@@ -2149,8 +2149,11 @@ namespace get_link_manga
             {
                 List<ReaderMangaItem> library = await Task.Run(() => ScanReaderLibrary(root, totalUnits, () =>
                 {
-                    currentUnits++;
-                    Dispatcher.BeginInvoke(new Action(() => UpdateReaderWatchLoadProgress(_readerStatusProgressBar, _readerStatusProgressText, currentUnits, totalUnits)));
+                    System.Threading.Interlocked.Increment(ref currentUnits);
+                    if (currentUnits % 10 == 0 || currentUnits >= totalUnits)
+                    {
+                        Dispatcher.BeginInvoke(new Action(() => UpdateReaderWatchLoadProgress(_readerStatusProgressBar, _readerStatusProgressText, currentUnits, totalUnits)));
+                    }
                 }));
                 _lastReaderLibraryRoot = root;
                 _readerLibrary = library;
@@ -2280,8 +2283,11 @@ namespace get_link_manga
             {
                 List<ReaderNovelBookItem> library = await Task.Run(() => ScanReaderNovelLibrary(root, totalUnits, () =>
                 {
-                    currentUnits++;
-                    Dispatcher.BeginInvoke(new Action(() => UpdateReaderWatchLoadProgress(_readerNovelStatusProgressBar, _readerNovelStatusProgressText, currentUnits, totalUnits)));
+                    System.Threading.Interlocked.Increment(ref currentUnits);
+                    if (currentUnits % 10 == 0 || currentUnits >= totalUnits)
+                    {
+                        Dispatcher.BeginInvoke(new Action(() => UpdateReaderWatchLoadProgress(_readerNovelStatusProgressBar, _readerNovelStatusProgressText, currentUnits, totalUnits)));
+                    }
                 }));
                 _readerNovelLibrary = library;
                 _readerNovelDomains = BuildReaderNovelDomainItems(_readerNovelLibrary);
@@ -2332,10 +2338,10 @@ namespace get_link_manga
         }
         private List<ReaderMangaItem> ScanReaderLibrary(string root, int totalUnits, Action onUnitProcessed)
         {
-            var result = new List<ReaderMangaItem>();
+            var result = new System.Collections.Concurrent.ConcurrentBag<ReaderMangaItem>();
             if (string.IsNullOrWhiteSpace(root) || !Directory.Exists(root))
             {
-                return result;
+                return new List<ReaderMangaItem>();
             }
 
             ReaderCompletionState completionState = ShouldShowReaderCompletionBadges(root)
@@ -2343,7 +2349,7 @@ namespace get_link_manga
                 : null;
             ReaderDownloadWatchState downloadState = LoadReaderDownloadWatchState(root);
 
-            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var itemsToScan = new List<(string bookFolder, string domainName)>();
             foreach (string domainFolder in SafeGetDirectories(root))
             {
                 onUnitProcessed?.Invoke();
@@ -2355,34 +2361,24 @@ namespace get_link_manga
 
                 foreach (string bookFolder in SafeGetDirectories(domainFolder))
                 {
-                    onUnitProcessed?.Invoke();
-                    TryAddReaderBook(bookFolder, domainName, 1, completionState, downloadState, seen, result);
+                    itemsToScan.Add((bookFolder, domainName));
                 }
             }
+
+            System.Threading.Tasks.Parallel.ForEach(itemsToScan, pair =>
+            {
+                ReaderMangaItem book = BuildReaderMangaItem(pair.bookFolder, pair.domainName, 1, completionState, downloadState);
+                if (book != null)
+                {
+                    result.Add(book);
+                }
+                onUnitProcessed?.Invoke();
+            });
 
             return result
                 .OrderBy(item => item.SourceGroup ?? string.Empty, StringComparer.OrdinalIgnoreCase)
                 .ThenBy(item => item.Name, _readerSortComparer)
                 .ToList();
-        }
-
-        private void TryAddReaderBook(string folderPath, string sourceGroup, int depth, ReaderCompletionState completionState, ReaderDownloadWatchState downloadState, ISet<string> seen, ICollection<ReaderMangaItem> result)
-        {
-            if (seen.Contains(folderPath))
-            {
-                return;
-            }
-
-            // ponytail: skip pre-check scan; BuildReaderMangaItem already does one pass.
-            ReaderMangaItem book = BuildReaderMangaItem(folderPath, sourceGroup, depth, completionState, downloadState);
-            if (book == null || book.Chapters.Count == 0)
-            {
-                return;
-            }
-
-            seen.Add(folderPath);
-            result.Add(book);
-            Debug.Assert(book.Chapters.Count > 0, "Reader book scan returned empty chapter list.");
         }
 
         private ReaderMangaItem BuildReaderMangaItem(string folderPath, string sourceGroup, int depth, ReaderCompletionState completionState, ReaderDownloadWatchState downloadState)
@@ -2638,21 +2634,6 @@ namespace get_link_manga
 
         private ReaderChapterItem BuildReaderChapterItem(string folderPath, string chapterName, int depth)
         {
-            bool hasImages;
-            try
-            {
-                hasImages = Directory.EnumerateFiles(folderPath).Any(IsSupportedReaderImageFile);
-            }
-            catch
-            {
-                hasImages = false;
-            }
-
-            if (!hasImages)
-            {
-                return null;
-            }
-
             return new ReaderChapterItem
             {
                 Name = chapterName,
