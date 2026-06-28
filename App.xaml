@@ -1,0 +1,575 @@
+<Application x:Class="get_link_manga.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:get_link_manga">
+    <Application.Resources>
+        <ResourceDictionary>
+
+            <!-- Manga/manhua reader palette: layered, calm, and high-contrast -->
+            <Color x:Key="CyberpunkDarkColor">#06090F</Color>
+            <Color x:Key="CyberpunkCardColor">#0D121F</Color>
+            <Color x:Key="CyberpunkCyanColor">#00E5FF</Color>
+            <Color x:Key="CyberpunkPinkColor">#FF2A85</Color>
+            <Color x:Key="CyberpunkYellowColor">#FFB800</Color>
+            <Color x:Key="CyberpunkGreenColor">#28FF7A</Color>
+            <Color x:Key="CyberpunkBorderColor">#1A2436</Color>
+            <Color x:Key="CyberpunkSurfaceAltColor">#111827</Color>
+            <Color x:Key="CyberpunkSurfaceEdgeColor">#1F293D</Color>
+            <Color x:Key="CyberpunkHeroTopColor">#10172A</Color>
+            <Color x:Key="CyberpunkHeroBottomColor">#0A0E1A</Color>
+            <Color x:Key="CyberpunkDangerColor">#FF4D6D</Color>
+
+            <LinearGradientBrush x:Key="CyberpunkDarkBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#06090F" Offset="0"/>
+                <GradientStop Color="#080D18" Offset="0.5"/>
+                <GradientStop Color="#0A1120" Offset="1"/>
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="CyberpunkCardBrush" Color="{StaticResource CyberpunkCardColor}" />
+            <SolidColorBrush x:Key="CyberpunkCyanBrush" Color="{StaticResource CyberpunkCyanColor}" />
+            <SolidColorBrush x:Key="CyberpunkPinkBrush" Color="{StaticResource CyberpunkPinkColor}" />
+            <SolidColorBrush x:Key="CyberpunkYellowBrush" Color="{StaticResource CyberpunkYellowColor}" />
+            <SolidColorBrush x:Key="CyberpunkGreenBrush" Color="{StaticResource CyberpunkGreenColor}" />
+            <SolidColorBrush x:Key="CyberpunkBorderBrush" Color="{StaticResource CyberpunkBorderColor}" />
+            <SolidColorBrush x:Key="CyberpunkSurfaceAltBrush" Color="{StaticResource CyberpunkSurfaceAltColor}" />
+            <SolidColorBrush x:Key="CyberpunkSurfaceEdgeBrush" Color="{StaticResource CyberpunkSurfaceEdgeColor}" />
+            <SolidColorBrush x:Key="CyberpunkDangerBrush" Color="{StaticResource CyberpunkDangerColor}" />
+            <SolidColorBrush x:Key="CyberpunkTextBrush" Color="#F8FAFC" />
+            <SolidColorBrush x:Key="CyberpunkMutedTextBrush" Color="#8F9EB2" />
+            <LinearGradientBrush x:Key="CyberpunkHeroBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="{StaticResource CyberpunkHeroTopColor}" Offset="0"/>
+                <GradientStop Color="#1A253E" Offset="0.5"/>
+                <GradientStop Color="{StaticResource CyberpunkHeroBottomColor}" Offset="1"/>
+            </LinearGradientBrush>
+
+            <!-- Custom Cyberpunk Card Style -->
+            <Style x:Key="CyberpunkCard" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource CyberpunkCardBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CyberpunkBorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="#010204" BlurRadius="20" ShadowDepth="0" Opacity="0.4"/>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="BorderBrush" Value="#2E446B"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Cyberpunk Glow Effect -->
+            <DropShadowEffect x:Key="CyberpunkCyanGlow" Color="{StaticResource CyberpunkCyanColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.35" />
+            <DropShadowEffect x:Key="CyberpunkPinkGlow" Color="{StaticResource CyberpunkPinkColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.3" />
+            
+            <!-- Cyberpunk Button Base Template -->
+            <ControlTemplate x:Key="CyberpunkButtonTemplate" TargetType="Button">
+                <Grid SnapsToDevicePixels="True">
+                    <Border x:Name="outerGlow"
+                            Margin="0"
+                            Background="Transparent"
+                            BorderBrush="#00FFFFFF"
+                            BorderThickness="0"
+                            CornerRadius="10"/>
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Border Height="1"
+                                    VerticalAlignment="Top"
+                                    Margin="8,0,8,0"
+                                    Background="#20FFFFFF"
+                                    CornerRadius="1"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}">
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextWrapping" Value="Wrap"/>
+                                        <Setter Property="TextAlignment" Value="Center"/>
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+                        </Grid>
+                    </Border>
+                </Grid>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter TargetName="border" Property="Opacity" Value="0.3"/>
+                    </Trigger>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="outerGlow" Property="BorderBrush" Value="#15FFFFFF"/>
+                        <Setter TargetName="outerGlow" Property="BorderThickness" Value="1"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter TargetName="border" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+
+            <ControlTemplate x:Key="CyberpunkToggleButtonTemplate" TargetType="ToggleButton">
+                <Grid SnapsToDevicePixels="True">
+                    <Border x:Name="outerGlow"
+                            Margin="0"
+                            Background="Transparent"
+                            BorderBrush="#00FFFFFF"
+                            BorderThickness="0"
+                            CornerRadius="10"/>
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            SnapsToDevicePixels="True">
+                        <Grid>
+                            <Border Height="1"
+                                    VerticalAlignment="Top"
+                                    Margin="8,0,8,0"
+                                    Background="#20FFFFFF"
+                                    CornerRadius="1"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}">
+                                <ContentPresenter.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextWrapping" Value="Wrap"/>
+                                        <Setter Property="TextAlignment" Value="Center"/>
+                                    </Style>
+                                </ContentPresenter.Resources>
+                            </ContentPresenter>
+                        </Grid>
+                    </Border>
+                </Grid>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter TargetName="border" Property="Opacity" Value="0.3"/>
+                    </Trigger>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="outerGlow" Property="BorderBrush" Value="#15FFFFFF"/>
+                        <Setter TargetName="outerGlow" Property="BorderThickness" Value="1"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter TargetName="border" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+
+            <!-- Cyberpunk Button Customizations -->
+            <Style x:Key="CyberpunkButtonCyan" TargetType="Button">
+                <Setter Property="Template" Value="{StaticResource CyberpunkButtonTemplate}"/>
+                <Setter Property="Background" Value="#122538"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CyberpunkCyanBrush}"/>
+                <Setter Property="Foreground" Value="#F1F8FE"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Padding" Value="14,8"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#183754"/>
+                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                        <Setter Property="Effect" Value="{StaticResource CyberpunkCyanGlow}"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter Property="Opacity" Value="0.85"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="CyberpunkToggleButtonCyan" TargetType="ToggleButton">
+                <Setter Property="Template" Value="{StaticResource CyberpunkToggleButtonTemplate}"/>
+                <Setter Property="Background" Value="#122538"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CyberpunkCyanBrush}"/>
+                <Setter Property="Foreground" Value="#F1F8FE"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Padding" Value="14,8"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#183754"/>
+                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                        <Setter Property="Effect" Value="{StaticResource CyberpunkCyanGlow}"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter Property="Opacity" Value="0.85"/>
+                    </Trigger>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter Property="Background" Value="#183754"/>
+                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                        <Setter Property="Effect" Value="{StaticResource CyberpunkCyanGlow}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="CyberpunkButtonPink" TargetType="Button">
+                <Setter Property="Template" Value="{StaticResource CyberpunkButtonTemplate}"/>
+                <Setter Property="Background" Value="#2F1823"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CyberpunkPinkBrush}"/>
+                <Setter Property="Foreground" Value="#FFF5FA"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Padding" Value="14,8"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#451F33"/>
+                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                        <Setter Property="Effect" Value="{StaticResource CyberpunkPinkGlow}"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter Property="Opacity" Value="0.85"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="CyberpunkToggleButtonPink" TargetType="ToggleButton">
+                <Setter Property="Template" Value="{StaticResource CyberpunkToggleButtonTemplate}"/>
+                <Setter Property="Background" Value="#2F1823"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CyberpunkPinkBrush}"/>
+                <Setter Property="Foreground" Value="#FFF5FA"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Padding" Value="14,8"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#451F33"/>
+                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                        <Setter Property="Effect" Value="{StaticResource CyberpunkPinkGlow}"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter Property="Opacity" Value="0.85"/>
+                    </Trigger>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter Property="Background" Value="#451F33"/>
+                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                        <Setter Property="Effect" Value="{StaticResource CyberpunkPinkGlow}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="CyberpunkButtonImportant" TargetType="Button">
+                <Setter Property="Template" Value="{StaticResource CyberpunkButtonTemplate}"/>
+                <Setter Property="Background" Value="#292010"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
+                <Setter Property="Foreground" Value="#FFFDF4"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Padding" Value="16,9"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#403117"/>
+                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <DropShadowEffect Color="{StaticResource CyberpunkYellowColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.3"/>
+                            </Setter.Value>
+                        </Setter>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter Property="Opacity" Value="0.85"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="CyberpunkToggleButtonImportant" TargetType="ToggleButton">
+                <Setter Property="Template" Value="{StaticResource CyberpunkToggleButtonTemplate}"/>
+                <Setter Property="Background" Value="#292010"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
+                <Setter Property="Foreground" Value="#FFFDF4"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Padding" Value="16,9"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#403117"/>
+                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <DropShadowEffect Color="{StaticResource CyberpunkYellowColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.3"/>
+                            </Setter.Value>
+                        </Setter>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter Property="Opacity" Value="0.85"/>
+                    </Trigger>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter Property="Background" Value="#403117"/>
+                        <Setter Property="Foreground" Value="#FFFFFF"/>
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <DropShadowEffect Color="{StaticResource CyberpunkYellowColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.3"/>
+                            </Setter.Value>
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <ControlTemplate x:Key="CyberpunkSwitchToggleBlueTemplate" TargetType="ToggleButton">
+                <Grid SnapsToDevicePixels="True">
+                    <Border x:Name="track"
+                            Background="#11131B"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="18"/>
+                    <Grid Margin="3" ClipToBounds="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border x:Name="leftSide"
+                                Grid.Column="0"
+                                Background="#4A1423"
+                                CornerRadius="15,0,0,15"
+                                BorderBrush="#6E2740"
+                                BorderThickness="0,0,1,0"/>
+                        <Border x:Name="rightSide"
+                                Grid.Column="1"
+                                Background="#0E1723"
+                                CornerRadius="0,15,15,0"
+                                BorderBrush="#243A56"
+                                BorderThickness="1,0,0,0"/>
+
+                        <Border x:Name="thumb"
+                                Panel.ZIndex="0"
+                                Width="58"
+                                Margin="0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Stretch"
+                                CornerRadius="14"
+                                Background="{StaticResource CyberpunkDangerBrush}"
+                                Opacity="0.98"
+                                BorderBrush="#FFD9DF"
+                                BorderThickness="1"/>
+                    </Grid>
+                </Grid>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter TargetName="track" Property="Opacity" Value="0.55"/>
+                    </Trigger>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter TargetName="leftSide" Property="Background" Value="#0E1723"/>
+                        <Setter TargetName="leftSide" Property="BorderBrush" Value="#243A56"/>
+                        <Setter TargetName="rightSide" Property="Background" Value="#1A5A34"/>
+                        <Setter TargetName="rightSide" Property="BorderBrush" Value="{StaticResource CyberpunkGreenBrush}"/>
+                        <Setter TargetName="thumb" Property="Margin" Value="68,0,0,0"/>
+                        <Setter TargetName="thumb" Property="Background" Value="{StaticResource CyberpunkGreenBrush}"/>
+                        <Setter TargetName="thumb" Property="Opacity" Value="1"/>
+                        <Setter TargetName="thumb" Property="BorderBrush" Value="#E8FDFF"/>
+                    </Trigger>
+                    <Trigger Property="IsChecked" Value="False">
+                        <Setter TargetName="leftSide" Property="Background" Value="#4A1423"/>
+                        <Setter TargetName="leftSide" Property="BorderBrush" Value="{StaticResource CyberpunkDangerBrush}"/>
+                        <Setter TargetName="rightSide" Property="Background" Value="#0E1723"/>
+                        <Setter TargetName="rightSide" Property="BorderBrush" Value="#243A56"/>
+                        <Setter TargetName="thumb" Property="Margin" Value="0"/>
+                        <Setter TargetName="thumb" Property="Background" Value="{StaticResource CyberpunkDangerBrush}"/>
+                        <Setter TargetName="thumb" Property="BorderBrush" Value="#FFD9DF"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+
+            <Style x:Key="CyberpunkSwitchToggleBlue" TargetType="ToggleButton">
+                <Setter Property="Template" Value="{StaticResource CyberpunkSwitchToggleBlueTemplate}"/>
+                <Setter Property="Background" Value="#11131B"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CyberpunkBorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Foreground" Value="#FFFFFF"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+            </Style>
+
+            <ControlTemplate x:Key="CyberpunkSwitchToggleRedTemplate" TargetType="ToggleButton">
+                <Grid SnapsToDevicePixels="True">
+                    <Border x:Name="track"
+                            Background="#11131B"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="18"/>
+                    <Grid Margin="3" ClipToBounds="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border x:Name="leftSide"
+                                Grid.Column="0"
+                                Background="#4A1423"
+                                CornerRadius="15,0,0,15"
+                                BorderBrush="#6E2740"
+                                BorderThickness="0,0,1,0"/>
+                        <Border x:Name="rightSide"
+                                Grid.Column="1"
+                                Background="#0E1723"
+                                CornerRadius="0,15,15,0"
+                                BorderBrush="#243A56"
+                                BorderThickness="1,0,0,0"/>
+
+                        <Border x:Name="thumb"
+                                Panel.ZIndex="0"
+                                Width="42"
+                                Margin="0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Stretch"
+                                CornerRadius="14"
+                                Background="{StaticResource CyberpunkDangerBrush}"
+                                Opacity="0.98"
+                                BorderBrush="#FFD9DF"
+                                BorderThickness="1"/>
+                    </Grid>
+                </Grid>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter TargetName="track" Property="Opacity" Value="0.55"/>
+                    </Trigger>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter TargetName="leftSide" Property="Background" Value="#0E1723"/>
+                        <Setter TargetName="leftSide" Property="BorderBrush" Value="#243A56"/>
+                        <Setter TargetName="rightSide" Property="Background" Value="#1A5A34"/>
+                        <Setter TargetName="rightSide" Property="BorderBrush" Value="{StaticResource CyberpunkGreenBrush}"/>
+                        <Setter TargetName="thumb" Property="Margin" Value="84,0,0,0"/>
+                        <Setter TargetName="thumb" Property="Background" Value="{StaticResource CyberpunkGreenBrush}"/>
+                        <Setter TargetName="thumb" Property="Opacity" Value="1"/>
+                        <Setter TargetName="thumb" Property="BorderBrush" Value="#E8FDFF"/>
+                    </Trigger>
+                    <Trigger Property="IsChecked" Value="False">
+                        <Setter TargetName="leftSide" Property="Background" Value="#4A1423"/>
+                        <Setter TargetName="leftSide" Property="BorderBrush" Value="{StaticResource CyberpunkDangerBrush}"/>
+                        <Setter TargetName="rightSide" Property="Background" Value="#0E1723"/>
+                        <Setter TargetName="rightSide" Property="BorderBrush" Value="#243A56"/>
+                        <Setter TargetName="thumb" Property="Margin" Value="0"/>
+                        <Setter TargetName="thumb" Property="Background" Value="{StaticResource CyberpunkDangerBrush}"/>
+                        <Setter TargetName="thumb" Property="BorderBrush" Value="#FFD9DF"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+
+            <Style x:Key="CyberpunkSwitchToggleRed" TargetType="ToggleButton">
+                <Setter Property="Template" Value="{StaticResource CyberpunkSwitchToggleRedTemplate}"/>
+                <Setter Property="Background" Value="#11131B"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CyberpunkBorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Foreground" Value="#FFFFFF"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+            </Style>
+
+            <ControlTemplate x:Key="FloatSwitchToggleTemplate" TargetType="ToggleButton">
+                <Border x:Name="track"
+                        CornerRadius="12"
+                        BorderThickness="1.3"
+                        Width="70"
+                        Height="24"
+                        Padding="3"
+                        Background="#D8212A"
+                        BorderBrush="#F4626B">
+                    <Grid x:Name="layout">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="stateText"
+                                   Grid.Column="1"
+                                   Text="OFF"
+                                   Foreground="White"
+                                   FontWeight="Bold"
+                                   FontSize="10"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"
+                                   TextDecorations="Underline"/>
+                        <Border x:Name="thumb"
+                                Grid.Column="0"
+                                Width="16"
+                                Height="16"
+                                CornerRadius="8"
+                                Background="#DFE5FA"
+                                BorderBrush="#C6CFF1"
+                                BorderThickness="1.1"
+                                HorizontalAlignment="Left"/>
+                    </Grid>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter TargetName="track" Property="Background" Value="#58D600"/>
+                        <Setter TargetName="track" Property="BorderBrush" Value="#7FE627"/>
+                        <Setter TargetName="stateText" Property="Text" Value="ON"/>
+                        <Setter TargetName="stateText" Property="Grid.Column" Value="0"/>
+                        <Setter TargetName="thumb" Property="Grid.Column" Value="1"/>
+                        <Setter TargetName="thumb" Property="HorizontalAlignment" Value="Right"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+
+            <Style x:Key="FloatSwitchToggle" TargetType="ToggleButton">
+                <Setter Property="Template" Value="{StaticResource FloatSwitchToggleTemplate}"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+            </Style>
+
+
+            <Style x:Key="SidebarMenuButton" TargetType="Button">
+                <Setter Property="Background" Value="#142437"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CyberpunkBorderBrush}"/>
+                <Setter Property="Foreground" Value="{StaticResource CyberpunkTextBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Padding" Value="14,9"/>
+                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="Margin" Value="0,0,0,8"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Grid SnapsToDevicePixels="True">
+                                <Border x:Name="outerGlow"
+                                        Background="Transparent"
+                                        BorderBrush="#00FFFFFF"
+                                        BorderThickness="0"
+                                        CornerRadius="18"/>
+                                <Border x:Name="border"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="16"
+                                        SnapsToDevicePixels="True">
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalAlignment="Center"
+                                                      Margin="{TemplateBinding Padding}"/>
+                                </Border>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#0E1726"/>
+                                    <Setter TargetName="border" Property="BorderBrush" Value="#4F7B97"/>
+                                    <Setter TargetName="outerGlow" Property="BorderBrush" Value="#26FFFFFF"/>
+                                    <Setter TargetName="outerGlow" Property="BorderThickness" Value="1"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#0A1320"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.55"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="CyberpunkHeader" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Bahnschrift SemiBold, Segoe UI Semibold, Segoe UI, Arial"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Foreground" Value="{StaticResource CyberpunkTextBrush}"/>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

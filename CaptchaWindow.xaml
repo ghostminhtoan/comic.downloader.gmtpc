@@ -1,0 +1,52 @@
+﻿<Window x:Class="get_link_manga.CaptchaWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="GIẢI CAPTCHA CLOUDFLARE" Height="650" Width="850"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{StaticResource CyberpunkDarkBrush}">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header info -->
+        <Border Grid.Row="0" BorderBrush="{StaticResource CyberpunkPinkBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,12">
+            <StackPanel Orientation="Vertical">
+                <TextBlock x:Name="txtCaptchaHeader" Text="CLOUDFLARE CAPTCHA BYPASS" 
+                           FontSize="16" 
+                           FontWeight="ExtraBold" 
+                           Style="{StaticResource CyberpunkHeader}"/>
+                <TextBlock x:Name="txtCaptchaDescription" Text="VUI LÒNG HOÀN THÀNH THỬ THÁCH TRÊN TRÌNH DUYỆT BÊN DƯỚI. KHI TRANG TẢI XONG, NHẤN 'ĐÃ HOÀN THÀNH'" 
+                           FontSize="9" 
+                           Foreground="{StaticResource CyberpunkCyanBrush}" 
+                           FontWeight="Bold"
+                           Margin="2,2,0,0"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- WebBrowser container -->
+        <Border Grid.Row="1" Style="{StaticResource CyberpunkCard}" Padding="2" Margin="0,0,0,15">
+            <Grid x:Name="webViewHost"/>
+        </Border>
+        
+        <!-- Footer Actions -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <Button Grid.Column="1" x:Name="btnDeleteCookies" Content="XÓA COOKIE" Click="BtnDeleteCookies_Click" Style="{StaticResource CyberpunkButtonPink}" Height="35" Width="120" FontWeight="Bold"/>
+            <Button Grid.Column="3" x:Name="btnDone" Content="ĐÃ HOÀN THÀNH CAPTCHA" Click="BtnDone_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="35" Width="200" FontWeight="Bold"/>
+            <Button Grid.Column="5" x:Name="btnCancel" Content="HỦY BỎ" Click="BtnCancel_Click" Style="{StaticResource CyberpunkButtonPink}" Height="35" Width="100" FontWeight="Bold"/>
+        </Grid>
+    </Grid>
+</Window>
