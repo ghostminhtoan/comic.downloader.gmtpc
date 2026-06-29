@@ -233,6 +233,15 @@
                     Height="35"
                     Width="140"
                     FontSize="11"/>
+             <ToggleButton Grid.Column="2"
+                           Name="btnRetryFailedToggle"
+                           Checked="BtnRetryFailedToggle_Checked"
+                           Unchecked="BtnRetryFailedToggle_Unchecked"
+                           Style="{StaticResource FloatSwitchToggle}"
+                           IsChecked="False"
+                           Height="26"
+                           VerticalAlignment="Center"
+                           ToolTip="FORCE RETRY ALL ERRORS BYPASSING PROCESS DONE STATE"/>
             <Button Grid.Column="4"
                     Name="btnClose"
                     Content="CLOSE"

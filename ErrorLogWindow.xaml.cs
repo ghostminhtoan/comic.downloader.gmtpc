@@ -310,5 +310,70 @@ namespace get_link_manga
 
             view.CustomSort = new ErrorDisplayItemComparer(sortMember, direction);
         }
+
+        private System.Threading.CancellationTokenSource _forceRetryCts;
+        private System.Threading.Tasks.Task _forceRetryLoopTask;
+
+        private void BtnRetryFailedToggle_Checked(object sender, RoutedEventArgs e)
+        {
+            StartForceRetryLoop();
+        }
+
+        private void BtnRetryFailedToggle_Unchecked(object sender, RoutedEventArgs e)
+        {
+            StopForceRetryLoop();
+        }
+
+        private void StartForceRetryLoop()
+        {
+            if (_forceRetryLoopTask != null && !_forceRetryLoopTask.IsCompleted)
+            {
+                return;
+            }
+
+            _forceRetryCts?.Dispose();
+            _forceRetryCts = new System.Threading.CancellationTokenSource();
+            var token = _forceRetryCts.Token;
+
+            _forceRetryLoopTask = System.Threading.Tasks.Task.Run(async () =>
+            {
+                try
+                {
+                    while (!token.IsCancellationRequested)
+                    {
+                        try
+                        {
+                            var erroredItems = _mainWindow._scrapedItems
+                                .Where(item => item.GetUniqueErrors().Any(err => err.PageNumber > 0 && !string.IsNullOrEmpty(err.ImageUrl)))
+                                .ToList();
+
+                            foreach (var item in erroredItems)
+                            {
+                                token.ThrowIfCancellationRequested();
+                                await _mainWindow.RetryDownloadQueueItemErrorsAsync(item, showMessageBox: false, force: true);
+                            }
+                        }
+                        catch (System.OperationCanceledException)
+                        {
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            _mainWindow.Log($"[Force Retry] Lỗi khi retry tự động cưỡng chế: {ex.Message}");
+                        }
+
+                        await System.Threading.Tasks.Task.Delay(1500, token);
+                    }
+                }
+                catch (System.OperationCanceledException)
+                {
+                }
+            }, token);
+        }
+
+        private void StopForceRetryLoop()
+        {
+            _forceRetryCts?.Cancel();
+        }
     }
 }

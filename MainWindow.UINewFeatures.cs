@@ -264,13 +264,13 @@ namespace get_link_manga
         /// <summary>
         /// Thử tải lại các trang bị lỗi của một GalleryItem.
         /// </summary>
-        public async Task RetryDownloadQueueItemErrorsAsync(GalleryItem queueItem, bool showMessageBox = true)
+        public async Task RetryDownloadQueueItemErrorsAsync(GalleryItem queueItem, bool showMessageBox = true, bool force = false)
         {
             if (queueItem == null)
                 return;
 
             var errorsToRetry = queueItem.GetUniqueErrors()
-                .Where(e => e.PageNumber > 0 && !string.IsNullOrEmpty(e.ImageUrl) && e.AttemptCount < 3)
+                .Where(e => e.PageNumber > 0 && !string.IsNullOrEmpty(e.ImageUrl) && (force || e.AttemptCount < 3))
                 .ToList();
             if (errorsToRetry.Count == 0)
                 return;
