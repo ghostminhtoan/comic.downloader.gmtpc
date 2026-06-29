@@ -883,18 +883,32 @@ namespace get_link_manga
                 return;
             }
 
+            UpdateReaderStatus(_isVietnameseUi ? "Đang xóa dữ liệu..." : "Deleting items...");
+            this.Cursor = System.Windows.Input.Cursors.Wait;
+
             int deletedCount = 0;
             int skippedCount = 0;
-            foreach (string target in targets.OrderByDescending(path => path.Length))
+
+            try
             {
-                if (TryDeleteReaderWatchPath(target))
+                await Task.Run(() =>
                 {
-                    deletedCount++;
-                }
-                else
-                {
-                    skippedCount++;
-                }
+                    foreach (string target in targets.OrderByDescending(path => path.Length))
+                    {
+                        if (TryDeleteReaderWatchPath(target))
+                        {
+                            deletedCount++;
+                        }
+                        else
+                        {
+                            skippedCount++;
+                        }
+                    }
+                });
+            }
+            finally
+            {
+                this.Cursor = System.Windows.Input.Cursors.Arrow;
             }
 
             UpdateReaderStatus(_isVietnameseUi
