@@ -45,6 +45,7 @@ namespace get_link_manga
             return new ErrorDisplayItem
             {
                 Icon = "❌",
+                Domain = queueItem?.SourceDomain ?? string.Empty,
                 ComicName = queueItem?.Name ?? "N/A",
                 ComicUrl = queueItem?.Link ?? string.Empty,
                 ChapterName = error?.ChapterName ?? "N/A",
@@ -335,6 +336,7 @@ namespace get_link_manga
         }
 
         public string Icon { get; set; }
+        public string Domain { get; set; }
         public string ComicName { get; set; }
         public string ComicUrl { get; set; }
         public string ChapterName { get; set; }

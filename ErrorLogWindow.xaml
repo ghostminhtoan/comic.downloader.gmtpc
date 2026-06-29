@@ -92,6 +92,24 @@
 
                     <DataGridTextColumn Header="⚠" Binding="{Binding Icon}" Width="35" IsReadOnly="True"/>
 
+                    <!-- Domain Column -->
+                    <DataGridTemplateColumn Width="120" SortMemberPath="Domain">
+                        <DataGridTemplateColumn.Header>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Name="hdrDomain" Text="DOMAIN" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <Path Data="M 0,3 L 3,0 L 6,3 M 0,5 L 3,8 L 6,5" Stroke="{StaticResource CyberpunkCyanBrush}" StrokeThickness="1.2" Width="6" Height="8" Stretch="Fill" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                            </StackPanel>
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Domain}" 
+                                           Foreground="{StaticResource CyberpunkTextBrush}"
+                                           VerticalAlignment="Center" 
+                                           Padding="4,2"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                     <DataGridTemplateColumn Width="240" SortMemberPath="ComicName">
                         <DataGridTemplateColumn.Header>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">

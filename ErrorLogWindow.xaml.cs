@@ -26,6 +26,7 @@ namespace get_link_manga
             lblLogSubtitle.Text = isVi
                 ? $"Tổng truyện lỗi: {items.Count}"
                 : $"Errored comics: {items.Count}";
+            hdrDomain.Text = isVi ? "NGUỒN" : "DOMAIN";
 
             _displayItems = new List<ErrorDisplayItem>();
             foreach (var comic in items)
@@ -51,6 +52,7 @@ namespace get_link_manga
                     _displayItems.Add(new ErrorDisplayItem
                     {
                         Icon = "❌",
+                        Domain = comic.SourceDomain ?? string.Empty,
                         ComicName = comic.Name ?? "N/A",
                         ComicUrl = comic.Link ?? string.Empty,
                         ChapterName = error?.ChapterName ?? "N/A",
@@ -142,9 +144,10 @@ namespace get_link_manga
 
             foreach (var error in _displayItems)
             {
+                string domainPart = !string.IsNullOrEmpty(error.Domain) ? $"[{error.Domain}] " : string.Empty;
                 sb.AppendLine(isVi
-                    ? $"❌ {error.ComicName} | {error.ChapterName}, Trang {error.PageNumber} — {error.ErrorMessage}"
-                    : $"❌ {error.ComicName} | {error.ChapterName}, Page {error.PageNumber} — {error.ErrorMessage}");
+                    ? $"❌ {domainPart}{error.ComicName} | {error.ChapterName}, Trang {error.PageNumber} — {error.ErrorMessage}"
+                    : $"❌ {domainPart}{error.ComicName} | {error.ChapterName}, Page {error.PageNumber} — {error.ErrorMessage}");
 
                 if (!string.IsNullOrWhiteSpace(error.ComicUrl))
                 {
@@ -253,9 +256,10 @@ namespace get_link_manga
             var sb = new StringBuilder();
             foreach (var error in dgLogs.SelectedItems.Cast<ErrorDisplayItem>())
             {
+                string domainPart = !string.IsNullOrEmpty(error.Domain) ? $"[{error.Domain}] " : string.Empty;
                 sb.AppendLine(isVi
-                    ? $"❌ {error.ComicName} | {error.ChapterName}, Trang {error.PageNumber} — {error.ErrorMessage}"
-                    : $"❌ {error.ComicName} | {error.ChapterName}, Page {error.PageNumber} — {error.ErrorMessage}");
+                    ? $"❌ {domainPart}{error.ComicName} | {error.ChapterName}, Trang {error.PageNumber} — {error.ErrorMessage}"
+                    : $"❌ {domainPart}{error.ComicName} | {error.ChapterName}, Page {error.PageNumber} — {error.ErrorMessage}");
 
                 if (!string.IsNullOrWhiteSpace(error.ComicUrl))
                 {
