@@ -6525,11 +6525,14 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
             {
                 foreach (var domain in domains)
                 {
-                    if (domain != null && domain.IsChecked)
+                    if (domain != null && domain.IsChecked && domain.Books != null)
                     {
-                        if (!string.IsNullOrWhiteSpace(domain.FolderPath))
+                        foreach (var book in domain.Books)
                         {
-                            folderPaths.Add(domain.FolderPath);
+                            if (book != null && !string.IsNullOrWhiteSpace(book.FolderPath))
+                            {
+                                folderPaths.Add(book.FolderPath);
+                            }
                         }
                     }
                 }
