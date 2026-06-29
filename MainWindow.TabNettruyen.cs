@@ -261,6 +261,13 @@ namespace get_link_manga
             return html.Replace("\\/", "/");
         }
 
+        private static string StripNettruyenBookPrefix(string title)
+        {
+            return string.IsNullOrWhiteSpace(title)
+                ? title
+                : Regex.Replace(title, @"^\s*(?:truyện|truyen)\s+", string.Empty, RegexOptions.IgnoreCase).Trim();
+        }
+
         private static List<string> ExtractNettruyenChapterLinks(string chapterListHtml, string activeDomain, string parentPath)
         {
             var chapterLinks = new List<string>();
@@ -714,6 +721,7 @@ namespace get_link_manga
                             var existingItem = _scrapedItems.FirstOrDefault(item => item.Link.Equals(fullLink, StringComparison.OrdinalIgnoreCase));
                             if (existingItem == null && !pageParents.Any(p => p.Link.Equals(fullLink, StringComparison.OrdinalIgnoreCase)))
                             {
+                                title = StripNettruyenBookPrefix(title);
                                 pageParents.Add(new GalleryItem
                                 {
                                     Link = fullLink,
@@ -879,7 +887,7 @@ namespace get_link_manga
                         {
                             string rawTitle = WebUtility.HtmlDecode(titleMatch.Groups[1].Value).Trim();
                             ParseMangaNameAndLatestChap(rawTitle, out string mangaName, out latestChapText);
-                            title = mangaName;
+                            title = StripNettruyenBookPrefix(mangaName);
                         }
 
                         Dispatcher.BeginInvoke((Action)(() =>
@@ -1019,7 +1027,7 @@ namespace get_link_manga
                             rawTitle = rawTitle.Substring(0, rawTitle.Length - suffix.Length).Trim();
                         }
                     }
-                    item.Name = FormatGalleryTitle(rawTitle);
+                    item.Name = FormatGalleryTitle(StripNettruyenBookPrefix(rawTitle));
                 }
 
                 // Try to find story/comic ID to fetch full chapter list from AJAX service
