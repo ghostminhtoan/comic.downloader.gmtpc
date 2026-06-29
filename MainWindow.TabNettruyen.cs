@@ -265,7 +265,7 @@ namespace get_link_manga
         {
             return string.IsNullOrWhiteSpace(title)
                 ? title
-                : Regex.Replace(title, @"^\s*(?:truyện|truyen)\s+", string.Empty, RegexOptions.IgnoreCase).Trim();
+                : Regex.Replace(title, @"^\s*(?:đọc\s+)?(?:truyện|truyen)(?:\s+tranh)?\s+", string.Empty, RegexOptions.IgnoreCase).Trim();
         }
 
         private static List<string> ExtractNettruyenChapterLinks(string chapterListHtml, string activeDomain, string parentPath)
