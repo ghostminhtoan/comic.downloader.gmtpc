@@ -645,7 +645,7 @@ namespace get_link_manga
                     }
                     
                     // Turnstile captcha bypass via keyboard sequence.
-                    if (!_headlessAutomation && (IsNettruyenUrl(url) || IsTruyenqqChallengeUrl(url)))
+                    if (!_headlessAutomation && _captchaType != CaptchaType.WatchMore && (IsNettruyenUrl(url) || IsTruyenqqChallengeUrl(url)))
                     {
                         if (_captchaBypassStartTime == DateTime.MinValue)
                         {

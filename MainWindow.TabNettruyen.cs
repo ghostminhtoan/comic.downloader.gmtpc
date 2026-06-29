@@ -34,8 +34,19 @@ namespace get_link_manga
             }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
+        private bool IsNettruyenTechUrl(string url)
+        {
+            return !string.IsNullOrWhiteSpace(url) &&
+                   url.IndexOf("nettruyen.tech", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
         internal async Task<bool> CheckIfNettruyenBlockedAsync(string testUrl)
         {
+            if (IsNettruyenTechUrl(testUrl))
+            {
+                return false;
+            }
+
             try
             {
                 using (var request = new HttpRequestMessage(HttpMethod.Get, testUrl))
@@ -76,6 +87,11 @@ namespace get_link_manga
 
         internal async Task<bool> SolveNettruyenCaptchaIfNeededAsync(string testUrl)
         {
+            if (IsNettruyenTechUrl(testUrl))
+            {
+                return true;
+            }
+
             bool isBlocked = await CheckIfNettruyenBlockedAsync(testUrl);
             if (!isBlocked)
             {

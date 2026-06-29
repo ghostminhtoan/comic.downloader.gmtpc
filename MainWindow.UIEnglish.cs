@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -148,9 +151,166 @@ namespace get_link_manga
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             CheckFirstTimeRunMigration();
+            _ = HandlePendingFirstRunCleanupAsync();
             ApplyCurrentUiLanguage();
             UpdateTruyenqqSpecificActions();
             PromptExtractPortableArchiveOnStartup();
+        }
+
+        private async System.Threading.Tasks.Task HandlePendingFirstRunCleanupAsync()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            string cleanupSourceDir = null;
+            string preserveDir = null;
+            string cleanupExePath = null;
+            int killPid = -1;
+
+            foreach (string arg in args.Skip(1))
+            {
+                if (arg.StartsWith("--cleanup-source=", StringComparison.OrdinalIgnoreCase))
+                {
+                    cleanupSourceDir = UnquoteCliValue(arg.Substring("--cleanup-source=".Length));
+                }
+                else if (arg.StartsWith("--preserve-dir=", StringComparison.OrdinalIgnoreCase))
+                {
+                    preserveDir = UnquoteCliValue(arg.Substring("--preserve-dir=".Length));
+                }
+                else if (arg.StartsWith("--kill-pid=", StringComparison.OrdinalIgnoreCase))
+                {
+                    int.TryParse(arg.Substring("--kill-pid=".Length), out killPid);
+                }
+                else if (arg.StartsWith("--cleanup-exe=", StringComparison.OrdinalIgnoreCase))
+                {
+                    cleanupExePath = UnquoteCliValue(arg.Substring("--cleanup-exe=".Length));
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(cleanupSourceDir) || string.IsNullOrWhiteSpace(preserveDir))
+            {
+                return;
+            }
+
+            await System.Threading.Tasks.Task.Delay(1200);
+
+            if (killPid > 0)
+            {
+                TryKillProcessById(killPid);
+            }
+
+            TryDeleteFileWithRetry(cleanupExePath, 8, 250);
+            DeleteDirectoryEntriesExcept(cleanupSourceDir, preserveDir);
+        }
+
+        private static string UnquoteCliValue(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim().Trim('"');
+        }
+
+        private static void TryKillProcessById(int pid)
+        {
+            try
+            {
+                var process = Process.GetProcessById(pid);
+                if (!process.HasExited)
+                {
+                    process.Kill();
+                    process.WaitForExit(5000);
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private static void DeleteDirectoryEntriesExcept(string sourceDir, string preserveDir)
+        {
+            try
+            {
+                string sourceFull = Path.GetFullPath(sourceDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                string preserveFull = Path.GetFullPath(preserveDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+                if (!Directory.Exists(sourceFull) || !Directory.Exists(preserveFull))
+                {
+                    return;
+                }
+
+                foreach (string entry in Directory.EnumerateFileSystemEntries(sourceFull))
+                {
+                    string entryFull = Path.GetFullPath(entry).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                    if (string.Equals(entryFull, preserveFull, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    DeletePathRecursively(entryFull);
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private static void DeletePathRecursively(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return;
+            }
+
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.SetAttributes(path, FileAttributes.Normal);
+                    File.Delete(path);
+                    return;
+                }
+
+                if (Directory.Exists(path))
+                {
+                    foreach (string child in Directory.GetFileSystemEntries(path))
+                    {
+                        DeletePathRecursively(child);
+                    }
+
+                    Directory.Delete(path, false);
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private static void TryDeleteFileWithRetry(string path, int attempts, int delayMs)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return;
+            }
+
+            for (int i = 0; i < Math.Max(1, attempts); i++)
+            {
+                try
+                {
+                    if (!File.Exists(path))
+                    {
+                        return;
+                    }
+
+                    File.SetAttributes(path, FileAttributes.Normal);
+                    File.Delete(path);
+                    return;
+                }
+                catch
+                {
+                    if (i + 1 >= attempts)
+                    {
+                        return;
+                    }
+
+                    System.Threading.Thread.Sleep(Math.Max(1, delayMs));
+                }
+            }
         }
 
         private void CheckFirstTimeRunMigration()
@@ -210,16 +370,12 @@ namespace get_link_manga
                             System.Diagnostics.Process.Start("explorer.exe", $"\"{targetDir}\"");
 
                             // Relaunch the new exe
-                            System.Diagnostics.Process.Start(newExePath);
-
-                            // Self-delete the old exe
-                            string batchCmd = $"/c timeout /t 1 /nobreak && del \"{currentExePath}\"";
+                            string launchArgs = $"--cleanup-source=\"{sourceDir}\" --preserve-dir=\"{targetDir}\" --cleanup-exe=\"{currentExePath}\" --kill-pid={Process.GetCurrentProcess().Id}";
                             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                             {
-                                FileName = "cmd.exe",
-                                Arguments = batchCmd,
-                                CreateNoWindow = true,
-                                WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+                                FileName = newExePath,
+                                Arguments = launchArgs,
+                                UseShellExecute = true
                             });
 
                             System.Windows.Application.Current.Shutdown();
