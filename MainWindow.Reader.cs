@@ -285,6 +285,8 @@ namespace get_link_manga
                 Content = CreateWatchConvertTabContent()
             });
 
+            ApplyUiTextMappingsRecursive(watchTabs, _isVietnameseUi);
+
             _readerRootGrid.Children.Add(watchTabs);
 
             UpdateReaderStatus(_isVietnameseUi
@@ -6306,7 +6308,12 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
                 }
             }
             catch {}
-            return @"C:\XnConvert Portable\XnConvertPortable.exe"; // default
+            string defaultPath = @"C:\XnConvert Portable\XnConvertPortable.exe";
+            if (File.Exists(defaultPath))
+            {
+                return defaultPath;
+            }
+            return string.Empty;
         }
 
         private void SaveXnConvertPath(string path)

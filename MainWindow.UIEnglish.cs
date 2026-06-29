@@ -19,6 +19,11 @@ namespace get_link_manga
             ["Ready."] = "Sẵn sàng.",
             ["Watch manga"] = "Xem manga",
             ["Watch novel"] = "Xem novel",
+            ["Convert"] = "Chuyển đổi",
+            ["Convert Tools"] = "Công cụ Convert",
+            ["XnConvert Tool"] = "Công cụ XnConvert",
+            ["Install App:"] = "Cài đặt ứng dụng:",
+            ["XnConvertPortable.exe path:"] = "Đường dẫn XnConvertPortable.exe:",
             ["Download Manga"] = "Tải Manga",
             ["Download Novel"] = "Tải Novel",
             ["download novel"] = "Tải Novel",
@@ -574,6 +579,11 @@ namespace get_link_manga
             if (dgResults?.ContextMenu != null)
             {
                 ApplyUiTextMappingsRecursive(dgResults.ContextMenu, vietnamese);
+            }
+
+            if (_watchSection != null)
+            {
+                ApplyUiTextMappingsRecursive(_watchSection, vietnamese);
             }
         }
 
