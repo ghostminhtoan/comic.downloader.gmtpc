@@ -354,9 +354,21 @@ namespace get_link_manga
             var readerCopyAllMissingButton = CreateReaderMiniButton("Copy all book's missing chapter", CopyAllBooksMissingChapters_Click, 230);
             var readerGoogleAllMissingButton = CreateReaderMiniButton("google all book'S missing chapter", GoogleAllBooksMissingChapters_Click, 240);
 
+            var btnConvertDomain = CreateReaderMiniButton("CONVERT XNCONVERT", BtnConvertDomainXnConvert_Click, 160);
+            btnConvertDomain.Background = new SolidColorBrush(Color.FromRgb(0xFF, 0x8A, 0x00));
+            btnConvertDomain.BorderBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0xD2, 0x66));
+            btnConvertDomain.Foreground = Brushes.Black;
+            btnConvertDomain.FontWeight = FontWeights.Bold;
+
+            var btnConvertBook = CreateReaderMiniButton("CONVERT XNCONVERT", BtnConvertBookXnConvert_Click, 160);
+            btnConvertBook.Background = new SolidColorBrush(Color.FromRgb(0xFF, 0x8A, 0x00));
+            btnConvertBook.BorderBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0xD2, 0x66));
+            btnConvertBook.Foreground = Brushes.Black;
+            btnConvertBook.FontWeight = FontWeights.Bold;
+
             var panelBoard = CreateWatchPanelBoard(
-                CreateReaderWatchPanel("Root / Domain", _readerDomainList, _readerMangaDomainSortDateButton, _readerMangaDomainSortNameButton),
-                CreateReaderWatchPanel("Domain / Book", _readerMangaList, _readerMangaBookSortDateButton, _readerMangaBookSortNameButton),
+                CreateReaderWatchPanel("Root / Domain", _readerDomainList, _readerMangaDomainSortDateButton, _readerMangaDomainSortNameButton, btnConvertDomain),
+                CreateReaderWatchPanel("Domain / Book", _readerMangaList, _readerMangaBookSortDateButton, _readerMangaBookSortNameButton, btnConvertBook),
                 CreateReaderWatchPanel("Book / Chapter", CreateReaderChapterPanelContent(), readerChapterMissingButton, readerCopyMissingButton, readerCopyAllMissingButton, readerGoogleAllMissingButton),
                 CreateReaderWatchPanel("Chapter / Image", _readerFileList));
 
@@ -678,12 +690,6 @@ namespace get_link_manga
             menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Copy nhãn" : "Copy labels", ReaderWatchMenuCopySelected_Click));
             menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Xóa" : "Delete", ReaderWatchMenuDeleteSelected_Click));
             menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Xóa tất cả" : "Delete all", ReaderWatchMenuDeleteAll_Click));
-
-            if (dataContext is ReaderDomainItem || dataContext is ReaderMangaItem)
-            {
-                menu.Items.Add(new Separator());
-                menu.Items.Add(CreateReaderWatchMenuItem("convert checkboxes with XnConvert", ReaderWatchMenuConvertXnConvert_Click));
-            }
 
             return menu;
         }
@@ -6512,56 +6518,52 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
             KnightComic_Click(sender, e);
         }
 
-        private void ReaderWatchMenuConvertXnConvert_Click(object sender, RoutedEventArgs e)
+        private void BtnConvertDomainXnConvert_Click(object sender, RoutedEventArgs e)
         {
-            if (!(sender is MenuItem menuItem) || !(menuItem.Parent is ContextMenu contextMenu) || !(contextMenu.PlacementTarget is ListBoxItem container) || !(ItemsControl.ItemsControlFromItemContainer(container) is ListBox listBox))
-            {
-                return;
-            }
-
             var folderPaths = new List<string>();
-
-            // 1. Gather folders from checked domains if clicked on domains list
-            if (listBox == _readerDomainList)
+            if (_readerDomainList?.ItemsSource is IEnumerable<ReaderDomainItem> domains)
             {
-                if (_readerDomainList?.ItemsSource is IEnumerable<ReaderDomainItem> domains)
+                foreach (var domain in domains)
                 {
-                    foreach (var domain in domains)
+                    if (domain != null && domain.IsChecked)
                     {
-                        if (domain != null && domain.IsChecked)
+                        if (!string.IsNullOrWhiteSpace(domain.FolderPath))
                         {
-                            if (!string.IsNullOrWhiteSpace(domain.FolderPath))
-                            {
-                                folderPaths.Add(domain.FolderPath);
-                            }
+                            folderPaths.Add(domain.FolderPath);
                         }
                     }
                 }
             }
-            // 2. Gather folders from checked books if clicked on books list
-            else if (listBox == _readerMangaList)
+            ExecuteXnConvertOnPaths(folderPaths);
+        }
+
+        private void BtnConvertBookXnConvert_Click(object sender, RoutedEventArgs e)
+        {
+            var folderPaths = new List<string>();
+            if (_readerMangaList?.ItemsSource is IEnumerable<ReaderMangaItem> books)
             {
-                if (_readerMangaList?.ItemsSource is IEnumerable<ReaderMangaItem> books)
+                foreach (var book in books)
                 {
-                    foreach (var book in books)
+                    if (book != null && book.IsChecked)
                     {
-                        if (book != null && book.IsChecked)
+                        if (!string.IsNullOrWhiteSpace(book.FolderPath))
                         {
-                            if (!string.IsNullOrWhiteSpace(book.FolderPath))
-                            {
-                                folderPaths.Add(book.FolderPath);
-                            }
+                            folderPaths.Add(book.FolderPath);
                         }
                     }
                 }
             }
+            ExecuteXnConvertOnPaths(folderPaths);
+        }
 
+        private void ExecuteXnConvertOnPaths(List<string> folderPaths)
+        {
             if (folderPaths.Count == 0)
             {
                 MessageBox.Show(
                     _isVietnameseUi 
-                        ? "Vui lòng tick chọn ít nhất một Domain hoặc Book để convert."
-                        : "Please check at least one Domain or Book to convert.",
+                        ? "Vui lòng tick chọn ít nhất một thư mục để convert."
+                        : "Please check at least one folder to convert.",
                     "Information",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);

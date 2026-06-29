@@ -22,6 +22,7 @@ namespace get_link_manga
             ["Convert"] = "Chuyển đổi",
             ["Convert Tools"] = "Công cụ Convert",
             ["XnConvert Tool"] = "Công cụ XnConvert",
+            ["CONVERT XNCONVERT"] = "CONVERT BẰNG XNCONVERT",
             ["Install App:"] = "Cài đặt ứng dụng:",
             ["XnConvertPortable.exe path:"] = "Đường dẫn XnConvertPortable.exe:",
             ["Download Manga"] = "Tải Manga",
