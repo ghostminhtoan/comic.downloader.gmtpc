@@ -6585,40 +6585,15 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
 
             try
             {
-                var currentChunk = new List<string>();
-                int currentLen = 0;
-                var chunks = new List<List<string>>();
-
-                foreach (var path in folderPaths)
+                var normalizedPaths = folderPaths.Select(path => path.Replace('/', '\\')).ToList();
+                var args = string.Join(" ", normalizedPaths.Select(p => $"\"{p}\""));
+                var psi = new System.Diagnostics.ProcessStartInfo
                 {
-                    string normalized = path.Replace('/', '\\');
-                    string quoted = $"\"{normalized}\"";
-                    int additionalLen = 1 + quoted.Length;
-                    if (currentChunk.Count > 0 && currentLen + additionalLen > 2000)
-                    {
-                        chunks.Add(currentChunk);
-                        currentChunk = new List<string>();
-                        currentLen = 0;
-                    }
-                    currentChunk.Add(normalized);
-                    currentLen += additionalLen;
-                }
-                if (currentChunk.Count > 0)
-                {
-                    chunks.Add(currentChunk);
-                }
-
-                foreach (var chunk in chunks)
-                {
-                    var args = string.Join(" ", chunk.Select(p => $"\"{p}\""));
-                    var psi = new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = xnPath.Replace('/', '\\'),
-                        Arguments = args,
-                        UseShellExecute = true
-                    };
-                    System.Diagnostics.Process.Start(psi);
-                }
+                    FileName = xnPath.Replace('/', '\\'),
+                    Arguments = args,
+                    UseShellExecute = true
+                };
+                System.Diagnostics.Process.Start(psi);
             }
             catch (Exception ex)
             {
