@@ -6459,20 +6459,29 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
                             UpdateReaderStatus(_isVietnameseUi ? "Đang tải XnConvert..." : "Downloading XnConvert...");
                             await EnsureXnConvertInstallerReadyAsync();
                             
+                            string normalizedDir = targetDir;
+                            if (normalizedDir.Length == 1 && char.IsLetter(normalizedDir[0]))
+                            {
+                                normalizedDir += ":\\";
+                            }
+                            else if (normalizedDir.Length == 2 && char.IsLetter(normalizedDir[0]) && normalizedDir[1] == ':')
+                            {
+                                normalizedDir += "\\";
+                            }
+                            else if (!normalizedDir.EndsWith("\\") && !normalizedDir.EndsWith("/"))
+                            {
+                                normalizedDir += "\\";
+                            }
+
                             var psi = new System.Diagnostics.ProcessStartInfo
                             {
                                 FileName = PortablePaths.XnConvertInstallerPath,
-                                Arguments = $"-d\"{targetDir}\" /s",
+                                Arguments = $"-d\"{normalizedDir}\" /s",
                                 WorkingDirectory = PortablePaths.PortableDataRoot,
                                 UseShellExecute = true
                             };
                             System.Diagnostics.Process.Start(psi);
 
-                            string normalizedDir = targetDir;
-                            if (!normalizedDir.EndsWith("\\") && !normalizedDir.EndsWith("/"))
-                            {
-                                normalizedDir += "\\";
-                            }
                             string finalPath = Path.Combine(normalizedDir, "XnConvert Portable", "XnConvertPortable.exe");
                             if (_xnConvertPathTextBox != null)
                             {
