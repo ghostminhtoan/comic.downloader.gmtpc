@@ -380,20 +380,23 @@ namespace get_link_manga
                 string newDir = Path.GetDirectoryName(newExePath) ?? string.Empty;
                 string newName = Path.GetFileName(newExePath);
                 string finalName = Path.GetFileName(finalExePath);
-                string cleanupClause = string.IsNullOrWhiteSpace(cleanupExePath)
-                    ? string.Empty
-                    : $"if (Test-Path '{EscapePowerShellSingleQuoted(cleanupExePath)}') {{ Remove-Item -LiteralPath '{EscapePowerShellSingleQuoted(cleanupExePath)}' -Force -ErrorAction SilentlyContinue }}; ";
-                string script =
-                    $"Wait-Process -Id {waitPid} -ErrorAction SilentlyContinue; " +
-                    cleanupClause +
-                    $"Set-Location '{EscapePowerShellSingleQuoted(newDir)}'; " +
-                    $"Rename-Item -LiteralPath '{EscapePowerShellSingleQuoted(newName)}' -NewName '{EscapePowerShellSingleQuoted(finalName)}' -Force -ErrorAction SilentlyContinue; " +
-                    $"Start-Process -FilePath '{EscapePowerShellSingleQuoted(finalExePath)}'";
+                string safeCleanup = string.IsNullOrWhiteSpace(cleanupExePath) ? string.Empty : cleanupExePath.Replace("\"", "\\\"");
+                string safeDir = newDir.Replace("\"", "\\\"");
+                string safeNewName = newName.Replace("\"", "\\\"");
+                string safeFinalName = finalName.Replace("\"", "\\\"");
+                string safeFinalPath = finalExePath.Replace("\"", "\\\"");
+                string args =
+                    $"/c taskkill /pid {waitPid} /f >nul 2>nul & " +
+                    $"timeout /t 2 /nobreak >nul & " +
+                    (string.IsNullOrWhiteSpace(safeCleanup) ? string.Empty : $"del /f /q \"{safeCleanup}\" >nul 2>nul & ") +
+                    $"pushd \"{safeDir}\" & " +
+                    $"ren \"{safeNewName}\" \"{safeFinalName}\" & " +
+                    $"start \"\" \"{safeFinalPath}\"";
 
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = "powershell.exe",
-                    Arguments = $"-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command \"{script}\"",
+                    FileName = "cmd.exe",
+                    Arguments = args,
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden
                 });
@@ -401,11 +404,6 @@ namespace get_link_manga
             catch
             {
             }
-        }
-
-        private static string EscapePowerShellSingleQuoted(string value)
-        {
-            return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Replace("'", "''");
         }
 
         private void CheckFirstTimeRunMigration()
