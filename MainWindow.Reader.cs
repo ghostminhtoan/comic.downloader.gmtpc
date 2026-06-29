@@ -682,7 +682,7 @@ namespace get_link_manga
             if (dataContext is ReaderDomainItem || dataContext is ReaderMangaItem)
             {
                 menu.Items.Add(new Separator());
-                menu.Items.Add(CreateReaderWatchMenuItem("convert with XnConvert", ReaderWatchMenuConvertXnConvert_Click));
+                menu.Items.Add(CreateReaderWatchMenuItem("convert checkboxes with XnConvert", ReaderWatchMenuConvertXnConvert_Click));
             }
 
             return menu;
@@ -6514,44 +6514,59 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
 
         private void ReaderWatchMenuConvertXnConvert_Click(object sender, RoutedEventArgs e)
         {
-            if (!(sender is MenuItem menuItem) || !(menuItem.Parent is ContextMenu contextMenu) || !(contextMenu.PlacementTarget is ListBoxItem container) || !(ItemsControl.ItemsControlFromItemContainer(container) is ListBox listBox))
-            {
-                return;
-            }
-
-            var selectedItems = GetReaderWatchSelectedItems(listBox).ToList();
-            if (selectedItems.Count == 0 && container.DataContext is IReaderWatchCheckable clickedItem)
-            {
-                selectedItems.Add(clickedItem);
-            }
-
             var folderPaths = new List<string>();
-            foreach (var item in selectedItems)
+
+            // 1. Gather book folders from checked domains
+            if (_readerDomainList?.ItemsSource is IEnumerable<ReaderDomainItem> domains)
             {
-                if (item is ReaderDomainItem domain)
+                foreach (var domain in domains)
                 {
-                    if (domain.Books != null)
+                    if (domain != null && domain.IsChecked)
                     {
-                        foreach (var book in domain.Books)
+                        if (domain.Books != null)
                         {
-                            if (book != null && !string.IsNullOrWhiteSpace(book.FolderPath))
+                            foreach (var book in domain.Books)
                             {
-                                folderPaths.Add(book.FolderPath);
+                                if (book != null && !string.IsNullOrWhiteSpace(book.FolderPath))
+                                {
+                                    folderPaths.Add(book.FolderPath);
+                                }
                             }
                         }
                     }
                 }
-                else if (item is ReaderMangaItem book)
+            }
+
+            // 2. Gather chapter folders from checked books
+            if (_readerMangaList?.ItemsSource is IEnumerable<ReaderMangaItem> books)
+            {
+                foreach (var book in books)
                 {
-                    if (!string.IsNullOrWhiteSpace(book.FolderPath))
+                    if (book != null && book.IsChecked)
                     {
-                        folderPaths.Add(book.FolderPath);
+                        if (book.Chapters != null)
+                        {
+                            foreach (var chapter in book.Chapters)
+                            {
+                                if (chapter != null && !string.IsNullOrWhiteSpace(chapter.FolderPath))
+                                {
+                                    folderPaths.Add(chapter.FolderPath);
+                                }
+                            }
+                        }
                     }
                 }
             }
 
             if (folderPaths.Count == 0)
             {
+                MessageBox.Show(
+                    _isVietnameseUi 
+                        ? "Vui lòng tick chọn ít nhất một Domain hoặc Book để convert."
+                        : "Please check at least one Domain or Book to convert.",
+                    "Information",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
                 return;
             }
 
