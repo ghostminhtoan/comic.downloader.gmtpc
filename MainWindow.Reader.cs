@@ -6516,43 +6516,31 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
         {
             var folderPaths = new List<string>();
 
-            // 1. Gather book folders from checked domains
+            // 1. Gather folders from checked domains
             if (_readerDomainList?.ItemsSource is IEnumerable<ReaderDomainItem> domains)
             {
                 foreach (var domain in domains)
                 {
                     if (domain != null && domain.IsChecked)
                     {
-                        if (domain.Books != null)
+                        if (!string.IsNullOrWhiteSpace(domain.FolderPath))
                         {
-                            foreach (var book in domain.Books)
-                            {
-                                if (book != null && !string.IsNullOrWhiteSpace(book.FolderPath))
-                                {
-                                    folderPaths.Add(book.FolderPath);
-                                }
-                            }
+                            folderPaths.Add(domain.FolderPath);
                         }
                     }
                 }
             }
 
-            // 2. Gather chapter folders from checked books
+            // 2. Gather folders from checked books
             if (_readerMangaList?.ItemsSource is IEnumerable<ReaderMangaItem> books)
             {
                 foreach (var book in books)
                 {
                     if (book != null && book.IsChecked)
                     {
-                        if (book.Chapters != null)
+                        if (!string.IsNullOrWhiteSpace(book.FolderPath))
                         {
-                            foreach (var chapter in book.Chapters)
-                            {
-                                if (chapter != null && !string.IsNullOrWhiteSpace(chapter.FolderPath))
-                                {
-                                    folderPaths.Add(chapter.FolderPath);
-                                }
-                            }
+                            folderPaths.Add(book.FolderPath);
                         }
                     }
                 }
