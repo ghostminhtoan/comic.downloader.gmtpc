@@ -106,6 +106,14 @@ namespace get_link_manga
                 BtnTruyenqqFetchInfo_Click(this, new RoutedEventArgs());
                 await WaitAndScrapeAsync(btnTruyenqqFetchInfo, BtnTruyenqqScrape_Click);
             }
+            else if (lowerUrl.Contains("nettruyen.tech"))
+            {
+                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
+                if (tabManga != null) tabManga.SelectedIndex = 2;
+                if (txtNettruyenTechTagUrl != null) txtNettruyenTechTagUrl.Text = url;
+                BtnNettruyenTechFetchInfo_Click(this, new RoutedEventArgs());
+                await WaitAndScrapeAsync(btnNettruyenTechFetchInfo, BtnNettruyenTechScrape_Click);
+            }
             else if (lowerUrl.Contains("nettruyen") || (!lowerUrl.Contains("nhentai.net") && (lowerUrl.Contains("truyenrr") || lowerUrl.Contains("truyenco") || lowerUrl.Contains("truyenplus"))))
             {
                 if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
@@ -125,7 +133,7 @@ namespace get_link_manga
             else if (lowerUrl.Contains("dilib.vn"))
             {
                 if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
-                if (tabManga != null) tabManga.SelectedIndex = 2;
+                if (tabManga != null) tabManga.SelectedIndex = 3;
                 if (txtDilibTagUrl != null) txtDilibTagUrl.Text = url;
                 BtnDilibFetchInfo_Click(this, new RoutedEventArgs());
                 await WaitAndScrapeAsync(btnDilibFetchInfo, BtnDilibScrape_Click);
@@ -279,6 +287,14 @@ namespace get_link_manga
                 return true;
             }
 
+            if (lowerUrl.Contains("nettruyen.tech"))
+            {
+                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
+                if (tabManga != null) tabManga.SelectedIndex = 2;
+                await ImportNettruyenTechDirectLinksAsync(new List<string> { url }, showMessageBox);
+                return true;
+            }
+
             if (lowerUrl.Contains("nettruyen") || (!lowerUrl.Contains("nhentai.net") && (lowerUrl.Contains("truyenrr") || lowerUrl.Contains("truyenco") || lowerUrl.Contains("truyenplus"))))
             {
                 if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
@@ -298,7 +314,7 @@ namespace get_link_manga
             if (lowerUrl.Contains("dilib.vn"))
             {
                 if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
-                if (tabManga != null) tabManga.SelectedIndex = 2;
+                if (tabManga != null) tabManga.SelectedIndex = 3;
                 await ImportDilibDirectLinksAsync(new List<string> { url }, clearExisting: false, showMessageBox: showMessageBox);
                 return true;
             }

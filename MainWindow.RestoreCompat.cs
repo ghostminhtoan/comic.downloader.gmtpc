@@ -371,7 +371,11 @@ namespace get_link_manga
                     url = "https://truyenqqko.com/";
                     break;
                 case "nettruyen":
-                    url = "https://nettruyenrr.com/";
+                case "nettruyenviet10.com":
+                    url = "https://nettruyenviet10.com/";
+                    break;
+                case "nettruyen.tech":
+                    url = "https://nettruyen.tech/";
                     break;
                 case "daomeoden":
                     url = "https://daomeoden.net/";

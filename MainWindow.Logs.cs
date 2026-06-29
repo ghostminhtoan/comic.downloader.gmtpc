@@ -46,6 +46,7 @@ namespace get_link_manga
             RegisterLogPanel("vihentai", txtViHentaiLog);
             RegisterLogPanel("truyenqq", txtTruyenqqLog);
             RegisterLogPanel("nettruyen", txtNettruyenLog);
+            RegisterLogPanel("nettruyen.tech", txtNettruyenTechLog);
             RegisterLogPanel("hako", txtHakoLog);
             RegisterLogPanel("hentai2read", txtHentai2readLog);
             RegisterLogPanel("hentaiera", txtHentaieraLog);

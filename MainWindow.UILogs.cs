@@ -75,6 +75,15 @@ namespace get_link_manga
                     }
                 }
 
+                if (txtNettruyenTechLog != null)
+                {
+                    AppendLogLine(txtNettruyenTechLog, logLine, isError);
+                    if (chkAutoScrollNettruyenTechLog?.IsChecked == true)
+                    {
+                        ScrollTextBoxToEnd(txtNettruyenTechLog);
+                    }
+                }
+
                 if (txtHakoLog != null)
                 {
                     AppendLogLine(txtHakoLog, logLine, isError);
@@ -142,6 +151,11 @@ namespace get_link_manga
         private void BtnClearNettruyenLog_Click(object sender, RoutedEventArgs e)
         {
             ClearLogPanel(txtNettruyenLog);
+        }
+
+        private void BtnClearNettruyenTechLog_Click(object sender, RoutedEventArgs e)
+        {
+            ClearLogPanel(txtNettruyenTechLog);
         }
 
         private void BtnClearTruyenggvnLog_Click(object sender, RoutedEventArgs e)

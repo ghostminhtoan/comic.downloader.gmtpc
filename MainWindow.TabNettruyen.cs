@@ -16,14 +16,21 @@ namespace get_link_manga
     public partial class MainWindow : Window
     {
         private string _lastCaptchaResolvedHtml = null;
+        private RichTextBox _nettruyenLogOverride = null;
+
+        private RichTextBox GetNettruyenLogTarget()
+        {
+            return _nettruyenLogOverride ?? txtNettruyenLog;
+        }
 
         private void NettruyenLog(string message)
         {
+            var logTarget = GetNettruyenLogTarget();
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 string logLine = $"[{DateTime.Now:HH:mm:ss}] {message}\r\n";
                 bool isError = IsErrorMessage(message);
-                AppendLogLine(txtNettruyenLog, logLine, isError);
+                AppendLogLine(logTarget, logLine, isError);
             }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
@@ -190,7 +197,7 @@ namespace get_link_manga
                     return match.Groups[1].Value;
                 }
             }
-            return "https://nettruyen.gg"; // Default fallback
+            return "https://nettruyenviet10.com"; // ponytail: fallback only when URL parse fails. Upgrade path: infer from active tab if needed.
         }
 
         private string GetNettruyenPageUrl(string baseUrl, int page)
@@ -244,8 +251,7 @@ namespace get_link_manga
             var seenChapters = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             chapterListHtml = NormalizeNettruyenHtml(chapterListHtml);
-            string escapedPath = Regex.Escape(parentPath.TrimEnd('/'));
-            string pattern = @"href=[""'](?<link>[^""']*?" + escapedPath + @"/(?:chuong|chap|chapter|c|chuong-tranh|chuong-doc)-\d+[^""'\s?#]*)[""']";
+            string pattern = @"href=[""'](?<link>[^""']*?/truyen-tranh/[^""']*(?:/|-)(?:chuong|chap|chapter|c|chuong-tranh|chuong-doc)[-_]?\d+(?:\.\d+)?[^""'\s?#]*)[""']";
             var matches = Regex.Matches(chapterListHtml, pattern, RegexOptions.IgnoreCase);
 
             foreach (Match m in matches)
@@ -314,7 +320,7 @@ namespace get_link_manga
             return webViewHtml;
         }
 
-        private async void BtnNettruyenFetchInfo_Click(object sender, RoutedEventArgs e)
+        private async Task NettruyenFetchInfoAsync()
         {
             string url = txtNettruyenTagUrl.Text.Trim();
             if (string.IsNullOrEmpty(url))
@@ -384,12 +390,27 @@ namespace get_link_manga
             }
         }
 
+        private async void BtnNettruyenFetchInfo_Click(object sender, RoutedEventArgs e)
+        {
+            await NettruyenFetchInfoAsync();
+        }
+
+        private void SyncNettruyenTotalPages(TextBox totalPagesBox, TextBox pageToBox)
+        {
+            if (totalPagesBox != null && pageToBox != null)
+            {
+                pageToBox.Text = totalPagesBox.Text;
+            }
+        }
+
         private void TxtNettruyenTotalPages_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (txtNettruyenPageTo != null && txtNettruyenTotalPages != null)
-            {
-                txtNettruyenPageTo.Text = txtNettruyenTotalPages.Text;
-            }
+            SyncNettruyenTotalPages(txtNettruyenTotalPages, txtNettruyenPageTo);
+        }
+
+        private void TxtNettruyenTechTotalPages_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            SyncNettruyenTotalPages(txtNettruyenTechTotalPages, txtNettruyenTechPageTo);
         }
 
         private async void BtnNettruyenScrape_Click(object sender, RoutedEventArgs e)
@@ -419,6 +440,108 @@ namespace get_link_manga
                 return;
             }
             await ScrapeNettruyenAsync(clearExisting: false);
+        }
+
+        private void CopyNettruyenTechInputsToPrimary()
+        {
+            if (txtNettruyenTechTagUrl != null && txtNettruyenTagUrl != null) txtNettruyenTagUrl.Text = txtNettruyenTechTagUrl.Text;
+            if (txtNettruyenTechPageFrom != null && txtNettruyenPageFrom != null) txtNettruyenPageFrom.Text = txtNettruyenTechPageFrom.Text;
+            if (txtNettruyenTechPageTo != null && txtNettruyenPageTo != null) txtNettruyenPageTo.Text = txtNettruyenTechPageTo.Text;
+            if (txtNettruyenTechTotalPages != null && txtNettruyenTotalPages != null) txtNettruyenTotalPages.Text = txtNettruyenTechTotalPages.Text;
+        }
+
+        private void CopyNettruyenPrimaryOutputsToTech()
+        {
+            if (txtNettruyenTechTagUrl != null && txtNettruyenTagUrl != null) txtNettruyenTechTagUrl.Text = txtNettruyenTagUrl.Text;
+            if (txtNettruyenTechPageFrom != null && txtNettruyenPageFrom != null) txtNettruyenTechPageFrom.Text = txtNettruyenPageFrom.Text;
+            if (txtNettruyenTechPageTo != null && txtNettruyenPageTo != null) txtNettruyenTechPageTo.Text = txtNettruyenPageTo.Text;
+            if (txtNettruyenTechTotalPages != null && txtNettruyenTotalPages != null) txtNettruyenTechTotalPages.Text = txtNettruyenTotalPages.Text;
+        }
+
+        private void SetNettruyenTechButtonsEnabled(bool isEnabled)
+        {
+            if (btnNettruyenTechFetchInfo != null) btnNettruyenTechFetchInfo.IsEnabled = isEnabled;
+            if (btnNettruyenTechScrape != null) btnNettruyenTechScrape.IsEnabled = isEnabled;
+            if (btnNettruyenTechCrawlMore != null) btnNettruyenTechCrawlMore.IsEnabled = isEnabled;
+            if (btnNettruyenTechPasteDirect != null) btnNettruyenTechPasteDirect.IsEnabled = isEnabled;
+        }
+
+        private async void BtnNettruyenTechFetchInfo_Click(object sender, RoutedEventArgs e)
+        {
+            CopyNettruyenTechInputsToPrimary();
+            SetNettruyenTechButtonsEnabled(false);
+            var oldLogTarget = _nettruyenLogOverride;
+            _nettruyenLogOverride = txtNettruyenTechLog;
+            try
+            {
+                await NettruyenFetchInfoAsync();
+            }
+            finally
+            {
+                _nettruyenLogOverride = oldLogTarget;
+                CopyNettruyenPrimaryOutputsToTech();
+                SetNettruyenTechButtonsEnabled(true);
+            }
+        }
+
+        private async void BtnNettruyenTechScrape_Click(object sender, RoutedEventArgs e)
+        {
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                if (btnNettruyenTechScrape != null)
+                {
+                    btnNettruyenTechScrape.Content = "CANCELLING...";
+                    btnNettruyenTechScrape.IsEnabled = false;
+                }
+                if (btnNettruyenTechCrawlMore != null) btnNettruyenTechCrawlMore.IsEnabled = false;
+                return;
+            }
+
+            CopyNettruyenTechInputsToPrimary();
+            SetNettruyenTechButtonsEnabled(false);
+            var oldLogTarget = _nettruyenLogOverride;
+            _nettruyenLogOverride = txtNettruyenTechLog;
+            try
+            {
+                await ScrapeNettruyenAsync(clearExisting: true);
+            }
+            finally
+            {
+                _nettruyenLogOverride = oldLogTarget;
+                CopyNettruyenPrimaryOutputsToTech();
+                SetNettruyenTechButtonsEnabled(true);
+            }
+        }
+
+        private async void BtnNettruyenTechCrawlMore_Click(object sender, RoutedEventArgs e)
+        {
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                if (btnNettruyenTechCrawlMore != null)
+                {
+                    btnNettruyenTechCrawlMore.Content = "CANCELLING...";
+                    btnNettruyenTechCrawlMore.IsEnabled = false;
+                }
+                if (btnNettruyenTechScrape != null) btnNettruyenTechScrape.IsEnabled = false;
+                return;
+            }
+
+            CopyNettruyenTechInputsToPrimary();
+            SetNettruyenTechButtonsEnabled(false);
+            var oldLogTarget = _nettruyenLogOverride;
+            _nettruyenLogOverride = txtNettruyenTechLog;
+            try
+            {
+                await ScrapeNettruyenAsync(clearExisting: false);
+            }
+            finally
+            {
+                _nettruyenLogOverride = oldLogTarget;
+                CopyNettruyenPrimaryOutputsToTech();
+                SetNettruyenTechButtonsEnabled(true);
+            }
         }
 
         private async Task ScrapeNettruyenAsync(bool clearExisting)
@@ -514,7 +637,7 @@ namespace get_link_manga
                         fullLink = fullLink.TrimEnd('/');
 
                         // Detect if chapter link
-                        bool isChap = Regex.IsMatch(relativeLink, @"/(?:chuong|chap|chapter|c)-\d+", RegexOptions.IgnoreCase);
+                        bool isChap = Regex.IsMatch(relativeLink, @"(?:/|-)(?:chuong|chap|chapter|c|chuong-tranh|chuong-doc)[-_]?\d+(?:\.\d+)?", RegexOptions.IgnoreCase);
                         if (isChap)
                         {
                             if (lastParentUrl != null)
@@ -657,6 +780,36 @@ namespace get_link_manga
             win.Show();
         }
 
+        private void BtnNettruyenTechPasteDirect_Click(object sender, RoutedEventArgs e)
+        {
+            var win = new DirectDownloadWindow(isNhentai: false);
+            win.Owner = this;
+            win.OnImport = async (links) =>
+            {
+                if (links != null && links.Any())
+                {
+                    await ImportNettruyenTechDirectLinksAsync(links);
+                }
+            };
+            win.Show();
+        }
+
+        private async Task ImportNettruyenTechDirectLinksAsync(List<string> links, bool showMessageBox = true)
+        {
+            SetNettruyenTechButtonsEnabled(false);
+            var oldLogTarget = _nettruyenLogOverride;
+            _nettruyenLogOverride = txtNettruyenTechLog;
+            try
+            {
+                await ImportNettruyenDirectLinksAsync(links, showMessageBox);
+            }
+            finally
+            {
+                _nettruyenLogOverride = oldLogTarget;
+                SetNettruyenTechButtonsEnabled(true);
+            }
+        }
+
         private async Task ImportNettruyenDirectLinksAsync(List<string> links, bool showMessageBox = true)
         {
             btnNettruyenScrape.IsEnabled = false;
@@ -778,12 +931,19 @@ namespace get_link_manga
             string activeDomain = ExtractNettruyenBaseUrl(cleanLink);
 
             var uri = new Uri(cleanLink);
-            string parentPath = uri.AbsolutePath.TrimEnd('/');
-            var segments = uri.AbsolutePath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            string parentPath = Regex.Replace(uri.AbsolutePath.TrimEnd('/'), @"\.html$", "", RegexOptions.IgnoreCase);
+            var segments = parentPath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            bool looksLikeChapter = Regex.IsMatch(uri.AbsolutePath, @"(?:/|-)(?:chuong|chap|chapter|c|chuong-tranh|chuong-doc)[-_]?\d+(?:\.\d+)?", RegexOptions.IgnoreCase);
 
-            // Detail Page segment pattern: /truyen-tranh/{slug}
-            // Chapter Page segment pattern: /truyen-tranh/{slug}/chuong-{num} or similar
-            bool isDetailPage = segments.Length == 2 && segments[0].Equals("truyen-tranh", StringComparison.OrdinalIgnoreCase);
+            // Detail Page: /truyen-tranh/{slug} or /truyen-tranh/{slug}.html
+            // Chapter Page: /truyen-tranh/{slug}/chuong-1 or /truyen-tranh/{slug}-chuong-1.html
+            bool isDetailPage = segments.Length == 2 &&
+                segments[0].Equals("truyen-tranh", StringComparison.OrdinalIgnoreCase) &&
+                !looksLikeChapter;
+            if (!isDetailPage && uri.AbsolutePath.EndsWith(".html", StringComparison.OrdinalIgnoreCase) && !looksLikeChapter)
+            {
+                isDetailPage = true;
+            }
 
             if (isDetailPage)
             {
@@ -1243,6 +1403,7 @@ namespace get_link_manga
             int startIndex = -1;
             string[] containerMarkers = new[]
             {
+                "class=\"reading-detail box_doc\"",
                 "class=\"page-chapter\"",
                 "class=\"reading-detail\"",
                 "class=\"chapter-content\"",

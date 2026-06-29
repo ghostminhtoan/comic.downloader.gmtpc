@@ -559,8 +559,8 @@
                             </Grid>
                             </ScrollViewer>
                         </TabItem>
-                        <!-- nettruyen tab -->
-                        <TabItem Header="nettruyen" Style="{StaticResource CyberpunkTabItem}">
+                        <!-- nettruyenviet10.com tab -->
+                        <TabItem Header="nettruyenviet10.com" Style="{StaticResource CyberpunkTabItem}">
                             <TabItem.Tag>
                                 <SolidColorBrush Color="#00ffff"/>
                             </TabItem.Tag>
@@ -581,7 +581,7 @@
                                         <StackPanel Grid.Row="0" Margin="0,0,0,15">
                                             <TextBlock Text="PARAMETERS CONFIG" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"/>
                                             <WrapPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                                <Button Name="btnOpenHomepageNettruyen" Tag="nettruyen" Content="HOME" Click="BtnOpenHomepage_Click" Style="{StaticResource CompactCyanButton}" MinWidth="86" Padding="8,0" FontWeight="Bold"/>
+                                                <Button Name="btnOpenHomepageNettruyen" Tag="nettruyenviet10.com" Content="HOME" Click="BtnOpenHomepage_Click" Style="{StaticResource CompactCyanButton}" MinWidth="86" Padding="8,0" FontWeight="Bold"/>
                                                 <Button Content="HISTORY" Click="BtnOpenHistory_Click" Style="{StaticResource CompactCyanButton}" MinWidth="78" Padding="8,0" FontWeight="Bold"/>
                                                 <Button Content="BOOKMARKS" Click="BtnOpenBookmarks_Click" Style="{StaticResource CompactCyanButton}" MinWidth="94" Padding="8,0" FontWeight="Bold"/>
                                             </WrapPanel>
@@ -698,6 +698,146 @@
                                                 <RichTextBox Name="txtNettruyenLog" VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0" Foreground="#a8ffb2" FontFamily="Consolas, Courier New" FontSize="11" IsReadOnly="True" Padding="10"/>
                                                 <ToggleButton Name="chkAutoScrollNettruyenLog" Style="{StaticResource ToggleButtonSwitch}" IsChecked="True" Height="16" Width="32"/>
                                                 <Button Name="btnClearNettruyenLog" Content="CLEAR" Click="BtnClearNettruyenLog_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="20" Width="60" FontSize="9" Padding="0"/>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <TabItem Header="nettruyen.tech" Style="{StaticResource CyberpunkTabItem}">
+                            <TabItem.Tag>
+                                <SolidColorBrush Color="#00ffff"/>
+                            </TabItem.Tag>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="True" Background="Transparent" BorderThickness="0" Padding="0">
+                            <Grid Margin="0,10,0,0">
+                                <Border Name="borderNettruyenTechLeftPanel" Style="{StaticResource CyberpunkCard}" Padding="15">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="0"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+
+                                        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                                            <TextBlock Text="PARAMETERS CONFIG" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            <WrapPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                <Button Name="btnOpenHomepageNettruyenTech" Tag="nettruyen.tech" Content="HOME" Click="BtnOpenHomepage_Click" Style="{StaticResource CompactCyanButton}" MinWidth="86" Padding="8,0" FontWeight="Bold"/>
+                                                <Button Content="HISTORY" Click="BtnOpenHistory_Click" Style="{StaticResource CompactCyanButton}" MinWidth="78" Padding="8,0" FontWeight="Bold"/>
+                                                <Button Content="BOOKMARKS" Click="BtnOpenBookmarks_Click" Style="{StaticResource CompactCyanButton}" MinWidth="94" Padding="8,0" FontWeight="Bold"/>
+                                            </WrapPanel>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="1" Margin="0,0,0,12">
+                                            <TextBlock Text="DOWNLOAD MULTIPLE WITH TAG OR ARTIST" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                            <TextBox Name="txtNettruyenTechTagUrl"
+                                                        Text="https://nettruyen.tech/the-loai/truyen-scan"
+                                                        Background="#0e121a"
+                                                        BorderBrush="{StaticResource CyberpunkBorderBrush}"
+                                                        Foreground="{StaticResource CyberpunkTextBrush}"
+                                                        CaretBrush="{StaticResource CyberpunkCyanBrush}"
+                                                        Height="32"/>
+                                        </StackPanel>
+
+                                        <Grid Grid.Row="2" Margin="0,0,0,15">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Name="btnNettruyenTechFetchInfo" Content="ANALYZE TARGET PAGE" Click="BtnNettruyenTechFetchInfo_Click" Style="{StaticResource TabFetchPrimaryButton}"/>
+                                            <Button Grid.Column="2" Name="btnNettruyenTechFetchCaptcha" Content="DELETE COOKIE" Click="BtnCaptcha_Click" Style="{StaticResource TabFetchSecondaryButton}"/>
+                                        </Grid>
+
+                                        <Grid Grid.Row="3" Margin="0,0,0,15">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                <TextBox Name="txtNettruyenTechTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtNettruyenTechTotalPages_TextChanged"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                <TextBox Name="txtNettruyenTechPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="4">
+                                                <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                <TextBox Name="txtNettruyenTechPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Grid Grid.Row="4" Height="0" Margin="0"/>
+
+                                        <Grid Grid.Row="5" Margin="0,15,0,15">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Name="btnNettruyenTechScrape" Content="GET LINK" Click="BtnNettruyenTechScrape_Click" Style="{StaticResource WideActionButton}"/>
+                                            <Button Grid.Column="2" Name="btnNettruyenTechCrawlMore" Content="GET MORE" Click="BtnNettruyenTechCrawlMore_Click" Style="{StaticResource WideActionButton}"/>
+                                            <Button Grid.Column="4" Name="btnNettruyenTechPasteDirect" Content="PASTE DIRECT LINK" Click="BtnNettruyenTechPasteDirect_Click" Style="{StaticResource WideActionButton}"/>
+                                        </Grid>
+
+                                        <Grid Grid.Row="6" Visibility="Collapsed">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid Grid.Row="0" Margin="0,0,0,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="CHECK ERROR" Foreground="{StaticResource CyberpunkPinkBrush}" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding CheckErrors.Count, RelativeSource={RelativeSource AncestorType=Window}, StringFormat=TOTAL: {0}}" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                <Button Grid.Column="2" Name="btnClearCheckErrorsNettruyenTech" Content="CLEAR" Click="BtnClearCheckErrors_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="20" Width="60" FontSize="9" Padding="0"/>
+                                            </Grid>
+                                            <Border Grid.Row="1" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
+                                                <DataGrid Name="dgCheckErrorsNettruyenTech"
+                                                          ItemsSource="{Binding CheckErrors, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          AutoGenerateColumns="False"
+                                                          IsReadOnly="True"
+                                                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                          Background="Transparent"
+                                                          BorderThickness="0"
+                                                          Foreground="{StaticResource CyberpunkTextBrush}"
+                                                          HeadersVisibility="Column"
+                                                          RowHeaderWidth="0"
+                                                          GridLinesVisibility="Horizontal"
+                                                          HorizontalGridLinesBrush="#1f293d"
+                                                          VerticalGridLinesBrush="#1f293d"
+                                                          ColumnHeaderStyle="{StaticResource CyberpunkDataGridColumnHeader}"
+                                                          RowStyle="{StaticResource CyberpunkDataGridRow}"
+                                                          CellStyle="{StaticResource CyberpunkDataGridCell}">
+                                                    <DataGrid.Columns>
+                                                        <DataGridTextColumn Header="TIME" Binding="{Binding LastSeen, StringFormat=HH:mm:ss}" Width="85" ElementStyle="{StaticResource CheckErrorWrapTextStyle}"/>
+                                                        <DataGridTextColumn Header="BOOK" Binding="{Binding DisplayBook}" Width="260" ElementStyle="{StaticResource CheckErrorWrapTextStyle}"/>
+                                                        <DataGridTextColumn Header="ERROR" Binding="{Binding ErrorMessage}" Width="300" ElementStyle="{StaticResource CheckErrorWrapTextStyle}"/>
+                                                    </DataGrid.Columns>
+                                                </DataGrid>
+                                            </Border>
+                                            <Grid Visibility="Collapsed">
+                                                <RichTextBox Name="txtNettruyenTechLog" VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0" Foreground="#a8ffb2" FontFamily="Consolas, Courier New" FontSize="11" IsReadOnly="True" Padding="10"/>
+                                                <ToggleButton Name="chkAutoScrollNettruyenTechLog" Style="{StaticResource ToggleButtonSwitch}" IsChecked="True" Height="16" Width="32"/>
+                                                <Button Name="btnClearNettruyenTechLog" Content="CLEAR" Click="BtnClearNettruyenTechLog_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="20" Width="60" FontSize="9" Padding="0"/>
                                             </Grid>
                                         </Grid>
                                     </Grid>
