@@ -261,6 +261,29 @@ namespace get_link_manga
             return html.Replace("\\/", "/");
         }
 
+        private static string ExtractNettruyenCenterHtml(string html)
+        {
+            if (string.IsNullOrWhiteSpace(html))
+            {
+                return html ?? string.Empty;
+            }
+
+            string normalized = NormalizeNettruyenHtml(html);
+            int centerIndex = normalized.IndexOf("id=\"ctl00_divCenter\"", StringComparison.OrdinalIgnoreCase);
+            if (centerIndex < 0)
+            {
+                return normalized;
+            }
+
+            int rightIndex = normalized.IndexOf("id=\"ctl00_divRight\"", centerIndex, StringComparison.OrdinalIgnoreCase);
+            if (rightIndex > centerIndex)
+            {
+                return normalized.Substring(centerIndex, rightIndex - centerIndex);
+            }
+
+            return normalized.Substring(centerIndex);
+        }
+
         private static string StripNettruyenBookPrefix(string title)
         {
             return string.IsNullOrWhiteSpace(title)
@@ -637,7 +660,7 @@ namespace get_link_manga
                         continue;
                     }
 
-                    string html = await FetchStringAsync(pageUrl, _downloadCts?.Token ?? CancellationToken.None);
+                    string html = ExtractNettruyenCenterHtml(await FetchStringAsync(pageUrl, _downloadCts?.Token ?? CancellationToken.None));
                     
                     // Match <a> tags containing /truyen-tranh/ links
                     var viewMatches = Regex.Matches(html, @"<a\s+[^>]*?href=[""'](?<link>[^""']*?/truyen-tranh/[^""']+)[""'][^>]*>(?<content>[\s\S]*?)<\/a>", RegexOptions.IgnoreCase);
@@ -1005,13 +1028,13 @@ namespace get_link_manga
                 string html = "";
                 if (!string.IsNullOrEmpty(_lastCaptchaResolvedHtml))
                 {
-                    html = NormalizeNettruyenHtml(_lastCaptchaResolvedHtml);
+                    html = ExtractNettruyenCenterHtml(_lastCaptchaResolvedHtml);
                     _lastCaptchaResolvedHtml = null; // Clear it
                     Log("[nettruyen] Sử dụng HTML đã nạp đầy đủ từ trình duyệt giải captcha.");
                 }
                 else
                 {
-                    html = NormalizeNettruyenHtml(await FetchStringAsync(cleanLink, _downloadCts?.Token ?? CancellationToken.None));
+                    html = ExtractNettruyenCenterHtml(await FetchStringAsync(cleanLink, _downloadCts?.Token ?? CancellationToken.None));
                 }
 
                 // Update manga title from <title> tag if available
