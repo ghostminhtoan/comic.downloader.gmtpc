@@ -284,6 +284,42 @@ namespace get_link_manga
             return normalized.Substring(centerIndex);
         }
 
+        private static string ExtractNettruyenListChapterHtml(string html)
+        {
+            if (string.IsNullOrWhiteSpace(html))
+            {
+                return html ?? string.Empty;
+            }
+
+            string normalized = NormalizeNettruyenHtml(html);
+            int listIndex = normalized.IndexOf("class=\"list-chapter\"", StringComparison.OrdinalIgnoreCase);
+            if (listIndex < 0)
+            {
+                listIndex = normalized.IndexOf("id=\"nt_listchapter\"", StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (listIndex < 0)
+            {
+                return normalized;
+            }
+
+            int rightIndex = normalized.IndexOf("id=\"ctl00_divRight\"", listIndex, StringComparison.OrdinalIgnoreCase);
+            if (rightIndex < 0)
+            {
+                rightIndex = normalized.IndexOf("class=\"right-side\"", listIndex, StringComparison.OrdinalIgnoreCase);
+            }
+            if (rightIndex < 0)
+            {
+                rightIndex = normalized.IndexOf("class=\"visited-comics\"", listIndex, StringComparison.OrdinalIgnoreCase);
+            }
+            if (rightIndex > listIndex)
+            {
+                return normalized.Substring(listIndex, rightIndex - listIndex);
+            }
+
+            return normalized.Substring(listIndex);
+        }
+
         private static string StripNettruyenBookPrefix(string title)
         {
             return string.IsNullOrWhiteSpace(title)
@@ -296,7 +332,7 @@ namespace get_link_manga
             var chapterLinks = new List<string>();
             var seenChapters = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            chapterListHtml = NormalizeNettruyenHtml(chapterListHtml);
+            chapterListHtml = ExtractNettruyenListChapterHtml(chapterListHtml);
             string pattern = @"href=[""'](?<link>[^""']*?/truyen-tranh/[^""']*(?:/|-)(?:chuong|chap|chapter|c|chuong-tranh|chuong-doc)[-_]?\d+(?:\.\d+)?[^""'\s?#]*)[""']";
             var matches = Regex.Matches(chapterListHtml, pattern, RegexOptions.IgnoreCase);
 
@@ -1078,7 +1114,8 @@ namespace get_link_manga
                     storyId = idMatch.Groups["id"].Value;
                 }
 
-                string chapterListHtml = html;
+                string chapterListHtml = ExtractNettruyenListChapterHtml(html);
+                var chapterLinks = ExtractNettruyenChapterLinks(chapterListHtml, activeDomain, parentPath);
                 string expandedChapterListHtml = null;
                 bool expandedViaWebView = false;
 
@@ -1093,13 +1130,14 @@ namespace get_link_manga
                 }
 
                 bool pageHasViewMore = HasNettruyenViewMoreButton(html);
-                if (pageHasViewMore)
+                if (pageHasViewMore && chapterLinks.Count == 0)
                 {
                     Log("[nettruyen] Thấy nút 'Xem thêm'. Đang click để bung danh sách chapter...");
                     string webViewHtml = await GetExpandedChapterListHtmlAsync();
                     if (!string.IsNullOrEmpty(webViewHtml))
                     {
-                        chapterListHtml = webViewHtml;
+                        chapterListHtml = ExtractNettruyenListChapterHtml(webViewHtml);
+                        chapterLinks = ExtractNettruyenChapterLinks(chapterListHtml, activeDomain, parentPath);
                         expandedViaWebView = true;
                         Log("[nettruyen] Đã lấy HTML đầy đủ sau khi click 'Xem thêm'.");
                     }
@@ -1124,11 +1162,11 @@ namespace get_link_manga
                                 {
                                     string jsonResponse = await response.Content.ReadAsStringAsync();
                                     var dMatch = Regex.Match(jsonResponse, @"""d""\s*:\s*""(?<htmlContent>.*?)""\s*}", RegexOptions.Singleline);
-                                    if (dMatch.Success)
-                                    {
-                                        string unescapedHtml = NormalizeNettruyenHtml(Regex.Unescape(dMatch.Groups["htmlContent"].Value));
-                                        if (!string.IsNullOrWhiteSpace(unescapedHtml) && unescapedHtml.Length > 100)
+                                                if (dMatch.Success)
                                         {
+                                            string unescapedHtml = ExtractNettruyenListChapterHtml(Regex.Unescape(dMatch.Groups["htmlContent"].Value));
+                                            if (!string.IsNullOrWhiteSpace(unescapedHtml) && unescapedHtml.Length > 100)
+                                            {
                                             var tempLinks = ExtractNettruyenChapterLinks(unescapedHtml, activeDomain, parentPath);
                                             if (tempLinks.Count > 0)
                                             {
@@ -1168,9 +1206,9 @@ namespace get_link_manga
                                     {
                                         string jsonResponse = await response.Content.ReadAsStringAsync();
                                         var dMatch = Regex.Match(jsonResponse, @"""d""\s*:\s*""(?<htmlContent>.*?)""\s*}", RegexOptions.Singleline);
-                                        if (dMatch.Success)
+                                                if (dMatch.Success)
                                         {
-                                            string unescapedHtml = NormalizeNettruyenHtml(Regex.Unescape(dMatch.Groups["htmlContent"].Value));
+                                            string unescapedHtml = ExtractNettruyenListChapterHtml(Regex.Unescape(dMatch.Groups["htmlContent"].Value));
                                             if (!string.IsNullOrWhiteSpace(unescapedHtml))
                                             {
                                                 var tempLinks = ExtractNettruyenChapterLinks(unescapedHtml, activeDomain, parentPath);
@@ -1197,8 +1235,6 @@ namespace get_link_manga
                     }
                 }
 
-                var chapterLinks = ExtractNettruyenChapterLinks(chapterListHtml, activeDomain, parentPath);
-
                 // If AJAX succeeded but page originally had "Xem thêm", verify AJAX returned more chapters than visible HTML
                 if (!expandedViaWebView && chapterListHtml != html && pageHasViewMore)
                 {
@@ -1209,10 +1245,10 @@ namespace get_link_manga
                         string webViewHtml = await GetExpandedChapterListHtmlAsync();
                         if (!string.IsNullOrEmpty(webViewHtml))
                         {
-                            var webViewLinks = ExtractNettruyenChapterLinks(webViewHtml, activeDomain, parentPath);
+                            var webViewLinks = ExtractNettruyenChapterLinks(ExtractNettruyenListChapterHtml(webViewHtml), activeDomain, parentPath);
                             if (webViewLinks.Count > chapterLinks.Count)
                             {
-                                chapterListHtml = webViewHtml;
+                                chapterListHtml = ExtractNettruyenListChapterHtml(webViewHtml);
                                 chapterLinks = webViewLinks;
                                 Log($"[nettruyen] WebView bung được {webViewLinks.Count} chương (trước đó AJAX: {htmlVisibleLinks.Count}).");
                             }
@@ -1235,10 +1271,10 @@ namespace get_link_manga
                     string webViewHtml = await GetExpandedChapterListHtmlAsync();
                     if (!string.IsNullOrEmpty(webViewHtml))
                     {
-                        var retriedLinks = ExtractNettruyenChapterLinks(webViewHtml, activeDomain, parentPath);
+                        var retriedLinks = ExtractNettruyenChapterLinks(ExtractNettruyenListChapterHtml(webViewHtml), activeDomain, parentPath);
                         if (retriedLinks.Count > originalChapterCount)
                         {
-                            chapterListHtml = webViewHtml;
+                            chapterListHtml = ExtractNettruyenListChapterHtml(webViewHtml);
                             chapterLinks = retriedLinks;
                             Log($"[nettruyen] Đã mở rộng danh sách chương từ {originalChapterCount} lên {retriedLinks.Count} link.");
                         }

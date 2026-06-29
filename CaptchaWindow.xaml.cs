@@ -511,13 +511,13 @@ namespace get_link_manga
                             bool shouldDelay = false;
                             if (_captchaType == CaptchaType.WatchMore)
                             {
-                                // Find and click "Xem thêm" by text content (CSS selectors are unreliable across nettruyen domains)
-                                string processChaptersJs = @"
+                                         // Find and click "Xem thêm" by text content (CSS selectors are unreliable across nettruyen domains)
+                                         string processChaptersJs = @"
                                      (function() {
                                          function getChapterLinks() {
-                                             var html = document.documentElement.outerHTML || '';
-                                             var matches = html.match(/\/(?:chuong|chap|chapter|c|chuong-tranh|chuong-doc)-\d+(?:\.\d+)?(?:\/|\s|""|'|\?|$)/gi);
-                                             return matches ? matches.length : 0;
+                                             var root = document.querySelector('.list-chapter') || document.querySelector('#nt_listchapter');
+                                             if (!root) return 0;
+                                             return root.querySelectorAll('a[href*=""/chuong""], a[href*=""/chap""], a[href*=""/chapter""], a[href*=""/c-""]').length;
                                          }
                                          
                                          if (window.viewMoreClicked) {
@@ -527,29 +527,12 @@ namespace get_link_manga
                                              if (chapterCount > baseline) {
                                                  return 'ready';
                                              }
-                                             return elapsed < 12000 ? 'waiting' : (chapterCount > 0 ? 'ready' : 'waiting');
+                                             return elapsed < 6000 ? 'waiting' : (chapterCount > 0 ? 'ready' : 'waiting');
                                          }
                                          
                                          // Prioritize the correct chapter-list view-more button
-                                         var xemThem = document.querySelector('.list-chapter .view-more') ||
-                                                       document.querySelector('#nt_listchapter .view-more') ||
-                                                       document.querySelector('.view-more:not(.morelink)');
-                                         
-                                         if (!xemThem) {
-                                             var allEls = document.querySelectorAll('a, button, span, div');
-                                             for (var i = 0; i < allEls.length; i++) {
-                                                 var el = allEls[i];
-                                                 // Exclude description expand links
-                                                 if (el.classList.contains('morelink') || el.closest('.shortened') || el.closest('.detail-content')) {
-                                                     continue;
-                                                 }
-                                                var txt = (el.textContent || '').trim();
-                                                 if (/^\+?\s*xem\s*th.*m$/i.test(txt)) {
-                                                     xemThem = el;
-                                                     break;
-                                                 }
-                                             }
-                                         }
+                                         var root = document.querySelector('.list-chapter') || document.querySelector('#nt_listchapter');
+                                         var xemThem = root ? root.querySelector('.view-more') : null;
 
                                          if (xemThem) {
                                               window.viewMoreChapterBaseline = getChapterLinks();
@@ -572,7 +555,7 @@ namespace get_link_manga
                                                   return 'waiting';
                                               }
                                           }
-                                         
+
                                          // If no view-more button exists and we have chapters, it's ready
                                          var chapterCount = getChapterLinks();
                                          if (chapterCount > 0) {
@@ -595,7 +578,7 @@ namespace get_link_manga
                                     }
                                     
                                     double elapsed = (DateTime.Now - nettruyenChaptersWaitStartTime).TotalSeconds;
-                                    if (elapsed < 20.0) // Timeout after 20 seconds of waiting for chapters to load
+                                    if (elapsed < 6.0) // Timeout after 6 seconds of waiting for chapters to load
                                     {
                                         shouldDelay = true;
                                     }
