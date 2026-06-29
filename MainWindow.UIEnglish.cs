@@ -432,7 +432,7 @@ namespace get_link_manga
             bool hasRoot = System.IO.Directory.Exists(pathRoot);
             bool hasAutosave = System.IO.File.Exists(pathAutosave) || System.IO.File.Exists(pathAutosaveTypo);
 
-            if (!hasRuntimes && !hasPortable && !hasRoot && !hasAutosave)
+            if (!hasRuntimes || !hasPortable || !hasRoot || !hasAutosave)
             {
                 string message = 
                     "Is this your first time running the tool?\n" +
