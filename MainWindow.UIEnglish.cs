@@ -163,6 +163,11 @@ namespace get_link_manga
             string cleanupSourceDir = null;
             string preserveDir = null;
             string cleanupExePath = null;
+            string migrateNewExePath = null;
+            string migrateFinalExePath = null;
+            string migrateNewExeName = null;
+            string migrateFinalExeName = null;
+            bool migrateFinish = false;
             int killPid = -1;
 
             foreach (string arg in args.Skip(1))
@@ -183,6 +188,43 @@ namespace get_link_manga
                 {
                     cleanupExePath = UnquoteCliValue(arg.Substring("--cleanup-exe=".Length));
                 }
+                else if (string.Equals(arg, "--migrate-finish", StringComparison.OrdinalIgnoreCase))
+                {
+                    migrateFinish = true;
+                }
+                else if (arg.StartsWith("--migrate-new-exe=", StringComparison.OrdinalIgnoreCase))
+                {
+                    migrateNewExePath = UnquoteCliValue(arg.Substring("--migrate-new-exe=".Length));
+                }
+                else if (arg.StartsWith("--migrate-final-exe=", StringComparison.OrdinalIgnoreCase))
+                {
+                    migrateFinalExePath = UnquoteCliValue(arg.Substring("--migrate-final-exe=".Length));
+                }
+                else if (arg.StartsWith("--migrate-new-name=", StringComparison.OrdinalIgnoreCase))
+                {
+                    migrateNewExeName = UnquoteCliValue(arg.Substring("--migrate-new-name=".Length));
+                }
+                else if (arg.StartsWith("--migrate-final-name=", StringComparison.OrdinalIgnoreCase))
+                {
+                    migrateFinalExeName = UnquoteCliValue(arg.Substring("--migrate-final-name=".Length));
+                }
+            }
+
+            if (migrateFinish)
+            {
+                await System.Threading.Tasks.Task.Delay(1200);
+
+                if (killPid > 0)
+                {
+                    TryKillProcessById(killPid);
+                }
+
+                TryDeleteFileWithRetry(cleanupExePath, 8, 250);
+                DeleteDirectoryEntriesExcept(cleanupSourceDir, preserveDir);
+                ScheduleRenameAndRelaunch(migrateNewExePath, migrateFinalExePath, migrateNewExeName, migrateFinalExeName);
+                System.Windows.Application.Current.Shutdown();
+                System.Environment.Exit(0);
+                return;
             }
 
             if (string.IsNullOrWhiteSpace(cleanupSourceDir) || string.IsNullOrWhiteSpace(preserveDir))
@@ -336,6 +378,36 @@ namespace get_link_manga
             }
         }
 
+        private static void ScheduleRenameAndRelaunch(string newExePath, string finalExePath, string newExeName, string finalExeName)
+        {
+            if (string.IsNullOrWhiteSpace(newExePath) || string.IsNullOrWhiteSpace(finalExePath) ||
+                string.IsNullOrWhiteSpace(newExeName) || string.IsNullOrWhiteSpace(finalExeName))
+            {
+                return;
+            }
+
+            try
+            {
+                string newDir = Path.GetDirectoryName(newExePath) ?? string.Empty;
+                string args =
+                    $"/c timeout /t 1 /nobreak >nul & " +
+                    $"pushd \"{newDir}\" & " +
+                    $"ren \"{newExeName}\" \"{finalExeName}\" & " +
+                    $"start \"\" \"{finalExePath}\"";
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = args,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                });
+            }
+            catch
+            {
+            }
+        }
+
         private void CheckFirstTimeRunMigration()
         {
             string currentExePath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
@@ -380,7 +452,22 @@ namespace get_link_manga
                         MoveOrCopyDirectoryContents(sourceDir, targetDir, currentExePath);
 
                         string exeName = System.IO.Path.GetFileName(currentExePath);
-                        string newExePath = System.IO.Path.Combine(targetDir, exeName);
+                        string exeBaseName = System.IO.Path.GetFileNameWithoutExtension(exeName);
+                        string exeExt = System.IO.Path.GetExtension(exeName);
+                        string newExeName = $"{exeBaseName}-new{exeExt}";
+                        string newExePath = System.IO.Path.Combine(targetDir, newExeName);
+                        string finalExePath = System.IO.Path.Combine(targetDir, exeName);
+                        string copiedExePath = System.IO.Path.Combine(targetDir, exeName);
+
+                        if (System.IO.File.Exists(newExePath))
+                        {
+                            try { System.IO.File.Delete(newExePath); } catch { }
+                        }
+
+                        if (System.IO.File.Exists(copiedExePath))
+                        {
+                            try { System.IO.File.Move(copiedExePath, newExePath); } catch { }
+                        }
 
                         if (System.IO.File.Exists(newExePath))
                         {
@@ -393,7 +480,7 @@ namespace get_link_manga
                             System.Diagnostics.Process.Start("explorer.exe", $"\"{targetDir}\"");
 
                             // Relaunch the new exe
-                            string launchArgs = $"--cleanup-source=\"{sourceDir}\" --preserve-dir=\"{targetDir}\" --cleanup-exe=\"{currentExePath}\" --kill-pid={Process.GetCurrentProcess().Id}";
+                            string launchArgs = $"--migrate-finish --cleanup-source=\"{sourceDir}\" --preserve-dir=\"{targetDir}\" --cleanup-exe=\"{currentExePath}\" --migrate-new-exe=\"{newExePath}\" --migrate-final-exe=\"{finalExePath}\" --migrate-new-name=\"{newExeName}\" --migrate-final-name=\"{exeName}\" --kill-pid={Process.GetCurrentProcess().Id}";
                             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                             {
                                 FileName = newExePath,
