@@ -279,6 +279,12 @@ namespace get_link_manga
                 Content = CreateWatchNovelTabContent()
             });
 
+            watchTabs.Items.Add(new TabItem
+            {
+                Header = "Convert",
+                Content = CreateWatchConvertTabContent()
+            });
+
             _readerRootGrid.Children.Add(watchTabs);
 
             UpdateReaderStatus(_isVietnameseUi
@@ -318,23 +324,6 @@ namespace get_link_manga
             watchToolbar.Children.Add(_readerWatchWithButton);
             UpdateReaderWatchWithButtonLabel();
 
-            var xnConvertButton = CreateReaderMiniButton("XnConvert", XnConvert_Click, 104);
-            xnConvertButton.Background = new SolidColorBrush(Color.FromRgb(0xFF, 0x8A, 0x00));
-            xnConvertButton.BorderBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0xD2, 0x66));
-            xnConvertButton.Foreground = Brushes.Black;
-            Grid.SetColumn(xnConvertButton, 4);
-            xnConvertButton.HorizontalAlignment = HorizontalAlignment.Left;
-            xnConvertButton.Margin = new Thickness(0, 0, 6, 4);
-            watchToolbar.Children.Add(xnConvertButton);
-
-            var knightComicButton = CreateReaderMiniButton("knightcomic", KnightComic_Click, 112);
-            knightComicButton.Background = new SolidColorBrush(Color.FromRgb(0xFF, 0x46, 0x1A));
-            knightComicButton.BorderBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0xD1, 0x66));
-            knightComicButton.Foreground = Brushes.Black;
-            Grid.SetColumn(knightComicButton, 5);
-            knightComicButton.HorizontalAlignment = HorizontalAlignment.Left;
-            knightComicButton.Margin = new Thickness(0, 0, 6, 4);
-            watchToolbar.Children.Add(knightComicButton);
 
             _readerSummaryText = CreateWatchSummaryText();
             _readerDomainList = CreateWatchListBox();
@@ -676,7 +665,7 @@ namespace get_link_manga
             return template;
         }
 
-        private ContextMenu CreateReaderWatchItemContextMenu()
+        private ContextMenu CreateReaderWatchItemContextMenu(object dataContext)
         {
             var menu = new ContextMenu();
             menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Chọn" : "Check", ReaderWatchMenuCheckSelected_Click));
@@ -687,6 +676,13 @@ namespace get_link_manga
             menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Copy nhãn" : "Copy labels", ReaderWatchMenuCopySelected_Click));
             menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Xóa" : "Delete", ReaderWatchMenuDeleteSelected_Click));
             menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Xóa tất cả" : "Delete all", ReaderWatchMenuDeleteAll_Click));
+
+            if (dataContext is ReaderDomainItem || dataContext is ReaderMangaItem)
+            {
+                menu.Items.Add(new Separator());
+                menu.Items.Add(CreateReaderWatchMenuItem("convert with XnConvert", ReaderWatchMenuConvertXnConvert_Click));
+            }
+
             return menu;
         }
 
@@ -715,7 +711,7 @@ namespace get_link_manga
                 return;
             }
 
-            item.ContextMenu = CreateReaderWatchItemContextMenu();
+            item.ContextMenu = CreateReaderWatchItemContextMenu(item.DataContext);
             item.ContextMenu.PlacementTarget = item;
         }
 
@@ -1798,8 +1794,8 @@ namespace get_link_manga
         private string GetReaderWatchAppDownloadUrl(ReaderWatchExternalApp app)
         {
             return app == ReaderWatchExternalApp.Bandiview
-                ? "https://github.com/ghostminhtoan/getlink210-GMTPC/releases/download/accessories/Bandiview.zip"
-                : "https://github.com/ghostminhtoan/getlink210-GMTPC/releases/download/accessories/FastStone.Image.Viewer.zip";
+                ? "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/Bandiview.zip"
+                : "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/FastStone.Image.Viewer.zip";
         }
 
         private string GetReaderWatchAppRootPath(ReaderWatchExternalApp app)
@@ -5496,7 +5492,7 @@ namespace get_link_manga
             }
 
             Directory.CreateDirectory(PortablePaths.PortableDataRoot);
-            using (var response = await _httpClient.GetAsync("https://github.com/ghostminhtoan/getlink210-GMTPC/releases/download/accessories/XnConvert.Portable.exe", HttpCompletionOption.ResponseHeadersRead))
+            using (var response = await _httpClient.GetAsync("https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/XnConvert.Portable.exe", HttpCompletionOption.ResponseHeadersRead))
             {
                 response.EnsureSuccessStatusCode();
                 using (var input = await response.Content.ReadAsStreamAsync())
@@ -5570,7 +5566,7 @@ namespace get_link_manga
             }
 
             Directory.CreateDirectory(PortablePaths.PortableDataRoot);
-            using (var response = await _httpClient.GetAsync("https://github.com/ghostminhtoan/getlink210-GMTPC/releases/download/accessories/KnightComic.exe", HttpCompletionOption.ResponseHeadersRead))
+            using (var response = await _httpClient.GetAsync("https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/KnightComic.exe", HttpCompletionOption.ResponseHeadersRead))
             {
                 response.EnsureSuccessStatusCode();
                 using (var input = await response.Content.ReadAsStreamAsync())
@@ -6295,6 +6291,338 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
                     Name = page.Name
                 })
                 .ToList();
+        }
+
+        private TextBox _xnConvertPathTextBox;
+        private string XnConvertPathFile => Path.Combine(PortablePaths.PortableDataRoot, "xnconvert_path.txt");
+
+        private string GetXnConvertPath()
+        {
+            try
+            {
+                if (File.Exists(XnConvertPathFile))
+                {
+                    return File.ReadAllText(XnConvertPathFile, System.Text.Encoding.UTF8).Trim();
+                }
+            }
+            catch {}
+            return @"C:\XnConvert Portable\XnConvertPortable.exe"; // default
+        }
+
+        private void SaveXnConvertPath(string path)
+        {
+            try
+            {
+                Directory.CreateDirectory(PortablePaths.PortableDataRoot);
+                File.WriteAllText(XnConvertPathFile, path, System.Text.Encoding.UTF8);
+            }
+            catch {}
+        }
+
+        private FrameworkElement CreateWatchConvertTabContent()
+        {
+            var mainCard = CreateWatchMainCard();
+            var mainGrid = new Grid();
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+            var titleText = new TextBlock
+            {
+                Text = _isVietnameseUi ? "Công cụ Convert" : "Convert Tools",
+                Foreground = (Brush)TryFindResource("CyberpunkYellowBrush") ?? Brushes.Yellow,
+                FontSize = 16,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+            Grid.SetRow(titleText, 0);
+            mainGrid.Children.Add(titleText);
+
+            var panelGrid = new Grid();
+            panelGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            panelGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            Grid.SetRow(panelGrid, 1);
+            mainGrid.Children.Add(panelGrid);
+
+            // XnConvert Panel
+            var xnContent = new StackPanel { Margin = new Thickness(5), VerticalAlignment = VerticalAlignment.Top };
+
+            var lblInstall = new TextBlock
+            {
+                Text = _isVietnameseUi ? "Cài đặt ứng dụng:" : "Install App:",
+                Foreground = Brushes.White,
+                Margin = new Thickness(0, 0, 0, 5)
+            };
+            xnContent.Children.Add(lblInstall);
+
+            var btnInstallXn = CreateReaderMiniButton("INSTALL XNCONVERT", BtnInstallXnConvert_Click, 180);
+            btnInstallXn.Style = TryFindResource("CompactCyanButton") as Style;
+            btnInstallXn.HorizontalAlignment = HorizontalAlignment.Left;
+            btnInstallXn.Margin = new Thickness(0, 0, 0, 15);
+            xnContent.Children.Add(btnInstallXn);
+
+            var lblPath = new TextBlock
+            {
+                Text = _isVietnameseUi ? "Đường dẫn XnConvertPortable.exe:" : "XnConvertPortable.exe path:",
+                Foreground = Brushes.White,
+                Margin = new Thickness(0, 0, 0, 5)
+            };
+            xnContent.Children.Add(lblPath);
+
+            _xnConvertPathTextBox = new TextBox
+            {
+                Text = GetXnConvertPath(),
+                Background = new SolidColorBrush(Color.FromRgb(0x1A, 0x22, 0x38)),
+                Foreground = Brushes.White,
+                CaretBrush = Brushes.White,
+                Padding = new Thickness(5),
+                Margin = new Thickness(0, 0, 0, 15)
+            };
+            _xnConvertPathTextBox.TextChanged += (s, e) => SaveXnConvertPath(_xnConvertPathTextBox.Text);
+            xnContent.Children.Add(_xnConvertPathTextBox);
+
+            var xnPanel = CreateReaderWatchPanel("XnConvert Tool", xnContent);
+            xnPanel.Margin = new Thickness(0, 0, 10, 0);
+            Grid.SetColumn(xnPanel, 0);
+            panelGrid.Children.Add(xnPanel);
+
+            // KnightComic Panel
+            var kcContent = new StackPanel { Margin = new Thickness(5), VerticalAlignment = VerticalAlignment.Top };
+
+            var lblInstallKc = new TextBlock
+            {
+                Text = _isVietnameseUi ? "Cài đặt ứng dụng:" : "Install App:",
+                Foreground = Brushes.White,
+                Margin = new Thickness(0, 0, 0, 5)
+            };
+            kcContent.Children.Add(lblInstallKc);
+
+            var btnInstallKc = CreateReaderMiniButton("INSTALL KNIGHTCOMIC", BtnInstallKnightComic_Click, 180);
+            btnInstallKc.Style = TryFindResource("CompactOrangeButton") as Style ?? TryFindResource("CompactPinkButton") as Style;
+            btnInstallKc.HorizontalAlignment = HorizontalAlignment.Left;
+            btnInstallKc.Margin = new Thickness(0, 0, 0, 15);
+            kcContent.Children.Add(btnInstallKc);
+
+            var kcPanel = CreateReaderWatchPanel("Knight Comic", kcContent);
+            Grid.SetColumn(kcPanel, 1);
+            panelGrid.Children.Add(kcPanel);
+
+            mainCard.Child = mainGrid;
+            return mainCard;
+        }
+
+        private async void BtnInstallXnConvert_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show(
+                _isVietnameseUi 
+                    ? "Bạn có muốn cài đặt mặc định XnConvert vào ổ C không?\nChọn YES để tự động cài đặt vào ổ C (chế độ silent).\nChọn NO để cài đặt vào ổ/thư mục khác.\nChọn CANCEL để hủy bỏ."
+                    : "Do you want to install XnConvert to C drive by default?\nSelect YES to install silently to C drive.\nSelect NO to choose a custom directory.\nSelect CANCEL to cancel.",
+                "Install XnConvert",
+                MessageBoxButton.YesNoCancel,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    UpdateReaderStatus(_isVietnameseUi ? "Đang tải XnConvert để cài vào ổ C..." : "Downloading XnConvert to install to C...");
+                    await EnsureXnConvertInstallerReadyAsync();
+                    StartXnConvertInstaller(silentInstall: true);
+                    
+                    string defaultPath = @"C:\XnConvert Portable\XnConvertPortable.exe";
+                    if (_xnConvertPathTextBox != null)
+                    {
+                        _xnConvertPathTextBox.Text = defaultPath;
+                    }
+                    SaveXnConvertPath(defaultPath);
+                    
+                    UpdateReaderStatus(_isVietnameseUi ? "Đã chạy XnConvert silent install vào ổ C." : "Launched XnConvert silent installer on C.");
+                }
+                catch (Exception ex)
+                {
+                    UpdateReaderStatus("XnConvert lỗi: " + ex.Message);
+                }
+            }
+            else if (result == MessageBoxResult.No)
+            {
+                var prompt = new PromptDialog(
+                    _isVietnameseUi ? "Nơi cài đặt XnConvert" : "XnConvert Installation Location",
+                    _isVietnameseUi ? "Nhập đường dẫn thư mục cài đặt (ví dụ: D:\\):" : "Enter installation folder path (e.g. D:\\):",
+                    "D:\\");
+                prompt.Owner = Window.GetWindow(this);
+                if (prompt.ShowDialog() == true)
+                {
+                    string targetDir = prompt.ResponseText.Trim();
+                    if (!string.IsNullOrWhiteSpace(targetDir))
+                    {
+                        try
+                        {
+                            UpdateReaderStatus(_isVietnameseUi ? "Đang tải XnConvert..." : "Downloading XnConvert...");
+                            await EnsureXnConvertInstallerReadyAsync();
+                            
+                            var psi = new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = PortablePaths.XnConvertInstallerPath,
+                                Arguments = $"-d\"{targetDir}\" /s",
+                                WorkingDirectory = PortablePaths.PortableDataRoot,
+                                UseShellExecute = true
+                            };
+                            System.Diagnostics.Process.Start(psi);
+
+                            string normalizedDir = targetDir;
+                            if (!normalizedDir.EndsWith("\\") && !normalizedDir.EndsWith("/"))
+                            {
+                                normalizedDir += "\\";
+                            }
+                            string finalPath = Path.Combine(normalizedDir, "XnConvert Portable", "XnConvertPortable.exe");
+                            if (_xnConvertPathTextBox != null)
+                            {
+                                _xnConvertPathTextBox.Text = finalPath;
+                            }
+                            SaveXnConvertPath(finalPath);
+
+                            UpdateReaderStatus(_isVietnameseUi ? "Đã chạy XnConvert installer." : "Launched XnConvert installer.");
+                        }
+                        catch (Exception ex)
+                        {
+                            UpdateReaderStatus("XnConvert lỗi: " + ex.Message);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void BtnInstallKnightComic_Click(object sender, RoutedEventArgs e)
+        {
+            KnightComic_Click(sender, e);
+        }
+
+        private void ReaderWatchMenuConvertXnConvert_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is MenuItem menuItem) || !(menuItem.Parent is ContextMenu contextMenu) || !(contextMenu.PlacementTarget is ListBoxItem container) || !(ItemsControl.ItemsControlFromItemContainer(container) is ListBox listBox))
+            {
+                return;
+            }
+
+            var selectedItems = GetReaderWatchSelectedItems(listBox).ToList();
+            if (selectedItems.Count == 0 && container.DataContext is IReaderWatchCheckable clickedItem)
+            {
+                selectedItems.Add(clickedItem);
+            }
+
+            var folderPaths = new List<string>();
+            foreach (var item in selectedItems)
+            {
+                if (item is ReaderDomainItem domain)
+                {
+                    if (domain.Books != null)
+                    {
+                        foreach (var book in domain.Books)
+                        {
+                            if (book != null && !string.IsNullOrWhiteSpace(book.FolderPath))
+                            {
+                                folderPaths.Add(book.FolderPath);
+                            }
+                        }
+                    }
+                }
+                else if (item is ReaderMangaItem book)
+                {
+                    if (!string.IsNullOrWhiteSpace(book.FolderPath))
+                    {
+                        folderPaths.Add(book.FolderPath);
+                    }
+                }
+            }
+
+            if (folderPaths.Count == 0)
+            {
+                return;
+            }
+
+            string xnPath = GetXnConvertPath();
+            if (!File.Exists(xnPath))
+            {
+                MessageBox.Show(
+                    _isVietnameseUi 
+                        ? $"Không tìm thấy XnConvert tại đường dẫn: {xnPath}\nVui lòng cài đặt hoặc chỉnh sửa đường dẫn trong tab Convert."
+                        : $"XnConvert executable not found at: {xnPath}\nPlease install or configure the path in the Convert tab.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                var args = string.Join(" ", folderPaths.Select(p => $"\"{p}\""));
+                var psi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = xnPath,
+                    Arguments = args,
+                    UseShellExecute = true
+                };
+                System.Diagnostics.Process.Start(psi);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error running XnConvert: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private class PromptDialog : Window
+        {
+            private TextBox txtInput;
+            public string ResponseText { get; private set; }
+
+            public PromptDialog(string title, string promptText, string defaultResponse = "")
+            {
+                Title = title;
+                Width = 400;
+                Height = 150;
+                WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                ResizeMode = ResizeMode.NoResize;
+                Background = new SolidColorBrush(Color.FromRgb(0x0D, 0x12, 0x1F));
+                BorderBrush = new SolidColorBrush(Color.FromRgb(0x00, 0xF0, 0xFF));
+                BorderThickness = new Thickness(1);
+                
+                var grid = new Grid { Margin = new Thickness(10) };
+                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                var lblPrompt = new TextBlock
+                {
+                    Text = promptText,
+                    Foreground = Brushes.White,
+                    Margin = new Thickness(0, 0, 0, 5)
+                };
+                Grid.SetRow(lblPrompt, 0);
+                grid.Children.Add(lblPrompt);
+
+                txtInput = new TextBox
+                {
+                    Text = defaultResponse,
+                    Margin = new Thickness(0, 0, 0, 10),
+                    Background = new SolidColorBrush(Color.FromRgb(0x1A, 0x22, 0x38)),
+                    Foreground = Brushes.White,
+                    CaretBrush = Brushes.White
+                };
+                Grid.SetRow(txtInput, 1);
+                grid.Children.Add(txtInput);
+
+                var buttonsPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
+                var btnOk = new Button { Content = "OK", Width = 75, Margin = new Thickness(0, 0, 10, 0), IsDefault = true };
+                btnOk.Click += (s, e) => { ResponseText = txtInput.Text; DialogResult = true; };
+                var btnCancel = new Button { Content = "Cancel", Width = 75, IsCancel = true };
+                btnCancel.Click += (s, e) => { DialogResult = false; };
+                
+                buttonsPanel.Children.Add(btnOk);
+                buttonsPanel.Children.Add(btnCancel);
+                Grid.SetRow(buttonsPanel, 2);
+                grid.Children.Add(buttonsPanel);
+
+                Content = grid;
+            }
         }
     }
 

@@ -10,7 +10,7 @@ namespace get_link_manga
     internal static class PortableArchiveBootstrap
     {
         private const string FastStoneResourcePrefix = "FastStone Image Viewer/";
-        private const string SevenZipDownloadUrl = "https://github.com/ghostminhtoan/getlink210-GMTPC/releases/download/accessories/7-Zip.zip";
+        private const string SevenZipDownloadUrl = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/7-Zip.zip";
 
         internal static void EnsurePortableSevenZip()
         {

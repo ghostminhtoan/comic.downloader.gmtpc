@@ -1,12 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows.Media;
 
 namespace get_link_manga
 {
-    internal interface IReaderWatchCheckable
+    internal interface IReaderWatchCheckable : INotifyPropertyChanged
     {
         bool IsChecked { get; set; }
+    }
+
+    internal class NotificationObject : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void RaisePropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
     internal sealed class UiZoomPreset
@@ -24,7 +34,7 @@ namespace get_link_manga
         }
     }
 
-    internal sealed class ReaderPageItem : IReaderWatchCheckable
+    internal sealed class ReaderPageItem : NotificationObject, IReaderWatchCheckable
     {
         public int Index { get; set; }
 
@@ -34,7 +44,19 @@ namespace get_link_manga
 
         public DateTime LastModifiedUtc { get; set; }
 
-        public bool IsChecked { get; set; }
+        private bool _isChecked;
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                if (_isChecked != value)
+                {
+                    _isChecked = value;
+                    RaisePropertyChanged(nameof(IsChecked));
+                }
+            }
+        }
 
         public string DisplayLabel => $"Page {Index + 1:000} - {Name}";
 
@@ -44,7 +66,7 @@ namespace get_link_manga
         }
     }
 
-    internal sealed class ReaderMarkdownItem : IReaderWatchCheckable
+    internal sealed class ReaderMarkdownItem : NotificationObject, IReaderWatchCheckable
     {
         public int Index { get; set; }
 
@@ -54,7 +76,19 @@ namespace get_link_manga
 
         public DateTime LastModifiedUtc { get; set; }
 
-        public bool IsChecked { get; set; }
+        private bool _isChecked;
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                if (_isChecked != value)
+                {
+                    _isChecked = value;
+                    RaisePropertyChanged(nameof(IsChecked));
+                }
+            }
+        }
 
         public string DisplayLabel => $"MD {Index + 1:000} - {Name}";
 
@@ -64,7 +98,7 @@ namespace get_link_manga
         }
     }
 
-    internal sealed class ReaderChapterItem : IReaderWatchCheckable
+    internal sealed class ReaderChapterItem : NotificationObject, IReaderWatchCheckable
     {
         public string Name { get; set; }
 
@@ -76,7 +110,19 @@ namespace get_link_manga
 
         public List<ReaderPageItem> Pages { get; set; } = new List<ReaderPageItem>();
 
-        public bool IsChecked { get; set; }
+        private bool _isChecked;
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                if (_isChecked != value)
+                {
+                    _isChecked = value;
+                    RaisePropertyChanged(nameof(IsChecked));
+                }
+            }
+        }
 
         public bool IsCompleted { get; set; }
 
@@ -102,7 +148,7 @@ namespace get_link_manga
         }
     }
 
-    internal sealed class ReaderMangaItem : IReaderWatchCheckable
+    internal sealed class ReaderMangaItem : NotificationObject, IReaderWatchCheckable
     {
         public string Name { get; set; }
 
@@ -120,7 +166,19 @@ namespace get_link_manga
 
         public List<ReaderChapterItem> Chapters { get; set; } = new List<ReaderChapterItem>();
 
-        public bool IsChecked { get; set; }
+        private bool _isChecked;
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                if (_isChecked != value)
+                {
+                    _isChecked = value;
+                    RaisePropertyChanged(nameof(IsChecked));
+                }
+            }
+        }
 
         public bool IsCompleted { get; set; }
 
@@ -150,7 +208,7 @@ namespace get_link_manga
         }
     }
 
-    internal sealed class ReaderDomainItem : IReaderWatchCheckable
+    internal sealed class ReaderDomainItem : NotificationObject, IReaderWatchCheckable
     {
         public string Name { get; set; }
 
@@ -160,7 +218,19 @@ namespace get_link_manga
 
         public List<ReaderMangaItem> Books { get; set; } = new List<ReaderMangaItem>();
 
-        public bool IsChecked { get; set; }
+        private bool _isChecked;
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                if (_isChecked != value)
+                {
+                    _isChecked = value;
+                    RaisePropertyChanged(nameof(IsChecked));
+                }
+            }
+        }
 
         public string DownloadStateText { get; set; }
 
@@ -178,7 +248,7 @@ namespace get_link_manga
         }
     }
 
-    internal sealed class ReaderNovelChapterItem : IReaderWatchCheckable
+    internal sealed class ReaderNovelChapterItem : NotificationObject, IReaderWatchCheckable
     {
         public string Name { get; set; }
 
@@ -190,7 +260,19 @@ namespace get_link_manga
 
         public List<ReaderMarkdownItem> Files { get; set; } = new List<ReaderMarkdownItem>();
 
-        public bool IsChecked { get; set; }
+        private bool _isChecked;
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                if (_isChecked != value)
+                {
+                    _isChecked = value;
+                    RaisePropertyChanged(nameof(IsChecked));
+                }
+            }
+        }
 
         public string DisplayLabel => $"{Name} ({Files.Count} md)";
 
@@ -200,7 +282,7 @@ namespace get_link_manga
         }
     }
 
-    internal sealed class ReaderNovelBookItem : IReaderWatchCheckable
+    internal sealed class ReaderNovelBookItem : NotificationObject, IReaderWatchCheckable
     {
         public string Name { get; set; }
 
@@ -218,7 +300,19 @@ namespace get_link_manga
 
         public List<ReaderNovelChapterItem> Chapters { get; set; } = new List<ReaderNovelChapterItem>();
 
-        public bool IsChecked { get; set; }
+        private bool _isChecked;
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                if (_isChecked != value)
+                {
+                    _isChecked = value;
+                    RaisePropertyChanged(nameof(IsChecked));
+                }
+            }
+        }
 
         public Brush DisplayForeground => IsNavigationItem ? Brushes.Yellow : null;
 
@@ -242,7 +336,7 @@ namespace get_link_manga
         }
     }
 
-    internal sealed class ReaderNovelDomainItem : IReaderWatchCheckable
+    internal sealed class ReaderNovelDomainItem : NotificationObject, IReaderWatchCheckable
     {
         public string Name { get; set; }
 
@@ -252,7 +346,19 @@ namespace get_link_manga
 
         public List<ReaderNovelBookItem> Books { get; set; } = new List<ReaderNovelBookItem>();
 
-        public bool IsChecked { get; set; }
+        private bool _isChecked;
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                if (_isChecked != value)
+                {
+                    _isChecked = value;
+                    RaisePropertyChanged(nameof(IsChecked));
+                }
+            }
+        }
 
         public string DisplayLabel => $"{Name} ({Books.Count} book{(Books.Count == 1 ? string.Empty : "s")})";
 
@@ -262,7 +368,7 @@ namespace get_link_manga
         }
     }
 
-    internal sealed class ReaderChapterIssueItem : IReaderWatchCheckable
+    internal sealed class ReaderChapterIssueItem : NotificationObject, IReaderWatchCheckable
     {
         public string BookName { get; set; }
 
@@ -278,7 +384,19 @@ namespace get_link_manga
 
         public ReaderChapterItem DecimalTarget { get; set; }
 
-        public bool IsChecked { get; set; }
+        private bool _isChecked;
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                if (_isChecked != value)
+                {
+                    _isChecked = value;
+                    RaisePropertyChanged(nameof(IsChecked));
+                }
+            }
+        }
 
         public bool HasMissingChapter => !string.IsNullOrWhiteSpace(MissingChapterLabel);
 
