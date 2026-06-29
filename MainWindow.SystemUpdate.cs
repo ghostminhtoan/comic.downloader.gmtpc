@@ -12,7 +12,7 @@ namespace get_link_manga
 {
     public partial class MainWindow : Window
     {
-        private const string LatestUpdateUrl = "https://github.com/ghostminhtoan/getlink210-GMTPC/releases/download/latest/Comic-GMTPC.latest.exe";
+        private const string LatestUpdateUrl = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/release/Comic-GMTPC.latest.exe";
         private bool _isUpdateCheckInProgress;
         private bool _isUpdateInstallInProgress;
 
