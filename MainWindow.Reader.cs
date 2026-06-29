@@ -6514,33 +6514,43 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
 
         private void ReaderWatchMenuConvertXnConvert_Click(object sender, RoutedEventArgs e)
         {
+            if (!(sender is MenuItem menuItem) || !(menuItem.Parent is ContextMenu contextMenu) || !(contextMenu.PlacementTarget is ListBoxItem container) || !(ItemsControl.ItemsControlFromItemContainer(container) is ListBox listBox))
+            {
+                return;
+            }
+
             var folderPaths = new List<string>();
 
-            // 1. Gather folders from checked domains
-            if (_readerDomainList?.ItemsSource is IEnumerable<ReaderDomainItem> domains)
+            // 1. Gather folders from checked domains if clicked on domains list
+            if (listBox == _readerDomainList)
             {
-                foreach (var domain in domains)
+                if (_readerDomainList?.ItemsSource is IEnumerable<ReaderDomainItem> domains)
                 {
-                    if (domain != null && domain.IsChecked)
+                    foreach (var domain in domains)
                     {
-                        if (!string.IsNullOrWhiteSpace(domain.FolderPath))
+                        if (domain != null && domain.IsChecked)
                         {
-                            folderPaths.Add(domain.FolderPath);
+                            if (!string.IsNullOrWhiteSpace(domain.FolderPath))
+                            {
+                                folderPaths.Add(domain.FolderPath);
+                            }
                         }
                     }
                 }
             }
-
-            // 2. Gather folders from checked books
-            if (_readerMangaList?.ItemsSource is IEnumerable<ReaderMangaItem> books)
+            // 2. Gather folders from checked books if clicked on books list
+            else if (listBox == _readerMangaList)
             {
-                foreach (var book in books)
+                if (_readerMangaList?.ItemsSource is IEnumerable<ReaderMangaItem> books)
                 {
-                    if (book != null && book.IsChecked)
+                    foreach (var book in books)
                     {
-                        if (!string.IsNullOrWhiteSpace(book.FolderPath))
+                        if (book != null && book.IsChecked)
                         {
-                            folderPaths.Add(book.FolderPath);
+                            if (!string.IsNullOrWhiteSpace(book.FolderPath))
+                            {
+                                folderPaths.Add(book.FolderPath);
+                            }
                         }
                     }
                 }
@@ -6579,7 +6589,8 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
 
                 foreach (var path in folderPaths)
                 {
-                    string quoted = $"\"{path}\"";
+                    string normalized = path.Replace('/', '\\');
+                    string quoted = $"\"{normalized}\"";
                     int additionalLen = 1 + quoted.Length;
                     if (currentChunk.Count > 0 && currentLen + additionalLen > 2000)
                     {
@@ -6587,7 +6598,7 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
                         currentChunk = new List<string>();
                         currentLen = 0;
                     }
-                    currentChunk.Add(path);
+                    currentChunk.Add(normalized);
                     currentLen += additionalLen;
                 }
                 if (currentChunk.Count > 0)
@@ -6600,7 +6611,7 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
                     var args = string.Join(" ", chunk.Select(p => $"\"{p}\""));
                     var psi = new System.Diagnostics.ProcessStartInfo
                     {
-                        FileName = xnPath,
+                        FileName = xnPath.Replace('/', '\\'),
                         Arguments = args,
                         UseShellExecute = true
                     };
