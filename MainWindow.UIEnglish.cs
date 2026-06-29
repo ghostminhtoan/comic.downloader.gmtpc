@@ -165,8 +165,6 @@ namespace get_link_manga
             string cleanupExePath = null;
             string migrateNewExePath = null;
             string migrateFinalExePath = null;
-            string migrateNewExeName = null;
-            string migrateFinalExeName = null;
             bool migrateFinish = false;
             int killPid = -1;
 
@@ -200,14 +198,6 @@ namespace get_link_manga
                 {
                     migrateFinalExePath = UnquoteCliValue(arg.Substring("--migrate-final-exe=".Length));
                 }
-                else if (arg.StartsWith("--migrate-new-name=", StringComparison.OrdinalIgnoreCase))
-                {
-                    migrateNewExeName = UnquoteCliValue(arg.Substring("--migrate-new-name=".Length));
-                }
-                else if (arg.StartsWith("--migrate-final-name=", StringComparison.OrdinalIgnoreCase))
-                {
-                    migrateFinalExeName = UnquoteCliValue(arg.Substring("--migrate-final-name=".Length));
-                }
             }
 
             if (migrateFinish)
@@ -221,7 +211,7 @@ namespace get_link_manga
 
                 TryDeleteFileWithRetry(cleanupExePath, 8, 250);
                 DeleteDirectoryEntriesExcept(cleanupSourceDir, preserveDir);
-                ScheduleRenameAndRelaunch(migrateNewExePath, migrateFinalExePath, migrateNewExeName, migrateFinalExeName);
+                ScheduleRenameAndRelaunch(migrateNewExePath, migrateFinalExePath, cleanupExePath, killPid);
                 System.Windows.Application.Current.Shutdown();
                 System.Environment.Exit(0);
                 return;
@@ -378,10 +368,9 @@ namespace get_link_manga
             }
         }
 
-        private static void ScheduleRenameAndRelaunch(string newExePath, string finalExePath, string newExeName, string finalExeName)
+        private static void ScheduleRenameAndRelaunch(string newExePath, string finalExePath, string cleanupExePath, int waitPid)
         {
-            if (string.IsNullOrWhiteSpace(newExePath) || string.IsNullOrWhiteSpace(finalExePath) ||
-                string.IsNullOrWhiteSpace(newExeName) || string.IsNullOrWhiteSpace(finalExeName))
+            if (string.IsNullOrWhiteSpace(newExePath) || string.IsNullOrWhiteSpace(finalExePath) || waitPid <= 0)
             {
                 return;
             }
@@ -389,16 +378,22 @@ namespace get_link_manga
             try
             {
                 string newDir = Path.GetDirectoryName(newExePath) ?? string.Empty;
-                string args =
-                    $"/c timeout /t 1 /nobreak >nul & " +
-                    $"pushd \"{newDir}\" & " +
-                    $"ren \"{newExeName}\" \"{finalExeName}\" & " +
-                    $"start \"\" \"{finalExePath}\"";
+                string newName = Path.GetFileName(newExePath);
+                string finalName = Path.GetFileName(finalExePath);
+                string cleanupClause = string.IsNullOrWhiteSpace(cleanupExePath)
+                    ? string.Empty
+                    : $"if (Test-Path '{EscapePowerShellSingleQuoted(cleanupExePath)}') {{ Remove-Item -LiteralPath '{EscapePowerShellSingleQuoted(cleanupExePath)}' -Force -ErrorAction SilentlyContinue }}; ";
+                string script =
+                    $"Wait-Process -Id {waitPid} -ErrorAction SilentlyContinue; " +
+                    cleanupClause +
+                    $"Set-Location '{EscapePowerShellSingleQuoted(newDir)}'; " +
+                    $"Rename-Item -LiteralPath '{EscapePowerShellSingleQuoted(newName)}' -NewName '{EscapePowerShellSingleQuoted(finalName)}' -Force -ErrorAction SilentlyContinue; " +
+                    $"Start-Process -FilePath '{EscapePowerShellSingleQuoted(finalExePath)}'";
 
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = "cmd.exe",
-                    Arguments = args,
+                    FileName = "powershell.exe",
+                    Arguments = $"-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command \"{script}\"",
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden
                 });
@@ -406,6 +401,11 @@ namespace get_link_manga
             catch
             {
             }
+        }
+
+        private static string EscapePowerShellSingleQuoted(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Replace("'", "''");
         }
 
         private void CheckFirstTimeRunMigration()
@@ -432,7 +432,7 @@ namespace get_link_manga
             bool hasRoot = System.IO.Directory.Exists(pathRoot);
             bool hasAutosave = System.IO.File.Exists(pathAutosave) || System.IO.File.Exists(pathAutosaveTypo);
 
-            if (!hasRuntimes || !hasPortable || !hasRoot || !hasAutosave)
+            if (!hasRuntimes && !hasPortable && !hasRoot && !hasAutosave)
             {
                 string message = 
                     "Is this your first time running the tool?\n" +
@@ -480,7 +480,7 @@ namespace get_link_manga
                             System.Diagnostics.Process.Start("explorer.exe", $"\"{targetDir}\"");
 
                             // Relaunch the new exe
-                            string launchArgs = $"--migrate-finish --cleanup-source=\"{sourceDir}\" --preserve-dir=\"{targetDir}\" --cleanup-exe=\"{currentExePath}\" --migrate-new-exe=\"{newExePath}\" --migrate-final-exe=\"{finalExePath}\" --migrate-new-name=\"{newExeName}\" --migrate-final-name=\"{exeName}\" --kill-pid={Process.GetCurrentProcess().Id}";
+                            string launchArgs = $"--migrate-finish --cleanup-source=\"{sourceDir}\" --preserve-dir=\"{targetDir}\" --cleanup-exe=\"{currentExePath}\" --migrate-new-exe=\"{newExePath}\" --migrate-final-exe=\"{finalExePath}\" --kill-pid={Process.GetCurrentProcess().Id}";
                             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                             {
                                 FileName = newExePath,
