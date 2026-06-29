@@ -198,6 +198,10 @@ namespace get_link_manga
             }
 
             TryDeleteFileWithRetry(cleanupExePath, 8, 250);
+            if (!string.IsNullOrWhiteSpace(cleanupExePath) && File.Exists(cleanupExePath))
+            {
+                ScheduleDeleteFile(cleanupExePath, 4);
+            }
             DeleteDirectoryEntriesExcept(cleanupSourceDir, preserveDir);
         }
 
@@ -310,6 +314,25 @@ namespace get_link_manga
 
                     System.Threading.Thread.Sleep(Math.Max(1, delayMs));
                 }
+            }
+        }
+
+        private static void ScheduleDeleteFile(string path, int delaySeconds)
+        {
+            try
+            {
+                string safePath = path.Replace("\"", "\\\"");
+                string args = $"/c timeout /t {Math.Max(1, delaySeconds)} /nobreak >nul & del /f /q \"{safePath}\"";
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = args,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                });
+            }
+            catch
+            {
             }
         }
 
