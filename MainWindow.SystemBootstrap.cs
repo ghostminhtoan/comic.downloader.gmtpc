@@ -159,7 +159,7 @@ namespace get_link_manga
         {
             if (msg == WM_HOTKEY && wParam.ToInt32() == HOTKEY_ID)
             {
-                BtnShowLightNovelFloatButton_Click(null, null);
+                Dispatcher.BeginInvoke(new Action(ToggleLightNovelFloatingControlWindow));
                 handled = true;
             }
             return IntPtr.Zero;
