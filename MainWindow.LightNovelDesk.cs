@@ -1573,6 +1573,11 @@ namespace get_link_manga
 
         private void HideMainWindowToFocusTray()
         {
+            if (!_lightNovelAutoFocusEnabled)
+            {
+                return;
+            }
+
             EnsureLightNovelFocusTrayIcon();
             if (!_lightNovelFocusStealthActive)
             {

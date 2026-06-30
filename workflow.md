@@ -10,6 +10,8 @@ Tài liệu này là chuẩn làm việc cho repo hiện tại.
 - I/O dài phải dùng `async/await` và `CancellationToken`.
 - Build xong phải sạch `0 error, 0 warning`.
 - Khi đổi code xong: build, rồi commit, rồi push.
+- Khi đụng UI song ngữ, phải check toggle ENG-VI và cập nhật cả 2 chiều.
+- Khi thêm/sửa text UI, trace vào `MainWindow.ENG-VI.md` để thấy chỗ thiếu ngay.
 
 ## 2. Cấu trúc code hiện tại
 
@@ -26,6 +28,7 @@ Tài liệu này là chuẩn làm việc cho repo hiện tại.
 - `MainWindow.UIResponsive.cs`
 - `MainWindow.UIResultsGrid.cs`
 - `MainWindow.UINewFeatures.cs`
+- `MainWindow.ENG-VI.md`
 - `MainWindow.Download.cs`
 - `MainWindow.DownloadPipeline.cs`
 - `MainWindow.DownloadState.cs`
@@ -58,6 +61,10 @@ Tài liệu này là chuẩn làm việc cho repo hiện tại.
 - Hỗ trợ captcha/bypass cho các domain chính.
 - Nếu captcha xong thì phải trả cookie/user-agent về main window.
 - Không làm main window tự minimize sau khi captcha xong.
+
+### Float button
+- `Ctrl+Shift+F` là global hotkey cho float button.
+- Focus toggle off thì webview xong không được tự minimize project.
 
 ### Error log
 - Xóa error trong error log không được làm crash app.
@@ -103,4 +110,3 @@ Tài liệu này là chuẩn làm việc cho repo hiện tại.
 - Commit theo thay đổi thật.
 - Không kéo file rác debug/temp vào commit.
 - Push lên `main`.
-

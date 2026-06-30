@@ -9,7 +9,12 @@ Mục tiêu: tìm chuỗi UI còn lệch giữa ENG và VI trong `MainWindow.*`.
 | `Copy all book's missing chapter` | `Sao chép chap thiếu của mọi truyện` | `MainWindow.Reader.cs` | MISSING |
 | `google all book's missing chapter` | `Google chap thiếu của mọi truyện` | `MainWindow.Reader.cs` | MISSING |
 | `Chapter / Image` | `Chapter / Ảnh` | `MainWindow.Reader.cs` | MISSING |
+| `Float button` | `Nút nổi` | `MainWindow.WorkspaceLayout.cs` | OK |
+| `Ctrl+Shift+F` | `Ctrl+Shift+F` | `MainWindow.SystemBootstrap.cs` | HOTKEY |
+| `Focus` | `Focus` / `Tự focus` | `MainWindow.SystemFloatingControlWindow.cs` | POLICY |
 
 Ghi chú:
 - Bảng này chỉ trace chỗ đang lộ trên UI.
 - Khi thấy `MISSING`, sửa ngay trong file sinh control, không chỉ thêm vào map.
+- Float button phải là global hotkey.
+- Webview xong, focus off thì không ép minimize main window.

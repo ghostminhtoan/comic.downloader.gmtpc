@@ -52,7 +52,8 @@ namespace get_link_manga
 
         private const int HOTKEY_ID = 9000;
         private const uint MOD_CONTROL = 0x0002;
-        private const uint VK_1 = 0x31;
+        private const uint MOD_SHIFT = 0x0004;
+        private const uint VK_F = 0x46;
         private const int WM_HOTKEY = 0x0312;
         private System.Windows.Interop.HwndSource _hwndSource;
 
@@ -151,7 +152,7 @@ namespace get_link_manga
             IntPtr handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
             _hwndSource = System.Windows.Interop.HwndSource.FromHwnd(handle);
             _hwndSource?.AddHook(HwndHook);
-            RegisterHotKey(handle, HOTKEY_ID, MOD_CONTROL, VK_1);
+            RegisterHotKey(handle, HOTKEY_ID, MOD_CONTROL | MOD_SHIFT, VK_F);
         }
 
         private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
