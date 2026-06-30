@@ -168,6 +168,10 @@ namespace get_link_manga
         private Button _readerOtherFolderButton;
         private Button _readerRootFolderButton;
         private Button _readerWatchWithButton;
+        private Button _readerChapterMissingButton;
+        private Button _readerCopyMissingButton;
+        private Button _readerCopyAllMissingButton;
+        private Button _readerGoogleAllMissingButton;
         private string _readerLibraryRootOverride;
         private bool _forceReaderRenderOnNextPageOpen;
         private string _lastRenderedReaderChapterPath;
@@ -349,10 +353,10 @@ namespace get_link_manga
             RefreshReaderSortButtonLabel(_readerMangaDomainSortNameButton, _readerMangaDomainSortState, ReaderWatchSortField.Name, "NAME");
             RefreshReaderSortButtonLabel(_readerMangaBookSortDateButton, _readerMangaBookSortState, ReaderWatchSortField.DateModified, "DATE");
             RefreshReaderSortButtonLabel(_readerMangaBookSortNameButton, _readerMangaBookSortState, ReaderWatchSortField.Name, "NAME");
-            var readerChapterMissingButton = CreateReaderMiniButton("Missing chapters", ReaderChapterMissing_Click, 140);
-            var readerCopyMissingButton = CreateReaderMiniButton("Copy missing chapter", CopyReaderMissingChapters_Click, 150);
-            var readerCopyAllMissingButton = CreateReaderMiniButton("Copy all book's missing chapter", CopyAllBooksMissingChapters_Click, 230);
-            var readerGoogleAllMissingButton = CreateReaderMiniButton("google all book'S missing chapter", GoogleAllBooksMissingChapters_Click, 240);
+            _readerChapterMissingButton = CreateReaderMiniButton(_isVietnameseUi ? "Chương thiếu" : "Missing chapters", ReaderChapterMissing_Click, 140);
+            _readerCopyMissingButton = CreateReaderMiniButton(_isVietnameseUi ? "Sao chép chap thiếu" : "Copy missing chapter", CopyReaderMissingChapters_Click, 150);
+            _readerCopyAllMissingButton = CreateReaderMiniButton(_isVietnameseUi ? "Sao chép chap thiếu của mọi truyện" : "Copy all book's missing chapter", CopyAllBooksMissingChapters_Click, 230);
+            _readerGoogleAllMissingButton = CreateReaderMiniButton(_isVietnameseUi ? "Google chap thiếu của mọi truyện" : "Google all book's missing chapter", GoogleAllBooksMissingChapters_Click, 240);
 
             var btnConvertDomain = CreateReaderMiniButton("CONVERT XNCONVERT", BtnConvertDomainXnConvert_Click, 160);
             btnConvertDomain.Background = new SolidColorBrush(Color.FromRgb(0xFF, 0x8A, 0x00));
@@ -369,8 +373,8 @@ namespace get_link_manga
             var panelBoard = CreateWatchPanelBoard(
                 CreateReaderWatchPanel("Root / Domain", _readerDomainList, _readerMangaDomainSortDateButton, _readerMangaDomainSortNameButton, btnConvertDomain),
                 CreateReaderWatchPanel("Domain / Book", _readerMangaList, _readerMangaBookSortDateButton, _readerMangaBookSortNameButton, btnConvertBook),
-                CreateReaderWatchPanel("Book / Chapter", CreateReaderChapterPanelContent(), readerChapterMissingButton, readerCopyMissingButton, readerCopyAllMissingButton, readerGoogleAllMissingButton),
-                CreateReaderWatchPanel("Chapter / Image", _readerFileList));
+                CreateReaderWatchPanel(_isVietnameseUi ? "Truyện / Chương" : "Book / Chapter", CreateReaderChapterPanelContent(), _readerChapterMissingButton, _readerCopyMissingButton, _readerCopyAllMissingButton, _readerGoogleAllMissingButton),
+                CreateReaderWatchPanel(_isVietnameseUi ? "Chapter / Ảnh" : "Chapter / Image", _readerFileList));
 
             _readerFullscreenButton = CreateReaderMiniButton("Open viewer", ReaderFullscreen_Click, 92);
             var readerStatusPanel = CreateWatchStatusPanel(out _readerStatusText, out _readerStatusProgressBar, out _readerStatusProgressText);
@@ -1133,12 +1137,12 @@ namespace get_link_manga
 
             grid.Columns.Add(new DataGridTextColumn
             {
-                Header = "Book",
+                Header = _isVietnameseUi ? "Truyện" : "Book",
                 Binding = new Binding(nameof(ReaderChapterIssueItem.BookName))
             });
-            grid.Columns.Add(CreateIssueButtonColumn("Chapter", nameof(ReaderChapterIssueItem.ChapterLabel), nameof(ReaderChapterIssueItem.ChapterTarget), ReaderChapterIssueChapter_Click));
-            grid.Columns.Add(CreateIssueButtonColumn("Missing chapter", nameof(ReaderChapterIssueItem.MissingChapterLabel), nameof(ReaderChapterIssueItem.MissingTarget), ReaderChapterIssueMissing_Click));
-            grid.Columns.Add(CreateIssueButtonColumn("Decimal chapter", nameof(ReaderChapterIssueItem.DecimalChapterLabel), nameof(ReaderChapterIssueItem.DecimalTarget), ReaderChapterIssueDecimal_Click));
+            grid.Columns.Add(CreateIssueButtonColumn(_isVietnameseUi ? "Chương" : "Chapter", nameof(ReaderChapterIssueItem.ChapterLabel), nameof(ReaderChapterIssueItem.ChapterTarget), ReaderChapterIssueChapter_Click));
+            grid.Columns.Add(CreateIssueButtonColumn(_isVietnameseUi ? "Chương thiếu" : "Missing chapter", nameof(ReaderChapterIssueItem.MissingChapterLabel), nameof(ReaderChapterIssueItem.MissingTarget), ReaderChapterIssueMissing_Click));
+            grid.Columns.Add(CreateIssueButtonColumn(_isVietnameseUi ? "Chap thập phân" : "Decimal chapter", nameof(ReaderChapterIssueItem.DecimalChapterLabel), nameof(ReaderChapterIssueItem.DecimalTarget), ReaderChapterIssueDecimal_Click));
 
             return grid;
         }
@@ -6245,6 +6249,11 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
                     ? (_isVietnameseUi ? "Thoát Full" : "Exit Full")
                     : "Fullscreen";
             }
+
+            if (_readerChapterMissingButton != null) _readerChapterMissingButton.Content = _isVietnameseUi ? "Chương thiếu" : "Missing chapters";
+            if (_readerCopyMissingButton != null) _readerCopyMissingButton.Content = _isVietnameseUi ? "Sao chép chap thiếu" : "Copy missing chapter";
+            if (_readerCopyAllMissingButton != null) _readerCopyAllMissingButton.Content = _isVietnameseUi ? "Sao chép chap thiếu của mọi truyện" : "Copy all book's missing chapter";
+            if (_readerGoogleAllMissingButton != null) _readerGoogleAllMissingButton.Content = _isVietnameseUi ? "Google chap thiếu của mọi truyện" : "Google all book's missing chapter";
 
             UpdateReaderFitButtons();
             UpdateReaderNovelLanguageState();
