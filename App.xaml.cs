@@ -13,6 +13,9 @@ namespace get_link_manga
             ServicePointManager.Expect100Continue = false;
             ServicePointManager.UseNagleAlgorithm = false;
 
+            System.Windows.Media.RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.Default;
+            EnsureHardwareAcceleration();
+
             PortableRuntimeBootstrap.EnsurePortableRuntime();
             PortableArchiveBootstrap.EnsurePortableSevenZip();
             EnsureLongPathSupport();
@@ -27,6 +30,31 @@ namespace get_link_manga
             base.OnStartup(e);
             var mainWindow = new MainWindow();
             mainWindow.Show();
+        }
+
+        private static void EnsureHardwareAcceleration()
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Microsoft\Avalon.Graphics"))
+                {
+                    if (key == null)
+                    {
+                        return;
+                    }
+
+                    object currentValue = key.GetValue("DisableHWAcceleration", 0);
+                    int disabled = currentValue is int ? (int)currentValue : Convert.ToInt32(currentValue);
+                    if (disabled != 0)
+                    {
+                        // ponytail: force hardware acceleration (DirectX 9+) to ensure smooth rendering
+                        key.SetValue("DisableHWAcceleration", 0, RegistryValueKind.DWord);
+                    }
+                }
+            }
+            catch
+            {
+            }
         }
 
         private static void EnsureLongPathSupport()
@@ -55,3 +83,4 @@ namespace get_link_manga
         }
     }
 }
+
