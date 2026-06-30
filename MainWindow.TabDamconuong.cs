@@ -131,6 +131,18 @@ namespace get_link_manga
             return FormatGalleryTitle(clean);
         }
 
+        private bool IsDamconuongLoginRequiredHtml(string html)
+        {
+            if (string.IsNullOrWhiteSpace(html))
+            {
+                return false;
+            }
+
+            return html.IndexOf("Yêu cầu đăng nhập", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   html.IndexOf("Nội dung này dành cho người dùng đã xác thực", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   html.IndexOf("Tạo tài khoản mới", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
         private async void BtnDamconuongFetchInfo_Click(object sender, RoutedEventArgs e)
         {
             string url = txtDamconuongTagUrl.Text.Trim();
@@ -679,6 +691,10 @@ namespace get_link_manga
         {
             string chapterUrl = NormalizeDamconuongUrl(item.Link);
             string html = await FetchStringAsync(chapterUrl, token);
+            if (IsDamconuongLoginRequiredHtml(html))
+            {
+                throw new Exception("Damconuong yêu cầu đăng nhập. Hãy bấm LOGIN ở tab source damconuong.shop rồi tải lại.");
+            }
 
             string title = ExtractDamconuongTitleFromHtml(html);
             string bookTitle = title;
