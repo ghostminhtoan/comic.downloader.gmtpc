@@ -1218,15 +1218,7 @@ namespace get_link_manga
             Directory.CreateDirectory(dest);
             foreach (var file in Directory.GetFiles(source))
             {
-                string destFile = Path.Combine(dest, Path.GetFileName(file));
-                if (File.Exists(destFile))
-                {
-                    File.Delete(file);
-                }
-                else
-                {
-                    File.Move(file, destFile);
-                }
+                MergeFileIntoDirectory(file, Path.Combine(dest, Path.GetFileName(file)));
             }
 
             foreach (var dir in Directory.GetDirectories(source))
@@ -1245,6 +1237,125 @@ namespace get_link_manga
             catch (Exception ex)
             {
                 Log($"[Merge Warning] Không thể xóa source sau khi gộp '{source}': {ex.Message}");
+            }
+        }
+
+        private void MergeFileIntoDirectory(string sourceFile, string destFile)
+        {
+            if (string.IsNullOrWhiteSpace(sourceFile) ||
+                string.IsNullOrWhiteSpace(destFile) ||
+                !File.Exists(sourceFile))
+            {
+                return;
+            }
+
+            Exception lastError = null;
+            for (int attempt = 1; attempt <= 3; attempt++)
+            {
+                try
+                {
+                    if (File.Exists(destFile))
+                    {
+                        long sourceLength = SafeGetFileLength(sourceFile);
+                        long destLength = SafeGetFileLength(destFile);
+                        if (destLength > 0 && sourceLength == destLength)
+                        {
+                            TryDeleteFileQuietly(sourceFile);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        string destParent = Path.GetDirectoryName(destFile);
+                        if (!string.IsNullOrWhiteSpace(destParent))
+                        {
+                            Directory.CreateDirectory(destParent);
+                        }
+
+                        File.Move(sourceFile, destFile);
+                        return;
+                    }
+                }
+                catch (IOException)
+                {
+                    lastError = new IOException($"Không thể gộp file '{sourceFile}' vào '{destFile}'.");
+                    if (File.Exists(destFile))
+                    {
+                        long sourceLength = SafeGetFileLength(sourceFile);
+                        long destLength = SafeGetFileLength(destFile);
+                        if (destLength > 0 && sourceLength == destLength)
+                        {
+                            TryDeleteFileQuietly(sourceFile);
+                            return;
+                        }
+                    }
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    lastError = new UnauthorizedAccessException($"Không thể truy cập file '{destFile}'.");
+                    if (File.Exists(destFile))
+                    {
+                        long sourceLength = SafeGetFileLength(sourceFile);
+                        long destLength = SafeGetFileLength(destFile);
+                        if (destLength > 0 && sourceLength == destLength)
+                        {
+                            TryDeleteFileQuietly(sourceFile);
+                            return;
+                        }
+                    }
+                }
+
+                if (attempt < 3)
+                {
+                    System.Threading.Thread.Sleep(120);
+                    continue;
+                }
+
+                if (File.Exists(sourceFile))
+                {
+                    throw lastError ?? new IOException($"Không thể gộp file '{sourceFile}' vào '{destFile}'.");
+                }
+            }
+        }
+
+        private static long SafeGetFileLength(string path)
+        {
+            try
+            {
+                return File.Exists(path) ? new FileInfo(path).Length : -1;
+            }
+            catch
+            {
+                return -1;
+            }
+        }
+
+        private static void TryDeleteFileQuietly(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return;
+            }
+
+            for (int attempt = 1; attempt <= 3; attempt++)
+            {
+                try
+                {
+                    if (!File.Exists(path))
+                    {
+                        return;
+                    }
+
+                    File.Delete(path);
+                    return;
+                }
+                catch
+                {
+                    if (attempt < 3)
+                    {
+                        System.Threading.Thread.Sleep(120);
+                    }
+                }
             }
         }
 
