@@ -13,6 +13,7 @@ namespace get_link_manga
     public partial class MainWindow : Window
     {
         private static volatile bool _isDamconuongLoginWindowActive;
+        private DamconuongLoginWindow _damconuongLoginWindow;
 
         private async void BtnDamconuongLogin_Click(object sender, RoutedEventArgs e)
         {
@@ -25,22 +26,65 @@ namespace get_link_manga
             await OpenDamconuongLoginAsync(preferredUrl);
         }
 
+        private async void BtnDamconuongLoginApply_Click(object sender, RoutedEventArgs e)
+        {
+            string email = txtDamconuongLoginEmail?.Text?.Trim() ?? string.Empty;
+            string password = txtDamconuongLoginPassword?.Password ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            {
+                ShowInfo(_isVietnameseUi
+                    ? "Nhập email và password damconuong trước."
+                    : "Enter damconuong email and password first.",
+                    _isVietnameseUi ? "Thiếu dữ liệu" : "Missing data");
+                return;
+            }
+
+            string preferredUrl = txtDamconuongTagUrl?.Text?.Trim();
+            if (!IsDamconuongUrl(preferredUrl))
+            {
+                preferredUrl = DamconuongBaseUrl;
+            }
+
+            try
+            {
+                lblStatus.Text = _isVietnameseUi ? "Đang tự đăng nhập damconuong.shop..." : "Auto logging into damconuong.shop...";
+                DamconuongLoginWindow loginWindow = await EnsureDamconuongLoginWindowAsync(preferredUrl);
+                bool applied = await loginWindow.ApplyCredentialsAsync(email, password);
+                if (!applied)
+                {
+                    lblStatus.Text = _isVietnameseUi
+                        ? "Không tìm thấy form login damconuong. Cửa sổ login đã mở để bạn tự xử lý."
+                        : "Damconuong login form not found. Login window left open for manual handling.";
+                    return;
+                }
+
+                await Task.Delay(2200);
+                await loginWindow.CaptureSessionAsync();
+                SyncDamconuongLoginState(loginWindow);
+                lblStatus.Text = _isVietnameseUi
+                    ? "Đã apply email/password và đồng bộ phiên damconuong.shop."
+                    : "Applied email/password and synced damconuong.shop session.";
+                DamconuongLog("Auto login damconuong đã apply và sync cookie.");
+            }
+            catch (Exception ex)
+            {
+                lblStatus.Text = (_isVietnameseUi ? "Auto login damconuong lỗi: " : "Damconuong auto login failed: ") + ex.Message;
+                DamconuongLog("Lỗi auto login: " + ex.Message);
+            }
+        }
+
         private async Task OpenDamconuongLoginAsync(string targetUrl)
         {
             if (_isDamconuongLoginWindowActive)
             {
+                _damconuongLoginWindow?.Activate();
                 ShowInfo("Cửa sổ login damconuong đang mở.", "Thông báo");
                 return;
             }
 
-            string loginUrl = IsDamconuongUrl(targetUrl) ? NormalizeDamconuongUrl(targetUrl) : DamconuongBaseUrl;
-            var loginWindow = new DamconuongLoginWindow(loginUrl, _isVietnameseUi)
-            {
-                Owner = this
-            };
-
             try
             {
+                DamconuongLoginWindow loginWindow = await EnsureDamconuongLoginWindowAsync(targetUrl);
                 _isDamconuongLoginWindowActive = true;
                 lblStatus.Text = _isVietnameseUi ? "Đang mở login damconuong.shop..." : "Opening damconuong.shop login...";
 
@@ -63,7 +107,33 @@ namespace get_link_manga
             finally
             {
                 _isDamconuongLoginWindowActive = false;
+                if (_damconuongLoginWindow != null && !_damconuongLoginWindow.IsVisible)
+                {
+                    _damconuongLoginWindow = null;
+                }
             }
+        }
+
+        private async Task<DamconuongLoginWindow> EnsureDamconuongLoginWindowAsync(string targetUrl)
+        {
+            string loginUrl = IsDamconuongUrl(targetUrl) ? NormalizeDamconuongUrl(targetUrl) : DamconuongBaseUrl;
+            if (_damconuongLoginWindow == null || !_damconuongLoginWindow.IsLoaded || !_damconuongLoginWindow.IsVisible)
+            {
+                _damconuongLoginWindow = new DamconuongLoginWindow(loginUrl, _isVietnameseUi)
+                {
+                    Owner = this
+                };
+                _damconuongLoginWindow.Closed += (_, __) => _damconuongLoginWindow = null;
+                _damconuongLoginWindow.Show();
+            }
+            else
+            {
+                _damconuongLoginWindow.Activate();
+                await _damconuongLoginWindow.NavigateIfNeededAsync(loginUrl);
+            }
+
+            await _damconuongLoginWindow.WaitUntilReadyAsync();
+            return _damconuongLoginWindow;
         }
 
         private void SyncDamconuongLoginState(DamconuongLoginWindow loginWindow)
@@ -106,6 +176,7 @@ namespace get_link_manga
         private readonly TextBlock _statusText;
         private readonly string _targetUrl;
         private readonly bool _isVietnamese;
+        private readonly TaskCompletionSource<bool> _readyTcs = new TaskCompletionSource<bool>();
         private bool _wasCompleted;
 
         internal CookieContainer ResolvedCookies { get; private set; } = new CookieContainer();
@@ -209,7 +280,6 @@ namespace get_link_manga
         {
             var tcs = new TaskCompletionSource<bool>();
             Closed += OnClosed;
-            Show();
             return tcs.Task;
 
             void OnClosed(object sender, EventArgs e)
@@ -241,6 +311,7 @@ namespace get_link_manga
                     _webView.CoreWebView2.NavigationCompleted += WebView_NavigationCompleted;
                 }
 
+                _readyTcs.TrySetResult(true);
                 _statusText.Text = _isVietnamese
                     ? "Đang mở trang damconuong.shop..."
                     : "Opening damconuong.shop...";
@@ -248,6 +319,7 @@ namespace get_link_manga
             }
             catch (Exception ex)
             {
+                _readyTcs.TrySetException(ex);
                 MessageBox.Show(
                     (_isVietnamese ? "Không thể khởi tạo WebView2: " : "Failed to initialize WebView2: ") + ex.Message,
                     "Error",
@@ -269,6 +341,215 @@ namespace get_link_manga
                 : "Click DONE after login to save cookies.";
         }
 
+        internal Task WaitUntilReadyAsync()
+        {
+            return _readyTcs.Task;
+        }
+
+        internal async Task NavigateIfNeededAsync(string targetUrl)
+        {
+            await WaitUntilReadyAsync();
+            string normalized = string.IsNullOrWhiteSpace(targetUrl) ? "https://damconuong.shop" : targetUrl;
+            string current = _webView.Source?.ToString() ?? string.Empty;
+            if (!string.Equals(current, normalized, StringComparison.OrdinalIgnoreCase))
+            {
+                _webView.CoreWebView2?.Navigate(normalized);
+                await Task.Delay(1200);
+            }
+        }
+
+        internal async Task<bool> ApplyCredentialsAsync(string email, string password)
+        {
+            await WaitUntilReadyAsync();
+            await NavigateToLoginFormAsync();
+
+            string script =
+@"
+(async () => {
+  const selectorsEmail = [
+    'input[type=""email""]',
+    'input[name*=""email"" i]',
+    'input[id*=""email"" i]',
+    'input[autocomplete=""username""]',
+    'input[autocomplete=""email""]'
+  ];
+  const selectorsPassword = [
+    'input[type=""password""]',
+    'input[name*=""pass"" i]',
+    'input[id*=""pass"" i]',
+    'input[autocomplete=""current-password""]'
+  ];
+  const submitSelectors = [
+    'button[type=""submit""]',
+    'input[type=""submit""]',
+    'button[name*=""login"" i]',
+    'button[id*=""login"" i]',
+    '.btn-login',
+    '.login-button'
+  ];
+  const find = list => {
+    for (const selector of list) {
+      const el = document.querySelector(selector);
+      if (el) return el;
+    }
+    return null;
+  };
+  const setValue = (el, value) => {
+    const setter = Object.getOwnPropertyDescriptor(el.__proto__, 'value')?.set;
+    if (setter) setter.call(el, value);
+    else el.value = value;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+  const emailInput = find(selectorsEmail);
+  const passwordInput = find(selectorsPassword);
+  if (!emailInput || !passwordInput) return 'missing';
+  setValue(emailInput, __EMAIL__);
+  setValue(passwordInput, __PASSWORD__);
+  const submit = find(submitSelectors);
+  const form = passwordInput.form || emailInput.form || document.querySelector('form');
+  if (submit) submit.click();
+  else if (form?.requestSubmit) form.requestSubmit();
+  else if (form) form.submit();
+  else return 'missing-submit';
+  return 'submitted';
+})()";
+
+            script = script
+                .Replace("__EMAIL__", ToJavaScriptStringLiteral(email))
+                .Replace("__PASSWORD__", ToJavaScriptStringLiteral(password));
+            string result = await ExecuteStringScriptAsync(script);
+
+            _statusText.Text = _isVietnamese
+                ? "Đã apply email/password. Nếu site hỏi captcha, xử lý ngay trong cửa sổ này."
+                : "Email/password applied. If captcha appears, solve it in this window.";
+            return string.Equals(result, "submitted", StringComparison.OrdinalIgnoreCase);
+        }
+
+        internal async Task CaptureSessionAsync()
+        {
+            await WaitUntilReadyAsync();
+            await RefreshResolvedSessionAsync();
+        }
+
+        private async Task NavigateToLoginFormAsync()
+        {
+            await WaitUntilReadyAsync();
+            for (int i = 0; i < 3; i++)
+            {
+                string state = await ExecuteStringScriptAsync(@"
+(() => {
+  if (document.querySelector('input[type=""password""]')) return 'ready';
+  const candidates = Array.from(document.querySelectorAll('a,button'));
+  const loginNode = candidates.find(node => {
+    const text = (node.textContent || '').trim().toLowerCase();
+    const href = (node.getAttribute('href') || '').toLowerCase();
+    return text.includes('đăng nhập') || text.includes('dang nhap') || text.includes('login') || href.includes('dang-nhap') || href.includes('/login');
+  });
+  if (!loginNode) return 'missing';
+  loginNode.click();
+  return 'clicked';
+})()");
+
+                if (string.Equals(state, "ready", StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
+                if (string.Equals(state, "clicked", StringComparison.OrdinalIgnoreCase))
+                {
+                    await Task.Delay(1500);
+                    continue;
+                }
+
+                _webView.CoreWebView2?.Navigate("https://damconuong.shop");
+                await Task.Delay(1500);
+            }
+        }
+
+        private async Task RefreshResolvedSessionAsync()
+        {
+            if (_webView?.CoreWebView2 == null)
+            {
+                return;
+            }
+
+            string currentUrl = _webView.Source?.ToString() ?? _targetUrl;
+            ResolvedUri = Uri.TryCreate(currentUrl, UriKind.Absolute, out Uri resolvedUri) ? resolvedUri : new Uri(_targetUrl);
+
+            ResolvedCookies = new CookieContainer();
+            foreach (string url in new[] { currentUrl, "https://damconuong.shop", _targetUrl }.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                foreach (CoreWebView2Cookie webCookie in await _webView.CoreWebView2.CookieManager.GetCookiesAsync(url))
+                {
+                    Uri cookieUri = Uri.TryCreate("https://" + webCookie.Domain.TrimStart('.'), UriKind.Absolute, out Uri parsedCookieUri)
+                        ? parsedCookieUri
+                        : ResolvedUri;
+
+                    var cookie = new Cookie(webCookie.Name, webCookie.Value, string.IsNullOrWhiteSpace(webCookie.Path) ? "/" : webCookie.Path, webCookie.Domain)
+                    {
+                        Secure = webCookie.IsSecure,
+                        HttpOnly = webCookie.IsHttpOnly
+                    };
+
+                    if (webCookie.Expires != DateTime.MinValue)
+                    {
+                        cookie.Expires = webCookie.Expires;
+                    }
+
+                    ResolvedCookies.Add(cookieUri, cookie);
+                }
+            }
+
+            try
+            {
+                string userAgent = await ExecuteStringScriptAsync("navigator.userAgent");
+                if (!string.IsNullOrWhiteSpace(userAgent))
+                {
+                    UserAgent = userAgent;
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private async Task<string> ExecuteStringScriptAsync(string script)
+        {
+            string raw = await _webView.CoreWebView2.ExecuteScriptAsync(script);
+            return DecodeWebViewString(raw);
+        }
+
+        private static string DecodeWebViewString(string value)
+        {
+            string text = (value ?? string.Empty).Trim();
+            if (text.StartsWith("\"", StringComparison.Ordinal) && text.EndsWith("\"", StringComparison.Ordinal) && text.Length >= 2)
+            {
+                text = text.Substring(1, text.Length - 2)
+                    .Replace("\\\\", "\\")
+                    .Replace("\\\"", "\"")
+                    .Replace("\\n", "\n")
+                    .Replace("\\r", "\r")
+                    .Replace("\\t", "\t")
+                    .Replace("\\u003C", "<")
+                    .Replace("\\u003E", ">")
+                    .Replace("\\u0026", "&");
+            }
+
+            return string.Equals(text, "null", StringComparison.OrdinalIgnoreCase) ? string.Empty : text;
+        }
+
+        private static string ToJavaScriptStringLiteral(string value)
+        {
+            string text = value ?? string.Empty;
+            return "\"" + text
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"")
+                .Replace("\r", "\\r")
+                .Replace("\n", "\\n")
+                .Replace("</", "<\\/") + "\"";
+        }
+
         private async Task CompleteAsync()
         {
             if (_webView?.CoreWebView2 == null)
@@ -278,52 +559,7 @@ namespace get_link_manga
 
             try
             {
-                string currentUrl = _webView.Source?.ToString() ?? _targetUrl;
-                ResolvedUri = Uri.TryCreate(currentUrl, UriKind.Absolute, out Uri resolvedUri) ? resolvedUri : new Uri(_targetUrl);
-
-                ResolvedCookies = new CookieContainer();
-                foreach (string url in new[] { currentUrl, "https://damconuong.shop", _targetUrl }.Distinct(StringComparer.OrdinalIgnoreCase))
-                {
-                    foreach (CoreWebView2Cookie webCookie in await _webView.CoreWebView2.CookieManager.GetCookiesAsync(url))
-                    {
-                        Uri cookieUri = Uri.TryCreate("https://" + webCookie.Domain.TrimStart('.'), UriKind.Absolute, out Uri parsedCookieUri)
-                            ? parsedCookieUri
-                            : ResolvedUri;
-
-                        var cookie = new Cookie(webCookie.Name, webCookie.Value, string.IsNullOrWhiteSpace(webCookie.Path) ? "/" : webCookie.Path, webCookie.Domain)
-                        {
-                            Secure = webCookie.IsSecure,
-                            HttpOnly = webCookie.IsHttpOnly
-                        };
-
-                        if (webCookie.Expires != DateTime.MinValue)
-                        {
-                            cookie.Expires = webCookie.Expires;
-                        }
-
-                        ResolvedCookies.Add(cookieUri, cookie);
-                    }
-                }
-
-                try
-                {
-                    string userAgentJson = await _webView.CoreWebView2.ExecuteScriptAsync("navigator.userAgent");
-                    string userAgent = (userAgentJson ?? string.Empty).Trim();
-                    if (userAgent.StartsWith("\"", StringComparison.Ordinal) && userAgent.EndsWith("\"", StringComparison.Ordinal) && userAgent.Length >= 2)
-                    {
-                        userAgent = userAgent.Substring(1, userAgent.Length - 2)
-                            .Replace("\\\\", "\\")
-                            .Replace("\\\"", "\"");
-                    }
-                    if (!string.IsNullOrWhiteSpace(userAgent))
-                    {
-                        UserAgent = userAgent;
-                    }
-                }
-                catch
-                {
-                }
-
+                await RefreshResolvedSessionAsync();
                 _wasCompleted = true;
                 Close();
             }
