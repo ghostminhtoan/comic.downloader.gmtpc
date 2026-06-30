@@ -698,7 +698,7 @@ namespace get_link_manga
                         try
                         {
                              var erroredItems = _scrapedItems
-                                 .Where(item => item.GetUniqueErrors().Any(e => e.PageNumber > 0 && !string.IsNullOrEmpty(e.ImageUrl) && e.AttemptCount < 3))
+                                 .Where(item => item.GetUniqueErrors().Any(e => IsRetryableDownloadError(item, e)))
                                  .ToList();
 
                             foreach (var item in erroredItems)

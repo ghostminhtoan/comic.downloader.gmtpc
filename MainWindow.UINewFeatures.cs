@@ -264,13 +264,72 @@ namespace get_link_manga
         /// <summary>
         /// Thử tải lại các trang bị lỗi của một GalleryItem.
         /// </summary>
+        private bool IsRetryableDownloadError(GalleryItem queueItem, ErrorDetail error, bool force = false)
+        {
+            if (queueItem == null || error == null)
+            {
+                return false;
+            }
+
+            if (!force && error.AttemptCount >= 3)
+            {
+                return false;
+            }
+
+            if (error.PageNumber > 0 && !string.IsNullOrWhiteSpace(error.ImageUrl))
+            {
+                return true;
+            }
+
+            return IsDamconuongRetryableChapterError(queueItem, error);
+        }
+
+        private bool IsDamconuongRetryableChapterError(GalleryItem queueItem, ErrorDetail error)
+        {
+            if (queueItem == null || error == null || error.PageNumber > 0)
+            {
+                return false;
+            }
+
+            string retryChapterUrl = !string.IsNullOrWhiteSpace(error.ChapterUrl) ? error.ChapterUrl : error.ImageUrl;
+            return !string.IsNullOrWhiteSpace(retryChapterUrl) &&
+                   (string.Equals(queueItem.SourceDomain, DamconuongSiteFolder, StringComparison.OrdinalIgnoreCase) || IsDamconuongUrl(retryChapterUrl)) &&
+                   IsDamconuongChapterUrl(retryChapterUrl);
+        }
+
+        private void RemoveRetryCheckError(GalleryItem queueItem, ErrorDetail err)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var keyToRemove = _checkErrorIndex.Keys.FirstOrDefault(k =>
+                {
+                    if (_checkErrorIndex.TryGetValue(k, out var val))
+                    {
+                        return string.Equals(val.BookName, queueItem.Name, StringComparison.OrdinalIgnoreCase) &&
+                               string.Equals(val.ChapterName, err.ChapterName, StringComparison.OrdinalIgnoreCase) &&
+                               val.PageNumber == err.PageNumber;
+                    }
+                    return false;
+                });
+
+                if (keyToRemove != null)
+                {
+                    if (_checkErrorIndex.TryGetValue(keyToRemove, out var itemToRemove))
+                    {
+                        _checkErrors.Remove(itemToRemove);
+                    }
+                    _checkErrorIndex.Remove(keyToRemove);
+                }
+            });
+        }
+
         public async Task RetryDownloadQueueItemErrorsAsync(GalleryItem queueItem, bool showMessageBox = true, bool force = false)
         {
             if (queueItem == null)
                 return;
 
             var errorsToRetry = queueItem.GetUniqueErrors()
-                .Where(e => e.PageNumber > 0 && !string.IsNullOrEmpty(e.ImageUrl) && (force || e.AttemptCount < 3))
+                .Where(e => IsRetryableDownloadError(queueItem, e, force))
                 .ToList();
             if (errorsToRetry.Count == 0)
                 return;
@@ -300,6 +359,34 @@ namespace get_link_manga
                 err.AttemptCount++;
                 try
                 {
+                    var token = _downloadCts?.Token ?? System.Threading.CancellationToken.None;
+                    if (IsDamconuongRetryableChapterError(queueItem, err))
+                    {
+                        string retryChapterUrl = NormalizeDamconuongUrl(!string.IsNullOrWhiteSpace(err.ChapterUrl) ? err.ChapterUrl : err.ImageUrl);
+                        string retryRoot = !string.IsNullOrWhiteSpace(queueItem.DownloadPath)
+                            ? queueItem.DownloadPath
+                            : txtDownloadPath?.Text;
+                        var retryChapterItem = new GalleryItem
+                        {
+                            Link = retryChapterUrl,
+                            Name = queueItem.Name,
+                            SourceDomain = DamconuongSiteFolder,
+                            DownloadPath = retryRoot
+                        };
+
+                        bool chapterCompleted = await DownloadDamconuongChapterAsync(retryChapterItem, retryRoot, token, queueItem, isParentQueue: true);
+                        if (!chapterCompleted)
+                        {
+                            throw new Exception("Retry chapter damconuong chưa hoàn tất.");
+                        }
+
+                        MarkChapterProcessDone(retryRoot, DamconuongSiteFolder, queueItem, retryChapterUrl);
+                        successfulRetries++;
+                        Log($"[Retry] Đã tải lại chapter damconuong: {err.ChapterName}");
+                        RemoveRetryCheckError(queueItem, err);
+                        goto UpdateRetryProgress;
+                    }
+
                     string targetFolder;
                     string retryUnmergedFolder = null;
                     string retryMergedFolder = null;
@@ -363,8 +450,6 @@ namespace get_link_manga
                     string fileName = $"{err.PageNumber:D3}{ext}";
                     string finalFilePath = Path.Combine(targetFolder, fileName);
 
-                    var token = _downloadCts?.Token ?? System.Threading.CancellationToken.None;
-
                     await DownloadUrlToFileWithRefererAsync(
                         imageUrl,
                         queueItem.Link, 
@@ -376,27 +461,7 @@ namespace get_link_manga
 
                     successfulRetries++;
                     Log($"[Retry] Đã tải thành công: {err.ChapterName}, Trang {err.PageNumber}");
-                    Dispatcher.Invoke(() =>
-                    {
-                        var keyToRemove = _checkErrorIndex.Keys.FirstOrDefault(k => {
-                            if (_checkErrorIndex.TryGetValue(k, out var val))
-                            {
-                                return string.Equals(val.BookName, queueItem.Name, StringComparison.OrdinalIgnoreCase) &&
-                                       string.Equals(val.ChapterName, err.ChapterName, StringComparison.OrdinalIgnoreCase) &&
-                                       val.PageNumber == err.PageNumber;
-                            }
-                            return false;
-                        });
-
-                        if (keyToRemove != null)
-                        {
-                            if (_checkErrorIndex.TryGetValue(keyToRemove, out var itemToRemove))
-                            {
-                                _checkErrors.Remove(itemToRemove);
-                            }
-                            _checkErrorIndex.Remove(keyToRemove);
-                        }
-                    });
+                    RemoveRetryCheckError(queueItem, err);
                 }
                 catch (Exception ex)
                 {
@@ -409,6 +474,7 @@ namespace get_link_manga
                     RecordCheckError(queueItem.SourceDomain ?? "retry", queueItem.Name, err.ChapterName, err.PageNumber, ex.Message, err.ImageUrl, pageName: err.PageName);
                 }
 
+UpdateRetryProgress:
                 int retryIndex = successfulRetries + failedRetries;
                 Dispatcher.BeginInvoke((Action)(() =>
                 {
