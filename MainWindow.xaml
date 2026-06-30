@@ -78,6 +78,13 @@
                 Padding="5"
                 SnapsToDevicePixels="True">
             <StackPanel Orientation="Horizontal">
+                <TextBlock Name="txtFpsCounter"
+                           Text="FPS: --"
+                           Foreground="{StaticResource CyberpunkYellowBrush}"
+                           FontSize="10"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"
+                           Margin="6,0,10,0"/>
                 <Button Name="btnMainMove"
                         Content="MOVE"
                         PreviewMouseLeftButtonDown="BtnMainMove_PreviewMouseLeftButtonDown"

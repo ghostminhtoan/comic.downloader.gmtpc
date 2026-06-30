@@ -41,6 +41,8 @@ namespace get_link_manga
         private bool _startupArchivePromptShown;
         private volatile int _currentMaxParallelBooks = 2;
         private DynamicSemaphore _activeBookSemaphore;
+        private int _frameCount = 0;
+        private System.Diagnostics.Stopwatch _fpsStopwatch = new System.Diagnostics.Stopwatch();
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
@@ -139,6 +141,8 @@ namespace get_link_manga
                     _hwndSource = null;
                 }
             };
+
+            InitializeFpsCounter();
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -316,6 +320,22 @@ namespace get_link_manga
             _globalAutoPasteLastClipboardText = null;
             _globalAutoPasteTimer?.Stop();
             UpdateLightNovelFloatingControlState();
+        }
+
+        private void InitializeFpsCounter()
+        {
+            _fpsStopwatch.Start();
+            System.Windows.Media.CompositionTarget.Rendering += (s, e) =>
+            {
+                _frameCount++;
+                if (_fpsStopwatch.ElapsedMilliseconds >= 500)
+                {
+                    double fps = (_frameCount * 1000.0) / _fpsStopwatch.ElapsedMilliseconds;
+                    txtFpsCounter.Text = $"FPS: {fps:0.0}";
+                    _frameCount = 0;
+                    _fpsStopwatch.Restart();
+                }
+            };
         }
     }
 }
