@@ -75,12 +75,14 @@ namespace get_link_manga
             
             bool isChapterSite = siteFolder == "truyenqq" ||
                                  siteFolder == "vi-hentai.pro" ||
+                                 siteFolder == "damconuong.shop" ||
                                  siteFolder == "nettruyen" ||
                                  siteFolder == "sayhentai.tv" ||
                                  siteFolder == "truyenggvn.com" ||
                                  (siteFolder != null && (
                                      siteFolder.IndexOf("truyenqq", StringComparison.OrdinalIgnoreCase) >= 0 ||
                                      siteFolder.IndexOf("vi-hentai", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                     siteFolder.IndexOf("damconuong", StringComparison.OrdinalIgnoreCase) >= 0 ||
                                      siteFolder.IndexOf("nettruyen", StringComparison.OrdinalIgnoreCase) >= 0 ||
                                      siteFolder.IndexOf("hentai2read", StringComparison.OrdinalIgnoreCase) >= 0 ||
                                      siteFolder.IndexOf("dilib", StringComparison.OrdinalIgnoreCase) >= 0 ||
@@ -179,6 +181,11 @@ namespace get_link_manga
                 if (host.Contains("vi-hentai"))
                 {
                     return "vi-hentai.pro";
+                }
+
+                if (host.Contains("damconuong"))
+                {
+                    return "damconuong.shop";
                 }
 
                 if (host.Contains("nhentai"))
@@ -809,6 +816,11 @@ namespace get_link_manga
                 if (host.Contains("vi-hentai"))
                 {
                     return "vi-hentai.pro";
+                }
+
+                if (host.Contains("damconuong"))
+                {
+                    return "damconuong.shop";
                 }
 
                 if (host.Contains("daomeoden"))
@@ -2142,6 +2154,12 @@ namespace get_link_manga
             if (hostName.Contains("hentai2read.com") || hostName.Contains("static.hentaicdn.com"))
             {
                 await DownloadHentai2readGalleryAsync(item, rootFolder, token, queueItem, chapterFilter);
+                return;
+            }
+
+            if (IsDamconuongUrl(item.Link))
+            {
+                await DownloadDamconuongGalleryAsync(item, rootFolder, token, queueItem, chapterFilter);
                 return;
             }
 
@@ -3492,6 +3510,15 @@ throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang �
                     }
                 }
 
+                if (host.Contains("damconuong.shop"))
+                {
+                    var segments = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (segments.Length >= 2 && segments[0].Equals("truyen", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "damconuong.shop|" + segments[1].ToLowerInvariant();
+                    }
+                }
+
                 if (host.Contains("nhentai.xxx") || host.Contains("nhentai.net"))
                 {
                     var segments = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
@@ -4056,6 +4083,7 @@ throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang �
                 if (host.Contains("nettruyenviet10.com")) return "nettruyenviet10.com";
                 if (host.Contains("nettruyen")) return "nettruyen";
                 if (host.Contains("vi-hentai") || host.Contains("hentaivn")) return "hentaivn";
+                if (host.Contains("damconuong")) return "damconuong";
                 if (host.Contains("hentai2read")) return "hentai2read";
                 if (host.Contains("daomeoden")) return "daomeoden";
                 if (host.Contains("dilib.vn")) return "dilib.vn";

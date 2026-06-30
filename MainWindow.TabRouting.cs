@@ -21,6 +21,7 @@ namespace get_link_manga
             return lower.Contains("truyenqq") || lower.Contains("qquyen") || lower.Contains("nettruyen") ||
                    lower.Contains("daomeoden") || lower.Contains("dilib.vn") || lower.Contains("vi-hentai") || lower.Contains("vihentai") ||
                    lower.Contains("sayhentai") || lower.Contains("truyengg") || lower.Contains("hentaiforce") ||
+                   lower.Contains("damconuong") ||
                    lower.Contains("nhentai") || lower.Contains("hentai2read") || lower.Contains("hentaiera") ||
                    lower.Contains("hako");
         }
@@ -129,6 +130,21 @@ namespace get_link_manga
                 if (txtDaomeodenTagUrl != null) txtDaomeodenTagUrl.Text = url;
                 BtnDaomeodenFetchInfo_Click(this, new RoutedEventArgs());
                 await WaitAndScrapeAsync(btnDaomeodenFetchInfo, BtnDaomeodenScrape_Click);
+            }
+            else if (lowerUrl.Contains("damconuong"))
+            {
+                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiTabByHeader("damconuong");
+                if (txtDamconuongTagUrl != null) txtDamconuongTagUrl.Text = url;
+                if (IsDamconuongCategoryUrl(url))
+                {
+                    BtnDamconuongFetchInfo_Click(this, new RoutedEventArgs());
+                    await WaitAndScrapeAsync(btnDamconuongFetchInfo, BtnDamconuongScrape_Click);
+                }
+                else
+                {
+                    await ImportDamconuongDirectLinksAsync(new List<string> { url });
+                }
             }
             else if (lowerUrl.Contains("dilib.vn"))
             {
@@ -308,6 +324,14 @@ namespace get_link_manga
                 if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
                 SelectHentaiTabByHeader("daomeoden");
                 await ImportDaomeodenDirectLinksAsync(new List<string> { url });
+                return true;
+            }
+
+            if (lowerUrl.Contains("damconuong"))
+            {
+                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiTabByHeader("damconuong");
+                await ImportDamconuongDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;
             }
 

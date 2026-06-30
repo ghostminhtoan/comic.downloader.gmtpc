@@ -61,6 +61,18 @@ namespace get_link_manga
             },
             new SiteDownloadProfile
             {
+                Id = "damconuong",
+                HostAliases = new[] { "damconuong.shop" },
+                BrowserSessionPreferred = false,
+                ChromeFallbackPreferred = false,
+                DefaultConcurrencyCap = 4,
+                InterRequestDelayMs = 120,
+                AllowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp" },
+                ChallengeMarkers = new[] { "Just a moment...", "cloudflare", "cf-challenge", "captcha" },
+                RetryPolicy = new RetryPolicyProfile { MaxAttempts = 3, BaseDelayMs = 500, MaxDelayMs = 8000, BrowserChallengeNeedsSessionRefresh = false }
+            },
+            new SiteDownloadProfile
+            {
                 Id = "hentaiera",
                 HostAliases = new[] { "hentaiera.com" },
                 BrowserSessionPreferred = true,

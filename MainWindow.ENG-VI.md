@@ -12,6 +12,7 @@ Mục tiêu: tìm chuỗi UI còn lệch giữa ENG và VI trong `MainWindow.*`.
 | `Float button` | `Nút nổi` | `MainWindow.WorkspaceLayout.cs` | OK |
 | `Ctrl+Shift+F` | `Ctrl+Shift+F` | `MainWindow.SystemBootstrap.cs` | HOTKEY |
 | `Focus` | `Focus` / `Tự focus` | `MainWindow.SystemFloatingControlWindow.cs` | POLICY |
+| `damconuong.shop` | `damconuong.shop` | `MainWindow.xaml` | OK |
 
 Ghi chú:
 - Bảng này chỉ trace chỗ đang lộ trên UI.

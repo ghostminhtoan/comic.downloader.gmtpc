@@ -389,6 +389,9 @@ namespace get_link_manga
                 case "vihentai":
                     url = "https://vi-hentai.pro/";
                     break;
+                case "damconuong":
+                    url = "https://damconuong.shop/";
+                    break;
                 case "sayhentai":
                     url = "https://sayhentai.cx/";
                     break;
