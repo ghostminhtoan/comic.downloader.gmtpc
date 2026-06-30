@@ -690,6 +690,7 @@ namespace get_link_manga
         private async Task<bool> DownloadDamconuongChapterAsync(GalleryItem item, string rootFolder, CancellationToken token, GalleryItem queueItem = null, bool isParentQueue = false)
         {
             string chapterUrl = NormalizeDamconuongUrl(item.Link);
+            string chapterSlug = GetDamconuongChapterSlugFromLink(chapterUrl);
             string html = await FetchStringAsync(chapterUrl, token);
             if (IsDamconuongLoginRequiredHtml(html))
             {
@@ -722,7 +723,6 @@ namespace get_link_manga
 
             if (string.IsNullOrWhiteSpace(chapterTitle))
             {
-                string chapterSlug = GetDamconuongChapterSlugFromLink(chapterUrl);
                 chapterTitle = NormalizeChapterLabel("Chapter " + chapterSlug.Replace("-", "."));
             }
             else
@@ -863,7 +863,13 @@ namespace get_link_manga
 
                 WriteTempProgressLog(tempFolder, item, "Done", imageUrls.Count, imageUrls.Count, $"{imageUrls.Count}/{imageUrls.Count} pages", "Download completed");
                 MoveTempFolderToTarget(tempFolder, finalTargetFolder, "damconuong");
-                return ValidateDownloadedFiles(finalTargetFolder, imageUrls.Count, queueItem ?? item, chapterTitle, chapterUrl: chapterUrl);
+                bool chapterValid = ValidateDownloadedFiles(finalTargetFolder, imageUrls.Count, queueItem ?? item, chapterTitle, chapterUrl: chapterUrl);
+                if (chapterValid && queueItem != null && !string.IsNullOrWhiteSpace(chapterSlug))
+                {
+                    ClearResolvedErrors(queueItem, chapterSlug);
+                }
+
+                return chapterValid;
             }
             finally
             {
