@@ -447,7 +447,7 @@ namespace get_link_manga
 
                     string ext = Path.GetExtension(imageUrl.Split('?')[0]);
                     if (string.IsNullOrEmpty(ext)) ext = ".jpg";
-                    string fileName = $"{err.PageNumber:D3}{ext}";
+                    string fileName = BuildOrderedImageFilename(err.PageNumber, imageUrl, ext, err.PageName);
                     string finalFilePath = Path.Combine(targetFolder, fileName);
 
                     await DownloadUrlToFileWithRefererAsync(

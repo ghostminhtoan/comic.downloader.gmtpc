@@ -2348,7 +2348,9 @@ namespace get_link_manga
                             }
                             token.ThrowIfCancellationRequested();
 
-                            string fileName = isFastPath ? $"{pageNum:D3}.{ext}" : $"{pageNum:D3}.jpg";
+                            string fileName = isFastPath
+                                ? BuildOrderedImageFilename(pageNum, $"{prefix}{pageNum}.{ext}", "." + ext, $"page-{pageNum}")
+                                : BuildOrderedImageFilename(pageNum, null, ".jpg", $"page-{pageNum}");
                             string localFilePath = Path.Combine(tempFolder, fileName);
                             string finalFilePath = Path.Combine(targetFolder, fileName);
                             string downloadedPath = localFilePath;
@@ -2561,7 +2563,7 @@ throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang �
                             }
                             token.ThrowIfCancellationRequested();
 
-                            string fileName = $"{pageNum:D3}.jpg";
+                            string fileName = BuildOrderedImageFilename(pageNum, null, ".jpg", $"page-{pageNum}");
                             string localFilePath = Path.Combine(tempFolder, fileName);
                             string finalFilePath = Path.Combine(targetFolder, fileName);
                             string downloadedPath = localFilePath;
@@ -2607,7 +2609,7 @@ throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang �
 
                             try
                             {
-                                downloadedPath = await DownloadNhentaiRedirectPageAsync(normalizedBookUrl, pageNum, localFilePath, token);
+                                downloadedPath = await DownloadNhentaiRedirectPageAsync(normalizedBookUrl, pageNum, tempFolder, token);
                             }
                             catch (Exception pageEx)
                             {
@@ -2704,7 +2706,7 @@ throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang �
             return 0;
         }
 
-        private async Task<string> DownloadNhentaiRedirectPageAsync(string bookUrl, int pageNum, string targetPath, CancellationToken token)
+        private async Task<string> DownloadNhentaiRedirectPageAsync(string bookUrl, int pageNum, string targetFolder, CancellationToken token)
         {
             while (_isDownloadPaused)
             {
@@ -2721,13 +2723,7 @@ throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang �
                 throw new Exception($"Không trích xuất được ảnh thật từ reader page. Reader: {pageUrl}");
             }
 
-            string actualExt = Path.GetExtension(new Uri(imageUrl).AbsolutePath);
-            if (string.IsNullOrWhiteSpace(actualExt))
-            {
-                actualExt = ".jpg";
-            }
-
-            string finalPath = Path.ChangeExtension(targetPath, actualExt.TrimStart('.'));
+            string finalPath = Path.Combine(targetFolder, BuildOrderedImageFilename(pageNum, imageUrl));
             await DownloadUrlToFileWithRefererAsync(imageUrl, pageUrl, finalPath, token);
             Log($"[nhentai.xxx] Trang {pageNum} -> {imageUrl}");
             return finalPath;
@@ -3759,73 +3755,87 @@ throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang �
             throw new Exception($"Không thể tải ảnh sau {maxAttempts} lần thử: {url}");
         }
 
+        private static string SanitizeImageBaseName(string value, string fallback = "page")
+        {
+            string name = (value ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = fallback;
+            }
+
+            var invalidChars = Path.GetInvalidFileNameChars();
+            var builder = new StringBuilder(name.Length);
+            foreach (char ch in name)
+            {
+                builder.Append(invalidChars.Contains(ch) ? '-' : ch);
+            }
+
+            name = builder.ToString().Trim(' ', '.');
+            while (name.Contains("--"))
+            {
+                name = name.Replace("--", "-");
+            }
+
+            return string.IsNullOrWhiteSpace(name) ? fallback : name;
+        }
+
+        private static string GetImageBaseNameFromUrl(string url, string fallback = "page")
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return fallback;
+            }
+
+            try
+            {
+                string path = url;
+                if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+                {
+                    path = uri.AbsolutePath;
+                }
+                else
+                {
+                    int queryIndex = url.IndexOf('?');
+                    if (queryIndex >= 0)
+                    {
+                        path = url.Substring(0, queryIndex);
+                    }
+                }
+
+                return SanitizeImageBaseName(Path.GetFileNameWithoutExtension(path), fallback);
+            }
+            catch
+            {
+                return fallback;
+            }
+        }
+
+        private static string BuildOrderedImageFilename(int pageNumber, string imageUrl, string fallbackExtension = ".jpg", string fallbackBaseName = null)
+        {
+            int safePageNumber = Math.Max(1, pageNumber);
+            string baseName = GetImageBaseNameFromUrl(imageUrl, fallbackBaseName ?? $"page-{safePageNumber}");
+            string extension = GetSafeImageExtensionFromUrl(imageUrl);
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                extension = string.IsNullOrWhiteSpace(fallbackExtension) ? ".jpg" : fallbackExtension;
+            }
+
+            if (!extension.StartsWith(".", StringComparison.Ordinal))
+            {
+                extension = "." + extension;
+            }
+
+            return $"{safePageNumber:D4}-{baseName}{extension}";
+        }
+
         public static List<string> DetermineImageFilenames(IList<string> imageUrls)
         {
             var filenames = new List<string>();
             if (imageUrls == null || imageUrls.Count == 0) return filenames;
 
-            var origNames = new List<string>();
-            var extensions = new List<string>();
-            foreach (var url in imageUrls)
-            {
-                string cleanUrl = url.Split('?')[0];
-                string nameWithoutExt = Path.GetFileNameWithoutExtension(cleanUrl);
-                string ext = Path.GetExtension(cleanUrl);
-                if (string.IsNullOrEmpty(ext)) ext = ".jpg";
-                origNames.Add(nameWithoutExt);
-                extensions.Add(ext);
-            }
-
-            bool useOriginal = true;
-            var nums = new List<long>();
-            foreach (var name in origNames)
-            {
-                if (long.TryParse(name, out long val))
-                {
-                    nums.Add(val);
-                }
-                else
-                {
-                    useOriginal = false;
-                    break;
-                }
-            }
-
-            if (useOriginal && nums.Count > 1)
-            {
-                for (int i = 1; i < nums.Count; i++)
-                {
-                    if (nums[i] <= nums[i - 1])
-                    {
-                        useOriginal = false;
-                        break;
-                    }
-                }
-
-                if (useOriginal)
-                {
-                    long range = nums[nums.Count - 1] - nums[0];
-                    if (range >= nums.Count * 2)
-                    {
-                        useOriginal = false;
-                    }
-                }
-            }
-            else if (nums.Count <= 1)
-            {
-                useOriginal = true;
-            }
-
             for (int i = 0; i < imageUrls.Count; i++)
             {
-                if (useOriginal)
-                {
-                    filenames.Add(origNames[i] + extensions[i]);
-                }
-                else
-                {
-                    filenames.Add($"page-{(i + 1):D3}{extensions[i]}");
-                }
+                filenames.Add(BuildOrderedImageFilename(i + 1, imageUrls[i]));
             }
 
             return filenames;
@@ -4476,19 +4486,40 @@ throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang �
                                 }
                                 token.ThrowIfCancellationRequested();
 
-                                string localFileWithoutExt = Path.Combine(tempFolder, $"{pageNum:D3}");
-                                string finalFileWithoutExt = Path.Combine(targetFolder, $"{pageNum:D3}");
+                                string localFileWithoutExt = Path.Combine(tempFolder, $"{pageNum:D4}-");
+                                string finalFileWithoutExt = Path.Combine(targetFolder, $"{pageNum:D4}-");
                                 string downloadedPath = localFileWithoutExt;
                                 var pageWatch = Stopwatch.StartNew();
 
                                 bool exists = false;
                                 string[] extensions = new string[] { ".jpg", ".png", ".jpeg", ".webp" };
-                                foreach (var ext in extensions)
+                                string[] searchPatterns = new[]
                                 {
-                                    if ((File.Exists(localFileWithoutExt + ext) && new FileInfo(localFileWithoutExt + ext).Length > 1024) ||
-                                        (File.Exists(finalFileWithoutExt + ext) && new FileInfo(finalFileWithoutExt + ext).Length > 1024))
+                                    $"{pageNum:D4}-*"
+                                };
+                                foreach (string pattern in searchPatterns)
+                                {
+                                    foreach (string folder in new[] { tempFolder, targetFolder })
                                     {
-                                        exists = true;
+                                        foreach (string existingPath in Directory.GetFiles(folder, pattern))
+                                        {
+                                            if (extensions.Contains(Path.GetExtension(existingPath), StringComparer.OrdinalIgnoreCase) &&
+                                                new FileInfo(existingPath).Length > 1024)
+                                            {
+                                                exists = true;
+                                                downloadedPath = existingPath;
+                                                break;
+                                            }
+                                        }
+
+                                        if (exists)
+                                        {
+                                            break;
+                                        }
+                                    }
+
+                                    if (exists)
+                                    {
                                         break;
                                     }
                                 }
@@ -4505,11 +4536,11 @@ throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang �
                                     return;
                                 }
 
-                                string localFilePath = Path.Combine(tempFolder, $"{pageNum:D3}.jpg");
+                                string localFilePath = Path.Combine(tempFolder, BuildOrderedImageFilename(pageNum, null, ".jpg", $"page-{pageNum}"));
 
                                 // Fetch hentaiera viewer page to extract image source
                                 // e.g. https://hentaiera.com/view/315003/1
-                                downloadedPath = await DownloadHentaieraPageAsync(item, galleryId, pageNum, localFilePath, token);
+                                downloadedPath = await DownloadHentaieraPageAsync(item, galleryId, pageNum, tempFolder, token);
 
                                 lock (lockObj)
                                 {
@@ -4555,7 +4586,7 @@ throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang �
             }
         }
 
-        private async Task<string> DownloadHentaieraPageAsync(GalleryItem item, string galleryId, int pageNum, string targetPath, CancellationToken token)
+        private async Task<string> DownloadHentaieraPageAsync(GalleryItem item, string galleryId, int pageNum, string targetFolder, CancellationToken token)
         {
             while (_isDownloadPaused || item.IsPaused)
             {
@@ -4662,11 +4693,7 @@ throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang �
                     actualExt = ".jpg";
                 }
 
-                string finalPath = targetPath;
-                if (!string.IsNullOrEmpty(actualExt) && !targetPath.EndsWith(actualExt, StringComparison.OrdinalIgnoreCase))
-                {
-                    finalPath = Path.ChangeExtension(targetPath, actualExt);
-                }
+                string finalPath = Path.Combine(targetFolder, BuildOrderedImageFilename(pageNum, imgUrl, actualExt, $"page-{pageNum}"));
 
                 while (_isDownloadPaused || item.IsPaused)
                 {
