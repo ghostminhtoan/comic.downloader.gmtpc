@@ -1105,7 +1105,7 @@ namespace get_link_manga
         private async Task DownloadHentai2readDirectImageAsync(GalleryItem item, string rootFolder, CancellationToken token, GalleryItem queueItem, string refererUrl = null)
         {
             string imageUrl = item.Link;
-            string fileName = Path.GetFileName(new Uri(imageUrl).AbsolutePath);
+            string fileName = BuildOrderedImageFilename(1, imageUrl);
             string title = !string.IsNullOrWhiteSpace(item.Name) ? item.Name : Path.GetFileNameWithoutExtension(fileName);
             string safeTitle = GetSafePathName(title);
             string resolvedRoot = GetConfiguredDownloadRoot(rootFolder, item);
