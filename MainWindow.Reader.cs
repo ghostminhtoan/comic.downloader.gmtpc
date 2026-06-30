@@ -2383,7 +2383,13 @@ namespace get_link_manga
                 }
             }
 
-            System.Threading.Tasks.Parallel.ForEach(itemsToScan, pair =>
+            System.Threading.ThreadPool.SetMinThreads(128, 128);
+            var parallelOptions = new System.Threading.Tasks.ParallelOptions
+            {
+                MaxDegreeOfParallelism = 128
+            };
+
+            System.Threading.Tasks.Parallel.ForEach(itemsToScan, parallelOptions, pair =>
             {
                 ReaderMangaItem book = BuildReaderMangaItem(pair.bookFolder, pair.domainName, 1, completionState, downloadState);
                 if (book != null)
