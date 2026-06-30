@@ -1649,7 +1649,7 @@ namespace get_link_manga
 
         private bool IsReaderRefreshBlockedByActiveDownload()
         {
-            return _downloadCts != null;
+            return false;
         }
 
         private void StartReaderAutoRefresh()
@@ -4100,12 +4100,24 @@ namespace get_link_manga
                 return;
             }
 
+            EnsureChapterPagesLoaded(chapter);
+
             _currentReaderChapter = chapter;
             _readerSelectionGuard = true;
             _readerChapterList.SelectedItem = chapter;
             UpdateReaderFileListItems(chapter.Pages);
             _readerSelectionGuard = false;
             ScrollReaderChapterIntoView(chapter);
+
+            if (chapter.Pages == null || chapter.Pages.Count == 0)
+            {
+                _currentReaderPage = null;
+                SetReaderCurrentTitle();
+                RenderReaderPlaceholder();
+                UpdateReaderStatus(_isVietnameseUi ? "Chapter này chưa có ảnh." : "This chapter has no images.");
+                UpdateReaderNavigationState();
+                return;
+            }
 
             int safePageIndex = Math.Max(0, Math.Min(chapter.Pages.Count - 1, pageIndex));
             _forceReaderRenderOnNextPageOpen = true;
@@ -4118,6 +4130,8 @@ namespace get_link_manga
             {
                 return;
             }
+
+            EnsureChapterPagesLoaded(chapter);
 
             _currentReaderChapter = chapter;
             _currentReaderPage = null;
@@ -4139,6 +4153,15 @@ namespace get_link_manga
         {
             if (page == null)
             {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(page.FilePath) || !File.Exists(page.FilePath))
+            {
+                _currentReaderPage = null;
+                RenderReaderPlaceholder();
+                UpdateReaderStatus(_isVietnameseUi ? "Ảnh không còn tồn tại." : "Image file no longer exists.");
+                UpdateReaderNavigationState();
                 return;
             }
 
