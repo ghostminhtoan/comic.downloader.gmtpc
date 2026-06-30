@@ -645,7 +645,23 @@ namespace get_link_manga
                     SourceDomain = DamconuongSiteFolder
                 };
 
-                bool chapterCompleted = await DownloadDamconuongChapterAsync(chapterItem, rootFolder, token, queueItem, isParentQueue: true);
+                bool chapterCompleted = false;
+                try
+                {
+                    chapterCompleted = await DownloadDamconuongChapterAsync(chapterItem, rootFolder, token, queueItem, isParentQueue: true);
+                }
+                catch (Exception ex)
+                {
+                    DamconuongLog($"Lỗi chapter '{chapterLink}': {ex.Message}");
+                    if (queueItem != null)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            queueItem.AddError(GetDamconuongChapterSlugFromLink(chapterLink), 0, ex.Message, chapterLink, chapterLink);
+                        });
+                    }
+                }
+
                 if (chapterCompleted)
                 {
                     MarkChapterProcessDone(rootFolder, DamconuongSiteFolder, item, chapterLink);
