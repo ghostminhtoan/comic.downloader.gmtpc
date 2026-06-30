@@ -1744,6 +1744,11 @@ namespace get_link_manga
                 _downloadCts = null;
                 _isDownloadPaused = false;
 
+                if (_currentSection == AppSection.Watch)
+                {
+                    _ = RefreshReaderLibraryWhenIdleAsync(forceRefresh: true);
+                }
+
                 SetDownloadToggleState(false);
 
                 btnBrowseFolder.IsEnabled = true;

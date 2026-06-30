@@ -715,6 +715,7 @@ namespace get_link_manga
             }
 
             item.Name = bookTitle;
+            string processChapterLabel = CompactSingleLine(chapterTitle);
 
             string safeBook = GetCanonicalBookFolderName(item, bookTitle, "Unknown Book");
             string aliasSafeBook = GetSafePathName(bookTitle);
@@ -743,6 +744,18 @@ namespace get_link_manga
                     {
                         queueItem.TotalChapters = imageUrls.Count;
                         queueItem.CompletedChapters = 0;
+                    });
+                }
+
+                if (queueItem != null)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        queueItem.DownloadingChapter = processChapterLabel;
+                        queueItem.DownloadingPageProgress = $"1/{imageUrls.Count}";
+                        queueItem.CurrentProcess = isParentQueue
+                            ? $"{processChapterLabel} (trang 1/{imageUrls.Count})"
+                            : $"1/{imageUrls.Count} pages";
                     });
                 }
 
@@ -786,7 +799,18 @@ namespace get_link_manga
                                     lock (lockObj)
                                     {
                                         completedPages++;
-                                        UpdateDownloadRowMetrics(queueItem, completedPages, imageUrls.Count, $"{completedPages}/{imageUrls.Count} pages", 0, 0, isParentQueue);
+                                        string processText = isParentQueue
+                                            ? $"{processChapterLabel} (trang {completedPages}/{imageUrls.Count})"
+                                            : $"{completedPages}/{imageUrls.Count} pages";
+                                        UpdateDownloadRowMetrics(queueItem, completedPages, imageUrls.Count, processText, 0, 0, isParentQueue);
+                                        if (queueItem != null)
+                                        {
+                                            int pageNumber = completedPages;
+                                            Dispatcher.BeginInvoke((Action)(() =>
+                                            {
+                                                queueItem.DownloadingPageProgress = $"{pageNumber}/{imageUrls.Count}";
+                                            }));
+                                        }
                                     }
                                     return;
                                 }
@@ -797,7 +821,18 @@ namespace get_link_manga
                                 {
                                     completedPages++;
                                     long downloadedBytes = File.Exists(localFilePath) ? new FileInfo(localFilePath).Length : 0;
-                                    UpdateDownloadRowMetrics(queueItem, completedPages, imageUrls.Count, $"{completedPages}/{imageUrls.Count} pages", downloadedBytes, pageWatch.ElapsedMilliseconds, isParentQueue);
+                                    string processText = isParentQueue
+                                        ? $"{processChapterLabel} (trang {completedPages}/{imageUrls.Count})"
+                                        : $"{completedPages}/{imageUrls.Count} pages";
+                                    UpdateDownloadRowMetrics(queueItem, completedPages, imageUrls.Count, processText, downloadedBytes, pageWatch.ElapsedMilliseconds, isParentQueue);
+                                    if (queueItem != null)
+                                    {
+                                        int pageNumber = completedPages;
+                                        Dispatcher.BeginInvoke((Action)(() =>
+                                        {
+                                            queueItem.DownloadingPageProgress = $"{pageNumber}/{imageUrls.Count}";
+                                        }));
+                                    }
                                 }
                             }
                             finally

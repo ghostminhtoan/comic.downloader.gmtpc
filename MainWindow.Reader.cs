@@ -1620,6 +1620,7 @@ namespace get_link_manga
                     _readerAutoRefreshInProgress ||
                     _readerLibraryRefreshInProgress ||
                     _readerNovelLibraryRefreshInProgress ||
+                    IsReaderRefreshBlockedByActiveDownload() ||
                     _isReaderFullscreen)
                 {
                     return;
@@ -1644,6 +1645,11 @@ namespace get_link_manga
                     _readerAutoRefreshInProgress = false;
                 }
             };
+        }
+
+        private bool IsReaderRefreshBlockedByActiveDownload()
+        {
+            return _downloadCts != null;
         }
 
         private void StartReaderAutoRefresh()
@@ -1672,7 +1678,10 @@ namespace get_link_manga
                 _readerLibraryWatcherDebounceTimer.Tick += async (sender, args) =>
                 {
                     _readerLibraryWatcherDebounceTimer.Stop();
-                    if (_currentSection == AppSection.Watch && !_isReaderFullscreen && !_readerLibraryRefreshInProgress)
+                    if (_currentSection == AppSection.Watch &&
+                        !_isReaderFullscreen &&
+                        !_readerLibraryRefreshInProgress &&
+                        !IsReaderRefreshBlockedByActiveDownload())
                     {
                         await RefreshReaderLibraryAsync(forceRefresh: true);
                     }
@@ -1688,7 +1697,10 @@ namespace get_link_manga
                 _readerNovelLibraryWatcherDebounceTimer.Tick += async (sender, args) =>
                 {
                     _readerNovelLibraryWatcherDebounceTimer.Stop();
-                    if (_currentSection == AppSection.Watch && !_isReaderFullscreen && !_readerNovelLibraryRefreshInProgress)
+                    if (_currentSection == AppSection.Watch &&
+                        !_isReaderFullscreen &&
+                        !_readerNovelLibraryRefreshInProgress &&
+                        !IsReaderRefreshBlockedByActiveDownload())
                     {
                         await RefreshReaderNovelLibraryAsync(forceRefresh: true);
                     }
@@ -1759,6 +1771,11 @@ namespace get_link_manga
                     return;
                 }
 
+                if (IsReaderRefreshBlockedByActiveDownload())
+                {
+                    return;
+                }
+
                 if (args.Name != null)
                 {
                     string ext = Path.GetExtension(args.Name).ToLowerInvariant();
@@ -1767,6 +1784,7 @@ namespace get_link_manga
                         return;
                     }
                 }
+
                 Dispatcher.BeginInvoke(onChanged);
             };
 
