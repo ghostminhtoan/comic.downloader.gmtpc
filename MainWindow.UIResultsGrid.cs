@@ -297,12 +297,24 @@ namespace get_link_manga
             if (row.ContextMenu == null)
             {
                 row.ContextMenu = new ContextMenu();
-                var moveTopItem = new MenuItem { Header = "Move to top", Tag = "top" };
-                var moveBottomItem = new MenuItem { Header = "Move to bottom", Tag = "bottom" };
+                var moveTopItem = new MenuItem { Header = _isVietnameseUi ? "Đưa lên đầu" : "Move to top", Tag = "top" };
+                var moveBottomItem = new MenuItem { Header = _isVietnameseUi ? "Đưa xuống cuối" : "Move to bottom", Tag = "bottom" };
                 moveTopItem.Click += RowContextMenuItem_Click;
                 moveBottomItem.Click += RowContextMenuItem_Click;
                 row.ContextMenu.Items.Add(moveTopItem);
                 row.ContextMenu.Items.Add(moveBottomItem);
+            }
+            else if (row.ContextMenu.Items.Count >= 2)
+            {
+                if (row.ContextMenu.Items[0] is MenuItem moveTopItem)
+                {
+                    moveTopItem.Header = _isVietnameseUi ? "Đưa lên đầu" : "Move to top";
+                }
+
+                if (row.ContextMenu.Items[1] is MenuItem moveBottomItem)
+                {
+                    moveBottomItem.Header = _isVietnameseUi ? "Đưa xuống cuối" : "Move to bottom";
+                }
             }
         }
 

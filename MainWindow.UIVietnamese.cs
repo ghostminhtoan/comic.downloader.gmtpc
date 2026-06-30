@@ -11,7 +11,7 @@ namespace get_link_manga
             if (txtHeaderTitle != null) txtHeaderTitle.Text = string.Empty;
             if (txtHeaderSubtitle != null) txtHeaderSubtitle.Text = string.Empty;
             if (txtHeaderStepPrimary != null) txtHeaderStepPrimary.Text = "BƯỚC 1";
-            if (txtHeaderStepPrimaryTitle != null) txtHeaderStepPrimaryTitle.Text = "Source";
+            if (txtHeaderStepPrimaryTitle != null) txtHeaderStepPrimaryTitle.Text = "Nguồn";
             if (txtHeaderStepSecondary != null) txtHeaderStepSecondary.Text = "BƯỚC 2";
             if (txtHeaderStepSecondaryTitle != null) txtHeaderStepSecondaryTitle.Text = "TẢI VỀ";
             if (txtLanguageLabel != null) txtLanguageLabel.Text = "ENG";

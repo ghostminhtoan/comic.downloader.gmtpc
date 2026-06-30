@@ -43,6 +43,7 @@ namespace get_link_manga
         private AppSection _currentSection = AppSection.ChooseSource;
         private bool _workspaceShellInitialized;
         private Button _showFloatRailButton;
+        private TextBlock _brandTitleText;
         private bool _createSubfolderUiReady;
         private bool _suppressCreateSubfolderEvents;
         private string _createSubfolderSelectedDomainKey;
@@ -193,9 +194,10 @@ namespace get_link_manga
 
             if (_toolbarClearTempButton == null)
             {
-                _toolbarClearTempButton = CreateCompactToolbarToggleButton("CLEAR TEMP", BtnClearTempFloating_Click);
-                _toolbarClearTempButton.Content = "CLEAR TEMP";
-                _toolbarClearTempButton.ToolTip = "CLEAR TEMP";
+                string clearTempText = _isVietnameseUi ? "XÓA TẠM" : "CLEAR TEMP";
+                _toolbarClearTempButton = CreateCompactToolbarToggleButton(clearTempText, BtnClearTempFloating_Click);
+                _toolbarClearTempButton.Content = clearTempText;
+                _toolbarClearTempButton.ToolTip = clearTempText;
             }
             if (_toolbarClearTempButton != null)
             {
@@ -459,9 +461,9 @@ namespace get_link_manga
                 Content = navStack
             };
 
-            var brandTitle = new TextBlock
+            _brandTitleText = new TextBlock
             {
-                Text = "MANGA DESK",
+                Text = _isVietnameseUi ? "BÀN TRUYỆN" : "MANGA DESK",
                 Foreground = (Brush)TryFindResource("CyberpunkTextBrush"),
                 FontSize = 15,
                 FontWeight = FontWeights.Bold
@@ -479,12 +481,12 @@ namespace get_link_manga
             _navigationButtonHost = new StackPanel { HorizontalAlignment = HorizontalAlignment.Stretch };
             _sidebarToolsHost = new StackPanel { Margin = new Thickness(0, 8, 0, 0), HorizontalAlignment = HorizontalAlignment.Stretch };
 
-            navStack.Children.Add(brandTitle);
+            navStack.Children.Add(_brandTitleText);
             navStack.Children.Add(_showFloatRailButton);
             navStack.Children.Add(_navigationButtonHost);
             navStack.Children.Add(_sidebarToolsHost);
 
-            AddNavigationButton(AppSection.ChooseSource, "Source", "Ctrl+Shift+S");
+            AddNavigationButton(AppSection.ChooseSource, _isVietnameseUi ? "Nguồn" : "Source", "Ctrl+Shift+S");
             AddNavigationButton(AppSection.Download, "Download", "Ctrl+Shift+D");
             AddNavigationButton(AppSection.Watch, "Watch", "Ctrl+Shift+W");
             AddNavigationButton(AppSection.About, "About", "Ctrl+Shift+A");
@@ -1099,7 +1101,7 @@ namespace get_link_manga
             switch (_currentSection)
             {
                 case AppSection.ChooseSource:
-                    _sectionTitleText.Text = "Source";
+                    _sectionTitleText.Text = _isVietnameseUi ? "Nguồn" : "Source";
                     _sectionHintText.Text = isVietnamese
                         ? "Chọn web nguồn bằng thẻ nhanh hoặc dùng form site cũ bên dưới. Toàn bộ parser và paste flow hiện tại được giữ nguyên."
                         : "Pick a source with quick cards or keep using the proven site forms below. Existing parsers and direct-paste flows stay intact.";
@@ -1211,7 +1213,7 @@ namespace get_link_manga
 
             if (_navigationButtons.Count > 0)
             {
-                _navigationButtons[AppSection.ChooseSource].Content = CreateNavigationButtonContent("Source", "Ctrl+Shift+S");
+                _navigationButtons[AppSection.ChooseSource].Content = CreateNavigationButtonContent(_isVietnameseUi ? "Nguồn" : "Source", "Ctrl+Shift+S");
                 _navigationButtons[AppSection.Download].Content = CreateNavigationButtonContent(_isVietnameseUi ? "Tải về" : "Download", "Ctrl+Shift+D");
                 _navigationButtons[AppSection.Watch].Content = CreateNavigationButtonContent(_isVietnameseUi ? "Xem truyện" : "Watch", "Ctrl+Shift+W");
                 _navigationButtons[AppSection.About].Content = CreateNavigationButtonContent(_isVietnameseUi ? "Giới thiệu" : "About", "Ctrl+Shift+A");
@@ -1223,10 +1225,20 @@ namespace get_link_manga
                 _showFloatRailButton.Background = new SolidColorBrush(Color.FromRgb(0x3A, 0x1A, 0x00));
                 _showFloatRailButton.BorderBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0xA6, 0x00));
                 _showFloatRailButton.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0xD4, 0x6A));
-                _showFloatRailButton.Content = CreateNavigationButtonContent("Float button", "Ctrl+Shift+F");
+                _showFloatRailButton.Content = CreateNavigationButtonContent(_isVietnameseUi ? "Nút nổi" : "Float button", "Ctrl+Shift+F");
             }
 
+            if (_brandTitleText != null)
+            {
+                _brandTitleText.Text = _isVietnameseUi ? "BÀN TRUYỆN" : "MANGA DESK";
+            }
 
+            if (_toolbarClearTempButton != null)
+            {
+                string clearTempText = _isVietnameseUi ? "XÓA TẠM" : "CLEAR TEMP";
+                _toolbarClearTempButton.Content = clearTempText;
+                _toolbarClearTempButton.ToolTip = clearTempText;
+            }
 
             if (txtHeaderTitle != null)
             {
