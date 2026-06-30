@@ -182,6 +182,7 @@ namespace get_link_manga
         private bool _readerHasUserClickedInWatch;
         private bool _readerAutoRefreshInProgress;
         private bool _readerSuppressAutoLaunch;
+        private readonly System.Threading.SemaphoreSlim _readerWatchAppInstallLock = new System.Threading.SemaphoreSlim(1, 1);
         private DateTime _lastReaderAutoRefreshUtc = DateTime.MinValue;
         private DispatcherTimer _readerAutoRefreshTimer;
         private FileSystemWatcher _readerLibraryWatcher;
@@ -1875,36 +1876,64 @@ namespace get_link_manga
                 return;
             }
 
-            string appName = GetReaderWatchAppDisplayName(app);
-            string appRoot = GetReaderWatchAppRootPath(app);
-            string zipFileName = app == ReaderWatchExternalApp.Bandiview ? "Bandiview.zip" : "FastStone.Image.Viewer.zip";
-            string zipPath = Path.Combine(PortablePaths.PortableDataRoot, zipFileName);
-
-            Directory.CreateDirectory(PortablePaths.PortableDataRoot);
-            UpdateReaderStatus((_isVietnameseUi ? "Đang tải " : "Downloading ") + appName + "...");
-
-            using (var response = await _httpClient.GetAsync(GetReaderWatchAppDownloadUrl(app), HttpCompletionOption.ResponseHeadersRead))
+            await _readerWatchAppInstallLock.WaitAsync();
+            try
             {
-                response.EnsureSuccessStatusCode();
-                using (var input = await response.Content.ReadAsStreamAsync())
-                using (var output = File.Open(zipPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                if (File.Exists(exePath))
                 {
-                    await input.CopyToAsync(output);
+                    return;
+                }
+
+                string appName = GetReaderWatchAppDisplayName(app);
+                string appRoot = GetReaderWatchAppRootPath(app);
+                string zipFileName = app == ReaderWatchExternalApp.Bandiview ? "Bandiview.zip" : "FastStone.Image.Viewer.zip";
+                string tempZipPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}-{zipFileName}");
+
+                Directory.CreateDirectory(PortablePaths.PortableDataRoot);
+                UpdateReaderStatus((_isVietnameseUi ? "Đang tải " : "Downloading ") + appName + "...");
+
+                try
+                {
+                    using (var response = await _httpClient.GetAsync(GetReaderWatchAppDownloadUrl(app), HttpCompletionOption.ResponseHeadersRead))
+                    {
+                        response.EnsureSuccessStatusCode();
+                        using (var input = await response.Content.ReadAsStreamAsync())
+                        using (var output = File.Open(tempZipPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                        {
+                            await input.CopyToAsync(output);
+                        }
+                    }
+
+                    if (Directory.Exists(appRoot))
+                    {
+                        Directory.Delete(appRoot, true);
+                    }
+
+                    // ponytail: zip already contains app folder; extract to .portable, not nested folder again.
+                    ZipFile.ExtractToDirectory(tempZipPath, PortablePaths.PortableDataRoot);
+                }
+                finally
+                {
+                    if (File.Exists(tempZipPath))
+                    {
+                        try
+                        {
+                            File.Delete(tempZipPath);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
+
+                if (!File.Exists(exePath))
+                {
+                    throw new FileNotFoundException("Viewer executable was not found after extraction.", exePath);
                 }
             }
-
-            if (Directory.Exists(appRoot))
+            finally
             {
-                Directory.Delete(appRoot, true);
-            }
-
-            // ponytail: zip already contains app folder; extract to .portable, not nested folder again.
-            ZipFile.ExtractToDirectory(zipPath, PortablePaths.PortableDataRoot);
-            File.Delete(zipPath);
-
-            if (!File.Exists(exePath))
-            {
-                throw new FileNotFoundException("Viewer executable was not found after extraction.", exePath);
+                _readerWatchAppInstallLock.Release();
             }
         }
 
@@ -7355,4 +7384,3 @@ private bool HandleReaderHotkeys(KeyEventArgs e)
         }
     }
 }
-
