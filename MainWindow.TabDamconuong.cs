@@ -857,6 +857,7 @@ namespace get_link_manga
                 links.Add(absolute);
             }
 
+            links.Reverse();
             return links;
         }
 
