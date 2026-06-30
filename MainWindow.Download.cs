@@ -136,6 +136,16 @@ namespace get_link_manga
                     return "truyenqq";
                 }
 
+                if (host.Contains("nettruyen.tech"))
+                {
+                    return "nettruyen.tech";
+                }
+
+                if (host.Contains("nettruyenviet10.com"))
+                {
+                    return "nettruyenviet10.com";
+                }
+
                 if (host.Contains("nettruyen"))
                 {
                     return "nettruyen";
@@ -291,7 +301,15 @@ namespace get_link_manga
             }
 
             string lowerKey = siteKey.ToLowerInvariant();
-            if (lowerKey.Contains("nettruyen"))
+            if (lowerKey.Contains("nettruyen.tech"))
+            {
+                siteKey = "nettruyen.tech";
+            }
+            else if (lowerKey.Contains("nettruyenviet10.com"))
+            {
+                siteKey = "nettruyenviet10.com";
+            }
+            else if (lowerKey.Contains("nettruyen"))
             {
                 siteKey = "nettruyen";
             }
@@ -771,6 +789,16 @@ namespace get_link_manga
                 if (host.Contains("truyenqq"))
                 {
                     return "truyenqq";
+                }
+
+                if (host.Contains("nettruyen.tech"))
+                {
+                    return "nettruyen.tech";
+                }
+
+                if (host.Contains("nettruyenviet10.com"))
+                {
+                    return "nettruyenviet10.com";
                 }
 
                 if (host.Contains("nettruyen"))
@@ -4024,6 +4052,8 @@ throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang �
                 string host = (uri.Host ?? string.Empty).ToLowerInvariant();
 
                 if (host.Contains("truyenqq")) return "truyenqq";
+                if (host.Contains("nettruyen.tech")) return "nettruyen.tech";
+                if (host.Contains("nettruyenviet10.com")) return "nettruyenviet10.com";
                 if (host.Contains("nettruyen")) return "nettruyen";
                 if (host.Contains("vi-hentai") || host.Contains("hentaivn")) return "hentaivn";
                 if (host.Contains("hentai2read")) return "hentai2read";

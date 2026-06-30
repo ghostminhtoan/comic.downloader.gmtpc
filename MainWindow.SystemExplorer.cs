@@ -257,6 +257,10 @@ namespace get_link_manga
             string lower = (header ?? string.Empty).ToLowerInvariant();
             if (lower.Contains("truyenqq"))
                 return "truyenqq";
+            if (lower.Contains("nettruyen.tech"))
+                return "nettruyen.tech";
+            if (lower.Contains("nettruyenviet10.com"))
+                return "nettruyenviet10.com";
             if (lower.Contains("nettruyen"))
                 return "nettruyen";
             if (lower.Contains("dilib"))
