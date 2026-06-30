@@ -14,4 +14,8 @@ $chapter = (Invoke-WebRequest 'https://damconuong.shop/truyen/truyen-san-vo-nguo
 Assert ($chapter -match 'id="chapter-content"') 'chapter-content block not found.'
 Assert ($chapter -match 'https://dcnvn2\.mbpro\.vip/dcn/truyen-san-vo-nguoi-o-the-gioi-khac/chapter-7/3\.jpg') 'Chapter image URL not found.'
 
+$mixedBook = (Invoke-WebRequest 'https://damconuong.shop/truyen/readers-paradise').Content
+Assert ($mixedBook -match '/truyen/readers-paradise/caera-denoir-trong-anh-sang-cuoi-con-duong') 'Mixed-text chapter link not found.'
+Assert ($mixedBook -match '/truyen/readers-paradise/chapter-15-2') 'Decimal chapter link not found.'
+
 Write-Host 'damconuong smoke test ok'

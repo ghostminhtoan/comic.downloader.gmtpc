@@ -1061,7 +1061,7 @@ namespace get_link_manga
                 }
             }
 
-            return links.OrderBy(ParseChapterNumber).ToList();
+            return links;
         }
 
         private string GetChapterProcessLabel(string chapterLink)
@@ -1078,7 +1078,53 @@ namespace get_link_manga
                 }
             }
 
-            return "chap 0001";
+            string slug = GetChapterSlugFromLink(chapterLink);
+            if (!string.IsNullOrWhiteSpace(slug))
+            {
+                return CompactSingleLine(slug.Replace("-", " "));
+            }
+
+            return "chapter";
+        }
+
+        private string GetChapterSlugFromLink(string chapterLink)
+        {
+            if (string.IsNullOrWhiteSpace(chapterLink))
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                if (Uri.TryCreate(chapterLink, UriKind.Absolute, out Uri uri))
+                {
+                    string[] segments = uri.AbsolutePath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (segments.Length > 0)
+                    {
+                        return Path.GetFileNameWithoutExtension(segments[segments.Length - 1]);
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                string normalized = chapterLink.Trim().TrimEnd('/');
+                int slash = normalized.LastIndexOf('/');
+                string tail = slash >= 0 ? normalized.Substring(slash + 1) : normalized;
+                return Path.GetFileNameWithoutExtension(tail);
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        private bool HasNumericChapterIdentity(string chapterLink)
+        {
+            return ParseChapterNumber(chapterLink) > 0d;
         }
 
         private void InitializeChapterProcess(string rootFolder, string siteFolder, GalleryItem item, IList<string> chapterLinks, bool preserveExistingDone = true)
@@ -1269,13 +1315,12 @@ namespace get_link_manga
                 return false;
             }
 
-            double chapterNumber = ParseChapterNumber(chapterLink);
-            if (chapterNumber <= 0)
+            string chapterLabel = GetChapterProcessLabel(chapterLink);
+            if (string.IsNullOrWhiteSpace(chapterLabel))
             {
                 return false;
             }
 
-            string chapterLabel = "chap " + chapterNumber.ToString("0.####", CultureInfo.InvariantCulture);
             string safeChapter = GetDownloadChapterFolderName(item.Name, chapterLabel);
             string safeBook = GetSafePathName(item.Name);
 
@@ -1350,7 +1395,8 @@ namespace get_link_manga
                 .Where(link => !IsChapterFolderAlreadyDownloaded(rootFolder, siteFolder, item, link))
                 .ToList();
 
-            int highestDownloadedChapter = GetHighestDownloadedChapterNumberFromDisk(rootFolder, siteFolder, item);
+            bool allNumeric = chapterLinks != null && chapterLinks.Count > 0 && chapterLinks.All(HasNumericChapterIdentity);
+            int highestDownloadedChapter = allNumeric ? GetHighestDownloadedChapterNumberFromDisk(rootFolder, siteFolder, item) : 0;
             if (highestDownloadedChapter > 0)
             {
                 var afterHighest = pending
