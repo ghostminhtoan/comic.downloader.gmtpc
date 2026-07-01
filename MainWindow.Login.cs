@@ -43,9 +43,14 @@ namespace get_link_manga
         {
             if (_isDamconuongLoginWindowActive)
             {
-                _damconuongLoginWindow?.Activate();
-                ShowInfo("Cửa sổ login damconuong đang mở.", "Thông báo");
-                return;
+                if (_damconuongLoginWindow == null)
+                {
+                    _isDamconuongLoginWindowActive = false;
+                }
+                else
+                {
+                    _damconuongLoginWindow.Activate();
+                }
             }
 
             try
