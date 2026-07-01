@@ -791,15 +791,16 @@ namespace get_link_manga
 
             string html = null;
             List<string> firecrawlLinks = null;
+            string normalizedItemLink = NormalizeHakoUrl(item.Link);
             if (firecrawlOnly)
             {
-                FirecrawlPageSnapshot page = await TryFetchHakoPageByFirecrawlAsync(item.Link, token, preferFastChapterList: true);
+                FirecrawlPageSnapshot page = await TryFetchHakoPageByFirecrawlAsync(normalizedItemLink, token, preferFastChapterList: true);
                 html = page?.Html;
                 firecrawlLinks = page?.Links;
             }
             else
             {
-                html = await FetchHakoHtmlAsync(item.Link, token);
+                html = await FetchHakoHtmlAsync(normalizedItemLink, token);
             }
             if (string.IsNullOrWhiteSpace(html))
             {
@@ -811,10 +812,58 @@ namespace get_link_manga
                 item.Name = FormatGalleryTitle(detectedTitle);
             }
 
-            List<HakoChapterInfo> chapters = ExtractHakoChapterLinks(html, item.Link);
+            List<HakoChapterInfo> chapters = ExtractHakoChapterLinks(html, normalizedItemLink);
+            if ((chapters == null || chapters.Count == 0) && !firecrawlOnly)
+            {
+                foreach (bool headlessAutomation in new[] { true, false })
+                {
+                    try
+                    {
+                        string browserHtml = await FetchHakoHtmlViaBrowserAsync(normalizedItemLink, headlessAutomation);
+                        if (string.IsNullOrWhiteSpace(browserHtml) || IsHakoChallengeHtml(browserHtml))
+                        {
+                            continue;
+                        }
+
+                        chapters = ExtractHakoChapterLinks(browserHtml, normalizedItemLink);
+                        if (chapters != null && chapters.Count > 0)
+                        {
+                            html = browserHtml;
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
+            if ((chapters == null || chapters.Count == 0) && (firecrawlLinks == null || firecrawlLinks.Count == 0))
+            {
+                try
+                {
+                    FirecrawlPageSnapshot page = await TryFetchHakoPageByFirecrawlAsync(normalizedItemLink, token, preferFastChapterList: true);
+                    if (page != null)
+                    {
+                        firecrawlLinks = page.Links;
+                        if (!string.IsNullOrWhiteSpace(page.Html))
+                        {
+                            List<HakoChapterInfo> firecrawlHtmlChapters = ExtractHakoChapterLinks(page.Html, normalizedItemLink);
+                            if (firecrawlHtmlChapters.Count > 0)
+                            {
+                                chapters = firecrawlHtmlChapters;
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                }
+            }
+
             if ((chapters == null || chapters.Count == 0) && firecrawlLinks != null && firecrawlLinks.Count > 0)
             {
-                chapters = ExtractHakoChapterLinksFromFirecrawlLinks(firecrawlLinks, item.Link);
+                chapters = ExtractHakoChapterLinksFromFirecrawlLinks(firecrawlLinks, normalizedItemLink);
             }
 
             if (chapters == null)
