@@ -21,6 +21,8 @@ namespace get_link_manga
         private async void BtnDamconuongLogin_Click(object sender, RoutedEventArgs e)
         {
             string preferredUrl = txtDamconuongTagUrl?.Text?.Trim();
+            string loginEmail = txtDamconuongLoginEmail?.Text?.Trim() ?? string.Empty;
+            string loginPassword = txtDamconuongLoginPassword?.Password ?? string.Empty;
             try
             {
                 if (!IsDamconuongUrl(preferredUrl))
@@ -28,7 +30,7 @@ namespace get_link_manga
                     preferredUrl = DamconuongBaseUrl;
                 }
 
-                await OpenDamconuongLoginAsync(preferredUrl);
+                await OpenDamconuongLoginAsync(preferredUrl, loginEmail, loginPassword);
             }
             catch (Exception ex)
             {
@@ -37,7 +39,7 @@ namespace get_link_manga
             }
         }
 
-        private async Task OpenDamconuongLoginAsync(string targetUrl)
+        private async Task OpenDamconuongLoginAsync(string targetUrl, string loginEmail, string loginPassword)
         {
             if (_isDamconuongLoginWindowActive)
             {
@@ -52,9 +54,26 @@ namespace get_link_manga
                 _isDamconuongLoginWindowActive = true;
                 lblStatus.Text = _isVietnameseUi ? "Đang mở login damconuong.shop..." : "Opening damconuong.shop login...";
 
+                if (!string.IsNullOrWhiteSpace(loginEmail) && !string.IsNullOrWhiteSpace(loginPassword))
+                {
+                    bool applied = await loginWindow.ApplyCredentialsAsync(loginEmail, loginPassword);
+                    bool authenticated = applied && await loginWindow.WaitForAuthenticatedSessionAsync();
+                    if (authenticated)
+                    {
+                        await loginWindow.CaptureSessionAsync();
+                        SyncDamconuongLoginState(loginWindow);
+                        ClearDamconuongLoginInputs();
+                        lblStatus.Text = _isVietnameseUi ? "Đã auto login damconuong.shop." : "damconuong.shop auto login completed.";
+                        DamconuongLog("Auto login thành công. Đã xóa login email/password ở tab source.");
+                        loginWindow.Close();
+                        return;
+                    }
+                }
+
                 if (await loginWindow.ShowNonBlockingAsync())
                 {
                     SyncDamconuongLoginState(loginWindow);
+                    ClearDamconuongLoginInputs();
                     lblStatus.Text = _isVietnameseUi ? "Đã đồng bộ phiên login damconuong.shop." : "damconuong.shop login session synced.";
                     DamconuongLog("Đồng bộ cookie và user-agent từ cửa sổ login thành công.");
                 }
@@ -76,6 +95,12 @@ namespace get_link_manga
                     _damconuongLoginWindow = null;
                 }
             }
+        }
+
+        private void ClearDamconuongLoginInputs()
+        {
+            txtDamconuongLoginEmail?.Clear();
+            txtDamconuongLoginPassword?.Clear();
         }
 
         private async Task<DamconuongLoginWindow> EnsureDamconuongLoginWindowAsync(string targetUrl)
