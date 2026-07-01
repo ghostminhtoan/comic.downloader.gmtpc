@@ -80,7 +80,6 @@ namespace get_link_manga
                 if (await loginWindow.ShowNonBlockingAsync())
                 {
                     SyncDamconuongLoginState(loginWindow);
-                    ClearDamconuongLoginInputs();
                     lblStatus.Text = _isVietnameseUi ? "Đã đồng bộ phiên login damconuong.shop." : "damconuong.shop login session synced.";
                     DamconuongLog("Đồng bộ cookie và user-agent từ cửa sổ login thành công.");
                 }
@@ -401,8 +400,6 @@ document.addEventListener('click', function (event) {
         internal async Task<bool> ApplyCredentialsAsync(string email, string password)
         {
             await WaitUntilReadyAsync();
-            await NavigateToLoginFormAsync();
-
             string script =
 @"
 (async () => {
@@ -467,26 +464,31 @@ document.addEventListener('click', function (event) {
   });
 })()";
 
-            script = script
-                .Replace("__EMAIL__", ToJavaScriptStringLiteral(email))
-                .Replace("__PASSWORD__", ToJavaScriptStringLiteral(password));
-            string result = await ExecuteStringScriptAsync(script);
-            if (string.IsNullOrWhiteSpace(result))
+            for (int attempt = 0; attempt < 5; attempt++)
             {
-                return false;
+                await NavigateToLoginFormAsync();
+                string result = await ExecuteStringScriptAsync(script);
+                if (string.IsNullOrWhiteSpace(result) || string.Equals(result, "missing", StringComparison.OrdinalIgnoreCase))
+                {
+                    await Task.Delay(1200);
+                    continue;
+                }
+
+                LoginUiTargets targets = LoginUiTargets.TryParse(result);
+                if (targets == null)
+                {
+                    await Task.Delay(1200);
+                    continue;
+                }
+
+                await RunNativeLoginSequenceAsync(email, password, targets);
+                _statusText.Text = _isVietnamese
+                    ? "Đã chạy chuỗi click/gõ native. Đang chờ xác thực..."
+                    : "Native click/type sequence completed. Waiting for authentication...";
+                return true;
             }
 
-            LoginUiTargets targets = LoginUiTargets.TryParse(result);
-            if (targets == null)
-            {
-                return false;
-            }
-
-            await RunNativeLoginSequenceAsync(email, password, targets);
-            _statusText.Text = _isVietnamese
-                ? "Đã chạy chuỗi click/gõ native. Đang chờ xác thực..."
-                : "Native click/type sequence completed. Waiting for authentication...";
-            return true;
+            return false;
         }
 
         internal async Task<bool> WaitForAuthenticatedSessionAsync()
