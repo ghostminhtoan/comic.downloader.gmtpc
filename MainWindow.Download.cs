@@ -410,6 +410,32 @@ namespace get_link_manga
             return GetSafePathName(NormalizeChapterLabel(chapterTitle), maxLength);
         }
 
+        private string NormalizeVolumeLabel(string volumeTitle, int? volumeOrder = null)
+        {
+            string cleaned = CompactSingleLine(volumeTitle);
+            if (string.IsNullOrWhiteSpace(cleaned))
+            {
+                return volumeOrder.HasValue && volumeOrder.Value > 0
+                    ? "volume " + volumeOrder.Value.ToString("00", CultureInfo.InvariantCulture)
+                    : string.Empty;
+            }
+
+            Match exactChapterLike = Regex.Match(
+                cleaned,
+                @"(?i)^(?:chap(?:ter)?|chương|chuong)\s*(?<num>\d+(?:\.\d+)?)$");
+            if (exactChapterLike.Success)
+            {
+                return "volume " + ZeroPadChapterNumberToken(exactChapterLike.Groups["num"].Value);
+            }
+
+            return cleaned;
+        }
+
+        private string GetSafeVolumePathName(string volumeTitle, int? volumeOrder = null, int maxLength = 100)
+        {
+            return GetSafePathName(NormalizeVolumeLabel(volumeTitle, volumeOrder), maxLength);
+        }
+
         private string GetSafeChapterPathName(string bookTitle, string chapterTitle, int maxLength = 120)
         {
             string combined = string.IsNullOrWhiteSpace(bookTitle)

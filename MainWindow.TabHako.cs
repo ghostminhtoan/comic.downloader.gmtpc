@@ -456,10 +456,10 @@ namespace get_link_manga
 
             try
             {
-                string firecrawlHtml = await TryFetchHakoHtmlByFirecrawlAsync(normalizedUrl, token);
-                if (!string.IsNullOrWhiteSpace(firecrawlHtml) && !IsHakoChallengeHtml(firecrawlHtml))
+                string httpClientHtml = await TryFetchHakoHtmlByHttpClientAsync(normalizedUrl, token);
+                if (!string.IsNullOrWhiteSpace(httpClientHtml))
                 {
-                    return firecrawlHtml;
+                    return httpClientHtml;
                 }
             }
             catch (Exception ex)
@@ -469,10 +469,10 @@ namespace get_link_manga
 
             try
             {
-                string httpClientHtml = await TryFetchHakoHtmlByHttpClientAsync(normalizedUrl, token);
-                if (!string.IsNullOrWhiteSpace(httpClientHtml))
+                string firecrawlHtml = await TryFetchHakoHtmlByFirecrawlAsync(normalizedUrl, token);
+                if (!string.IsNullOrWhiteSpace(firecrawlHtml) && !IsHakoChallengeHtml(firecrawlHtml))
                 {
-                    return httpClientHtml;
+                    return firecrawlHtml;
                 }
             }
             catch (Exception ex)
@@ -1914,7 +1914,7 @@ namespace get_link_manga
             }
 
             return volumeOrder > 0
-                ? $"Tap {volumeOrder:00}"
+                ? $"volume {volumeOrder:00}"
                 : string.Empty;
         }
 
@@ -1927,8 +1927,15 @@ namespace get_link_manga
                 return rootFolder;
             }
 
+            string safeVolumeName = GetSafeVolumePathName(normalizedVolume, volumeOrder, 40);
+            if (string.IsNullOrWhiteSpace(safeVolumeName))
+            {
+                Directory.CreateDirectory(rootFolder);
+                return rootFolder;
+            }
+
             string prefix = volumeOrder > 0 ? volumeOrder.ToString("00", CultureInfo.InvariantCulture) + " - " : string.Empty;
-            string volumeFolder = Path.Combine(rootFolder, GetSafeChapterPathName(prefix + normalizedVolume, 40));
+            string volumeFolder = Path.Combine(rootFolder, prefix + safeVolumeName);
             Directory.CreateDirectory(volumeFolder);
             return volumeFolder;
         }
