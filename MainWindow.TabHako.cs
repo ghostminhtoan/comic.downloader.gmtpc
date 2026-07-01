@@ -1554,16 +1554,38 @@ namespace get_link_manga
             string contentHtml = ExtractHtmlElementById(html, "chapter-content");
             if (!string.IsNullOrWhiteSpace(contentHtml))
             {
+                string protectedContentHtml = TryDecodeProtectedHakoChapterContent(contentHtml);
+                if (!string.IsNullOrWhiteSpace(protectedContentHtml))
+                {
+                    return protectedContentHtml;
+                }
+
                 return contentHtml;
             }
 
             contentHtml = ExtractHtmlElementByClass(html, "chapter-content");
             if (!string.IsNullOrWhiteSpace(contentHtml))
             {
+                string protectedContentHtml = TryDecodeProtectedHakoChapterContent(contentHtml);
+                if (!string.IsNullOrWhiteSpace(protectedContentHtml))
+                {
+                    return protectedContentHtml;
+                }
+
                 return contentHtml;
             }
 
-            return ExtractHtmlElementByClass(html, "long-text");
+            contentHtml = ExtractHtmlElementByClass(html, "long-text");
+            if (!string.IsNullOrWhiteSpace(contentHtml))
+            {
+                string protectedContentHtml = TryDecodeProtectedHakoChapterContent(contentHtml);
+                if (!string.IsNullOrWhiteSpace(protectedContentHtml))
+                {
+                    return protectedContentHtml;
+                }
+            }
+
+            return contentHtml;
         }
 
         private string ExtractHakoTitleTopText(string html)
@@ -1636,6 +1658,142 @@ namespace get_link_manga
             }
 
             return string.Join("\n\n", dedupedLines);
+        }
+
+        private string TryDecodeProtectedHakoChapterContent(string contentHtml)
+        {
+            if (string.IsNullOrWhiteSpace(contentHtml) ||
+                contentHtml.IndexOf("chapter-c-protected", StringComparison.OrdinalIgnoreCase) < 0)
+            {
+                return string.Empty;
+            }
+
+            string protectedTag = ExtractFirstGroup(
+                contentHtml,
+                @"(?<tag><div[^>]*id\s*=\s*[""']chapter-c-protected[""'][^>]*>)",
+                "tag");
+            if (string.IsNullOrWhiteSpace(protectedTag))
+            {
+                return string.Empty;
+            }
+
+            string scheme = ExtractHtmlAttributeValue(protectedTag, "data-s");
+            string key = ExtractHtmlAttributeValue(protectedTag, "data-k");
+            string chunksJson = ExtractHtmlAttributeValue(protectedTag, "data-c");
+            if (string.IsNullOrWhiteSpace(chunksJson))
+            {
+                return string.Empty;
+            }
+
+            List<string> chunks = ParseProtectedHakoChunkList(chunksJson);
+            if (chunks.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            chunks.Sort((left, right) => ExtractProtectedHakoChunkOrder(left).CompareTo(ExtractProtectedHakoChunkOrder(right)));
+
+            var sb = new StringBuilder();
+            foreach (string chunk in chunks)
+            {
+                if (string.IsNullOrWhiteSpace(chunk) || chunk.Length <= 4)
+                {
+                    continue;
+                }
+
+                string payload = chunk.Substring(4);
+                string decodedChunk = DecodeProtectedHakoChunk(payload, scheme, key);
+                if (!string.IsNullOrWhiteSpace(decodedChunk))
+                {
+                    sb.Append(decodedChunk);
+                }
+            }
+
+            return sb.ToString().Trim();
+        }
+
+        private static string ExtractHtmlAttributeValue(string tagHtml, string attributeName)
+        {
+            if (string.IsNullOrWhiteSpace(tagHtml) || string.IsNullOrWhiteSpace(attributeName))
+            {
+                return string.Empty;
+            }
+
+            string value = ExtractFirstGroup(
+                tagHtml,
+                $@"\b{Regex.Escape(attributeName)}\s*=\s*[""'](?<value>[^""']*)[""']",
+                "value");
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : WebUtility.HtmlDecode(value);
+        }
+
+        private static List<string> ParseProtectedHakoChunkList(string chunksJson)
+        {
+            var chunks = new List<string>();
+            if (string.IsNullOrWhiteSpace(chunksJson))
+            {
+                return chunks;
+            }
+
+            string normalized = WebUtility.HtmlDecode(chunksJson).Replace(@"\/", "/");
+            MatchCollection matches = Regex.Matches(normalized, @"""(?<value>(?:\\.|[^""\\])*)""");
+            foreach (Match match in matches)
+            {
+                string value = match.Groups["value"].Value;
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    continue;
+                }
+
+                chunks.Add(Regex.Unescape(value));
+            }
+
+            return chunks;
+        }
+
+        private static int ExtractProtectedHakoChunkOrder(string chunk)
+        {
+            if (string.IsNullOrWhiteSpace(chunk) || chunk.Length < 4)
+            {
+                return int.MaxValue;
+            }
+
+            return int.TryParse(chunk.Substring(0, 4), NumberStyles.Integer, CultureInfo.InvariantCulture, out int order)
+                ? order
+                : int.MaxValue;
+        }
+
+        private static string DecodeProtectedHakoChunk(string payload, string scheme, string key)
+        {
+            if (string.IsNullOrWhiteSpace(payload))
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                string normalizedPayload = string.Equals(scheme, "base64_reverse", StringComparison.OrdinalIgnoreCase)
+                    ? new string(payload.Reverse().ToArray())
+                    : payload;
+                byte[] bytes = Convert.FromBase64String(normalizedPayload);
+
+                if (string.Equals(scheme, "xor_shuffle", StringComparison.OrdinalIgnoreCase) &&
+                    !string.IsNullOrEmpty(key))
+                {
+                    byte[] decodedBytes = new byte[bytes.Length];
+                    for (int i = 0; i < bytes.Length; i++)
+                    {
+                        decodedBytes[i] = (byte)(bytes[i] ^ (byte)key[i % key.Length]);
+                    }
+
+                    bytes = decodedBytes;
+                }
+
+                return Encoding.UTF8.GetString(bytes);
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
 
         private static string ExtractHtmlElementById(string html, string id)
