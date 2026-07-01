@@ -193,7 +193,6 @@ namespace get_link_manga
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            CheckFirstTimeRunMigration();
             _ = HandlePendingFirstRunCleanupAsync();
             ApplyCurrentUiLanguage();
             UpdateTruyenqqSpecificActions();

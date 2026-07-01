@@ -334,6 +334,7 @@ namespace get_link_manga
                     _webView.CoreWebView2.Settings.IsZoomControlEnabled = true;
                     _webView.CoreWebView2.Settings.UserAgent = UserAgent;
                     _webView.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
+                    _webView.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;
                     _webView.CoreWebView2.NavigationCompleted += WebView_NavigationCompleted;
                     await _webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(@"
 window.open = () => null;
@@ -378,6 +379,26 @@ document.addEventListener('click', function (event) {
         private void CoreWebView2_NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
         {
             e.Handled = true;
+        }
+
+        private void CoreWebView2_NavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(e?.Uri))
+            {
+                return;
+            }
+
+            if (Uri.TryCreate(e.Uri, UriKind.Absolute, out Uri uri))
+            {
+                string host = uri.Host ?? string.Empty;
+                if (host.IndexOf("damconuong.shop", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    host.IndexOf("mbpro.vip", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return;
+                }
+
+                e.Cancel = true;
+            }
         }
 
         internal Task WaitUntilReadyAsync()
@@ -455,11 +476,15 @@ document.addEventListener('click', function (event) {
   const passwordInput = find(selectorsPassword);
   if (!emailInput || !passwordInput) return 'missing';
   const rememberInput = find(rememberSelectors);
+  const submitButton = find(submitSelectors);
   return JSON.stringify({
     email: getCenter(emailInput),
     password: getCenter(passwordInput),
+    remember: rememberInput ? getCenter(rememberInput) : null,
+    submit: submitButton ? getCenter(submitButton) : null,
     rememberExists: !!rememberInput,
-    rememberChecked: !!rememberInput?.checked
+    rememberChecked: !!rememberInput?.checked,
+    submitExists: !!submitButton
   });
 })()";
 
@@ -672,22 +697,25 @@ document.addEventListener('click', function (event) {
             SendUnicodeText(email);
             await Task.Delay(140);
 
-            SendVirtualKey(VkTab);
-            await Task.Delay(140);
+            ClickWebViewPoint(targets.PasswordX, targets.PasswordY);
+            await Task.Delay(120);
             SendUnicodeText(password);
             await Task.Delay(140);
 
-            SendVirtualKey(VkTab);
-            await Task.Delay(140);
             if (targets.RememberExists && !targets.RememberChecked)
             {
-                SendVirtualKey(VkSpace);
+                ClickWebViewPoint(targets.RememberX, targets.RememberY);
                 await Task.Delay(120);
             }
 
-            SendVirtualKey(VkTab);
-            await Task.Delay(120);
-            SendVirtualKey(VkReturn);
+            if (targets.SubmitExists)
+            {
+                ClickWebViewPoint(targets.SubmitX, targets.SubmitY);
+            }
+            else
+            {
+                SendVirtualKey(VkReturn);
+            }
             await Task.Delay(220);
         }
 
@@ -800,8 +828,13 @@ document.addEventListener('click', function (event) {
             internal double EmailY { get; private set; }
             internal double PasswordX { get; private set; }
             internal double PasswordY { get; private set; }
+            internal double RememberX { get; private set; }
+            internal double RememberY { get; private set; }
+            internal double SubmitX { get; private set; }
+            internal double SubmitY { get; private set; }
             internal bool RememberExists { get; private set; }
             internal bool RememberChecked { get; private set; }
+            internal bool SubmitExists { get; private set; }
 
             internal static LoginUiTargets TryParse(string raw)
             {
@@ -813,14 +846,22 @@ document.addEventListener('click', function (event) {
                     return null;
                 }
 
+                bool rememberExists = raw.IndexOf(@"""rememberExists"":true", StringComparison.OrdinalIgnoreCase) >= 0;
+                bool submitExists = raw.IndexOf(@"""submitExists"":true", StringComparison.OrdinalIgnoreCase) >= 0;
+                int index = 0;
                 return new LoginUiTargets
                 {
-                    EmailX = ParseDouble(matches[0].Value),
-                    EmailY = ParseDouble(matches[1].Value),
-                    PasswordX = ParseDouble(matches[2].Value),
-                    PasswordY = ParseDouble(matches[3].Value),
-                    RememberExists = raw.IndexOf(@"""rememberExists"":true", StringComparison.OrdinalIgnoreCase) >= 0,
-                    RememberChecked = raw.IndexOf(@"""rememberChecked"":true", StringComparison.OrdinalIgnoreCase) >= 0
+                    EmailX = ParseDouble(matches[index++].Value),
+                    EmailY = ParseDouble(matches[index++].Value),
+                    PasswordX = ParseDouble(matches[index++].Value),
+                    PasswordY = ParseDouble(matches[index++].Value),
+                    RememberX = rememberExists && matches.Length >= index + 2 ? ParseDouble(matches[index++].Value) : 0d,
+                    RememberY = rememberExists && matches.Length >= index + 1 ? ParseDouble(matches[index++].Value) : 0d,
+                    SubmitX = submitExists && matches.Length >= index + 2 ? ParseDouble(matches[index++].Value) : 0d,
+                    SubmitY = submitExists && matches.Length >= index + 1 ? ParseDouble(matches[index++].Value) : 0d,
+                    RememberExists = rememberExists,
+                    RememberChecked = raw.IndexOf(@"""rememberChecked"":true", StringComparison.OrdinalIgnoreCase) >= 0,
+                    SubmitExists = submitExists
                 };
             }
 
