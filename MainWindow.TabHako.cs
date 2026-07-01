@@ -174,6 +174,7 @@ namespace get_link_manga
         private static bool IsHakoBookSection(string segment)
         {
             return segment.Equals("truyen", StringComparison.OrdinalIgnoreCase) ||
+                   segment.Equals("ai-dich", StringComparison.OrdinalIgnoreCase) ||
                    segment.Equals("sang-tac", StringComparison.OrdinalIgnoreCase);
         }
 
@@ -875,7 +876,7 @@ namespace get_link_manga
 
             foreach (Match match in Regex.Matches(
                 html ?? string.Empty,
-                @"<a[^>]+href\s*=\s*[""'](?<link>(?:https?:\/\/(?:ln\.hako\.vn|docln\.net|ln\.hako\.re))?\/(?:truyen|sang-tac)\/[^""'#?]+\/?)(?:[""'])[^>]*?(?:title\s*=\s*[""'](?<title>[^""']+)[""'])?[^>]*>(?<text>.*?)</a>",
+                @"<a[^>]+href\s*=\s*[""'](?<link>(?:https?:\/\/(?:ln\.hako\.vn|docln\.net|ln\.hako\.re))?\/(?:truyen|ai-dich|sang-tac)\/[^""'#?]+\/?)(?:[""'])[^>]*?(?:title\s*=\s*[""'](?<title>[^""']+)[""'])?[^>]*>(?<text>.*?)</a>",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline))
             {
                 string link = NormalizeHakoUrl(match.Groups["link"].Value);
@@ -1314,7 +1315,7 @@ namespace get_link_manga
             {
                 @"<div[^>]*class\s*=\s*[""'][^""']*rd_sidebar-name[^""']*[""'][^>]*>.*?<h5[^>]*>\s*<a[^>]*>(?<text>.*?)</a>",
                 @"<span[^>]*class\s*=\s*[""'][^""']*series-name[^""']*[""'][^>]*>(?<text>.*?)</span>",
-                @"<a[^>]+href\s*=\s*[""'](?<link>/(?:truyen|sang-tac)/[^""'#?]+/?)[^""']*[""'][^>]*>(?<text>.*?)</a>"
+                @"<a[^>]+href\s*=\s*[""'](?<link>/(?:truyen|ai-dich|sang-tac)/[^""'#?]+/?)[^""']*[""'][^>]*>(?<text>.*?)</a>"
             };
 
             foreach (string pattern in patterns)
@@ -1391,7 +1392,7 @@ namespace get_link_manga
 
                     foreach (Match match in Regex.Matches(
                         sectionHtml,
-                        @"<a[^>]+href\s*=\s*[""'](?<link>(?:https?:\/\/(?:ln\.hako\.vn|docln\.net|ln\.hako\.re))?\/(?:truyen|sang-tac)\/[^""'#?]+\/c\d+[^""'#?]*)[""'][^>]*>(?<text>.*?)</a>",
+                        @"<a[^>]+href\s*=\s*[""'](?<link>(?:https?:\/\/(?:ln\.hako\.vn|docln\.net|ln\.hako\.re))?\/(?:truyen|ai-dich|sang-tac)\/[^""'#?]+\/c\d+[^""'#?]*)[""'][^>]*>(?<text>.*?)</a>",
                         RegexOptions.IgnoreCase | RegexOptions.Singleline))
                     {
                         string link = NormalizeHakoUrl(match.Groups["link"].Value);
@@ -1439,7 +1440,7 @@ namespace get_link_manga
 
             foreach (Match match in Regex.Matches(
                 html ?? string.Empty,
-                @"<a[^>]+href\s*=\s*[""'](?<link>(?:https?:\/\/(?:ln\.hako\.vn|docln\.net|ln\.hako\.re))?\/(?:truyen|sang-tac)\/[^""'#?]+\/c\d+[^""'#?]*)[""'][^>]*>(?<text>.*?)</a>",
+                @"<a[^>]+href\s*=\s*[""'](?<link>(?:https?:\/\/(?:ln\.hako\.vn|docln\.net|ln\.hako\.re))?\/(?:truyen|ai-dich|sang-tac)\/[^""'#?]+\/c\d+[^""'#?]*)[""'][^>]*>(?<text>.*?)</a>",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline))
             {
                 string link = NormalizeHakoUrl(match.Groups["link"].Value);
@@ -1602,7 +1603,7 @@ namespace get_link_manga
                 .Select(line => line.Trim())
                 .Where(line =>
                     !string.IsNullOrWhiteSpace(line) &&
-                    !Regex.IsMatch(line, @"^(https?://|/(?:truyen|sang-tac)/\d+)", RegexOptions.IgnoreCase) &&
+                    !Regex.IsMatch(line, @"^(https?://|/(?:truyen|ai-dich|sang-tac)/\d+)", RegexOptions.IgnoreCase) &&
                     !Regex.IsMatch(line, @"^Ảnh tạm thời bị tắt\.?$", RegexOptions.IgnoreCase))
                 .ToList();
 

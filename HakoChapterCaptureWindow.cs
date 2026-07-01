@@ -362,8 +362,10 @@ namespace get_link_manga
     document.querySelector('.series-name') ||
     document.querySelector('.series-name-group .series-name') ||
     document.querySelector('a[href^=""/truyen/""][title]') ||
+    document.querySelector('a[href^=""/ai-dich/""][title]') ||
     document.querySelector('a[href^=""/sang-tac/""][title]') ||
     document.querySelector('a[href^=""/truyen/""]') ||
+    document.querySelector('a[href^=""/ai-dich/""]') ||
     document.querySelector('a[href^=""/sang-tac/""]');
   const html = document.documentElement ? document.documentElement.outerHTML : '';
   const bodyText = document.body ? document.body.innerText : '';
