@@ -426,12 +426,16 @@ namespace get_link_manga
                 return false;
             }
 
+            string plainText = WebUtility.HtmlDecode(Regex.Replace(html, "<[^>]+>", " ", RegexOptions.Singleline));
+            plainText = Regex.Replace(plainText, @"\s+", " ").Trim();
+
             return html.IndexOf("cf-turnstile", StringComparison.OrdinalIgnoreCase) >= 0 ||
                    html.IndexOf("cf-challenge", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   html.IndexOf("cloudflare", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   html.IndexOf("Just a moment", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   html.IndexOf("captcha", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   html.IndexOf("xác minh", StringComparison.OrdinalIgnoreCase) >= 0;
+                   html.IndexOf("challenge-platform", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   plainText.IndexOf("Just a moment", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   plainText.IndexOf("Checking your browser", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   plainText.IndexOf("xác minh bạn là con người", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   plainText.IndexOf("verify you are human", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private async Task<string> TryFetchHakoHtmlByHttpClientAsync(string normalizedUrl, CancellationToken token)
@@ -456,6 +460,19 @@ namespace get_link_manga
                 if (!string.IsNullOrWhiteSpace(firecrawlHtml) && !IsHakoChallengeHtml(firecrawlHtml))
                 {
                     return firecrawlHtml;
+                }
+            }
+            catch (Exception ex)
+            {
+                lastError = ex;
+            }
+
+            try
+            {
+                string httpClientHtml = await TryFetchHakoHtmlByHttpClientAsync(normalizedUrl, token);
+                if (!string.IsNullOrWhiteSpace(httpClientHtml))
+                {
+                    return httpClientHtml;
                 }
             }
             catch (Exception ex)
