@@ -398,23 +398,36 @@ namespace get_link_manga
   ];
   const find = list => {
     for (const selector of list) {
-      const el = document.querySelector(selector);
+      const matches = Array.from(document.querySelectorAll(selector));
+      const el = matches.find(node => {
+        if (!node) return false;
+        const style = window.getComputedStyle(node);
+        return !node.disabled && style.display !== 'none' && style.visibility !== 'hidden';
+      });
       if (el) return el;
     }
     return null;
   };
   const setValue = (el, value) => {
-    const setter = Object.getOwnPropertyDescriptor(el.__proto__, 'value')?.set;
+    el.focus();
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
+      || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value')?.set;
     if (setter) setter.call(el, value);
     else el.value = value;
     el.dispatchEvent(new Event('input', { bubbles: true }));
     el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.dispatchEvent(new Event('blur', { bubbles: true }));
   };
   const emailInput = find(selectorsEmail);
   const passwordInput = find(selectorsPassword);
   if (!emailInput || !passwordInput) return 'missing';
   setValue(emailInput, __EMAIL__);
   setValue(passwordInput, __PASSWORD__);
+  await new Promise(resolve => setTimeout(resolve, 150));
+  if ((passwordInput.value || '') !== __PASSWORD__) {
+    setValue(passwordInput, __PASSWORD__);
+    await new Promise(resolve => setTimeout(resolve, 150));
+  }
   const submit = find(submitSelectors);
   const form = passwordInput.form || emailInput.form || document.querySelector('form');
   if (submit) submit.click();
