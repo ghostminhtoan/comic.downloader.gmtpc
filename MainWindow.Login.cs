@@ -23,72 +23,18 @@ namespace get_link_manga
             string preferredUrl = txtDamconuongTagUrl?.Text?.Trim();
             try
             {
-                await EnsureDamconuongAuthenticatedAsync(preferredUrl, true);
+                if (!IsDamconuongUrl(preferredUrl))
+                {
+                    preferredUrl = DamconuongBaseUrl;
+                }
+
+                await OpenDamconuongLoginAsync(preferredUrl);
             }
             catch (Exception ex)
             {
-                lblStatus.Text = (_isVietnameseUi ? "Auto login damconuong lỗi: " : "Damconuong auto login failed: ") + ex.Message;
-                DamconuongLog("Lỗi auto login: " + ex.Message);
+                lblStatus.Text = (_isVietnameseUi ? "Login damconuong lỗi: " : "damconuong login failed: ") + ex.Message;
+                DamconuongLog("Lỗi login: " + ex.Message);
             }
-        }
-
-        private Task<bool> EnsureDamconuongAuthenticatedAsync(string targetUrl, bool allowManualLoginIfMissingCredentials)
-        {
-            if (Dispatcher.CheckAccess())
-            {
-                return EnsureDamconuongAuthenticatedCoreAsync(targetUrl, allowManualLoginIfMissingCredentials);
-            }
-
-            return Dispatcher.InvokeAsync(() => EnsureDamconuongAuthenticatedCoreAsync(targetUrl, allowManualLoginIfMissingCredentials)).Task.Unwrap();
-        }
-
-        private async Task<bool> EnsureDamconuongAuthenticatedCoreAsync(string targetUrl, bool allowManualLoginIfMissingCredentials)
-        {
-            string preferredUrl = IsDamconuongUrl(targetUrl) ? targetUrl : txtDamconuongTagUrl?.Text?.Trim();
-            if (!IsDamconuongUrl(preferredUrl))
-            {
-                preferredUrl = DamconuongBaseUrl;
-            }
-
-            string email = txtDamconuongLoginEmail?.Text?.Trim() ?? string.Empty;
-            string password = txtDamconuongLoginPassword?.Password ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-            {
-                if (allowManualLoginIfMissingCredentials)
-                {
-                    await OpenDamconuongLoginAsync(preferredUrl);
-                }
-
-                return false;
-            }
-
-            lblStatus.Text = _isVietnameseUi ? "Đang mở login damconuong.shop và điền sẵn tài khoản..." : "Opening damconuong.shop login and prefilling credentials...";
-            DamconuongLoginWindow loginWindow = await EnsureDamconuongLoginWindowAsync(preferredUrl);
-            bool applied = await loginWindow.ApplyCredentialsAsync(email, password);
-            if (!applied)
-            {
-                lblStatus.Text = _isVietnameseUi
-                    ? "Không tìm thấy form login damconuong. Cửa sổ login đã mở để bạn tự xử lý."
-                    : "Damconuong login form not found. Login window left open for manual handling.";
-                return false;
-            }
-
-            bool authenticated = await loginWindow.WaitForAuthenticatedSessionAsync();
-            if (!authenticated)
-            {
-                lblStatus.Text = _isVietnameseUi
-                    ? "LOGIN đã chạy chuỗi click/gõ nhưng phiên chưa sẵn sàng. Cửa sổ login vẫn mở để bạn xử lý tiếp."
-                    : "LOGIN ran the click/type sequence but the session is not ready yet. The login window remains open.";
-                return false;
-            }
-
-            await loginWindow.CaptureSessionAsync();
-            SyncDamconuongLoginState(loginWindow);
-            lblStatus.Text = _isVietnameseUi
-                ? "Đã login damconuong.shop và đồng bộ phiên."
-                : "damconuong.shop login completed and synced.";
-            DamconuongLog("Đã login damconuong bằng native input và sync cookie.");
-            return true;
         }
 
         private async Task OpenDamconuongLoginAsync(string targetUrl)
