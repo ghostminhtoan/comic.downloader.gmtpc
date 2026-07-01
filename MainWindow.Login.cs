@@ -403,6 +403,8 @@ document.addEventListener('click', function (event) {
             string script =
 @"
 (async () => {
+  const emailValue = __EMAIL__;
+  const passwordValue = __PASSWORD__;
   const selectorsEmail = [
     'input[type=""email""]',
     'input[name*=""email"" i]',
@@ -441,50 +443,61 @@ document.addEventListener('click', function (event) {
     }
     return null;
   };
-  const getCenter = el => {
-    const rect = el.getBoundingClientRect();
-    return {
-      x: Math.round(rect.left + rect.width / 2),
-      y: Math.round(rect.top + rect.height / 2)
-    };
+  const setNativeValue = (el, value) => {
+    const prototype = Object.getPrototypeOf(el);
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, 'value');
+    if (descriptor && descriptor.set) {
+      descriptor.set.call(el, value);
+    } else {
+      el.value = value;
+    }
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
   };
   const emailInput = find(selectorsEmail);
   const passwordInput = find(selectorsPassword);
   if (!emailInput || !passwordInput) return 'missing';
   const rememberInput = find(rememberSelectors);
   const submitButton = find(submitSelectors);
-  return JSON.stringify({
-    email: getCenter(emailInput),
-    password: getCenter(passwordInput),
-    remember: rememberInput ? getCenter(rememberInput) : null,
-    submit: submitButton ? getCenter(submitButton) : null,
-    rememberExists: !!rememberInput,
-    rememberChecked: !!rememberInput?.checked,
-    submitExists: !!submitButton
-  });
+  emailInput.focus();
+  setNativeValue(emailInput, emailValue);
+  passwordInput.focus();
+  setNativeValue(passwordInput, passwordValue);
+  if (rememberInput && !rememberInput.checked) {
+    rememberInput.click();
+    rememberInput.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  if (submitButton) {
+    submitButton.click();
+    return 'submitted';
+  }
+  const form = emailInput.form || passwordInput.form;
+  if (form) {
+    if (typeof form.requestSubmit === 'function') {
+      form.requestSubmit();
+    } else {
+      form.submit();
+    }
+    return 'submitted';
+  }
+  return 'filled';
 })()";
 
             for (int attempt = 0; attempt < 5; attempt++)
             {
                 await NavigateToLoginFormAsync();
-                string result = await ExecuteStringScriptAsync(script);
+                string result = await ExecuteStringScriptAsync(
+                    script
+                        .Replace("__EMAIL__", ToJavaScriptStringLiteral(email))
+                        .Replace("__PASSWORD__", ToJavaScriptStringLiteral(password)));
                 if (string.IsNullOrWhiteSpace(result) || string.Equals(result, "missing", StringComparison.OrdinalIgnoreCase))
                 {
                     await Task.Delay(1200);
                     continue;
                 }
-
-                LoginUiTargets targets = LoginUiTargets.TryParse(result);
-                if (targets == null)
-                {
-                    await Task.Delay(1200);
-                    continue;
-                }
-
-                await RunNativeLoginSequenceAsync(email, password, targets);
                 _statusText.Text = _isVietnamese
-                    ? "Đã chạy chuỗi click/gõ native. Đang chờ xác thực..."
-                    : "Native click/type sequence completed. Waiting for authentication...";
+                    ? "Đã auto fill form login. Đang chờ xác thực..."
+                    : "Login form auto-filled. Waiting for authentication...";
                 return true;
             }
 
