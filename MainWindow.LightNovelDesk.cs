@@ -733,10 +733,10 @@ namespace get_link_manga
                     }
                 });
 
-                List<LightNovelChapterRecord> loaded = await BuildLightNovelChapterRecordsAsync(item, CancellationToken.None, firecrawlOnly: true);
+                List<LightNovelChapterRecord> loaded = await BuildLightNovelChapterRecordsAsync(item, CancellationToken.None, firecrawlOnly: false);
                 if (loaded.Count == 0)
                 {
-                    loaded = await BuildLightNovelChapterRecordsAsync(item, CancellationToken.None, firecrawlOnly: false);
+                    loaded = await BuildLightNovelChapterRecordsAsync(item, CancellationToken.None, firecrawlOnly: true);
                 }
                 Dispatcher.Invoke(() => SetLightNovelChapterList(item, loaded));
 
@@ -1088,10 +1088,10 @@ namespace get_link_manga
             if (!_lightNovelChapterMap.TryGetValue(GetLightNovelItemKey(item), out ObservableCollection<LightNovelChapterRecord> chapters) ||
                 chapters.Count == 0)
             {
-                List<LightNovelChapterRecord> loaded = await BuildLightNovelChapterRecordsAsync(item, token, firecrawlOnly: true);
+                List<LightNovelChapterRecord> loaded = await BuildLightNovelChapterRecordsAsync(item, token, firecrawlOnly: false);
                 if (loaded.Count == 0)
                 {
-                    loaded = await BuildLightNovelChapterRecordsAsync(item, token, firecrawlOnly: false);
+                    loaded = await BuildLightNovelChapterRecordsAsync(item, token, firecrawlOnly: true);
                 }
                 SetLightNovelChapterList(item, loaded);
                 chapters = _lightNovelChapterMap.TryGetValue(GetLightNovelItemKey(item), out ObservableCollection<LightNovelChapterRecord> created)
@@ -1712,10 +1712,10 @@ namespace get_link_manga
             if (!_lightNovelChapterMap.TryGetValue(GetLightNovelItemKey(item), out ObservableCollection<LightNovelChapterRecord> chapters) ||
                 chapters.Count == 0)
             {
-                List<LightNovelChapterRecord> loaded = await BuildLightNovelChapterRecordsAsync(item, CancellationToken.None, firecrawlOnly: true);
+                List<LightNovelChapterRecord> loaded = await BuildLightNovelChapterRecordsAsync(item, CancellationToken.None, firecrawlOnly: false);
                 if (loaded.Count == 0)
                 {
-                    loaded = await BuildLightNovelChapterRecordsAsync(item, CancellationToken.None, firecrawlOnly: false);
+                    loaded = await BuildLightNovelChapterRecordsAsync(item, CancellationToken.None, firecrawlOnly: true);
                 }
 
                 SetLightNovelChapterList(item, loaded);
