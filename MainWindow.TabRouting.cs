@@ -47,7 +47,7 @@ namespace get_link_manga
                    lower.Contains("sayhentai") || lower.Contains("truyengg") || lower.Contains("hentaiforce") ||
                    lower.Contains("damconuong") ||
                    lower.Contains("nhentai") || lower.Contains("hentai2read") || lower.Contains("hentaiera") ||
-                   lower.Contains("hako");
+                   lower.Contains("hako") || lower.Contains("docln.net");
         }
 
         private async Task WaitAndScrapeAsync(Button fetchButton, RoutedEventHandler scrapeHandler)
@@ -91,7 +91,7 @@ namespace get_link_manga
             string lowerUrl = url.ToLowerInvariant();
             SelectAppSection(AppSection.Download);
 
-            if (lowerUrl.Contains("hako.vn") || lowerUrl.Contains("hako.re") || lowerUrl.Contains("hako"))
+            if (lowerUrl.Contains("hako.vn") || lowerUrl.Contains("hako.re") || lowerUrl.Contains("hako") || lowerUrl.Contains("docln.net"))
             {
                 if (tabDownloadRoot != null && tabDownloadRoot.Items.Count >= 2)
                 {
@@ -298,7 +298,7 @@ namespace get_link_manga
             string lowerUrl = url.Trim().ToLowerInvariant();
             SelectAppSection(AppSection.Download);
 
-            if (lowerUrl.Contains("hako.vn") || lowerUrl.Contains("hako.re") || lowerUrl.Contains("hako"))
+            if (lowerUrl.Contains("hako.vn") || lowerUrl.Contains("hako.re") || lowerUrl.Contains("hako") || lowerUrl.Contains("docln.net"))
             {
                 if (tabDownloadRoot != null && tabDownloadRoot.Items.Count >= 2) tabDownloadRoot.SelectedIndex = 1;
                 SelectNovelSourceRoot();
