@@ -734,6 +734,10 @@ namespace get_link_manga
                 });
 
                 List<LightNovelChapterRecord> loaded = await BuildLightNovelChapterRecordsAsync(item, CancellationToken.None, firecrawlOnly: true);
+                if (loaded.Count == 0)
+                {
+                    loaded = await BuildLightNovelChapterRecordsAsync(item, CancellationToken.None, firecrawlOnly: false);
+                }
                 Dispatcher.Invoke(() => SetLightNovelChapterList(item, loaded));
 
                 Dispatcher.Invoke(() =>
@@ -779,7 +783,8 @@ namespace get_link_manga
                     {
                         ChapterTitle = NormalizeChapterLabel(chapterTitle),
                         ChapterLink = canonicalChapterUrl,
-                        SequenceIndex = 1
+                        SequenceIndex = 1,
+                        IsChecked = item.IsChecked
                     }
                 };
             }
@@ -824,7 +829,8 @@ namespace get_link_manga
                     ChapterLink = chapter.Link,
                     VolumeTitle = chapter.VolumeTitle,
                     VolumeOrder = chapter.VolumeOrder,
-                    SequenceIndex = chapter.SequenceIndex
+                    SequenceIndex = chapter.SequenceIndex,
+                    IsChecked = item.IsChecked
                 })
                 .ToList();
         }
