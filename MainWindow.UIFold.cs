@@ -171,6 +171,13 @@ namespace get_link_manga
                 }
             }
 
+            if (!hasShift && e.Key == Key.O)
+            {
+                BtnLoadCustom_Click(this, new RoutedEventArgs());
+                e.Handled = true;
+                return;
+            }
+
             if (!hasShift)
             {
                 return;
@@ -180,6 +187,36 @@ namespace get_link_manga
             {
                 case Key.F:
                     ToggleLightNovelFloatingControlWindow();
+                    e.Handled = true;
+                    return;
+                case Key.O:
+                    BtnOpenFolder_Click(this, new RoutedEventArgs());
+                    e.Handled = true;
+                    return;
+                case Key.C:
+                    if (_lightNovelCopyCts == null)
+                    {
+                        _ = StartLightNovelAutoCopyAsync();
+                    }
+                    else
+                    {
+                        StopLightNovelAutoCopy();
+                    }
+                    e.Handled = true;
+                    return;
+                case Key.T:
+                    if (_downloadCts == null && btnStartDownload?.IsChecked != true)
+                    {
+                        _ = StartPictureDownloadFromFloatingAsync();
+                    }
+                    else
+                    {
+                        StopPictureDownloadFromFloating();
+                    }
+                    e.Handled = true;
+                    return;
+                case Key.R:
+                    BtnRetryErrors_Click(this, new RoutedEventArgs());
                     e.Handled = true;
                     return;
                 case Key.S:

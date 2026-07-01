@@ -37,10 +37,9 @@ namespace get_link_manga
                 return;
             }
 
-            string targetFolder = GetActiveTargetFolder(downloadRoot);
-            EnsureFolderExistsForExplorer(targetFolder);
+            EnsureFolderExistsForExplorer(downloadRoot);
 
-            if (!ShellFolderLauncher.TryOpenFolder(targetFolder, out string openError))
+            if (!ShellFolderLauncher.TryOpenFolder(downloadRoot, out string openError))
             {
                 ShowLocalizedMessageBox(
                     $"Cannot open folder: {openError}",
