@@ -1,14 +1,18 @@
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace get_link_manga
@@ -17,6 +21,9 @@ namespace get_link_manga
     {
         private static volatile bool _isDamconuongLoginWindowActive;
         private DamconuongLoginWindow _damconuongLoginWindow;
+        private readonly Dictionary<string, PasswordManagerEntry> _passwordManagerEntries = new Dictionary<string, PasswordManagerEntry>(StringComparer.OrdinalIgnoreCase);
+        private bool _suppressPasswordManagerEvents;
+        private bool _showPasswordManagerPassword;
 
         private async void BtnDamconuongLogin_Click(object sender, RoutedEventArgs e)
         {
@@ -43,7 +50,7 @@ namespace get_link_manga
         {
             string domain = (cmbPasswordManagerDomain?.SelectedItem as ComboBoxItem)?.Content?.ToString()?.Trim() ?? string.Empty;
             string username = txtPasswordManagerUsername?.Text?.Trim() ?? string.Empty;
-            string password = txtPasswordManagerPassword?.Password ?? string.Empty;
+            string password = GetPasswordManagerPasswordValue();
 
             try
             {
@@ -92,6 +99,290 @@ namespace get_link_manga
                 lblStatus.Text = (_isVietnameseUi ? "Apply password lỗi: " : "Password apply failed: ") + ex.Message;
                 DamconuongLog("Lỗi apply password: " + ex.Message);
             }
+        }
+
+        private void InitializePasswordManagerControls()
+        {
+            LoadPasswordManagerSettings();
+            UpdatePasswordManagerPasswordVisibility();
+            UpdatePasswordManagerLanguage();
+            LoadPasswordManagerEntryToUi(GetSelectedPasswordManagerDomain());
+        }
+
+        private string GetPasswordManagerSettingsPath()
+        {
+            return Path.Combine(PortablePaths.PortableDataRoot, "password-manager.txt");
+        }
+
+        private string GetSelectedPasswordManagerDomain()
+        {
+            if (cmbPasswordManagerDomain?.SelectedItem is ComboBoxItem selectedItem)
+            {
+                return selectedItem.Content?.ToString()?.Trim();
+            }
+
+            return string.Empty;
+        }
+
+        private void LoadPasswordManagerSettings()
+        {
+            string settingsPath = GetPasswordManagerSettingsPath();
+            if (!File.Exists(settingsPath))
+            {
+                return;
+            }
+
+            foreach (string line in File.ReadAllLines(settingsPath, Encoding.UTF8))
+            {
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                string[] parts = line.Split('|');
+                if (parts.Length < 3)
+                {
+                    continue;
+                }
+
+                string domain = parts[0]?.Trim() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(domain))
+                {
+                    continue;
+                }
+
+                _passwordManagerEntries[domain] = new PasswordManagerEntry
+                {
+                    Username = Uri.UnescapeDataString(parts[1] ?? string.Empty),
+                    Password = Uri.UnescapeDataString(parts[2] ?? string.Empty)
+                };
+            }
+        }
+
+        private void SavePasswordManagerSettings()
+        {
+            string settingsPath = GetPasswordManagerSettingsPath();
+            Directory.CreateDirectory(Path.GetDirectoryName(settingsPath));
+            string[] lines = _passwordManagerEntries
+                .Where(pair => !string.IsNullOrWhiteSpace(pair.Key))
+                .Select(pair => $"{pair.Key}|{Uri.EscapeDataString(pair.Value?.Username ?? string.Empty)}|{Uri.EscapeDataString(pair.Value?.Password ?? string.Empty)}")
+                .ToArray();
+            File.WriteAllLines(settingsPath, lines, Encoding.UTF8);
+        }
+
+        private void PersistPasswordManagerCurrentEntry()
+        {
+            if (_suppressPasswordManagerEvents)
+            {
+                return;
+            }
+
+            string domain = GetSelectedPasswordManagerDomain();
+            if (string.IsNullOrWhiteSpace(domain))
+            {
+                return;
+            }
+
+            _passwordManagerEntries[domain] = new PasswordManagerEntry
+            {
+                Username = txtPasswordManagerUsername?.Text?.Trim() ?? string.Empty,
+                Password = GetPasswordManagerPasswordValue()
+            };
+
+            SavePasswordManagerSettings();
+        }
+
+        private void LoadPasswordManagerEntryToUi(string domain)
+        {
+            _suppressPasswordManagerEvents = true;
+            try
+            {
+                if (!_passwordManagerEntries.TryGetValue(domain ?? string.Empty, out PasswordManagerEntry entry))
+                {
+                    entry = new PasswordManagerEntry();
+                }
+
+                if (txtPasswordManagerUsername != null)
+                {
+                    txtPasswordManagerUsername.Text = entry.Username ?? string.Empty;
+                }
+
+                if (txtPasswordManagerPassword != null)
+                {
+                    txtPasswordManagerPassword.Password = entry.Password ?? string.Empty;
+                }
+
+                if (txtPasswordManagerPasswordVisible != null)
+                {
+                    txtPasswordManagerPasswordVisible.Text = entry.Password ?? string.Empty;
+                }
+            }
+            finally
+            {
+                _suppressPasswordManagerEvents = false;
+            }
+        }
+
+        private string GetPasswordManagerPasswordValue()
+        {
+            if (_showPasswordManagerPassword)
+            {
+                return txtPasswordManagerPasswordVisible?.Text ?? string.Empty;
+            }
+
+            return txtPasswordManagerPassword?.Password ?? string.Empty;
+        }
+
+        private void UpdatePasswordManagerPasswordVisibility()
+        {
+            if (txtPasswordManagerPassword == null || txtPasswordManagerPasswordVisible == null || btnPasswordManagerToggleVisibility == null)
+            {
+                return;
+            }
+
+            string password = GetPasswordManagerPasswordValue();
+            _suppressPasswordManagerEvents = true;
+            try
+            {
+                txtPasswordManagerPassword.Password = password;
+                txtPasswordManagerPasswordVisible.Text = password;
+                txtPasswordManagerPassword.Visibility = _showPasswordManagerPassword ? Visibility.Collapsed : Visibility.Visible;
+                txtPasswordManagerPasswordVisible.Visibility = _showPasswordManagerPassword ? Visibility.Visible : Visibility.Collapsed;
+                btnPasswordManagerToggleVisibility.Content = _showPasswordManagerPassword ? "\uE523" : "\uE522";
+                btnPasswordManagerToggleVisibility.ToolTip = _isVietnameseUi
+                    ? (_showPasswordManagerPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu")
+                    : (_showPasswordManagerPassword ? "Hide password" : "Show password");
+            }
+            finally
+            {
+                _suppressPasswordManagerEvents = false;
+            }
+        }
+
+        private void UpdatePasswordManagerLanguage()
+        {
+            if (txtPasswordManagerTitle != null)
+            {
+                txtPasswordManagerTitle.Text = _isVietnameseUi ? "QUẢN LÝ MẬT KHẨU" : "PASSWORD MANAGER";
+            }
+
+            if (txtPasswordManagerDomainLabel != null)
+            {
+                txtPasswordManagerDomainLabel.Text = _isVietnameseUi ? "MIỀN" : "DOMAIN";
+            }
+
+            if (txtPasswordManagerUsernameLabel != null)
+            {
+                txtPasswordManagerUsernameLabel.Text = _isVietnameseUi ? "TÊN ĐĂNG NHẬP" : "USERNAME";
+            }
+
+            if (txtPasswordManagerPasswordLabel != null)
+            {
+                txtPasswordManagerPasswordLabel.Text = _isVietnameseUi ? "MẬT KHẨU" : "PASSWORD";
+            }
+
+            if (txtPasswordManagerHelpText != null)
+            {
+                txtPasswordManagerHelpText.Text = _isVietnameseUi
+                    ? "ÁP DỤNG sẽ đẩy username/password sang tab source của domain tương ứng, auto login, rồi tab source tự xóa ô login sau khi hoàn tất."
+                    : "APPLY sends username/password to the matching source tab, auto logs in, then the source tab clears its login boxes after completion.";
+            }
+
+            if (btnPasswordManagerApply != null)
+            {
+                btnPasswordManagerApply.Content = _isVietnameseUi ? "ÁP DỤNG" : "APPLY";
+            }
+
+            if (txtDamconuongLoginEmailLabel != null)
+            {
+                txtDamconuongLoginEmailLabel.Text = _isVietnameseUi ? "EMAIL ĐĂNG NHẬP" : "LOGIN EMAIL";
+            }
+
+            if (txtDamconuongLoginPasswordLabel != null)
+            {
+                txtDamconuongLoginPasswordLabel.Text = _isVietnameseUi ? "MẬT KHẨU ĐĂNG NHẬP" : "LOGIN PASSWORD";
+            }
+
+            if (btnDamconuongLogin != null)
+            {
+                btnDamconuongLogin.Content = _isVietnameseUi ? "ĐĂNG NHẬP" : "LOGIN";
+            }
+
+            if (txtDamconuongHelpText != null)
+            {
+                txtDamconuongHelpText.Text = _isVietnameseUi
+                    ? "Hỗ trợ category, book, chapter. Category tự đi page 1 -> cuối. Chapter chỉ lấy ảnh trong #chapter-content / reading-detail box_doc."
+                    : "Supports category, book, and chapter. Category auto walks page 1 -> last. Chapters only read images from #chapter-content / reading-detail box_doc.";
+            }
+
+            UpdatePasswordManagerPasswordVisibility();
+        }
+
+        private void DamconuongLoginInput_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+            ShowInfo(_isVietnameseUi ? "Đăng nhập ở tab password." : "Log in from the password tab.", _isVietnameseUi ? "Thông báo" : "Info");
+        }
+
+        private void DamconuongLoginInput_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            e.Handled = true;
+            ShowInfo(_isVietnameseUi ? "Đăng nhập ở tab password." : "Log in from the password tab.", _isVietnameseUi ? "Thông báo" : "Info");
+        }
+
+        private void CmbPasswordManagerDomain_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_suppressPasswordManagerEvents)
+            {
+                return;
+            }
+
+            LoadPasswordManagerEntryToUi(GetSelectedPasswordManagerDomain());
+        }
+
+        private void TxtPasswordManagerUsername_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            PersistPasswordManagerCurrentEntry();
+        }
+
+        private void TxtPasswordManagerPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (_suppressPasswordManagerEvents)
+            {
+                return;
+            }
+
+            if (txtPasswordManagerPasswordVisible != null)
+            {
+                _suppressPasswordManagerEvents = true;
+                txtPasswordManagerPasswordVisible.Text = txtPasswordManagerPassword?.Password ?? string.Empty;
+                _suppressPasswordManagerEvents = false;
+            }
+
+            PersistPasswordManagerCurrentEntry();
+        }
+
+        private void TxtPasswordManagerPasswordVisible_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_suppressPasswordManagerEvents)
+            {
+                return;
+            }
+
+            if (txtPasswordManagerPassword != null)
+            {
+                _suppressPasswordManagerEvents = true;
+                txtPasswordManagerPassword.Password = txtPasswordManagerPasswordVisible?.Text ?? string.Empty;
+                _suppressPasswordManagerEvents = false;
+            }
+
+            PersistPasswordManagerCurrentEntry();
+        }
+
+        private void BtnPasswordManagerToggleVisibility_Click(object sender, RoutedEventArgs e)
+        {
+            _showPasswordManagerPassword = !_showPasswordManagerPassword;
+            UpdatePasswordManagerPasswordVisibility();
         }
 
         private async Task OpenDamconuongLoginAsync(string targetUrl, string loginEmail, string loginPassword)
@@ -162,6 +453,12 @@ namespace get_link_manga
         {
             txtDamconuongLoginEmail?.Clear();
             txtDamconuongLoginPassword?.Clear();
+        }
+
+        private sealed class PasswordManagerEntry
+        {
+            internal string Username { get; set; }
+            internal string Password { get; set; }
         }
 
         private async Task<DamconuongLoginWindow> EnsureDamconuongLoginWindowAsync(string targetUrl)

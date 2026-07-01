@@ -1224,21 +1224,26 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="LOGIN EMAIL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                <TextBlock Name="txtDamconuongLoginEmailLabel" Text="LOGIN EMAIL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                                 <TextBox Name="txtDamconuongLoginEmail"
                                                          Background="#0e121a"
                                                          BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                          Foreground="{StaticResource CyberpunkTextBrush}"
                                                          CaretBrush="{StaticResource CyberpunkCyanBrush}"
-                                                         Height="32"/>
+                                                         Height="32"
+                                                         IsReadOnly="True"
+                                                         PreviewMouseLeftButtonDown="DamconuongLoginInput_PreviewMouseLeftButtonDown"
+                                                         PreviewKeyDown="DamconuongLoginInput_PreviewKeyDown"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
-                                                <TextBlock Text="LOGIN PASSWORD" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                <TextBlock Name="txtDamconuongLoginPasswordLabel" Text="LOGIN PASSWORD" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                                 <PasswordBox Name="txtDamconuongLoginPassword"
                                                              Background="#0e121a"
                                                              BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                              Foreground="{StaticResource CyberpunkTextBrush}"
-                                                             Height="32"/>
+                                                             Height="32"
+                                                             PreviewMouseLeftButtonDown="DamconuongLoginInput_PreviewMouseLeftButtonDown"
+                                                             PreviewKeyDown="DamconuongLoginInput_PreviewKeyDown"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
                                                 <Button Name="btnDamconuongLogin" Content="LOGIN" Click="BtnDamconuongLogin_Click" Style="{StaticResource CompactCyanButton}" MinWidth="90" Height="32" Padding="12,0" FontWeight="Bold"/>
@@ -1293,7 +1298,7 @@
                                         </Grid>
 
                                         <Border Grid.Row="6" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" Padding="12" CornerRadius="3">
-                                            <TextBlock Text="Hỗ trợ category, book, chapter. Category tự đi page 1 -> cuối. Chapter chỉ lấy ảnh trong #chapter-content / reading-detail box_doc." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
+                                            <TextBlock Name="txtDamconuongHelpText" Text="Hỗ trợ category, book, chapter. Category tự đi page 1 -> cuối. Chapter chỉ lấy ảnh trong #chapter-content / reading-detail box_doc." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
                                         </Border>
                                     </Grid>
                                 </Border>
@@ -2180,7 +2185,7 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Text="PASSWORD MANAGER" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold" Margin="0,0,0,15"/>
+                            <TextBlock Name="txtPasswordManagerTitle" Text="PASSWORD MANAGER" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold" Margin="0,0,0,15"/>
 
                             <Grid Grid.Row="1" Margin="0,0,0,15">
                                 <Grid.ColumnDefinitions>
@@ -2192,32 +2197,61 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="DOMAIN" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                    <TextBlock Name="txtPasswordManagerDomainLabel" Text="DOMAIN" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                     <ComboBox Name="cmbPasswordManagerDomain"
                                               Style="{StaticResource CyberpunkComboBox}"
                                               Height="30"
+                                              SelectionChanged="CmbPasswordManagerDomain_SelectionChanged"
                                               SelectedIndex="0">
                                         <ComboBoxItem Content="damconuong.shop"/>
                                     </ComboBox>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="2">
-                                    <TextBlock Text="USERNAME" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                    <TextBlock Name="txtPasswordManagerUsernameLabel" Text="USERNAME" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                     <TextBox Name="txtPasswordManagerUsername"
                                              Background="#0e121a"
                                              BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                              Foreground="{StaticResource CyberpunkTextBrush}"
                                              CaretBrush="{StaticResource CyberpunkCyanBrush}"
-                                             Height="32"/>
+                                             Height="32"
+                                             TextChanged="TxtPasswordManagerUsername_TextChanged"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="4">
-                                    <TextBlock Text="PASSWORD" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                    <PasswordBox Name="txtPasswordManagerPassword"
+                                    <TextBlock Name="txtPasswordManagerPasswordLabel" Text="PASSWORD" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="44"/>
+                                        </Grid.ColumnDefinitions>
+                                        <PasswordBox Name="txtPasswordManagerPassword"
+                                                     Grid.Column="0"
+                                                     Background="#0e121a"
+                                                     BorderBrush="{StaticResource CyberpunkBorderBrush}"
+                                                     Foreground="{StaticResource CyberpunkTextBrush}"
+                                                     Height="32"
+                                                     PasswordChanged="TxtPasswordManagerPassword_PasswordChanged"/>
+                                        <TextBox Name="txtPasswordManagerPasswordVisible"
+                                                 Grid.Column="0"
                                                  Background="#0e121a"
                                                  BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                  Foreground="{StaticResource CyberpunkTextBrush}"
-                                                 Height="32"/>
+                                                 CaretBrush="{StaticResource CyberpunkCyanBrush}"
+                                                 Height="32"
+                                                 Visibility="Collapsed"
+                                                 TextChanged="TxtPasswordManagerPasswordVisible_TextChanged"/>
+                                        <Button Grid.Column="1"
+                                                Name="btnPasswordManagerToggleVisibility"
+                                                Click="BtnPasswordManagerToggleVisibility_Click"
+                                                Style="{StaticResource CompactCyanButton}"
+                                                Margin="8,0,0,0"
+                                                Height="32"
+                                                Padding="0"
+                                                FontFamily="Segoe MDL2 Assets"
+                                                FontSize="14"
+                                                Content="&#xE522;"/>
+                                    </Grid>
                                 </StackPanel>
                             </Grid>
 
@@ -2227,7 +2261,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <Border Grid.Column="0" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" Padding="12" CornerRadius="3" Margin="0,0,12,0">
-                                    <TextBlock Text="APPLY sẽ đẩy username/password sang tab source của domain tương ứng, auto login, rồi tab source tự xóa ô login sau khi hoàn tất." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
+                                    <TextBlock Name="txtPasswordManagerHelpText" Text="APPLY sẽ đẩy username/password sang tab source của domain tương ứng, auto login, rồi tab source tự xóa ô login sau khi hoàn tất." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
                                 </Border>
                                 <Button Grid.Column="1"
                                         Name="btnPasswordManagerApply"

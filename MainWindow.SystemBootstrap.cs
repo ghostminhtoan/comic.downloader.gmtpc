@@ -73,6 +73,7 @@ namespace get_link_manga
             _isVietnameseUi = true;
             ApplyCurrentUiLanguage();
             InitializeGalleryListAutosave();
+            InitializePasswordManagerControls();
             ApplyBuildInfoText();
             WirePauseButtonToggle();
             InitializeLogPanels();
@@ -94,6 +95,7 @@ namespace get_link_manga
             Loaded += (s, e) =>
             {
                 StyleComboBoxPopup(cmbCreateSubfolderDomain);
+                StyleComboBoxPopup(cmbPasswordManagerDomain);
                 StyleComboBoxPopup(cmbNhentaiSort);
                 StyleComboBoxPopup(cmbConnections);
                 StyleComboBoxPopup(cmbMultiDownload);

@@ -705,6 +705,7 @@ namespace get_link_manga
             RefreshVisibleGalleryLanguage();
             UpdateFoldButtonUi();
             UpdateWorkspaceShellLanguage();
+            UpdatePasswordManagerLanguage();
             UpdateThemeText();
         }
 
