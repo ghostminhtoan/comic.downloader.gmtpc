@@ -815,26 +815,20 @@ namespace get_link_manga
             List<HakoChapterInfo> chapters = ExtractHakoChapterLinks(html, normalizedItemLink);
             if ((chapters == null || chapters.Count == 0) && !firecrawlOnly)
             {
-                foreach (bool headlessAutomation in new[] { true, false })
+                try
                 {
-                    try
+                    string browserHtml = await FetchHakoHtmlViaBrowserAsync(normalizedItemLink, headlessAutomation: true);
+                    if (!string.IsNullOrWhiteSpace(browserHtml) && !IsHakoChallengeHtml(browserHtml))
                     {
-                        string browserHtml = await FetchHakoHtmlViaBrowserAsync(normalizedItemLink, headlessAutomation);
-                        if (string.IsNullOrWhiteSpace(browserHtml) || IsHakoChallengeHtml(browserHtml))
-                        {
-                            continue;
-                        }
-
                         chapters = ExtractHakoChapterLinks(browserHtml, normalizedItemLink);
                         if (chapters != null && chapters.Count > 0)
                         {
                             html = browserHtml;
-                            break;
                         }
                     }
-                    catch
-                    {
-                    }
+                }
+                catch
+                {
                 }
             }
 
