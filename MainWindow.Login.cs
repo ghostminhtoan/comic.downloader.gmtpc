@@ -58,7 +58,15 @@ namespace get_link_manga
                     return;
                 }
 
-                await Task.Delay(2200);
+                bool authenticated = await loginWindow.WaitForAuthenticatedSessionAsync();
+                if (!authenticated)
+                {
+                    lblStatus.Text = _isVietnameseUi
+                        ? "APPLY đã gửi login nhưng phiên chưa sẵn sàng. Cửa sổ login đang mở để bạn xử lý tiếp rồi tải lại."
+                        : "APPLY submitted login but session is not ready yet. Login window remains open for manual completion.";
+                    return;
+                }
+
                 await loginWindow.CaptureSessionAsync();
                 SyncDamconuongLoginState(loginWindow);
                 lblStatus.Text = _isVietnameseUi
@@ -174,7 +182,7 @@ namespace get_link_manga
     {
         private readonly WebView2 _webView;
         private readonly TextBlock _statusText;
-        private readonly string _targetUrl;
+        private string _targetUrl;
         private readonly bool _isVietnamese;
         private readonly TaskCompletionSource<bool> _readyTcs = new TaskCompletionSource<bool>();
         private bool _wasCompleted;
@@ -350,6 +358,7 @@ namespace get_link_manga
         {
             await WaitUntilReadyAsync();
             string normalized = string.IsNullOrWhiteSpace(targetUrl) ? "https://damconuong.shop" : targetUrl;
+            _targetUrl = normalized;
             string current = _webView.Source?.ToString() ?? string.Empty;
             if (!string.Equals(current, normalized, StringComparison.OrdinalIgnoreCase))
             {
@@ -424,6 +433,46 @@ namespace get_link_manga
                 ? "Đã apply email/password. Nếu site hỏi captcha, xử lý ngay trong cửa sổ này."
                 : "Email/password applied. If captcha appears, solve it in this window.";
             return string.Equals(result, "submitted", StringComparison.OrdinalIgnoreCase);
+        }
+
+        internal async Task<bool> WaitForAuthenticatedSessionAsync()
+        {
+            await WaitUntilReadyAsync();
+            await Task.Delay(1200);
+            await NavigateIfNeededAsync(_targetUrl);
+
+            for (int attempt = 0; attempt < 20; attempt++)
+            {
+                string state = await ExecuteStringScriptAsync(@"
+(() => {
+  const text = (document.body?.innerText || '').toLowerCase();
+  const hasPassword = !!document.querySelector('input[type=""password""]');
+  const loginRequired =
+    text.includes('yêu cầu đăng nhập') ||
+    text.includes('nội dung này dành cho người dùng đã xác thực') ||
+    text.includes('noi dung nay danh cho nguoi dung da xac thuc') ||
+    text.includes('tạo tài khoản mới') ||
+    text.includes('tao tai khoan moi');
+
+  if (hasPassword) return 'password';
+  if (loginRequired) return 'blocked';
+  return 'ready';
+})()");
+
+                if (string.Equals(state, "ready", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                if (attempt == 4 || attempt == 9 || attempt == 14)
+                {
+                    _webView.CoreWebView2?.Navigate(_targetUrl);
+                }
+
+                await Task.Delay(1000);
+            }
+
+            return false;
         }
 
         internal async Task CaptureSessionAsync()
