@@ -1100,6 +1100,18 @@ namespace get_link_manga
             }
 
             List<LightNovelChapterRecord> chaptersToCopy = chapters.Where(chapter => chapter.IsChecked).ToList();
+            if (chaptersToCopy.Count == 0 && chapters.Count > 0)
+            {
+                foreach (LightNovelChapterRecord chapter in chapters)
+                {
+                    chapter.IsChecked = true;
+                }
+
+                item.IsChecked = true;
+                chaptersToCopy = chapters.ToList();
+                UpdateLightNovelBookCheckedState(item);
+            }
+
             if (chaptersToCopy.Count == 0)
             {
                 item.TotalChapters = 0;
@@ -1490,38 +1502,11 @@ namespace get_link_manga
 
         private void UpdateLightNovelFocusVisibilityState()
         {
-            bool shouldHideWindows = _lightNovelAutoFocusEnabled && _lightNovelCopyCts != null;
-            if (shouldHideWindows)
-            {
-                if (_lightNovelFocusRestoreOverride)
-                {
-                    return;
-                }
-
-                HideMainWindowToFocusTray();
-                return;
-            }
-
             _lightNovelFocusRestoreOverride = false;
             if (_lightNovelFocusTrayHidden)
             {
-                if (_lightNovelAutoFocusEnabled)
-                {
-                    return;
-                }
-
                 RestoreMainWindowFromFocusTray(activateWindow: false);
-                return;
             }
-
-            if (!_lightNovelFocusStealthActive)
-            {
-                return;
-            }
-
-            _lightNovelFocusStealthActive = false;
-            Opacity = _lightNovelSavedWindowOpacity <= 0d ? 1d : _lightNovelSavedWindowOpacity;
-            ShowInTaskbar = _lightNovelSavedShowInTaskbar;
         }
 
         private void ToggleLightNovelAutoFocus()
@@ -1530,15 +1515,13 @@ namespace get_link_manga
             lblStatus.Text = _lightNovelAutoFocusEnabled
                 ? "Auto focus WebView2: ON"
                 : "Auto focus WebView2: OFF";
-            if (_lightNovelAutoFocusEnabled)
+
+            _lightNovelFocusRestoreOverride = false;
+            if (_lightNovelFocusTrayHidden)
             {
-                HideMainWindowToFocusTray();
-            }
-            else
-            {
-                _lightNovelFocusRestoreOverride = false;
                 RestoreMainWindowFromFocusTray(activateWindow: false);
             }
+
             UpdateLightNovelFocusVisibilityState();
             UpdateLightNovelFloatingControlState();
         }
@@ -1666,7 +1649,7 @@ namespace get_link_manga
         {
             if (_lightNovelAutoFocusEnabled && WindowState == WindowState.Minimized)
             {
-                HideMainWindowToFocusTray();
+                WindowState = WindowState.Normal;
             }
         }
 
