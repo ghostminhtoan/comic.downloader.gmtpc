@@ -23,26 +23,12 @@ namespace get_link_manga
                 preferredUrl = DamconuongBaseUrl;
             }
 
-            await OpenDamconuongLoginAsync(preferredUrl);
-        }
-
-        private async void BtnDamconuongLoginApply_Click(object sender, RoutedEventArgs e)
-        {
             string email = txtDamconuongLoginEmail?.Text?.Trim() ?? string.Empty;
             string password = txtDamconuongLoginPassword?.Password ?? string.Empty;
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
-                ShowInfo(_isVietnameseUi
-                    ? "Nhập email và password damconuong trước."
-                    : "Enter damconuong email and password first.",
-                    _isVietnameseUi ? "Thiếu dữ liệu" : "Missing data");
+                await OpenDamconuongLoginAsync(preferredUrl);
                 return;
-            }
-
-            string preferredUrl = txtDamconuongTagUrl?.Text?.Trim();
-            if (!IsDamconuongUrl(preferredUrl))
-            {
-                preferredUrl = DamconuongBaseUrl;
             }
 
             try
@@ -62,8 +48,8 @@ namespace get_link_manga
                 if (!authenticated)
                 {
                     lblStatus.Text = _isVietnameseUi
-                        ? "APPLY đã gửi login nhưng phiên chưa sẵn sàng. Cửa sổ login đang mở để bạn xử lý tiếp rồi tải lại."
-                        : "APPLY submitted login but session is not ready yet. Login window remains open for manual completion.";
+                        ? "LOGIN đã gửi thông tin nhưng phiên chưa sẵn sàng. Cửa sổ login đang mở để bạn xử lý tiếp rồi tải lại."
+                        : "LOGIN submitted credentials but session is not ready yet. Login window remains open for manual completion.";
                     return;
                 }
 
