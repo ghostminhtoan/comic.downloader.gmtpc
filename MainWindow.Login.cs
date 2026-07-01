@@ -402,7 +402,7 @@ document.addEventListener('click', function (event) {
     }
     return null;
   };
-  const setValue = (el, value) => {
+  const applyValue = (el, value) => {
     el.focus();
     const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
       || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value')?.set;
@@ -410,6 +410,16 @@ document.addEventListener('click', function (event) {
     else el.value = value;
     el.dispatchEvent(new Event('input', { bubbles: true }));
     el.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+  const typeSequentially = async (el, value) => {
+    applyValue(el, '');
+    for (const ch of value) {
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: ch, bubbles: true }));
+      el.dispatchEvent(new KeyboardEvent('keypress', { key: ch, bubbles: true }));
+      applyValue(el, (el.value || '') + ch);
+      el.dispatchEvent(new KeyboardEvent('keyup', { key: ch, bubbles: true }));
+      await new Promise(resolve => setTimeout(resolve, 35));
+    }
     el.dispatchEvent(new Event('blur', { bubbles: true }));
   };
   const setChecked = (el, checked) => {
@@ -428,8 +438,9 @@ document.addEventListener('click', function (event) {
   const emailInput = find(selectorsEmail);
   const passwordInput = find(selectorsPassword);
   if (!emailInput || !passwordInput) return 'missing';
-  setValue(emailInput, __EMAIL__);
-  setValue(passwordInput, __PASSWORD__);
+  await typeSequentially(emailInput, __EMAIL__);
+  await new Promise(resolve => setTimeout(resolve, 120));
+  await typeSequentially(passwordInput, __PASSWORD__);
   const rememberInput = find(rememberSelectors);
   if (rememberInput && !rememberInput.checked) {
     setChecked(rememberInput, true);
@@ -442,10 +453,10 @@ document.addEventListener('click', function (event) {
       rememberLabel.click();
     }
   }
-  await new Promise(resolve => setTimeout(resolve, 150));
+  await new Promise(resolve => setTimeout(resolve, 180));
   if ((passwordInput.value || '') !== __PASSWORD__) {
-    setValue(passwordInput, __PASSWORD__);
-    await new Promise(resolve => setTimeout(resolve, 150));
+    await typeSequentially(passwordInput, __PASSWORD__);
+    await new Promise(resolve => setTimeout(resolve, 180));
   }
   return 'prefilled';
 })()";
