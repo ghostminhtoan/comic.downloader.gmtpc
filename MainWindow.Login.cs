@@ -224,8 +224,8 @@ namespace get_link_manga
             header.Children.Add(new TextBlock
             {
                 Text = isVietnamese
-                    ? "Tự đăng nhập và vượt captcha trong WebView này. Xong thì bấm HOÀN TẤT để đồng bộ cookie cho downloader."
-                    : "Sign in and solve captcha in this WebView. Click DONE to sync cookies back to the downloader.",
+                    ? "Đăng nhập damconuong trong WebView này. Xong thì bấm HOÀN TẤT để đồng bộ cookie cho downloader."
+                    : "Sign in to damconuong in this WebView. Click DONE to sync cookies back to the downloader.",
                 Margin = new Thickness(0, 6, 0, 0),
                 TextWrapping = TextWrapping.Wrap,
                 Foreground = new SolidColorBrush(Color.FromRgb(0xA8, 0xB3, 0xC7))
@@ -316,7 +316,16 @@ namespace get_link_manga
                     _webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
                     _webView.CoreWebView2.Settings.IsZoomControlEnabled = true;
                     _webView.CoreWebView2.Settings.UserAgent = UserAgent;
+                    _webView.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
                     _webView.CoreWebView2.NavigationCompleted += WebView_NavigationCompleted;
+                    await _webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(@"
+window.open = () => null;
+document.addEventListener('click', function (event) {
+  const anchor = event.target && event.target.closest ? event.target.closest('a[target=""_blank""]') : null;
+  if (anchor) {
+    anchor.removeAttribute('target');
+  }
+}, true);");
                 }
 
                 _readyTcs.TrySetResult(true);
@@ -347,6 +356,11 @@ namespace get_link_manga
             _statusText.Text = _isVietnamese
                 ? "Đăng nhập xong thì bấm HOÀN TẤT để lưu cookie."
                 : "Click DONE after login to save cookies.";
+        }
+
+        private void CoreWebView2_NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
+        {
+            e.Handled = true;
         }
 
         internal Task WaitUntilReadyAsync()
@@ -396,6 +410,11 @@ namespace get_link_manga
     '.btn-login',
     '.login-button'
   ];
+  const rememberSelectors = [
+    'input[type=""checkbox""][name*=""remember"" i]',
+    'input[type=""checkbox""][id*=""remember"" i]',
+    'input[type=""checkbox""][autocomplete=""remember""]'
+  ];
   const find = list => {
     for (const selector of list) {
       const matches = Array.from(document.querySelectorAll(selector));
@@ -418,11 +437,36 @@ namespace get_link_manga
     el.dispatchEvent(new Event('change', { bubbles: true }));
     el.dispatchEvent(new Event('blur', { bubbles: true }));
   };
+  const setChecked = (el, checked) => {
+    el.focus();
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'checked')?.set
+      || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'checked')?.set;
+    if (setter) setter.call(el, checked);
+    else el.checked = checked;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    if (!!el.checked !== checked && typeof el.click === 'function') {
+      el.click();
+    }
+    el.dispatchEvent(new Event('blur', { bubbles: true }));
+  };
   const emailInput = find(selectorsEmail);
   const passwordInput = find(selectorsPassword);
   if (!emailInput || !passwordInput) return 'missing';
   setValue(emailInput, __EMAIL__);
   setValue(passwordInput, __PASSWORD__);
+  const rememberInput = find(rememberSelectors);
+  if (rememberInput && !rememberInput.checked) {
+    setChecked(rememberInput, true);
+  } else if (!rememberInput) {
+    const rememberLabel = Array.from(document.querySelectorAll('label,span,div')).find(node => {
+      const text = (node.textContent || '').trim().toLowerCase();
+      return text.includes('remember me');
+    });
+    if (rememberLabel) {
+      rememberLabel.click();
+    }
+  }
   await new Promise(resolve => setTimeout(resolve, 150));
   if ((passwordInput.value || '') !== __PASSWORD__) {
     setValue(passwordInput, __PASSWORD__);
@@ -451,11 +495,10 @@ namespace get_link_manga
         internal async Task<bool> WaitForAuthenticatedSessionAsync()
         {
             await WaitUntilReadyAsync();
-            await Task.Delay(1200);
-            await NavigateIfNeededAsync(_targetUrl);
 
             for (int attempt = 0; attempt < 20; attempt++)
             {
+                bool hasAuthCookies = await HasAuthenticationCookiesAsync();
                 string state = await ExecuteStringScriptAsync(@"
 (() => {
   const text = (document.body?.innerText || '').toLowerCase();
@@ -472,17 +515,58 @@ namespace get_link_manga
   return 'ready';
 })()");
 
-                if (string.Equals(state, "ready", StringComparison.OrdinalIgnoreCase))
+                if (hasAuthCookies && !string.Equals(state, "blocked", StringComparison.OrdinalIgnoreCase))
                 {
-                    return true;
+                    await NavigateIfNeededAsync(_targetUrl);
+                    await Task.Delay(1000);
+                    string targetState = await ExecuteStringScriptAsync(@"
+(() => {
+  const text = (document.body?.innerText || '').toLowerCase();
+  const loginRequired =
+    text.includes('yêu cầu đăng nhập') ||
+    text.includes('nội dung này dành cho người dùng đã xác thực') ||
+    text.includes('noi dung nay danh cho nguoi dung da xac thuc') ||
+    text.includes('tạo tài khoản mới') ||
+    text.includes('tao tai khoan moi');
+  return loginRequired ? 'blocked' : 'ready';
+})()");
+                    if (string.Equals(targetState, "ready", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
                 }
 
-                if (attempt == 4 || attempt == 9 || attempt == 14)
+                if (attempt == 3 || attempt == 7 || attempt == 11 || attempt == 15)
                 {
                     _webView.CoreWebView2?.Navigate(_targetUrl);
                 }
 
                 await Task.Delay(1000);
+            }
+
+            return false;
+        }
+
+        private async Task<bool> HasAuthenticationCookiesAsync()
+        {
+            if (_webView?.CoreWebView2 == null)
+            {
+                return false;
+            }
+
+            foreach (string url in new[] { "https://damconuong.shop", _targetUrl }.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                var cookies = await _webView.CoreWebView2.CookieManager.GetCookiesAsync(url);
+                if (cookies.Any(cookie =>
+                    cookie != null &&
+                    !string.IsNullOrWhiteSpace(cookie.Value) &&
+                    (cookie.Name.IndexOf("session", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     cookie.Name.IndexOf("remember", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     cookie.Name.IndexOf("auth", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     cookie.Name.IndexOf("token", StringComparison.OrdinalIgnoreCase) >= 0)))
+                {
+                    return true;
+                }
             }
 
             return false;
