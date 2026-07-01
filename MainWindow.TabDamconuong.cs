@@ -602,6 +602,21 @@ namespace get_link_manga
         {
             string bookUrl = NormalizeDamconuongUrl(item.Link);
             string html = await FetchStringAsync(bookUrl, token);
+            if (IsDamconuongLoginRequiredHtml(html))
+            {
+                bool authenticated = await EnsureDamconuongAuthenticatedAsync(bookUrl, false);
+                if (!authenticated)
+                {
+                    throw new Exception("Damconuong yêu cầu đăng nhập. Hãy nhập email/password ở tab source damconuong.shop rồi tải lại.");
+                }
+
+                html = await FetchStringAsync(bookUrl, token);
+                if (IsDamconuongLoginRequiredHtml(html))
+                {
+                    throw new Exception("Damconuong vẫn yêu cầu đăng nhập sau khi auto login.");
+                }
+            }
+
             string bookTitle = CleanDamconuongTitle(item.Name);
             if (string.IsNullOrWhiteSpace(bookTitle))
             {
@@ -694,7 +709,17 @@ namespace get_link_manga
             string html = await FetchStringAsync(chapterUrl, token);
             if (IsDamconuongLoginRequiredHtml(html))
             {
-                throw new Exception("Damconuong yêu cầu đăng nhập. Hãy bấm LOGIN ở tab source damconuong.shop rồi tải lại.");
+                bool authenticated = await EnsureDamconuongAuthenticatedAsync(chapterUrl, false);
+                if (!authenticated)
+                {
+                    throw new Exception("Damconuong yêu cầu đăng nhập. Hãy nhập email/password ở tab source damconuong.shop rồi tải lại.");
+                }
+
+                html = await FetchStringAsync(chapterUrl, token);
+                if (IsDamconuongLoginRequiredHtml(html))
+                {
+                    throw new Exception("Damconuong vẫn yêu cầu đăng nhập sau khi auto login.");
+                }
             }
 
             string title = ExtractDamconuongTitleFromHtml(html);
