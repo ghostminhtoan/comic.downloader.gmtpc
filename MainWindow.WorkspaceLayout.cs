@@ -1199,6 +1199,14 @@ namespace get_link_manga
             {
                 tabLightNovelRootItem.Header = _isVietnameseUi ? "Nguồn Novel" : "Novel Source";
             }
+            if (tabHentaiSourceRootItem != null)
+            {
+                tabHentaiSourceRootItem.Header = _isVietnameseUi ? "Nguồn Hentai" : "Source Hentai";
+            }
+            if (tabPasswordRootItem != null)
+            {
+                tabPasswordRootItem.Header = _isVietnameseUi ? "Mật khẩu" : "Password";
+            }
             if (tabDownloadRoot != null && tabDownloadRoot.Items.Count >= 2)
             {
                 if (tabDownloadRoot.Items[0] is TabItem mangaTab)

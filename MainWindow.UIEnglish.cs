@@ -793,7 +793,7 @@ namespace get_link_manga
             }
 
             bool isVisible =
-                tabMangaRootItem != null && tabMangaRootItem.IsSelected &&
+                tabMangaSourceRootItem != null && tabMangaSourceRootItem.IsSelected &&
                 tabTruyenqqItem != null && tabTruyenqqItem.IsSelected;
 
             btnSortByLatestChapter.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;

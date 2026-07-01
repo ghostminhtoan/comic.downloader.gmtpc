@@ -10,6 +10,30 @@ namespace get_link_manga
 {
     public partial class MainWindow : Window
     {
+        private void SelectMangaSourceRoot()
+        {
+            if (tabLeftPanel != null && tabMangaSourceRootItem != null)
+            {
+                tabLeftPanel.SelectedItem = tabMangaSourceRootItem;
+            }
+        }
+
+        private void SelectHentaiSourceRoot()
+        {
+            if (tabLeftPanel != null && tabHentaiSourceRootItem != null)
+            {
+                tabLeftPanel.SelectedItem = tabHentaiSourceRootItem;
+            }
+        }
+
+        private void SelectNovelSourceRoot()
+        {
+            if (tabLeftPanel != null && tabLightNovelRootItem != null)
+            {
+                tabLeftPanel.SelectedItem = tabLightNovelRootItem;
+            }
+        }
+
         public bool IsSupportedDomain(string url)
         {
             if (string.IsNullOrWhiteSpace(url))
@@ -74,10 +98,7 @@ namespace get_link_manga
                     tabDownloadRoot.SelectedIndex = 1;
                 }
 
-                if (tabLeftPanel != null)
-                {
-                    tabLeftPanel.SelectedIndex = 1;
-                }
+                SelectNovelSourceRoot();
 
                 if (txtHakoTagUrl != null)
                 {
@@ -94,14 +115,10 @@ namespace get_link_manga
                 tabDownloadRoot.SelectedIndex = 0;
             }
 
-            if (tabLeftPanel != null)
-            {
-                tabLeftPanel.SelectedIndex = 0;
-            }
+            SelectMangaSourceRoot();
 
             if (lowerUrl.Contains("truyenqq") || lowerUrl.Contains("qquyen"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
                 if (tabManga != null) tabManga.SelectedIndex = 0;
                 if (txtTruyenqqTagUrl != null) txtTruyenqqTagUrl.Text = url;
                 BtnTruyenqqFetchInfo_Click(this, new RoutedEventArgs());
@@ -109,7 +126,6 @@ namespace get_link_manga
             }
             else if (lowerUrl.Contains("nettruyen.tech"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
                 if (tabManga != null) tabManga.SelectedIndex = 2;
                 if (txtNettruyenTechTagUrl != null) txtNettruyenTechTagUrl.Text = url;
                 BtnNettruyenTechFetchInfo_Click(this, new RoutedEventArgs());
@@ -117,7 +133,6 @@ namespace get_link_manga
             }
             else if (lowerUrl.Contains("nettruyen") || (!lowerUrl.Contains("nhentai.net") && (lowerUrl.Contains("truyenrr") || lowerUrl.Contains("truyenco") || lowerUrl.Contains("truyenplus"))))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
                 if (tabManga != null) tabManga.SelectedIndex = 1;
                 if (txtNettruyenTagUrl != null) txtNettruyenTagUrl.Text = url;
                 BtnNettruyenFetchInfo_Click(this, new RoutedEventArgs());
@@ -125,7 +140,7 @@ namespace get_link_manga
             }
             else if (lowerUrl.Contains("daomeoden"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("daomeoden");
                 if (txtDaomeodenTagUrl != null) txtDaomeodenTagUrl.Text = url;
                 BtnDaomeodenFetchInfo_Click(this, new RoutedEventArgs());
@@ -133,7 +148,7 @@ namespace get_link_manga
             }
             else if (lowerUrl.Contains("damconuong"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("damconuong");
                 if (txtDamconuongTagUrl != null) txtDamconuongTagUrl.Text = url;
                 if (IsDamconuongCategoryUrl(url))
@@ -148,7 +163,6 @@ namespace get_link_manga
             }
             else if (lowerUrl.Contains("dilib.vn"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
                 if (tabManga != null) tabManga.SelectedIndex = 3;
                 if (txtDilibTagUrl != null) txtDilibTagUrl.Text = url;
                 BtnDilibFetchInfo_Click(this, new RoutedEventArgs());
@@ -156,7 +170,7 @@ namespace get_link_manga
             }
             else if (lowerUrl.Contains("vi-hentai") || lowerUrl.Contains("vihentai"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 if (tabHentai != null) tabHentai.SelectedIndex = 0;
                 if (txtViHentaiTagUrl != null) txtViHentaiTagUrl.Text = url;
                 BtnViHentaiFetchInfo_Click(this, new RoutedEventArgs());
@@ -164,7 +178,7 @@ namespace get_link_manga
             }
             else if (lowerUrl.Contains("sayhentai") || lowerUrl.Contains("truyengg"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("sayhentai");
                 if (txtTruyenggvnTagUrl != null) txtTruyenggvnTagUrl.Text = url;
                 BtnTruyenggvnFetchInfo_Click(this, new RoutedEventArgs());
@@ -172,7 +186,7 @@ namespace get_link_manga
             }
             else if (lowerUrl.Contains("hentaiforce"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("hentaiforce");
                 if (txtTagUrl != null) txtTagUrl.Text = url;
                 BtnFetchInfo_Click(this, new RoutedEventArgs());
@@ -180,7 +194,7 @@ namespace get_link_manga
             }
             else if (lowerUrl.Contains("nhentai"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("nhentai");
                 if (txtNhentaiTagUrl != null) txtNhentaiTagUrl.Text = url;
                 BtnNhentaiFetchInfo_Click(this, new RoutedEventArgs());
@@ -188,7 +202,7 @@ namespace get_link_manga
             }
             else if (lowerUrl.Contains("hentai2read"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("hentai2read");
                 if (txtHentai2readTagUrl != null) txtHentai2readTagUrl.Text = url;
                 BtnHentai2readFetchInfo_Click(this, new RoutedEventArgs());
@@ -196,7 +210,7 @@ namespace get_link_manga
             }
             else if (lowerUrl.Contains("hentaiera"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("hentaiera");
                 if (txtHentaieraTagUrl != null) txtHentaieraTagUrl.Text = url;
                 BtnHentaieraFetchInfo_Click(this, new RoutedEventArgs());
@@ -287,17 +301,16 @@ namespace get_link_manga
             if (lowerUrl.Contains("hako.vn") || lowerUrl.Contains("hako.re") || lowerUrl.Contains("hako"))
             {
                 if (tabDownloadRoot != null && tabDownloadRoot.Items.Count >= 2) tabDownloadRoot.SelectedIndex = 1;
-                if (tabLeftPanel != null) tabLeftPanel.SelectedIndex = 1;
+                SelectNovelSourceRoot();
                 await ImportLightNovelDirectLinksAsync(new List<string> { url });
                 return true;
             }
 
             if (tabDownloadRoot != null && tabDownloadRoot.Items.Count >= 2) tabDownloadRoot.SelectedIndex = 0;
-            if (tabLeftPanel != null) tabLeftPanel.SelectedIndex = 0;
+            SelectMangaSourceRoot();
 
             if (lowerUrl.Contains("truyenqq") || lowerUrl.Contains("qquyen"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
                 if (tabManga != null) tabManga.SelectedIndex = 0;
                 await ImportTruyenqqDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;
@@ -305,7 +318,6 @@ namespace get_link_manga
 
             if (lowerUrl.Contains("nettruyen.tech"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
                 if (tabManga != null) tabManga.SelectedIndex = 2;
                 await ImportNettruyenTechDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;
@@ -313,7 +325,6 @@ namespace get_link_manga
 
             if (lowerUrl.Contains("nettruyen") || (!lowerUrl.Contains("nhentai.net") && (lowerUrl.Contains("truyenrr") || lowerUrl.Contains("truyenco") || lowerUrl.Contains("truyenplus"))))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
                 if (tabManga != null) tabManga.SelectedIndex = 1;
                 await ImportNettruyenDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;
@@ -321,7 +332,7 @@ namespace get_link_manga
 
             if (lowerUrl.Contains("daomeoden"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("daomeoden");
                 await ImportDaomeodenDirectLinksAsync(new List<string> { url });
                 return true;
@@ -329,7 +340,7 @@ namespace get_link_manga
 
             if (lowerUrl.Contains("damconuong"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("damconuong");
                 await ImportDamconuongDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;
@@ -337,7 +348,6 @@ namespace get_link_manga
 
             if (lowerUrl.Contains("dilib.vn"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 0;
                 if (tabManga != null) tabManga.SelectedIndex = 3;
                 await ImportDilibDirectLinksAsync(new List<string> { url }, clearExisting: false, showMessageBox: showMessageBox);
                 return true;
@@ -345,7 +355,7 @@ namespace get_link_manga
 
             if (lowerUrl.Contains("vi-hentai") || lowerUrl.Contains("vihentai"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 if (tabHentai != null) tabHentai.SelectedIndex = 0;
                 await ImportViHentaiDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;
@@ -353,7 +363,7 @@ namespace get_link_manga
 
             if (lowerUrl.Contains("sayhentai") || lowerUrl.Contains("truyengg"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("sayhentai");
                 await ImportTruyenggvnDirectLinksAsync(new List<string> { url });
                 return true;
@@ -361,7 +371,7 @@ namespace get_link_manga
 
             if (lowerUrl.Contains("hentaiforce"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("hentaiforce");
                 await ImportDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;
@@ -369,7 +379,7 @@ namespace get_link_manga
 
             if (lowerUrl.Contains("nhentai"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("nhentai");
                 await ImportNhentaiDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;
@@ -377,7 +387,7 @@ namespace get_link_manga
 
             if (lowerUrl.Contains("hentai2read"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("hentai2read");
                 await ImportHentai2readDirectLinksAsync(new List<string> { url });
                 return true;
@@ -385,7 +395,7 @@ namespace get_link_manga
 
             if (lowerUrl.Contains("hentaiera"))
             {
-                if (tabMangaSourceSubPanel != null) tabMangaSourceSubPanel.SelectedIndex = 1;
+                SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("hentaiera");
                 await ImportHentaieraDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;

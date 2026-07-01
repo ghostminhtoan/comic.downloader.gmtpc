@@ -416,8 +416,6 @@
                 <TabControl Name="tabLeftPanel" Grid.Row="1" Style="{StaticResource TabControlInLine}" Background="Transparent" BorderThickness="0">
                 <!-- Manga Source Parent Tab -->
                 <TabItem x:Name="tabMangaSourceRootItem" Header="Manga Source" Style="{StaticResource CyberpunkTabItem}" Tag="{StaticResource CyberpunkCyanBrush}">
-                    <TabControl Name="tabMangaSourceSubPanel" Style="{StaticResource TabControlInLine}" Background="Transparent" BorderThickness="0" SelectionChanged="TabManga_SelectionChanged" TabStripPlacement="None">
-                        <TabItem x:Name="tabMangaRootItem" Header="MANGA" Style="{StaticResource CyberpunkTabItem}" Tag="{StaticResource CyberpunkCyanBrush}">
                     <TabControl Name="tabManga" Style="{StaticResource TabControlInLine}" Background="Transparent" BorderThickness="0" SelectionChanged="TabManga_SelectionChanged">
                         <!-- truyenqq tab -->
                         <TabItem x:Name="tabTruyenqqItem" Header="truyenqq" Style="{StaticResource CyberpunkTabItem}">
@@ -1034,8 +1032,6 @@
                         </TabItem>
                     </TabControl>
                 </TabItem>
-            </TabControl>
-        </TabItem>
 
                 <!-- HENTAI Source Parent Tab -->
                 <TabItem x:Name="tabHentaiSourceRootItem" Header="Source Hentai" Style="{StaticResource CyberpunkTabItem}" Tag="{StaticResource CyberpunkPinkBrush}">
