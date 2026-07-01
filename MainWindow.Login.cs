@@ -33,7 +33,7 @@ namespace get_link_manga
 
             try
             {
-                lblStatus.Text = _isVietnameseUi ? "Đang tự đăng nhập damconuong.shop..." : "Auto logging into damconuong.shop...";
+                lblStatus.Text = _isVietnameseUi ? "Đang mở login damconuong.shop và điền sẵn tài khoản..." : "Opening damconuong.shop login and prefilling credentials...";
                 DamconuongLoginWindow loginWindow = await EnsureDamconuongLoginWindowAsync(preferredUrl);
                 bool applied = await loginWindow.ApplyCredentialsAsync(email, password);
                 if (!applied)
@@ -44,21 +44,10 @@ namespace get_link_manga
                     return;
                 }
 
-                bool authenticated = await loginWindow.WaitForAuthenticatedSessionAsync();
-                if (!authenticated)
-                {
-                    lblStatus.Text = _isVietnameseUi
-                        ? "LOGIN đã gửi thông tin nhưng phiên chưa sẵn sàng. Cửa sổ login đang mở để bạn xử lý tiếp rồi tải lại."
-                        : "LOGIN submitted credentials but session is not ready yet. Login window remains open for manual completion.";
-                    return;
-                }
-
-                await loginWindow.CaptureSessionAsync();
-                SyncDamconuongLoginState(loginWindow);
                 lblStatus.Text = _isVietnameseUi
-                    ? "Đã apply email/password và đồng bộ phiên damconuong.shop."
-                    : "Applied email/password and synced damconuong.shop session.";
-                DamconuongLog("Auto login damconuong đã apply và sync cookie.");
+                    ? "Đã điền email/password + remember me. Hãy bấm nút ĐĂNG NHẬP của website, rồi bấm HOÀN TẤT."
+                    : "Prefilled email/password + remember me. Click the website LOGIN button, then click DONE.";
+                DamconuongLog("Đã prefill tài khoản damconuong, chờ người dùng bấm nút đăng nhập của website.");
             }
             catch (Exception ex)
             {
@@ -458,13 +447,7 @@ document.addEventListener('click', function (event) {
     setValue(passwordInput, __PASSWORD__);
     await new Promise(resolve => setTimeout(resolve, 150));
   }
-  const submit = find(submitSelectors);
-  const form = passwordInput.form || emailInput.form || document.querySelector('form');
-  if (submit) submit.click();
-  else if (form?.requestSubmit) form.requestSubmit();
-  else if (form) form.submit();
-  else return 'missing-submit';
-  return 'submitted';
+  return 'prefilled';
 })()";
 
             script = script
@@ -473,9 +456,9 @@ document.addEventListener('click', function (event) {
             string result = await ExecuteStringScriptAsync(script);
 
             _statusText.Text = _isVietnamese
-                ? "Đã apply email/password. Nếu site hỏi captcha, xử lý ngay trong cửa sổ này."
-                : "Email/password applied. If captcha appears, solve it in this window.";
-            return string.Equals(result, "submitted", StringComparison.OrdinalIgnoreCase);
+                ? "Đã điền sẵn tài khoản. Hãy bấm nút ĐĂNG NHẬP của website rồi bấm HOÀN TẤT."
+                : "Credentials prefilled. Click the website LOGIN button, then click DONE.";
+            return string.Equals(result, "prefilled", StringComparison.OrdinalIgnoreCase);
         }
 
         internal async Task<bool> WaitForAuthenticatedSessionAsync()
