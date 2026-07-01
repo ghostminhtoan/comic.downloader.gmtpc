@@ -60,13 +60,15 @@ namespace get_link_manga
                     bool authenticated = applied && await loginWindow.WaitForAuthenticatedSessionAsync();
                     if (authenticated)
                     {
-                        await loginWindow.CaptureSessionAsync();
-                        SyncDamconuongLoginState(loginWindow);
-                        ClearDamconuongLoginInputs();
-                        lblStatus.Text = _isVietnameseUi ? "Đã auto login damconuong.shop." : "damconuong.shop auto login completed.";
-                        DamconuongLog("Auto login thành công. Đã xóa login email/password ở tab source.");
-                        loginWindow.Close();
-                        return;
+                        await loginWindow.CompleteAndCloseAsync();
+                        if (loginWindow.WasCompleted)
+                        {
+                            SyncDamconuongLoginState(loginWindow);
+                            ClearDamconuongLoginInputs();
+                            lblStatus.Text = _isVietnameseUi ? "Đã auto login damconuong.shop." : "damconuong.shop auto login completed.";
+                            DamconuongLog("Auto login thành công bằng flow HOÀN TẤT. Đã xóa login email/password ở tab source.");
+                            return;
+                        }
                     }
                 }
 
@@ -178,6 +180,7 @@ namespace get_link_manga
         internal CookieContainer ResolvedCookies { get; private set; } = new CookieContainer();
         internal Uri ResolvedUri { get; private set; }
         internal string UserAgent { get; private set; } = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+        internal bool WasCompleted => _wasCompleted;
 
         internal DamconuongLoginWindow(string targetUrl, bool isVietnamese)
         {
@@ -565,6 +568,11 @@ document.addEventListener('click', function (event) {
         {
             await WaitUntilReadyAsync();
             await RefreshResolvedSessionAsync();
+        }
+
+        internal async Task CompleteAndCloseAsync()
+        {
+            await CompleteAsync();
         }
 
         private async Task NavigateToLoginFormAsync()
