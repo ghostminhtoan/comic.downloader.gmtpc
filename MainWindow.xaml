@@ -339,7 +339,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Border Grid.Row="0" Margin="0,0,0,10" Padding="14" Style="{StaticResource CyberpunkCard}">
+                <Border Grid.Row="0" Margin="0,0,0,10" Padding="14" Style="{StaticResource CyberpunkCard}" Visibility="Collapsed">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -416,8 +416,7 @@
                 <TabControl Name="tabLeftPanel" Grid.Row="1" Style="{StaticResource TabControlInLine}" Background="Transparent" BorderThickness="0">
                 <!-- Manga Source Parent Tab -->
                 <TabItem x:Name="tabMangaSourceRootItem" Header="Manga Source" Style="{StaticResource CyberpunkTabItem}" Tag="{StaticResource CyberpunkCyanBrush}">
-                    <TabControl Name="tabMangaSourceSubPanel" Style="{StaticResource TabControlInLine}" Background="Transparent" BorderThickness="0" SelectionChanged="TabManga_SelectionChanged">
-                        <!-- MANGA Parent Tab -->
+                    <TabControl Name="tabMangaSourceSubPanel" Style="{StaticResource TabControlInLine}" Background="Transparent" BorderThickness="0" SelectionChanged="TabManga_SelectionChanged" TabStripPlacement="None">
                         <TabItem x:Name="tabMangaRootItem" Header="MANGA" Style="{StaticResource CyberpunkTabItem}" Tag="{StaticResource CyberpunkCyanBrush}">
                     <TabControl Name="tabManga" Style="{StaticResource TabControlInLine}" Background="Transparent" BorderThickness="0" SelectionChanged="TabManga_SelectionChanged">
                         <!-- truyenqq tab -->
@@ -1035,9 +1034,11 @@
                         </TabItem>
                     </TabControl>
                 </TabItem>
+            </TabControl>
+        </TabItem>
 
-                <!-- HENTAI Parent Tab -->
-                <TabItem Header="HENTAI" Style="{StaticResource CyberpunkTabItem}" Tag="{StaticResource CyberpunkPinkBrush}">
+                <!-- HENTAI Source Parent Tab -->
+                <TabItem x:Name="tabHentaiSourceRootItem" Header="Source Hentai" Style="{StaticResource CyberpunkTabItem}" Tag="{StaticResource CyberpunkPinkBrush}">
                     <TabControl Name="tabHentai" Style="{StaticResource TabControlInLine}" Background="Transparent" BorderThickness="0">
                         <!-- hentaivn (formerly vi-hentai.pro) tab -->
                         <TabItem Header="hentaivn" Style="{StaticResource CyberpunkTabItem}" Tag="{StaticResource CyberpunkCyanBrush}">
@@ -1183,7 +1184,7 @@
                             </ScrollViewer>
                         </TabItem>
 
-                        <TabItem Header="damconuong.shop" Style="{StaticResource CyberpunkTabItem}" Tag="{StaticResource CyberpunkCyanBrush}">
+                        <TabItem x:Name="tabDamconuongItem" Header="damconuong.shop" Style="{StaticResource CyberpunkTabItem}" Tag="{StaticResource CyberpunkCyanBrush}">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="True" Background="Transparent" BorderThickness="0" Padding="0">
                             <Grid Margin="0,10,0,0">
                                 <Border Name="borderDamconuongLeftPanel" Style="{StaticResource CyberpunkCard}" Padding="15">
@@ -2029,8 +2030,6 @@
                         </TabItem>
                     </TabControl>
                 </TabItem>
-            </TabControl>
-        </TabItem>
 
         <!-- Novel Source Parent Tab -->
         <TabItem x:Name="tabLightNovelRootItem" Header="Novel Source" Style="{StaticResource CyberpunkTabItem}" Visibility="Visible">
@@ -2169,6 +2168,86 @@
                     </ScrollViewer>
                 </TabItem>
             </TabControl>
+        </TabItem>
+
+        <TabItem x:Name="tabPasswordRootItem" Header="Password" Style="{StaticResource CyberpunkTabItem}" Visibility="Visible">
+            <TabItem.Tag>
+                <SolidColorBrush Color="#66f2ff"/>
+            </TabItem.Tag>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="True" Background="Transparent" BorderThickness="0" Padding="0">
+                <Grid Margin="0,6,0,0">
+                    <Border Style="{StaticResource CyberpunkCard}" Padding="15">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="PASSWORD MANAGER" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold" Margin="0,0,0,15"/>
+
+                            <Grid Grid.Row="1" Margin="0,0,0,15">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="DOMAIN" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                    <ComboBox Name="cmbPasswordManagerDomain"
+                                              Style="{StaticResource CyberpunkComboBox}"
+                                              Height="30"
+                                              SelectedIndex="0">
+                                        <ComboBoxItem Content="damconuong.shop"/>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="USERNAME" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                    <TextBox Name="txtPasswordManagerUsername"
+                                             Background="#0e121a"
+                                             BorderBrush="{StaticResource CyberpunkBorderBrush}"
+                                             Foreground="{StaticResource CyberpunkTextBrush}"
+                                             CaretBrush="{StaticResource CyberpunkCyanBrush}"
+                                             Height="32"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="4">
+                                    <TextBlock Text="PASSWORD" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                    <PasswordBox Name="txtPasswordManagerPassword"
+                                                 Background="#0e121a"
+                                                 BorderBrush="{StaticResource CyberpunkBorderBrush}"
+                                                 Foreground="{StaticResource CyberpunkTextBrush}"
+                                                 Height="32"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Grid.Row="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" Padding="12" CornerRadius="3" Margin="0,0,12,0">
+                                    <TextBlock Text="APPLY sẽ đẩy username/password sang tab source của domain tương ứng, auto login, rồi tab source tự xóa ô login sau khi hoàn tất." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
+                                </Border>
+                                <Button Grid.Column="1"
+                                        Name="btnPasswordManagerApply"
+                                        Content="APPLY"
+                                        Click="BtnPasswordManagerApply_Click"
+                                        Style="{StaticResource CompactCyanButton}"
+                                        MinWidth="110"
+                                        Height="32"
+                                        Padding="12,0"
+                                        VerticalAlignment="Top"
+                                        FontWeight="Bold"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </ScrollViewer>
         </TabItem>
     </TabControl>
 </Grid>

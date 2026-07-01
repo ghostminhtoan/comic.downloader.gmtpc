@@ -39,6 +39,61 @@ namespace get_link_manga
             }
         }
 
+        private async void BtnPasswordManagerApply_Click(object sender, RoutedEventArgs e)
+        {
+            string domain = (cmbPasswordManagerDomain?.SelectedItem as ComboBoxItem)?.Content?.ToString()?.Trim() ?? string.Empty;
+            string username = txtPasswordManagerUsername?.Text?.Trim() ?? string.Empty;
+            string password = txtPasswordManagerPassword?.Password ?? string.Empty;
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(domain))
+                {
+                    lblStatus.Text = _isVietnameseUi ? "Tab password chưa có domain." : "Password tab has no domain.";
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+                {
+                    lblStatus.Text = _isVietnameseUi ? "Thiếu username hoặc password ở tab password." : "Missing username or password in password tab.";
+                    return;
+                }
+
+                if (!string.Equals(domain, "damconuong.shop", StringComparison.OrdinalIgnoreCase))
+                {
+                    lblStatus.Text = _isVietnameseUi ? $"Chưa hỗ trợ auto login cho {domain}." : $"Auto login not supported for {domain} yet.";
+                    return;
+                }
+
+                if (tabLeftPanel != null && tabHentaiSourceRootItem != null)
+                {
+                    tabLeftPanel.SelectedItem = tabHentaiSourceRootItem;
+                }
+
+                if (tabHentai != null && tabDamconuongItem != null)
+                {
+                    tabHentai.SelectedItem = tabDamconuongItem;
+                }
+
+                if (txtDamconuongLoginEmail != null)
+                {
+                    txtDamconuongLoginEmail.Text = username;
+                }
+
+                if (txtDamconuongLoginPassword != null)
+                {
+                    txtDamconuongLoginPassword.Password = password;
+                }
+
+                await OpenDamconuongLoginAsync(txtDamconuongTagUrl?.Text?.Trim(), username, password);
+            }
+            catch (Exception ex)
+            {
+                lblStatus.Text = (_isVietnameseUi ? "Apply password lỗi: " : "Password apply failed: ") + ex.Message;
+                DamconuongLog("Lỗi apply password: " + ex.Message);
+            }
+        }
+
         private async Task OpenDamconuongLoginAsync(string targetUrl, string loginEmail, string loginPassword)
         {
             if (_isDamconuongLoginWindowActive)
