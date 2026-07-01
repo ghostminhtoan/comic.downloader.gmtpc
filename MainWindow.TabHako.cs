@@ -1409,7 +1409,7 @@ namespace get_link_manga
 
                     foreach (Match match in Regex.Matches(
                         sectionHtml,
-                        @"<a[^>]+href\s*=\s*[""'](?<link>(?:https?:\/\/(?:ln\.hako\.vn|docln\.net|ln\.hako\.re))?\/(?:truyen|ai-dich|sang-tac)\/[^""'#?]+\/c\d+[^""'#?]*)[""'][^>]*>(?<text>.*?)</a>",
+                        @"<div[^>]*class\s*=\s*[""'][^""']*\bchapter-name\b[^""']*[""'][^>]*>\s*(?:<i[^>]*>.*?</i>\s*)*<a[^>]+href\s*=\s*[""'](?<link>(?:https?:\/\/(?:ln\.hako\.vn|docln\.net|ln\.hako\.re))?\/(?:truyen|ai-dich|sang-tac)\/[^""'#?]+\/c\d+[^""'#?]*)[""'][^>]*>(?<text>.*?)</a>",
                         RegexOptions.IgnoreCase | RegexOptions.Singleline))
                     {
                         string link = NormalizeHakoUrl(match.Groups["link"].Value);
@@ -1457,7 +1457,7 @@ namespace get_link_manga
 
             foreach (Match match in Regex.Matches(
                 html ?? string.Empty,
-                @"<a[^>]+href\s*=\s*[""'](?<link>(?:https?:\/\/(?:ln\.hako\.vn|docln\.net|ln\.hako\.re))?\/(?:truyen|ai-dich|sang-tac)\/[^""'#?]+\/c\d+[^""'#?]*)[""'][^>]*>(?<text>.*?)</a>",
+                @"<div[^>]*class\s*=\s*[""'][^""']*\bchapter-name\b[^""']*[""'][^>]*>\s*(?:<i[^>]*>.*?</i>\s*)*<a[^>]+href\s*=\s*[""'](?<link>(?:https?:\/\/(?:ln\.hako\.vn|docln\.net|ln\.hako\.re))?\/(?:truyen|ai-dich|sang-tac)\/[^""'#?]+\/c\d+[^""'#?]*)[""'][^>]*>(?<text>.*?)</a>",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline))
             {
                 string link = NormalizeHakoUrl(match.Groups["link"].Value);
