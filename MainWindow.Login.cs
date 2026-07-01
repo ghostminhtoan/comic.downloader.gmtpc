@@ -3,9 +3,12 @@ using Microsoft.Web.WebView2.Wpf;
 using System;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Media;
 
 namespace get_link_manga
@@ -44,10 +47,21 @@ namespace get_link_manga
                     return;
                 }
 
+                bool authenticated = await loginWindow.WaitForAuthenticatedSessionAsync();
+                if (!authenticated)
+                {
+                    lblStatus.Text = _isVietnameseUi
+                        ? "LOGIN đã chạy chuỗi click/gõ nhưng phiên chưa sẵn sàng. Cửa sổ login vẫn mở để bạn xử lý tiếp."
+                        : "LOGIN ran the click/type sequence but the session is not ready yet. The login window remains open.";
+                    return;
+                }
+
+                await loginWindow.CaptureSessionAsync();
+                SyncDamconuongLoginState(loginWindow);
                 lblStatus.Text = _isVietnameseUi
-                    ? "Đã điền email/password + remember me. Hãy bấm nút ĐĂNG NHẬP của website, rồi bấm HOÀN TẤT."
-                    : "Prefilled email/password + remember me. Click the website LOGIN button, then click DONE.";
-                DamconuongLog("Đã prefill tài khoản damconuong, chờ người dùng bấm nút đăng nhập của website.");
+                    ? "Đã login damconuong.shop và đồng bộ phiên."
+                    : "damconuong.shop login completed and synced.";
+                DamconuongLog("Đã login damconuong bằng native input và sync cookie.");
             }
             catch (Exception ex)
             {
@@ -161,6 +175,13 @@ namespace get_link_manga
         private readonly bool _isVietnamese;
         private readonly TaskCompletionSource<bool> _readyTcs = new TaskCompletionSource<bool>();
         private bool _wasCompleted;
+        private const uint MouseEventLeftDown = 0x0002;
+        private const uint MouseEventLeftUp = 0x0004;
+        private const uint KeyeventfKeyup = 0x0002;
+        private const uint KeyeventfUnicode = 0x0004;
+        private const ushort VkTab = 0x09;
+        private const ushort VkSpace = 0x20;
+        private const ushort VkReturn = 0x0D;
 
         internal CookieContainer ResolvedCookies { get; private set; } = new CookieContainer();
         internal Uri ResolvedUri { get; private set; }
@@ -402,74 +423,45 @@ document.addEventListener('click', function (event) {
     }
     return null;
   };
-  const applyValue = (el, value) => {
-    el.focus();
-    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
-      || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value')?.set;
-    if (setter) setter.call(el, value);
-    else el.value = value;
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-  };
-  const typeSequentially = async (el, value) => {
-    applyValue(el, '');
-    for (const ch of value) {
-      el.dispatchEvent(new KeyboardEvent('keydown', { key: ch, bubbles: true }));
-      el.dispatchEvent(new KeyboardEvent('keypress', { key: ch, bubbles: true }));
-      applyValue(el, (el.value || '') + ch);
-      el.dispatchEvent(new KeyboardEvent('keyup', { key: ch, bubbles: true }));
-      await new Promise(resolve => setTimeout(resolve, 35));
-    }
-    el.dispatchEvent(new Event('blur', { bubbles: true }));
-  };
-  const setChecked = (el, checked) => {
-    el.focus();
-    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'checked')?.set
-      || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'checked')?.set;
-    if (setter) setter.call(el, checked);
-    else el.checked = checked;
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-    if (!!el.checked !== checked && typeof el.click === 'function') {
-      el.click();
-    }
-    el.dispatchEvent(new Event('blur', { bubbles: true }));
+  const getCenter = el => {
+    const rect = el.getBoundingClientRect();
+    return {
+      x: Math.round(rect.left + rect.width / 2),
+      y: Math.round(rect.top + rect.height / 2)
+    };
   };
   const emailInput = find(selectorsEmail);
   const passwordInput = find(selectorsPassword);
   if (!emailInput || !passwordInput) return 'missing';
-  await typeSequentially(emailInput, __EMAIL__);
-  await new Promise(resolve => setTimeout(resolve, 120));
-  await typeSequentially(passwordInput, __PASSWORD__);
   const rememberInput = find(rememberSelectors);
-  if (rememberInput && !rememberInput.checked) {
-    setChecked(rememberInput, true);
-  } else if (!rememberInput) {
-    const rememberLabel = Array.from(document.querySelectorAll('label,span,div')).find(node => {
-      const text = (node.textContent || '').trim().toLowerCase();
-      return text.includes('remember me');
-    });
-    if (rememberLabel) {
-      rememberLabel.click();
-    }
-  }
-  await new Promise(resolve => setTimeout(resolve, 180));
-  if ((passwordInput.value || '') !== __PASSWORD__) {
-    await typeSequentially(passwordInput, __PASSWORD__);
-    await new Promise(resolve => setTimeout(resolve, 180));
-  }
-  return 'prefilled';
+  return JSON.stringify({
+    email: getCenter(emailInput),
+    password: getCenter(passwordInput),
+    rememberExists: !!rememberInput,
+    rememberChecked: !!rememberInput?.checked
+  });
 })()";
 
             script = script
                 .Replace("__EMAIL__", ToJavaScriptStringLiteral(email))
                 .Replace("__PASSWORD__", ToJavaScriptStringLiteral(password));
             string result = await ExecuteStringScriptAsync(script);
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                return false;
+            }
 
+            LoginUiTargets targets = LoginUiTargets.TryParse(result);
+            if (targets == null)
+            {
+                return false;
+            }
+
+            await RunNativeLoginSequenceAsync(email, password, targets);
             _statusText.Text = _isVietnamese
-                ? "Đã điền sẵn tài khoản. Hãy bấm nút ĐĂNG NHẬP của website rồi bấm HOÀN TẤT."
-                : "Credentials prefilled. Click the website LOGIN button, then click DONE.";
-            return string.Equals(result, "prefilled", StringComparison.OrdinalIgnoreCase);
+                ? "Đã chạy chuỗi click/gõ native. Đang chờ xác thực..."
+                : "Native click/type sequence completed. Waiting for authentication...";
+            return true;
         }
 
         internal async Task<bool> WaitForAuthenticatedSessionAsync()
@@ -646,6 +638,88 @@ document.addEventListener('click', function (event) {
             return DecodeWebViewString(raw);
         }
 
+        private async Task RunNativeLoginSequenceAsync(string email, string password, LoginUiTargets targets)
+        {
+            Activate();
+            _webView.Focus();
+            IntPtr hwnd = new WindowInteropHelper(this).Handle;
+            SetForegroundWindow(hwnd);
+            await Task.Delay(180);
+
+            ClickWebViewPoint(targets.EmailX, targets.EmailY);
+            await Task.Delay(120);
+            SendUnicodeText(email);
+            await Task.Delay(140);
+
+            SendVirtualKey(VkTab);
+            await Task.Delay(140);
+            SendUnicodeText(password);
+            await Task.Delay(140);
+
+            SendVirtualKey(VkTab);
+            await Task.Delay(140);
+            if (targets.RememberExists && !targets.RememberChecked)
+            {
+                SendVirtualKey(VkSpace);
+                await Task.Delay(120);
+            }
+
+            SendVirtualKey(VkTab);
+            await Task.Delay(120);
+            SendVirtualKey(VkReturn);
+            await Task.Delay(220);
+        }
+
+        private void ClickWebViewPoint(double webX, double webY)
+        {
+            Point screenPoint = _webView.PointToScreen(new Point(webX, webY));
+            SetCursorPos((int)Math.Round(screenPoint.X), (int)Math.Round(screenPoint.Y));
+            mouse_event(MouseEventLeftDown, 0, 0, 0, UIntPtr.Zero);
+            mouse_event(MouseEventLeftUp, 0, 0, 0, UIntPtr.Zero);
+        }
+
+        private static void SendUnicodeText(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return;
+            }
+
+            foreach (char ch in text)
+            {
+                SendKeyboardInput(0, ch, KeyeventfUnicode);
+                SendKeyboardInput(0, ch, KeyeventfUnicode | KeyeventfKeyup);
+            }
+        }
+
+        private static void SendVirtualKey(ushort virtualKey)
+        {
+            SendKeyboardInput(virtualKey, '\0', 0);
+            SendKeyboardInput(virtualKey, '\0', KeyeventfKeyup);
+        }
+
+        private static void SendKeyboardInput(ushort virtualKey, char unicodeChar, uint flags)
+        {
+            var input = new INPUT
+            {
+                type = 1,
+                U = new InputUnion
+                {
+                    ki = new KEYBDINPUT
+                    {
+                        wVk = virtualKey,
+                        wScan = unicodeChar,
+                        dwFlags = flags,
+                        time = 0,
+                        dwExtraInfo = IntPtr.Zero
+                    }
+                }
+            };
+
+            INPUT[] inputs = { input };
+            SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+        }
+
         private static string DecodeWebViewString(string value)
         {
             string text = (value ?? string.Empty).Trim();
@@ -695,8 +769,82 @@ document.addEventListener('click', function (event) {
                     (_isVietnamese ? "Không thể lưu phiên login: " : "Failed to save login session: ") + ex.Message,
                     "Error",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBoxImage.Error);
             }
         }
+
+        private sealed class LoginUiTargets
+        {
+            internal double EmailX { get; private set; }
+            internal double EmailY { get; private set; }
+            internal double PasswordX { get; private set; }
+            internal double PasswordY { get; private set; }
+            internal bool RememberExists { get; private set; }
+            internal bool RememberChecked { get; private set; }
+
+            internal static LoginUiTargets TryParse(string raw)
+            {
+                Match[] matches = Regex.Matches(raw ?? string.Empty, @"-?\d+(?:\.\d+)?")
+                    .Cast<Match>()
+                    .ToArray();
+                if (matches.Length < 4)
+                {
+                    return null;
+                }
+
+                return new LoginUiTargets
+                {
+                    EmailX = ParseDouble(matches[0].Value),
+                    EmailY = ParseDouble(matches[1].Value),
+                    PasswordX = ParseDouble(matches[2].Value),
+                    PasswordY = ParseDouble(matches[3].Value),
+                    RememberExists = raw.IndexOf(@"""rememberExists"":true", StringComparison.OrdinalIgnoreCase) >= 0,
+                    RememberChecked = raw.IndexOf(@"""rememberChecked"":true", StringComparison.OrdinalIgnoreCase) >= 0
+                };
+            }
+
+            private static double ParseDouble(string value)
+            {
+                return double.TryParse(value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double parsed)
+                    ? parsed
+                    : 0d;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct INPUT
+        {
+            internal uint type;
+            internal InputUnion U;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        private struct InputUnion
+        {
+            [FieldOffset(0)]
+            internal KEYBDINPUT ki;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct KEYBDINPUT
+        {
+            internal ushort wVk;
+            internal ushort wScan;
+            internal uint dwFlags;
+            internal uint time;
+            internal IntPtr dwExtraInfo;
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetCursorPos(int x, int y);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, UIntPtr dwExtraInfo);
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
     }
 }
