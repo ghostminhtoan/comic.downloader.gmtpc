@@ -1407,45 +1407,16 @@ namespace get_link_manga
                         "title"));
                     volumeTitle = NormalizeHakoVolumeTitle(volumeTitle, volumeOrder);
 
-                    foreach (Match match in Regex.Matches(
+                    foreach (HakoChapterInfo chapter in ExtractHakoChapterLinksFromBlock(
                         sectionHtml,
-                        @"<div[^>]*class\s*=\s*[""'][^""']*\bchapter-name\b[^""']*[""'][^>]*>\s*(?:<i[^>]*>.*?</i>\s*)*<a[^>]+href\s*=\s*[""'](?<link>(?:https?:\/\/(?:ln\.hako\.vn|docln\.net|ln\.hako\.re))?\/(?:truyen|ai-dich|sang-tac)\/[^""'#?]+\/c\d+[^""'#?]*)[""'][^>]*>(?<text>.*?)</a>",
-                        RegexOptions.IgnoreCase | RegexOptions.Singleline))
+                        bookTitle,
+                        basePath,
+                        seen,
+                        volumeTitle,
+                        volumeOrder,
+                        ref sequenceIndex))
                     {
-                        string link = NormalizeHakoUrl(match.Groups["link"].Value);
-                        if (!TryParseHakoChapterUrl(link, out _, out _, out _, out _, out string canonicalChapterUrl))
-                        {
-                            continue;
-                        }
-
-                        link = canonicalChapterUrl;
-                        Uri chapterUri = new Uri(link);
-                        if (!chapterUri.AbsolutePath.StartsWith(basePath + "/", StringComparison.OrdinalIgnoreCase))
-                        {
-                            continue;
-                        }
-
-                        if (!seen.Add(link))
-                        {
-                            continue;
-                        }
-
-                        string title = StripHtmlToPlainText(match.Groups["text"].Value);
-                        if (string.IsNullOrWhiteSpace(title))
-                        {
-                            title = HumanizeHakoSlug(chapterUri.Segments.LastOrDefault());
-                        }
-
-                        chapters.Add(new HakoChapterInfo
-                        {
-                            BookTitle = bookTitle,
-                            Link = link,
-                            Title = title,
-                            ChapterNumber = TryExtractHakoChapterNumber(title, link),
-                            VolumeTitle = volumeTitle,
-                            VolumeOrder = volumeOrder,
-                            SequenceIndex = ++sequenceIndex
-                        });
+                        chapters.Add(chapter);
                     }
                 }
 
@@ -1455,9 +1426,39 @@ namespace get_link_manga
                 }
             }
 
-            foreach (Match match in Regex.Matches(
+            foreach (HakoChapterInfo chapter in ExtractHakoChapterLinksFromBlock(
                 html ?? string.Empty,
-                @"<div[^>]*class\s*=\s*[""'][^""']*\bchapter-name\b[^""']*[""'][^>]*>\s*(?:<i[^>]*>.*?</i>\s*)*<a[^>]+href\s*=\s*[""'](?<link>(?:https?:\/\/(?:ln\.hako\.vn|docln\.net|ln\.hako\.re))?\/(?:truyen|ai-dich|sang-tac)\/[^""'#?]+\/c\d+[^""'#?]*)[""'][^>]*>(?<text>.*?)</a>",
+                bookTitle,
+                basePath,
+                seen,
+                null,
+                0,
+                ref sequenceIndex))
+            {
+                chapters.Add(chapter);
+            }
+
+            return chapters;
+        }
+
+        private List<HakoChapterInfo> ExtractHakoChapterLinksFromBlock(
+            string htmlBlock,
+            string bookTitle,
+            string basePath,
+            HashSet<string> seen,
+            string volumeTitle,
+            int volumeOrder,
+            ref int sequenceIndex)
+        {
+            var chapters = new List<HakoChapterInfo>();
+            if (string.IsNullOrWhiteSpace(htmlBlock))
+            {
+                return chapters;
+            }
+
+            foreach (Match match in Regex.Matches(
+                htmlBlock,
+                @"<a[^>]+href\s*=\s*[""'](?<link>(?:https?:\/\/(?:ln\.hako\.vn|docln\.net|ln\.hako\.re))?\/(?:truyen|ai-dich|sang-tac)\/[^""'#?]+\/c\d+[^""'#?]*)[""'][^>]*(?:title\s*=\s*[""'](?<titleAttr>[^""']*)[""'])?[^>]*>(?<text>.*?)</a>",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline))
             {
                 string link = NormalizeHakoUrl(match.Groups["link"].Value);
@@ -1473,12 +1474,17 @@ namespace get_link_manga
                     continue;
                 }
 
-                if (!seen.Add(link))
+                if (seen != null && !seen.Add(link))
                 {
                     continue;
                 }
 
-                string title = StripHtmlToPlainText(match.Groups["text"].Value);
+                string title = StripHtmlToPlainText(match.Groups["titleAttr"].Value);
+                if (string.IsNullOrWhiteSpace(title))
+                {
+                    title = StripHtmlToPlainText(match.Groups["text"].Value);
+                }
+
                 if (string.IsNullOrWhiteSpace(title))
                 {
                     title = HumanizeHakoSlug(chapterUri.Segments.LastOrDefault());
@@ -1490,6 +1496,8 @@ namespace get_link_manga
                     Link = link,
                     Title = title,
                     ChapterNumber = TryExtractHakoChapterNumber(title, link),
+                    VolumeTitle = volumeTitle,
+                    VolumeOrder = volumeOrder,
                     SequenceIndex = ++sequenceIndex
                 });
             }
