@@ -1422,6 +1422,7 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
         {
             var chapters = new List<MangadexChapterDescriptor>();
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var seenChapterNumbers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             int sequenceIndex = 0;
             int offset = 0;
 
@@ -1443,6 +1444,18 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                     if (string.IsNullOrWhiteSpace(chapterId) || !seen.Add(chapterId))
                     {
                         continue;
+                    }
+
+                    string lang = (chapter.Attributes?.TranslatedLanguage ?? string.Empty).Trim().ToLower();
+                    string chapNum = (chapter.Attributes?.Chapter ?? string.Empty).Trim();
+                    if (!string.IsNullOrEmpty(chapNum))
+                    {
+                        string groupKey = $"{lang}_{chapNum}";
+                        if (seenChapterNumbers.Contains(groupKey))
+                        {
+                            continue;
+                        }
+                        seenChapterNumbers.Add(groupKey);
                     }
 
                     _mangadexChapterCache[chapterId] = chapter;
