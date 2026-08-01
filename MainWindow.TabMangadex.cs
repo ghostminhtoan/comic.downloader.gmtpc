@@ -272,6 +272,25 @@ namespace get_link_manga
             for (int attempt = 1; attempt <= 4; attempt++)
             {
                 token.ThrowIfCancellationRequested();
+
+                // First try direct HttpClient fetch
+                try
+                {
+                    string json = await FetchStringAsync(url, token);
+                    if (!string.IsNullOrWhiteSpace(json))
+                    {
+                        return DeserializeMangadexJson<T>(json);
+                    }
+
+                    throw new HttpRequestException("MangaDex trả JSON rỗng.");
+                }
+                catch (Exception ex)
+                {
+                    lastError = ex;
+                    MangadexLog($"HttpClient lỗi với MangaDex. Thử các phương thức fallback ({attempt}/4): {ex.Message}");
+                }
+
+                // If HttpClient fails, try browser fallback if it's a mangadex host
                 if (IsMangadexBrowserFetchUrl(url))
                 {
                     try
@@ -291,22 +310,7 @@ namespace get_link_manga
                     }
                 }
 
-                try
-                {
-                    string json = await FetchStringAsync(url, token);
-                    if (!string.IsNullOrWhiteSpace(json))
-                    {
-                        return DeserializeMangadexJson<T>(json);
-                    }
-
-                    throw new HttpRequestException("MangaDex trả JSON rỗng.");
-                }
-                catch (Exception ex)
-                {
-                    lastError = ex;
-                    MangadexLog($"HttpClient lỗi với MangaDex. Đổi sang curl fallback ({attempt}/4): {ex.Message}");
-                }
-
+                // If both fail, try curl fallback
                 try
                 {
                     string json = await FetchMangadexTextWithCurlAsync(url, token);
@@ -1883,7 +1887,7 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
 
                 WriteTempProgressLog(tempFolder, item, "Downloading", 0, imageUrls.Count, "0/0 pages", $"Bắt đầu tải {chapterTitle}");
 
-                int maxThreads = 1;
+                int maxThreads = GetCurrentConnectionLimit();
                 List<string> pageFilenames = DetermineImageFilenames(imageUrls);
                 using (var semaphore = new DynamicSemaphore(maxThreads, GetCurrentConnectionLimit))
                 {
