@@ -1,0 +1,191 @@
+<UserControl x:Class="get_link_manga.SingleComicFolderToolsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/MainWindowStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid Margin="0,10,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource CyberpunkCard}" Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="12"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="14"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="SPLIT SINGLE COMIC FOLDERS" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold"/>
+                <TextBlock Grid.Row="2"
+                           Text="Chia book\chapter thành folder con theo khoảng chap tròn. Chap thập phân vẫn tính theo nhóm chap nguyên."
+                           Foreground="{StaticResource CyberpunkMutedTextBrush}"
+                           FontSize="11"
+                           TextWrapping="Wrap"/>
+
+                <Grid Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="CHAP GROUP" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center"/>
+
+                    <Grid Grid.Column="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox x:Name="txtSplitSingleComicRoot"
+                                 Grid.Column="0"
+                                 Style="{StaticResource SurfaceTextBox}"
+                                 Height="26"
+                                 VerticalContentAlignment="Center"/>
+
+                        <Button x:Name="btnBrowseSplitSingleComicRoot"
+                                Grid.Column="2"
+                                Content="BROWSE"
+                                Click="BtnBrowseSplitSingleComicRoot_Click"
+                                Style="{StaticResource CompactCyanButton}"
+                                Width="72"
+                                Margin="0"/>
+                    </Grid>
+
+                    <ComboBox x:Name="cmbSplitChapterGroupSize"
+                              Grid.Column="4"
+                              Style="{StaticResource CyberpunkComboBox}"
+                              Height="26"
+                              Width="120"
+                              VerticalContentAlignment="Center"
+                              HorizontalContentAlignment="Center"
+                              SelectedIndex="1">
+                        <ComboBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel Background="#121622"/>
+                            </ItemsPanelTemplate>
+                        </ComboBox.ItemsPanel>
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="ComboBoxItem" BasedOn="{StaticResource CyberpunkComboBoxItemStyle}"/>
+                        </ComboBox.ItemContainerStyle>
+                        <ComboBoxItem Content="100"/>
+                        <ComboBoxItem Content="200"/>
+                        <ComboBoxItem Content="300"/>
+                        <ComboBoxItem Content="400"/>
+                        <ComboBoxItem Content="500"/>
+                        <ComboBoxItem Content="600"/>
+                    </ComboBox>
+
+                    <ComboBox x:Name="cmbSplitSingleComicFolderType"
+                              Grid.Column="6"
+                              Style="{StaticResource CyberpunkComboBox}"
+                              Height="26"
+                              Width="150"
+                              VerticalContentAlignment="Center"
+                              HorizontalContentAlignment="Center"
+                              SelectedIndex="0">
+                        <ComboBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel Background="#121622"/>
+                            </ItemsPanelTemplate>
+                        </ComboBox.ItemsPanel>
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="ComboBoxItem" BasedOn="{StaticResource CyberpunkComboBoxItemStyle}"/>
+                        </ComboBox.ItemContainerStyle>
+                        <ComboBoxItem Content="chapter"/>
+                        <ComboBoxItem Content="book-chapter"/>
+                    </ComboBox>
+
+                    <Button x:Name="btnSplitSingleComicFolders"
+                            Grid.Column="8"
+                            Content="SPLIT FOLDER"
+                            Click="BtnSplitSingleComicFolders_Click"
+                            Style="{StaticResource CompactCyanButton}"
+                            Width="124"
+                            Margin="0"/>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource CyberpunkCard}" Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="12"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="14"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="MERGE SINGLE COMIC FOLDERS" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold"/>
+                <TextBlock Grid.Row="2"
+                           Text="Gộp chapter trong các subfolder về folder đã chọn. Chỉ xóa subfolder rỗng."
+                           Foreground="{StaticResource CyberpunkMutedTextBrush}"
+                           FontSize="11"
+                           TextWrapping="Wrap"/>
+
+                <Grid Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="MERGE ROOT" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center"/>
+
+                    <Grid Grid.Column="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox x:Name="txtMergeSingleComicRoot"
+                                 Grid.Column="0"
+                                 Style="{StaticResource SurfaceTextBox}"
+                                 Height="26"
+                                 VerticalContentAlignment="Center"/>
+
+                        <Button x:Name="btnBrowseMergeSingleComicRoot"
+                                Grid.Column="2"
+                                Content="BROWSE"
+                                Click="BtnBrowseMergeSingleComicRoot_Click"
+                                Style="{StaticResource CompactCyanButton}"
+                                Width="72"
+                                Margin="0"/>
+                    </Grid>
+
+                    <Button x:Name="btnMergeSingleComicFolders"
+                            Grid.Column="4"
+                            Content="MERGE FOLDER"
+                            Click="BtnMergeSingleComicFolders_Click"
+                            Style="{StaticResource CompactPinkButton}"
+                            Width="128"
+                            Margin="0"/>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

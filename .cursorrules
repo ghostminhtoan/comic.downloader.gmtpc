@@ -1,0 +1,12 @@
+# Attention AI Agents (Cursor, Windsurf, Cline, Roo Code, etc.)
+
+CRITICAL: Before writing, modifying, or analyzing any code in this repository, you MUST read the central workflow guidelines file:
+👉 [workflow.md](file:///r:/HDD%20R/ZC%20SYMLINK/USERS/source/repos/ghostminhtoan/get%20link%20manga/workflow.md)
+
+LƯU Ý QUAN TRỌNG (Tiếng Việt):
+Trước khi thực hiện bất kỳ thay đổi nào hoặc viết code mới, bạn BẮT BUỘC phải đọc kỹ toàn bộ nội dung file quy tắc và hướng dẫn dự án tại đây:
+👉 [workflow.md](file:///r:/HDD%20R/ZC%20SYMLINK/USERS/source/repos/ghostminhtoan/get%20link%20manga/workflow.md)
+
+File này chứa toàn bộ cấu trúc dự án, tiêu chuẩn code C#, quy tắc thiết kế giao diện WPF (Cyberpunk/HandyControl), và quy trình làm việc chuẩn.
+
+CRITICAL RULE: DO NOT write or edit code directly in MainWindow.xaml.cs. All core logic must be partitioned into the corresponding partial code-behind files (MainWindow.System*.cs, MainWindow.Tab**.cs, MainWindow.UI***.cs).

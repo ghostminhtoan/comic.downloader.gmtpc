@@ -1,0 +1,966 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Security.Cryptography;
+using System.Diagnostics;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+
+namespace get_link_manga
+{
+    public partial class MainWindow : Window
+    {
+        private bool _isGalleryPopupPreviewEnabled = true;
+        private CancellationTokenSource _galleryHoverPreviewCts;
+        private FrameworkElement _activeGalleryHoverPreviewHost;
+        private GalleryItem _activeGalleryHoverPreviewItem;
+        private readonly HashSet<string> _galleryHoverPreviewBitmapMissingCache = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, List<string>> _galleryHoverPreviewCandidateCache = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        private readonly object _galleryHoverPreviewCandidateCacheLock = new object();
+        private readonly SemaphoreSlim _galleryHoverPreviewImageSemaphore = new SemaphoreSlim(24, 24);
+
+        private void GalleryResultPreviewHost_MouseEnter(object sender, MouseEventArgs e)
+        {
+            StartGalleryHoverPreview(sender as FrameworkElement);
+        }
+
+        private void GalleryResultPreviewHost_MouseMove(object sender, MouseEventArgs e)
+        {
+            StartGalleryHoverPreview(sender as FrameworkElement);
+        }
+
+        private void GalleryResultPreviewHost_MouseLeave(object sender, MouseEventArgs e)
+        {
+            StopGalleryHoverPreview(sender as FrameworkElement);
+        }
+
+        internal void ForwardGalleryPreviewMouseEnter(FrameworkElement host)
+        {
+            StartGalleryHoverPreview(host);
+        }
+
+        internal void ForwardGalleryPreviewMouseMove(FrameworkElement host)
+        {
+            StartGalleryHoverPreview(host);
+        }
+
+        internal void ForwardGalleryPreviewMouseLeave(FrameworkElement host)
+        {
+            StopGalleryHoverPreview(host);
+        }
+
+        internal void PrefetchGalleryHoverPreview(IEnumerable<GalleryItem> items)
+        {
+            if (items == null)
+            {
+                return;
+            }
+
+            foreach (GalleryItem item in items.Where(SupportsHoverPreview).Distinct())
+            {
+                _ = PrefetchGalleryHoverPreviewAsync(item);
+            }
+        }
+
+        private void StartGalleryHoverPreview(FrameworkElement host)
+        {
+            if (!_isGalleryPopupPreviewEnabled || host == null || !(host.DataContext is GalleryItem item) || !SupportsHoverPreview(item))
+            {
+                return;
+            }
+
+            if (ReferenceEquals(_activeGalleryHoverPreviewHost, host) &&
+                ReferenceEquals(_activeGalleryHoverPreviewItem, item) &&
+                (item.IsHoverPreviewLoading || (host.ToolTip is ToolTip activeToolTip && activeToolTip.IsOpen)))
+            {
+                return;
+            }
+
+            CancelGalleryHoverPreview();
+            _activeGalleryHoverPreviewHost = host;
+            _activeGalleryHoverPreviewItem = item;
+            _galleryHoverPreviewCts = new CancellationTokenSource();
+            CancellationToken token = _galleryHoverPreviewCts.Token;
+
+            item.IsHoverPreviewLoading = true;
+            _ = OpenGalleryHoverPreviewAsync(host, item, token);
+        }
+
+        private async Task OpenGalleryHoverPreviewAsync(FrameworkElement host, GalleryItem item, CancellationToken token)
+        {
+            try
+            {
+                await Task.Delay(150, token);
+                if (token.IsCancellationRequested || !host.IsMouseOver || !ReferenceEquals(_activeGalleryHoverPreviewHost, host))
+                {
+                    return;
+                }
+
+                await EnsureGalleryHoverPreviewAsync(item);
+                await EnsureGalleryHoverPreviewFileAsync(item, token);
+                if (token.IsCancellationRequested ||
+                    !host.IsMouseOver ||
+                    !ReferenceEquals(_activeGalleryHoverPreviewHost, host) ||
+                    !ReferenceEquals(_activeGalleryHoverPreviewItem, item) ||
+                    string.IsNullOrWhiteSpace(item.HoverPreviewLocalPath) ||
+                    !File.Exists(item.HoverPreviewLocalPath))
+                {
+                    return;
+                }
+
+                ToolTip toolTip = CreateGalleryHoverPreviewToolTip(item);
+                CloseGalleryHoverPreviewToolTip();
+                host.ToolTip = toolTip;
+                _activeGalleryHoverPreviewHost = host;
+                _activeGalleryHoverPreviewItem = item;
+                toolTip.IsOpen = true;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                Log($"Hover preview failed for '{item.DisplayName}': {ex.Message}");
+            }
+            finally
+            {
+                item.IsHoverPreviewLoading = false;
+            }
+        }
+
+        private async Task PrefetchGalleryHoverPreviewAsync(GalleryItem item)
+        {
+            if (item == null || (!string.IsNullOrWhiteSpace(item.HoverPreviewLocalPath) && File.Exists(item.HoverPreviewLocalPath)))
+            {
+                return;
+            }
+
+            try
+            {
+                item.IsHoverPreviewLoading = true;
+                await EnsureGalleryHoverPreviewAsync(item);
+                await EnsureGalleryHoverPreviewFileAsync(item, CancellationToken.None);
+            }
+            catch
+            {
+            }
+            finally
+            {
+                item.IsHoverPreviewLoading = false;
+            }
+        }
+
+        private void StopGalleryHoverPreview(FrameworkElement host)
+        {
+            CancelGalleryHoverPreview();
+            if (host == null)
+            {
+                return;
+            }
+
+            if (host.DataContext is GalleryItem item)
+            {
+                item.IsHoverPreviewLoading = false;
+            }
+
+            if (host.ToolTip is ToolTip toolTip)
+            {
+                toolTip.IsOpen = false;
+            }
+
+            host.ToolTip = null;
+
+            if (ReferenceEquals(_activeGalleryHoverPreviewHost, host))
+            {
+                _activeGalleryHoverPreviewHost = null;
+                _activeGalleryHoverPreviewItem = null;
+            }
+        }
+
+        private void CancelGalleryHoverPreview()
+        {
+            _galleryHoverPreviewCts?.Cancel();
+            _galleryHoverPreviewCts?.Dispose();
+            _galleryHoverPreviewCts = null;
+            CloseGalleryHoverPreviewToolTip();
+        }
+
+        private void BtnPopupPreviewToggle_Click(object sender, RoutedEventArgs e)
+        {
+            _isGalleryPopupPreviewEnabled = btnPopupPreviewToggle?.IsChecked == true;
+            if (!_isGalleryPopupPreviewEnabled)
+            {
+                CancelGalleryHoverPreview();
+            }
+
+            RefreshVisibleGalleryHoverPreviewBindings();
+            PrefetchAllThumbnailResults();
+
+            UpdateGalleryPopupPreviewButtonState();
+        }
+
+        private void UpdateGalleryPopupPreviewButtonState()
+        {
+            if (btnPopupPreviewToggle == null)
+            {
+                return;
+            }
+
+            btnPopupPreviewToggle.IsChecked = _isGalleryPopupPreviewEnabled;
+        }
+
+        private void CloseGalleryHoverPreviewToolTip()
+        {
+            if (_activeGalleryHoverPreviewHost?.ToolTip is ToolTip activeToolTip)
+            {
+                activeToolTip.IsOpen = false;
+            }
+
+            if (_activeGalleryHoverPreviewHost != null)
+            {
+                _activeGalleryHoverPreviewHost.ToolTip = null;
+            }
+
+            _activeGalleryHoverPreviewHost = null;
+            _activeGalleryHoverPreviewItem = null;
+        }
+
+        private ToolTip CreateGalleryHoverPreviewToolTip(GalleryItem item)
+        {
+            var image = new Image
+            {
+                Stretch = Stretch.Uniform,
+                MaxWidth = 240,
+                MaxHeight = 320,
+                Source = CreatePreviewImageSource(item?.HoverPreviewLocalPath, 360)
+            };
+
+            var panel = new StackPanel();
+            panel.Children.Add(image);
+            string title = item?.DisplayName;
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                panel.Children.Add(new TextBlock
+                {
+                    Text = title,
+                    Foreground = TryFindResource("CyberpunkYellowBrush") as Brush ?? Brushes.Gold,
+                    FontWeight = FontWeights.Bold,
+                    FontSize = 12,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(2, 6, 2, 0)
+                });
+            }
+
+            string latestChapter = item?.MissingChapterLatestChapterText;
+            if (!string.IsNullOrWhiteSpace(latestChapter))
+            {
+                panel.Children.Add(new TextBlock
+                {
+                    Text = "latest chapter: " + latestChapter,
+                    Foreground = TryFindResource("CyberpunkCyanBrush") as Brush ?? Brushes.Cyan,
+                    FontWeight = FontWeights.SemiBold,
+                    FontSize = 11,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(2, 3, 2, 0)
+                });
+            }
+
+            string missingStatus = item?.MissingChapterStatusText;
+            if (!string.IsNullOrWhiteSpace(missingStatus))
+            {
+                panel.Children.Add(new TextBlock
+                {
+                    Text = "missing chapter: " + missingStatus,
+                    Foreground = item.HasMissingChapterIssue
+                        ? (TryFindResource("CyberpunkPinkBrush") as Brush ?? Brushes.DeepPink)
+                        : (TryFindResource("CyberpunkCyanBrush") as Brush ?? Brushes.Cyan),
+                    FontWeight = FontWeights.SemiBold,
+                    FontSize = 11,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(2, 2, 2, 0)
+                });
+            }
+
+            bool isDetailsGrid = false;
+            if (_activeGalleryHoverPreviewHost != null)
+            {
+                DependencyObject p = _activeGalleryHoverPreviewHost;
+                while (p != null)
+                {
+                    if (p is DataGrid)
+                    {
+                        isDetailsGrid = true;
+                        break;
+                    }
+                    p = VisualTreeHelper.GetParent(p);
+                }
+            }
+
+            return new ToolTip
+            {
+                Placement = isDetailsGrid ? System.Windows.Controls.Primitives.PlacementMode.Right : System.Windows.Controls.Primitives.PlacementMode.Mouse,
+                PlacementTarget = isDetailsGrid ? _activeGalleryHoverPreviewHost : null,
+                HorizontalOffset = isDetailsGrid ? 10 : 0,
+                HasDropShadow = true,
+                Background = (Brush)new BrushConverter().ConvertFromString("#DD091018"),
+                BorderBrush = TryFindResource("CyberpunkCyanBrush") as Brush,
+                BorderThickness = new Thickness(1),
+                Content = new Border
+                {
+                    Padding = new Thickness(4),
+                    MaxWidth = 250,
+                    MaxHeight = 360,
+                    Child = panel
+                }
+            };
+        }
+
+        private async Task EnsureGalleryHoverPreviewFileAsync(GalleryItem item, CancellationToken token)
+        {
+            if (item == null)
+            {
+                return;
+            }
+
+            await EnsureTruyenqqHoverPreviewUrlAsync(item, token);
+            List<string> imageUrls = await GetGalleryHoverPreviewCandidateUrlsAsync(item, token);
+            if (imageUrls.Count == 0)
+            {
+                return;
+            }
+
+            foreach (string imageUrl in imageUrls)
+            {
+                if (await TryEnsureGalleryHoverPreviewFileAsync(item, imageUrl, token))
+                {
+                    item.HoverPreviewThumbnailUrl = imageUrl;
+                    return;
+                }
+            }
+        }
+
+        private async Task EnsureTruyenqqHoverPreviewUrlAsync(GalleryItem item, CancellationToken token)
+        {
+            if (item == null ||
+                !string.IsNullOrWhiteSpace(item.HoverPreviewThumbnailUrl) ||
+                string.IsNullOrWhiteSpace(item.Link) ||
+                !IsTruyenqqUrl(item.Link))
+            {
+                return;
+            }
+
+            try
+            {
+                string pageUrl = ResolveTruyenqqRequestUrl(item.Link);
+                string html = await FetchStringAsync(pageUrl, token);
+                string previewUrl = ExtractTruyenqqPreviewUrlFromHtml(html, pageUrl);
+                if (!string.IsNullOrWhiteSpace(previewUrl))
+                {
+                    item.HoverPreviewThumbnailUrl = previewUrl;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch
+            {
+            }
+        }
+
+        private async Task<List<string>> GetGalleryHoverPreviewCandidateUrlsAsync(GalleryItem item, CancellationToken token)
+        {
+            var imageUrls = new List<string>();
+            if (item == null)
+            {
+                return imageUrls;
+            }
+
+            AddGalleryHoverPreviewCandidate(imageUrls, item.HoverPreviewThumbnailUrl);
+            if (!string.IsNullOrWhiteSpace(item.Link) && IsTruyenqqUrl(item.Link))
+            {
+                foreach (string candidateUrl in await GetCachedGalleryHoverPreviewCandidatesAsync(item.Link, token))
+                {
+                    AddGalleryHoverPreviewCandidate(imageUrls, candidateUrl);
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(item.Link) && IsNettruyenUrl(item.Link))
+            {
+                string html = await FetchStringAsync(item.Link, token);
+                string previewUrl = ExtractNettruyenviet10PreviewUrlFromHtml(html, item.Link);
+                if (!string.IsNullOrWhiteSpace(previewUrl))
+                {
+                    item.HoverPreviewThumbnailUrl = previewUrl;
+                    AddGalleryHoverPreviewCandidate(imageUrls, previewUrl);
+                }
+
+                foreach (string candidateUrl in GetNettruyenviet10PreviewUrlCandidatesFromHtml(html, item.Link))
+                {
+                    AddGalleryHoverPreviewCandidate(imageUrls, candidateUrl);
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(item.Link) &&
+                item.Link.IndexOf("hentaiforce.net/view/", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                string html = await FetchStringAsync(item.Link, token);
+                foreach (string candidateUrl in GetHentaiforceCoverUrlCandidates(html, item.Link))
+                {
+                    AddGalleryHoverPreviewCandidate(imageUrls, candidateUrl);
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(item.Link) && IsHaibabaUrl(item.Link))
+            {
+                string html = await FetchStringAsync(item.Link, token);
+                foreach (string candidateUrl in GetHaibabaPreviewUrlCandidatesFromHtml(html, item.Link))
+                {
+                    AddGalleryHoverPreviewCandidate(imageUrls, candidateUrl);
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(item.Link) && IsDilibUrl(item.Link))
+            {
+                string html = await FetchStringAsync(item.Link, token);
+                foreach (string candidateUrl in GetDilibPreviewUrlCandidatesFromHtml(html, item.Link))
+                {
+                    AddGalleryHoverPreviewCandidate(imageUrls, candidateUrl);
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(item.Link) && IsMangadexUrl(item.Link))
+            {
+                try
+                {
+                    if (TryParseMangadexMangaId(item.Link, out string mangaId, out _))
+                    {
+                        MangadexMangaData manga = await GetMangadexMangaAsync(mangaId, token);
+                        if (manga != null)
+                        {
+                            string coverUrl = BuildMangadexCoverUrl(manga.Id, manga.CoverFileName);
+                            AddGalleryHoverPreviewCandidate(imageUrls, coverUrl);
+                        }
+                    }
+                    else if (TryParseMangadexChapterId(item.Link, out string chapterId, out _))
+                    {
+                        MangadexChapterData chapter = await GetMangadexChapterAsync(chapterId, token);
+                        MangadexMangaData manga = await ResolveMangadexMangaForChapterAsync(chapter, token);
+                        if (manga != null)
+                        {
+                            string coverUrl = BuildMangadexCoverUrl(manga.Id, manga.CoverFileName);
+                            AddGalleryHoverPreviewCandidate(imageUrls, coverUrl);
+                        }
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            return imageUrls;
+        }
+
+        private async Task<List<string>> GetCachedGalleryHoverPreviewCandidatesAsync(string link, CancellationToken token)
+        {
+            if (string.IsNullOrWhiteSpace(link))
+            {
+                return new List<string>();
+            }
+
+            lock (_galleryHoverPreviewCandidateCacheLock)
+            {
+                if (_galleryHoverPreviewCandidateCache.TryGetValue(link, out List<string> cachedCandidates))
+                {
+                    return new List<string>(cachedCandidates);
+                }
+            }
+
+            string pageUrl = ResolveTruyenqqRequestUrl(link);
+            string html = await FetchStringAsync(pageUrl, token);
+            List<string> candidates = GetTruyenqqPreviewUrlCandidatesFromHtml(html, pageUrl)
+                .Where(url => !string.IsNullOrWhiteSpace(url))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            lock (_galleryHoverPreviewCandidateCacheLock)
+            {
+                _galleryHoverPreviewCandidateCache[link] = candidates;
+            }
+
+            return new List<string>(candidates);
+        }
+
+        private void RefreshVisibleGalleryHoverPreviewBindings()
+        {
+            IEnumerable<GalleryItem> visibleItems = Enumerable.Empty<GalleryItem>();
+            if (_isResultsThumbnailViewEnabled)
+            {
+                visibleItems = _thumbnailVisibleItems;
+            }
+            else if (ResultsView != null)
+            {
+                visibleItems = ResultsView.Cast<object>().OfType<GalleryItem>();
+            }
+
+            foreach (GalleryItem item in visibleItems.Where(SupportsHoverPreview).Distinct())
+            {
+                item.RefreshHoverPreviewBindings();
+            }
+        }
+
+        private static void AddGalleryHoverPreviewCandidate(List<string> imageUrls, string imageUrl)
+        {
+            string cleanUrl = imageUrl?.Trim();
+            if (string.IsNullOrWhiteSpace(cleanUrl) ||
+                imageUrls.Contains(cleanUrl, StringComparer.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            imageUrls.Add(cleanUrl);
+        }
+
+        private string ExtractNettruyenviet10PreviewUrlFromHtml(string html, string pageUrl)
+        {
+            return GetNettruyenviet10PreviewUrlCandidatesFromHtml(html, pageUrl).FirstOrDefault() ?? string.Empty;
+        }
+
+        private static List<string> GetNettruyenviet10PreviewUrlCandidatesFromHtml(string html, string pageUrl)
+        {
+            var urls = new List<string>();
+            if (string.IsNullOrWhiteSpace(html))
+            {
+                return urls;
+            }
+
+            string imageHtml = string.Empty;
+            Match imageBlockMatch = Regex.Match(
+                html,
+                @"<div[^>]*class=[""'][^""']*\bcol-image\b[^""']*[""'][^>]*>(?<content>[\s\S]*?)</div>",
+                RegexOptions.IgnoreCase);
+            if (imageBlockMatch.Success)
+            {
+                imageHtml = imageBlockMatch.Groups["content"].Value;
+            }
+
+            CollectNettruyenviet10PreviewUrls(imageHtml, pageUrl, urls);
+            if (urls.Count == 0)
+            {
+                CollectNettruyenviet10PreviewUrls(html, pageUrl, urls);
+            }
+
+            ValidateNettruyenviet10PreviewParser();
+
+            return urls;
+        }
+
+        private static void CollectNettruyenviet10PreviewUrls(string htmlFragment, string pageUrl, List<string> urls)
+        {
+            if (string.IsNullOrWhiteSpace(htmlFragment) || urls == null)
+            {
+                return;
+            }
+
+            foreach (Match match in Regex.Matches(
+                htmlFragment,
+                @"(?:data-retries|src|data-src|data-original|data-lazy)=[""'](?<url>[^""']+?\.(?:jpe?g|png|webp)(?:\?[^""']*)?)[""']",
+                RegexOptions.IgnoreCase))
+            {
+                foreach (string candidate in SplitNettruyenviet10PreviewUrlCandidates(match.Groups["url"].Value, pageUrl))
+                {
+                    if (!string.IsNullOrWhiteSpace(candidate) &&
+                        !urls.Contains(candidate, StringComparer.OrdinalIgnoreCase))
+                    {
+                        urls.Add(candidate);
+                    }
+                }
+            }
+
+            foreach (Match match in Regex.Matches(
+                htmlFragment,
+                @"https?://[^""'\s>]+?\.(?:jpe?g|png|webp)(?:\?[^""'\s>]*)?",
+                RegexOptions.IgnoreCase))
+            {
+                string normalizedUrl = NormalizeNettruyenviet10PreviewUrl(match.Value, pageUrl);
+                if (!string.IsNullOrWhiteSpace(normalizedUrl) &&
+                    !urls.Contains(normalizedUrl, StringComparer.OrdinalIgnoreCase))
+                {
+                    urls.Add(normalizedUrl);
+                }
+            }
+        }
+
+        private static IEnumerable<string> SplitNettruyenviet10PreviewUrlCandidates(string imageUrl, string pageUrl)
+        {
+            string cleanUrl = WebUtility.HtmlDecode(imageUrl ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(cleanUrl))
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            string[] pieces = cleanUrl.Split(new[] { '\r', '\n', '\t', ' ', ',', ';', '|' }, StringSplitOptions.RemoveEmptyEntries);
+            if (pieces.Length == 0)
+            {
+                pieces = new[] { cleanUrl };
+            }
+
+            return pieces
+                .Select(piece => NormalizeNettruyenviet10PreviewUrl(piece, pageUrl))
+                .Where(url => !string.IsNullOrWhiteSpace(url))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        private static string NormalizeNettruyenviet10PreviewUrl(string imageUrl, string pageUrl)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl))
+            {
+                return string.Empty;
+            }
+
+            string cleanUrl = WebUtility.HtmlDecode(imageUrl).Trim();
+            if (string.IsNullOrWhiteSpace(cleanUrl))
+            {
+                return string.Empty;
+            }
+
+            if (Uri.TryCreate(cleanUrl, UriKind.Absolute, out Uri absoluteUri))
+            {
+                return absoluteUri.ToString();
+            }
+
+            if (Uri.TryCreate(new Uri(pageUrl), cleanUrl, out Uri resolvedUri))
+            {
+                return resolvedUri.ToString();
+            }
+
+            return cleanUrl;
+        }
+
+        [Conditional("DEBUG")]
+        private static void ValidateNettruyenviet10PreviewParser()
+        {
+            var urls = new List<string>();
+            CollectNettruyenviet10PreviewUrls(
+                @"<div class=""col-xs-4 col-image""><img data-retries=""https://image2.kcgsbok.com/nettruyen/thumb/ryoumin-0-nin-start-no-henkyou-ryoushusama.jpg"" src=""https://image2.kcgsbok.com/nettruyen/thumb/ryoumin-0-nin-start-no-henkyou-ryoushusama.jpg"" data-src=""https://image2.kcgsbok.com/nettruyen/thumb/ryoumin-0-nin-start-no-henkyou-ryoushusama.jpg"" class=""image-thumb""></div>",
+                "https://nettruyenviet10.com/truyen-tranh/ryoumin-0-nin-start-no-henkyou-ryoushusama",
+                urls);
+            Debug.Assert(urls.FirstOrDefault() == "https://image2.kcgsbok.com/nettruyen/thumb/ryoumin-0-nin-start-no-henkyou-ryoushusama.jpg");
+
+            urls.Clear();
+            CollectNettruyenviet10PreviewUrls(
+                @"<div class=""col-xs-4 col-image""><img src=""https://nettruyenapp.club.org/storage/images/thumbnails/bach-luyen-thanh-than.webp"" alt=""Bách Luyện Thành Thần""></div>",
+                "https://nettruyen.tech/truyen-tranh/bach-luyen-thanh-than",
+                urls);
+            Debug.Assert(urls.FirstOrDefault() == "https://nettruyenapp.club.org/storage/images/thumbnails/bach-luyen-thanh-than.webp");
+        }
+
+        private async Task<bool> TryEnsureGalleryHoverPreviewFileAsync(GalleryItem item, string imageUrl, CancellationToken token)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl) || _galleryHoverPreviewBitmapMissingCache.Contains(imageUrl))
+            {
+                return false;
+            }
+
+            string originalPath = item.HoverPreviewLocalPath;
+            string thumbnailPath = item.HoverPreviewThumbnailLocalPath;
+            if (!string.IsNullOrWhiteSpace(originalPath) &&
+                !string.IsNullOrWhiteSpace(thumbnailPath) &&
+                File.Exists(originalPath) &&
+                File.Exists(thumbnailPath))
+            {
+                return true;
+            }
+
+            string cacheBasePath = GetGalleryHoverPreviewCacheBasePath(item, imageUrl);
+            if (TryGetGalleryHoverPreviewCacheFiles(cacheBasePath, out originalPath, out thumbnailPath))
+            {
+                item.HoverPreviewLocalPath = originalPath;
+                item.HoverPreviewThumbnailLocalPath = thumbnailPath;
+                return true;
+            }
+
+            EnsureCacheSizeLimit();
+            await _galleryHoverPreviewImageSemaphore.WaitAsync(token);
+            try
+            {
+                if (TryGetGalleryHoverPreviewCacheFiles(cacheBasePath, out originalPath, out thumbnailPath))
+                {
+                    item.HoverPreviewLocalPath = originalPath;
+                    item.HoverPreviewThumbnailLocalPath = thumbnailPath;
+                    return true;
+                }
+
+                string previewRoot = Path.Combine(PortablePaths.PortableTempRoot, "preview-cache");
+                Directory.CreateDirectory(previewRoot);
+                ServicePoint previewServicePoint = ServicePointManager.FindServicePoint(new Uri(imageUrl));
+                previewServicePoint.ConnectionLimit = Math.Max(previewServicePoint.ConnectionLimit, 8);
+
+                if (IsMangadexBrowserFetchUrl(imageUrl))
+                {
+                    string originalExtension = GetGalleryHoverPreviewFileExtension(imageUrl, null);
+                    originalPath = cacheBasePath + originalExtension;
+
+                    byte[] browserBytes = await FetchMangadexBytesViaBrowserAsync(imageUrl, item?.Link, token);
+                    using (FileStream fileStream = new FileStream(originalPath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    {
+                        await fileStream.WriteAsync(browserBytes, 0, browserBytes.Length, token);
+                    }
+
+                    item.HoverPreviewLocalPath = originalPath;
+                    item.HoverPreviewThumbnailLocalPath = originalPath;
+                    return true;
+                }
+
+                using (HttpClient client = CreateScopedHttpClient(imageUrl))
+                using (var request = new HttpRequestMessage(HttpMethod.Get, imageUrl))
+                {
+                    if (!string.IsNullOrWhiteSpace(item.Link))
+                    {
+                        request.Headers.Referrer = new Uri(item.Link);
+                    }
+                    else if (imageUrl.Contains("thuviensach.vn"))
+                    {
+                        request.Headers.Referrer = new Uri("https://thuviensach.vn/");
+                    }
+
+                    // Tối ưu hóa Keep-Alive để đẩy tốc độ tải ảnh bìa thuviensach
+                    request.Headers.ConnectionClose = false;
+
+                    using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token))
+                    {
+                        response.EnsureSuccessStatusCode();
+                        string originalExtension = GetGalleryHoverPreviewFileExtension(imageUrl, response.Content.Headers.ContentType?.MediaType);
+                        originalPath = cacheBasePath + originalExtension;
+
+                        using (Stream sourceStream = await response.Content.ReadAsStreamAsync())
+                        using (FileStream fileStream = new FileStream(originalPath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                        {
+                            await sourceStream.CopyToAsync(fileStream, 81920, token);
+                        }
+
+                        item.HoverPreviewLocalPath = originalPath;
+                        item.HoverPreviewThumbnailLocalPath = originalPath;
+                        return true;
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch
+            {
+                _galleryHoverPreviewBitmapMissingCache.Add(imageUrl);
+                return false;
+            }
+            finally
+            {
+                _galleryHoverPreviewImageSemaphore.Release();
+            }
+        }
+
+        private static string GetSanitizedFileName(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+            foreach (char c in Path.GetInvalidFileNameChars())
+            {
+                input = input.Replace(c, '_');
+            }
+            return input.Trim();
+        }
+
+        private static void EnsureCacheSizeLimit()
+        {
+            try
+            {
+                string previewRoot = Path.Combine(PortablePaths.PortableTempRoot, "preview-cache");
+                if (!Directory.Exists(previewRoot))
+                {
+                    return;
+                }
+
+                DirectoryInfo dir = new DirectoryInfo(previewRoot);
+                FileInfo[] files = dir.GetFiles();
+                long totalSize = files.Sum(f => f.Length);
+                if (totalSize > 20971520) // 20 MB
+                {
+                    foreach (FileInfo file in files)
+                    {
+                        try
+                        {
+                            file.Delete();
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private static string GetGalleryHoverPreviewCacheBasePath(GalleryItem item, string imageUrl)
+        {
+            string previewRoot = Path.Combine(PortablePaths.PortableTempRoot, "preview-cache");
+            string bookName = item?.Name;
+            string sanitizedBook = GetSanitizedFileName(bookName);
+            if (!string.IsNullOrWhiteSpace(sanitizedBook))
+            {
+                return Path.Combine(previewRoot, sanitizedBook);
+            }
+
+            using (SHA1 sha1 = SHA1.Create())
+            {
+                byte[] hash = sha1.ComputeHash(Encoding.UTF8.GetBytes(imageUrl ?? string.Empty));
+                string fileName = BitConverter.ToString(hash).Replace("-", string.Empty);
+                return Path.Combine(previewRoot, fileName);
+            }
+        }
+
+        private static bool TryGetGalleryHoverPreviewCacheFiles(string cacheBasePath, out string originalPath, out string thumbnailPath)
+        {
+            originalPath = null;
+            thumbnailPath = null;
+
+            string directory = Path.GetDirectoryName(cacheBasePath);
+            if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
+            {
+                return false;
+            }
+
+            string fileBaseName = Path.GetFileName(cacheBasePath);
+            if (string.IsNullOrWhiteSpace(fileBaseName))
+            {
+                return false;
+            }
+
+            originalPath = Directory.EnumerateFiles(directory, fileBaseName + ".*")
+                .FirstOrDefault(path => !path.EndsWith(".thumb.jpg", StringComparison.OrdinalIgnoreCase));
+
+            if (string.IsNullOrWhiteSpace(originalPath) || !File.Exists(originalPath))
+            {
+                originalPath = null;
+                return false;
+            }
+
+            thumbnailPath = cacheBasePath + ".thumb.jpg";
+            if (!File.Exists(thumbnailPath))
+            {
+                try
+                {
+                    CreateGalleryHoverPreviewThumbnail(originalPath, thumbnailPath);
+                }
+                catch
+                {
+                    thumbnailPath = originalPath;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(thumbnailPath) || !File.Exists(thumbnailPath))
+            {
+                thumbnailPath = originalPath;
+            }
+
+            return true;
+        }
+
+        private static string GetGalleryHoverPreviewFileExtension(string imageUrl, string contentType)
+        {
+            string extension = null;
+            if (!string.IsNullOrWhiteSpace(imageUrl))
+            {
+                try
+                {
+                    extension = Path.GetExtension(new Uri(imageUrl).AbsolutePath);
+                }
+                catch
+                {
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(extension) && extension.Length <= 5)
+            {
+                return extension;
+            }
+
+            switch ((contentType ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "image/png":
+                    return ".png";
+                case "image/gif":
+                    return ".gif";
+                case "image/bmp":
+                    return ".bmp";
+                case "image/webp":
+                    return ".webp";
+                default:
+                    return ".jpg";
+            }
+        }
+
+        private static void CreateGalleryHoverPreviewThumbnail(string originalPath, string thumbnailPath)
+        {
+            if (string.IsNullOrWhiteSpace(originalPath) || !File.Exists(originalPath) || string.IsNullOrWhiteSpace(thumbnailPath))
+            {
+                return;
+            }
+
+            try
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+                bitmap.DecodePixelWidth = 220;
+                bitmap.UriSource = new Uri(originalPath, UriKind.Absolute);
+                bitmap.EndInit();
+                bitmap.Freeze();
+
+                var encoder = new JpegBitmapEncoder
+                {
+                    QualityLevel = 72
+                };
+                encoder.Frames.Add(BitmapFrame.Create(bitmap));
+
+                using (FileStream thumbStream = new FileStream(thumbnailPath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                {
+                    encoder.Save(thumbStream);
+                }
+            }
+            catch
+            {
+                if (!File.Exists(thumbnailPath))
+                {
+                    File.Copy(originalPath, thumbnailPath, true);
+                }
+            }
+        }
+
+        private static ImageSource CreatePreviewImageSource(string localPath, int decodePixelWidth)
+        {
+            if (string.IsNullOrWhiteSpace(localPath) || !File.Exists(localPath))
+            {
+                return null;
+            }
+
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+            bitmap.DecodePixelWidth = decodePixelWidth;
+            bitmap.UriSource = new Uri(localPath, UriKind.Absolute);
+            bitmap.EndInit();
+            bitmap.Freeze();
+            return bitmap;
+        }
+    }
+}

@@ -1,0 +1,77 @@
+﻿<Window x:Class="get_link_manga.DirectDownloadWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:get_link_manga"
+        mc:Ignorable="d"
+        Title="PASTE DIRECT LINKS" Height="450" Width="650"
+        Background="{StaticResource CyberpunkDarkBrush}"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <!-- Header -->
+            <RowDefinition Height="Auto"/>
+            <!-- Description -->
+            <RowDefinition Height="Auto"/>
+            <!-- Text Input Area -->
+            <RowDefinition Height="*"/>
+            <!-- Action Toolbar -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" BorderBrush="{StaticResource CyberpunkPinkBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,12">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="DIRECT GALLERY LINKS IMPORTER" 
+                           FontSize="18" 
+                           FontWeight="ExtraBold" 
+                           Style="{StaticResource CyberpunkHeader}"/>
+                <TextBlock Text="IMPORT LINKS DIRECTLY INTO EXTRACTED LINKS LIST" 
+                           FontSize="9" 
+                           Foreground="{StaticResource CyberpunkCyanBrush}" 
+                           FontWeight="Bold"
+                           Margin="2,2,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Description -->
+        <TextBlock Grid.Row="1" 
+                   x:Name="lblDescription"
+                   Text="Paste HentaiForce gallery links below (one link per line). The system will fetch and analyze titles automatically." 
+                   Foreground="{StaticResource CyberpunkMutedTextBrush}" 
+                   FontSize="12" 
+                   Margin="0,0,0,10"
+                   TextWrapping="Wrap"/>
+
+        <!-- TextBox Input Area -->
+        <Border Grid.Row="2" Style="{StaticResource CyberpunkCard}" Padding="5" Margin="0,0,0,15">
+            <TextBox Name="txtLinksInput" 
+                     AcceptsReturn="True" 
+                     VerticalScrollBarVisibility="Auto" 
+                     Background="#0e121a" 
+                     BorderThickness="0" 
+                     Foreground="{StaticResource CyberpunkTextBrush}" 
+                     CaretBrush="{StaticResource CyberpunkCyanBrush}"
+                     FontFamily="Consolas, Courier New" 
+                     FontSize="12"
+                     Padding="8"
+                     TextWrapping="NoWrap"/>
+        </Border>
+
+        <!-- Footer Actions -->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="1" Name="btnImport" Content="IMPORT LINKS" Click="BtnImport_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="35" Width="140" FontWeight="Bold"/>
+            <Button Grid.Column="3" Name="btnCancel" Content="CANCEL" Click="BtnCancel_Click" Style="{StaticResource CyberpunkButtonPink}" Height="35" Width="100" FontWeight="Bold"/>
+        </Grid>
+    </Grid>
+</Window>
