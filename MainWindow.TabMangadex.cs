@@ -1222,7 +1222,8 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
             var response = await GetMangadexJsonAsync<MangadexSingleResponse<MangadexChapterData>>(
                 BuildMangadexApiUrl($"/chapter/{chapterId}", new Dictionary<string, string>
                 {
-                    { "includes[]", "manga" }
+                    { "includes[]", "manga" },
+                    { "includes[]", "scanlation_group" }
                 }),
                 token);
             MangadexChapterData chapter = response?.Data;
@@ -1271,6 +1272,13 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 _mangadexMangaCache[resolvedManga.Id] = resolvedManga;
             }
             return resolvedManga;
+        }
+
+        private string GetMangadexChapterGroupName(MangadexChapterData chapter)
+        {
+            var groupRelation = chapter?.Relationships?
+                .FirstOrDefault(r => r != null && r.Type == "scanlation_group");
+            return groupRelation?.Attributes?.Name ?? string.Empty;
         }
 
         private static string BuildMangadexBookUrl(string mangaId, int page = 1)
@@ -1420,10 +1428,8 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
 
         private async Task<List<MangadexChapterDescriptor>> GetMangadexBookChaptersAsync(string mangaId, IEnumerable<string> translatedLanguages, CancellationToken token)
         {
-            var chapters = new List<MangadexChapterDescriptor>();
+            var allChapters = new List<MangadexChapterData>();
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var seenChapterNumbers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            int sequenceIndex = 0;
             int offset = 0;
 
             while (true)
@@ -1446,30 +1452,8 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                         continue;
                     }
 
-                    string lang = (chapter.Attributes?.TranslatedLanguage ?? string.Empty).Trim().ToLower();
-                    string chapNum = (chapter.Attributes?.Chapter ?? string.Empty).Trim();
-                    if (!string.IsNullOrEmpty(chapNum))
-                    {
-                        string groupKey = $"{lang}_{chapNum}";
-                        if (seenChapterNumbers.Contains(groupKey))
-                        {
-                            continue;
-                        }
-                        seenChapterNumbers.Add(groupKey);
-                    }
-
                     _mangadexChapterCache[chapterId] = chapter;
-
-                    string displayTitle = GetMangadexChapterDisplayTitle(chapter.Attributes);
-                    chapters.Add(new MangadexChapterDescriptor
-                    {
-                        Id = chapterId,
-                        Url = BuildMangadexChapterUrl(chapterId),
-                        DisplayTitle = displayTitle,
-                        ChapterNumber = ParseMangadexChapterNumber(displayTitle),
-                        SequenceIndex = sequenceIndex++,
-                        TranslatedLanguage = chapter.Attributes?.TranslatedLanguage
-                    });
+                    allChapters.Add(chapter);
                 }
 
                 offset += pageItems.Count;
@@ -1477,6 +1461,68 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 {
                     break;
                 }
+            }
+
+            string preferredGroup = string.Empty;
+            Dispatcher.Invoke(() => preferredGroup = txtMangadexGroupFilter.Text.Trim());
+
+            var filteredChapters = new List<MangadexChapterData>();
+            var grouped = allChapters.GroupBy(c => new {
+                Lang = (c.Attributes?.TranslatedLanguage ?? string.Empty).Trim().ToLower(),
+                ChapNum = (c.Attributes?.Chapter ?? string.Empty).Trim()
+            });
+
+            foreach (var g in grouped)
+            {
+                if (string.IsNullOrEmpty(g.Key.ChapNum))
+                {
+                    filteredChapters.AddRange(g);
+                }
+                else
+                {
+                    MangadexChapterData selected = null;
+                    if (!string.IsNullOrWhiteSpace(preferredGroup))
+                    {
+                        selected = g.FirstOrDefault(c =>
+                        {
+                            string gName = GetMangadexChapterGroupName(c);
+                            return gName.IndexOf(preferredGroup, StringComparison.OrdinalIgnoreCase) >= 0;
+                        });
+                    }
+
+                    if (selected == null)
+                    {
+                        selected = g.First();
+                    }
+
+                    filteredChapters.Add(selected);
+                }
+            }
+
+            var chapters = new List<MangadexChapterDescriptor>();
+            int sequenceIndex = 0;
+            foreach (MangadexChapterData chapter in filteredChapters)
+            {
+                string displayTitle = GetMangadexChapterDisplayTitle(chapter.Attributes);
+                if (!string.IsNullOrWhiteSpace(preferredGroup))
+                {
+                    string gName = GetMangadexChapterGroupName(chapter);
+                    if (string.IsNullOrWhiteSpace(gName))
+                    {
+                        gName = "No Group";
+                    }
+                    displayTitle = $"{displayTitle}-group {gName}";
+                }
+
+                chapters.Add(new MangadexChapterDescriptor
+                {
+                    Id = chapter.Id,
+                    Url = BuildMangadexChapterUrl(chapter.Id),
+                    DisplayTitle = displayTitle,
+                    ChapterNumber = ParseMangadexChapterNumber(displayTitle),
+                    SequenceIndex = sequenceIndex++,
+                    TranslatedLanguage = chapter.Attributes?.TranslatedLanguage
+                });
             }
 
             return chapters;
@@ -1556,6 +1602,7 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                    $"?offset={offset.ToString(CultureInfo.InvariantCulture)}" +
                    $"&limit={limit.ToString(CultureInfo.InvariantCulture)}" +
                    languageQuery +
+                   "&includes%5B%5D=scanlation_group" +
                    "&includeFutureUpdates=0" +
                    "&includeEmptyPages=0" +
                    "&includeExternalUrl=0" +
@@ -1869,6 +1916,18 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
             if (string.IsNullOrWhiteSpace(chapterTitle))
             {
                 chapterTitle = NormalizeChapterLabel(chapterSlug.Replace("-", " "));
+            }
+
+            string preferredGroup = string.Empty;
+            Dispatcher.Invoke(() => preferredGroup = txtMangadexGroupFilter.Text.Trim());
+            if (!string.IsNullOrWhiteSpace(preferredGroup))
+            {
+                string gName = GetMangadexChapterGroupName(chapter);
+                if (string.IsNullOrWhiteSpace(gName))
+                {
+                    gName = "No Group";
+                }
+                chapterTitle = $"{chapterTitle}-group {gName}";
             }
 
             item.Name = bookTitle;
@@ -2190,6 +2249,9 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
         {
             [DataMember(Name = "fileName")]
             public string FileName { get; set; }
+
+            [DataMember(Name = "name")]
+            public string Name { get; set; }
         }
 
         [DataContract]
