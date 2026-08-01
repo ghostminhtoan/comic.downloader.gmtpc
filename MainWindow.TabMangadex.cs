@@ -2205,5 +2205,123 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                     return "Unknown";
             }
         }
+
+        private async Task<bool> PromptMangadexLanguageSelectionAsync()
+        {
+            return await Dispatcher.InvokeAsync(() =>
+            {
+                var dialog = new MangadexLanguageDialog(_isVietnameseUi)
+                {
+                    Owner = this
+                };
+                if (dialog.ShowDialog() == true)
+                {
+                    if (chkMangadexLangVi != null) chkMangadexLangVi.IsChecked = dialog.SelectedVi;
+                    if (chkMangadexLangEn != null) chkMangadexLangEn.IsChecked = dialog.SelectedEn;
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        private sealed class MangadexLanguageDialog : Window
+        {
+            public bool SelectedVi { get; set; }
+            public bool SelectedEn { get; set; }
+
+            public MangadexLanguageDialog(bool isVietnameseUi)
+            {
+                this.Title = isVietnameseUi ? "Ngôn ngữ MangaDex" : "MangaDex Language";
+                this.Width = 320;
+                this.Height = 200;
+                this.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                this.ResizeMode = ResizeMode.NoResize;
+                this.Background = Application.Current.TryFindResource("CyberpunkWindowBackgroundBrush") as System.Windows.Media.Brush 
+                    ?? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(26, 26, 26));
+                this.ShowInTaskbar = false;
+
+                var mainStack = new StackPanel { Margin = new Thickness(20) };
+
+                var label = new TextBlock
+                {
+                    Text = isVietnameseUi 
+                        ? "Phát hiện link MangaDex. Chọn ngôn ngữ tải:" 
+                        : "MangaDex link detected. Select download language:",
+                    Foreground = Application.Current.TryFindResource("CyberpunkTextBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.White,
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(0, 0, 0, 15),
+                    TextWrapping = TextWrapping.Wrap
+                };
+                mainStack.Children.Add(label);
+
+                var chkVi = new CheckBox
+                {
+                    Content = isVietnameseUi ? "Tiếng Việt" : "Vietnamese",
+                    IsChecked = true,
+                    Foreground = Application.Current.TryFindResource("CyberpunkTextBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.White,
+                    Margin = new Thickness(0, 0, 0, 10),
+                    FontWeight = FontWeights.Bold
+                };
+                mainStack.Children.Add(chkVi);
+
+                var chkEn = new CheckBox
+                {
+                    Content = isVietnameseUi ? "Tiếng Anh" : "English",
+                    IsChecked = false,
+                    Foreground = Application.Current.TryFindResource("CyberpunkTextBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.White,
+                    Margin = new Thickness(0, 0, 0, 20),
+                    FontWeight = FontWeights.Bold
+                };
+                mainStack.Children.Add(chkEn);
+
+                var btnStack = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
+
+                var btnOk = new Button
+                {
+                    Content = "OK",
+                    Width = 75,
+                    Height = 28,
+                    IsDefault = true,
+                    Margin = new Thickness(0, 0, 10, 0),
+                    Style = Application.Current.TryFindResource("CompactCyanButton") as Style
+                };
+                btnOk.Click += (s, e) =>
+                {
+                    if (chkVi.IsChecked != true && chkEn.IsChecked != true)
+                    {
+                        MessageBox.Show(
+                            isVietnameseUi ? "Vui lòng chọn ít nhất một ngôn ngữ." : "Please select at least one language.",
+                            "Warning",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                        return;
+                    }
+                    SelectedVi = chkVi.IsChecked == true;
+                    SelectedEn = chkEn.IsChecked == true;
+                    this.DialogResult = true;
+                    this.Close();
+                };
+
+                var btnCancel = new Button
+                {
+                    Content = isVietnameseUi ? "Hủy" : "Cancel",
+                    Width = 75,
+                    Height = 28,
+                    IsCancel = true,
+                    Style = Application.Current.TryFindResource("CompactPinkButton") as Style
+                };
+                btnCancel.Click += (s, e) =>
+                {
+                    this.DialogResult = false;
+                    this.Close();
+                };
+
+                btnStack.Children.Add(btnOk);
+                btnStack.Children.Add(btnCancel);
+                mainStack.Children.Add(btnStack);
+
+                this.Content = mainStack;
+            }
+        }
     }
 }

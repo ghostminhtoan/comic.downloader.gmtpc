@@ -548,6 +548,15 @@ namespace get_link_manga
                 return;
             }
 
+            if (links.Any(IsMangadexUrl))
+            {
+                bool proceed = await PromptMangadexLanguageSelectionAsync();
+                if (!proceed)
+                {
+                    return;
+                }
+            }
+
             ShowResultsImportingIndicator();
             try
             {
