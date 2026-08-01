@@ -783,10 +783,7 @@ namespace get_link_manga
             SetResultsColumnHeaderText(colStatus, statusText);
             SetResultsColumnHeaderText(colProcess, processText);
 
-            if (colViewLink != null)
-            {
-                colViewLink.Header = viewText;
-            }
+
         }
 
         private void SetResultsColumnHeaderText(System.Windows.Controls.DataGridColumn column, string text)

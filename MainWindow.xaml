@@ -3836,31 +3836,6 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-
-                            <DataGridTemplateColumn x:Name="colViewLink" Header="VIEW" Width="76" SortMemberPath="Link">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                                                        <Button Content="&#xE71B;"
-                                                    FontFamily="Segoe MDL2 Assets"
-                                                    Tag="{Binding Link}"
-                                                    Click="BtnOpenLinkInRow_Click"
-                                                    Width="26" Height="20" Margin="1,0"
-                                                    Style="{StaticResource CyberpunkButtonCyan}"
-                                                    FontSize="12" Padding="0"
-                                                    ToolTip="OPEN LINK"/>
-                                            <Button Content="&#x1F4C2;"
-                                                    FontFamily="Segoe UI Emoji"
-                                                    DataContext="{Binding}"
-                                                    Click="BtnOpenFolderInRow_Click"
-                                                    Width="26" Height="20" Margin="1,0"
-                                                    Style="{StaticResource CyberpunkButtonPink}"
-                                                    FontSize="12" Padding="0"
-                                                    ToolTip="OPEN FOLDER"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
 
