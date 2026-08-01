@@ -672,23 +672,30 @@ namespace get_link_manga
             {
                 if (!string.IsNullOrEmpty(_targetUrl))
                 {
-                    var uri = new Uri(_targetUrl);
-                    string host = uri.Host.ToLower();
-                    if (host.Contains("truyenqq")) domain = "truyenqq";
-                    else if (host.Contains("nettruyen")) domain = "nettruyen";
-                    else if (host.Contains("vi-hentai") || host.Contains("hentaivn")) domain = "hentaivn";
-                    else if (host.Contains("hentai2read")) domain = "hentai2read";
-                    else if (host.Contains("daomeoden")) domain = "daomeoden";
+                    if (_targetUrl.StartsWith("chrome-extension://", StringComparison.OrdinalIgnoreCase))
+                    {
+                        domain = "linkgrabber";
+                    }
                     else
                     {
-                        var parts = host.Split('.');
-                        if (parts.Length >= 2)
-                        {
-                            domain = parts[parts.Length - 2];
-                        }
+                        var uri = new Uri(_targetUrl);
+                        string host = uri.Host.ToLower();
+                        if (host.Contains("truyenqq")) domain = "truyenqq";
+                        else if (host.Contains("nettruyen")) domain = "nettruyen";
+                        else if (host.Contains("vi-hentai") || host.Contains("hentaivn")) domain = "hentaivn";
+                        else if (host.Contains("hentai2read")) domain = "hentai2read";
+                        else if (host.Contains("daomeoden")) domain = "daomeoden";
                         else
                         {
-                            domain = host;
+                            var parts = host.Split('.');
+                            if (parts.Length >= 2)
+                            {
+                                domain = parts[parts.Length - 2];
+                            }
+                            else
+                            {
+                                domain = host;
+                            }
                         }
                     }
                 }
@@ -702,8 +709,19 @@ namespace get_link_manga
         {
             try
             {
-                string browserArgs = "--disable-extensions --disable-component-extensions-with-background-pages --disable-background-networking --disable-sync --disable-default-apps --no-first-run --disable-features=msSmartScreenProtection,RendererCodeIntegrity";
-                if (string.IsNullOrEmpty(_targetUrl) || (!_targetUrl.Contains("truyenqq") && !_targetUrl.Contains("nettruyen")))
+                string browserArgs = "--disable-background-networking --disable-sync --disable-default-apps --no-first-run --disable-features=msSmartScreenProtection,RendererCodeIntegrity";
+                string extensionPath = System.IO.Path.Combine(PortablePaths.AppRoot, "extensions", "Link Grabber 0.6.1_0");
+                if (System.IO.Directory.Exists(extensionPath))
+                {
+                    browserArgs += $" --load-extension=\"{extensionPath}\"";
+                }
+                else
+                {
+                    browserArgs += " --disable-extensions --disable-component-extensions-with-background-pages";
+                }
+
+                bool isExtensionPage = !string.IsNullOrEmpty(_targetUrl) && _targetUrl.StartsWith("chrome-extension://", StringComparison.OrdinalIgnoreCase);
+                if (!isExtensionPage && (string.IsNullOrEmpty(_targetUrl) || (!_targetUrl.Contains("truyenqq") && !_targetUrl.Contains("nettruyen"))))
                 {
                     browserArgs += " --blink-settings=imagesEnabled=false";
                 }
@@ -730,7 +748,7 @@ document.addEventListener('click', function (event) {
     anchor.removeAttribute('target');
   }
 }, true);";
-                    if (string.IsNullOrEmpty(_targetUrl) || (!_targetUrl.Contains("truyenqq") && !_targetUrl.Contains("nettruyen")))
+                    if (!isExtensionPage && (string.IsNullOrEmpty(_targetUrl) || (!_targetUrl.Contains("truyenqq") && !_targetUrl.Contains("nettruyen"))))
                     {
                         initScript = @"
 const textOnlyStyle = document.createElement('style');
@@ -784,6 +802,17 @@ document.addEventListener('click', function (event) {
         private void CoreWebView2_NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
         {
             e.Handled = true;
+            string targetUrl = e.Uri;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    var captchaWin = new CaptchaWindow(targetUrl, _captchaType, autoDeleteCookiesOnLoad: false, headlessAutomation: false);
+                    captchaWin.Owner = this;
+                    captchaWin.Show();
+                }
+                catch {}
+            }));
         }
 
         private async Task AutoDetectBypassAsync()
