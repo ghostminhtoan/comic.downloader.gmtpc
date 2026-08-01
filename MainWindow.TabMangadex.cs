@@ -29,6 +29,8 @@ namespace get_link_manga
         private const int MangadexFeedPageSize = 500;
         // ponytail: spawn ChromeDriver theo request cho MangaDex; cham hon pool nhung tranh profile lock va crash DevToolsActivePort. Nang cap sau: shared WebView2 fetcher.
         private readonly SemaphoreSlim _mangadexBrowserFetchSemaphore = new SemaphoreSlim(2, 2);
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, MangadexMangaData> _mangadexMangaCache = new System.Collections.Concurrent.ConcurrentDictionary<string, MangadexMangaData>(StringComparer.OrdinalIgnoreCase);
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, MangadexChapterData> _mangadexChapterCache = new System.Collections.Concurrent.ConcurrentDictionary<string, MangadexChapterData>(StringComparer.OrdinalIgnoreCase);
         private static readonly Regex MangadexUuidRegex = new Regex(
             @"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
             RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
@@ -1188,6 +1190,11 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
 
         private async Task<MangadexMangaData> GetMangadexMangaAsync(string mangaId, CancellationToken token)
         {
+            if (_mangadexMangaCache.TryGetValue(mangaId, out MangadexMangaData cached))
+            {
+                return cached;
+            }
+
             var response = await GetMangadexJsonAsync<MangadexSingleResponse<MangadexMangaData>>(
                 BuildMangadexApiUrl($"/manga/{mangaId}", new Dictionary<string, string>
                 {
@@ -1201,11 +1208,17 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
             }
 
             manga.CoverFileName = GetMangadexCoverFileName(manga);
+            _mangadexMangaCache[mangaId] = manga;
             return manga;
         }
 
         private async Task<MangadexChapterData> GetMangadexChapterAsync(string chapterId, CancellationToken token)
         {
+            if (_mangadexChapterCache.TryGetValue(chapterId, out MangadexChapterData cached))
+            {
+                return cached;
+            }
+
             var response = await GetMangadexJsonAsync<MangadexSingleResponse<MangadexChapterData>>(
                 BuildMangadexApiUrl($"/chapter/{chapterId}", new Dictionary<string, string>
                 {
@@ -1218,6 +1231,7 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 throw new Exception("Không lấy được thông tin chapter từ MangaDex.");
             }
 
+            _mangadexChapterCache[chapterId] = chapter;
             return chapter;
         }
 
@@ -1230,9 +1244,14 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 return null;
             }
 
+            if (_mangadexMangaCache.TryGetValue(mangaRelation.Id, out MangadexMangaData cachedManga))
+            {
+                return cachedManga;
+            }
+
             if (mangaRelation.Attributes != null || (mangaRelation.Relationships != null && mangaRelation.Relationships.Count > 0))
             {
-                return new MangadexMangaData
+                var manga = new MangadexMangaData
                 {
                     Id = mangaRelation.Id,
                     Attributes = new MangadexMangaAttributes
@@ -1242,9 +1261,16 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                     Relationships = mangaRelation.Relationships,
                     CoverFileName = GetMangadexCoverFileName(mangaRelation)
                 };
+                _mangadexMangaCache[manga.Id] = manga;
+                return manga;
             }
 
-            return await GetMangadexMangaAsync(mangaRelation.Id, token);
+            var resolvedManga = await GetMangadexMangaAsync(mangaRelation.Id, token);
+            if (resolvedManga != null)
+            {
+                _mangadexMangaCache[resolvedManga.Id] = resolvedManga;
+            }
+            return resolvedManga;
         }
 
         private static string BuildMangadexBookUrl(string mangaId, int page = 1)
@@ -1418,6 +1444,8 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                     {
                         continue;
                     }
+
+                    _mangadexChapterCache[chapterId] = chapter;
 
                     string displayTitle = GetMangadexChapterDisplayTitle(chapter.Attributes);
                     chapters.Add(new MangadexChapterDescriptor
