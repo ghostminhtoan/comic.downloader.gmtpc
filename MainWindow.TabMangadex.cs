@@ -1935,6 +1935,15 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
             string safeBook = GetCanonicalBookFolderName(item, bookTitle, "Unknown Book");
             string aliasSafeBook = GetSafePathName(bookTitle);
             string safeChapter = GetDownloadChapterFolderName(bookTitle, chapterTitle);
+            if (!string.IsNullOrWhiteSpace(preferredGroup))
+            {
+                string gName = GetMangadexChapterGroupName(chapter);
+                if (string.IsNullOrWhiteSpace(gName))
+                {
+                    gName = "No Group";
+                }
+                safeChapter = $"{safeChapter}-group {GetSafePathName(gName)}";
+            }
             string langFolder = GetMangadexLanguageFolderName(chapter.Attributes?.TranslatedLanguage);
             string siteRootFolder = Path.Combine(GetSiteDownloadRoot(rootFolder, MangadexSiteFolder), langFolder);
             await NormalizeChapterFolderAliasAsync(siteRootFolder, safeBook, aliasSafeBook, safeChapter, token);
@@ -2321,10 +2330,16 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 {
                     Owner = this
                 };
+                if (txtMangadexGroupFilter != null)
+                {
+                    dialog.SelectedGroup = txtMangadexGroupFilter.Text;
+                }
+
                 if (dialog.ShowDialog() == true)
                 {
                     if (chkMangadexLangVi != null) chkMangadexLangVi.IsChecked = dialog.SelectedVi;
                     if (chkMangadexLangEn != null) chkMangadexLangEn.IsChecked = dialog.SelectedEn;
+                    if (txtMangadexGroupFilter != null) txtMangadexGroupFilter.Text = dialog.SelectedGroup ?? string.Empty;
                     return true;
                 }
                 return false;
@@ -2335,12 +2350,13 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
         {
             public bool SelectedVi { get; set; }
             public bool SelectedEn { get; set; }
+            public string SelectedGroup { get; set; }
 
             public MangadexLanguageDialog(bool isVietnameseUi)
             {
                 this.Title = isVietnameseUi ? "Ngôn ngữ MangaDex" : "MangaDex Language";
-                this.Width = 320;
-                this.Height = 200;
+                this.Width = 340;
+                this.Height = 290;
                 this.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 this.ResizeMode = ResizeMode.NoResize;
                 this.Background = Application.Current.TryFindResource("CyberpunkWindowBackgroundBrush") as System.Windows.Media.Brush 
@@ -2376,10 +2392,33 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                     Content = isVietnameseUi ? "Tiếng Anh" : "English",
                     IsChecked = false,
                     Foreground = Application.Current.TryFindResource("CyberpunkTextBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.White,
-                    Margin = new Thickness(0, 0, 0, 20),
+                    Margin = new Thickness(0, 0, 0, 15),
                     FontWeight = FontWeights.Bold
                 };
                 mainStack.Children.Add(chkEn);
+
+                var groupLabel = new TextBlock
+                {
+                    Text = isVietnameseUi 
+                        ? "Ưu tiên nhóm dịch (Không bắt buộc):" 
+                        : "Preferred scanlator group (Optional):",
+                    Foreground = Application.Current.TryFindResource("CyberpunkTextBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.White,
+                    FontWeight = FontWeights.Bold,
+                    Margin = new Thickness(0, 0, 0, 5)
+                };
+                mainStack.Children.Add(groupLabel);
+
+                var txtGroup = new TextBox
+                {
+                    Height = 26,
+                    Margin = new Thickness(0, 0, 0, 20),
+                    VerticalContentAlignment = VerticalAlignment.Center,
+                    Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(14, 18, 26)),
+                    BorderBrush = Application.Current.TryFindResource("CyberpunkBorderBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Gray,
+                    Foreground = Application.Current.TryFindResource("CyberpunkYellowBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Yellow
+                };
+                this.Loaded += (s, e) => { txtGroup.Text = SelectedGroup ?? string.Empty; };
+                mainStack.Children.Add(txtGroup);
 
                 var btnStack = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
 
@@ -2405,6 +2444,7 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                     }
                     SelectedVi = chkVi.IsChecked == true;
                     SelectedEn = chkEn.IsChecked == true;
+                    SelectedGroup = txtGroup.Text.Trim();
                     this.DialogResult = true;
                     this.Close();
                 };
