@@ -2154,6 +2154,21 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 return string.Empty;
             }
 
+            try
+            {
+                var uri = new Uri(imageUrl);
+                if (!uri.Host.Equals("uploads.mangadex.org", StringComparison.OrdinalIgnoreCase))
+                {
+                    var builder = new UriBuilder(uri)
+                    {
+                        Host = "uploads.mangadex.org",
+                        Port = -1
+                    };
+                    return builder.Uri.AbsoluteUri;
+                }
+            }
+            catch {}
+
             if (imageUrl.IndexOf("/data-saver/", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 return imageUrl.Replace("/data-saver/", "/data/");

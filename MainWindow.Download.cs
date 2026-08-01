@@ -4432,7 +4432,9 @@ namespace get_link_manga
                 token.ThrowIfCancellationRequested();
 
                 string arguments = "--fail --location --silent --show-error --http1.1 --no-keepalive " +
-                                   "--retry 3 --retry-all-errors --retry-delay 1 " +
+                                   "--connect-timeout 8 --max-time 30 " +
+                                   "--speed-limit 15360 --speed-time 5 " +
+                                   "--retry 1 --retry-all-errors --retry-delay 1 " +
                                    "--user-agent " + QuoteWindowsArgument("Mozilla/5.0") + " " +
                                    "--output " + QuoteWindowsArgument(filePath) + " ";
                 if (!string.IsNullOrWhiteSpace(referer))
