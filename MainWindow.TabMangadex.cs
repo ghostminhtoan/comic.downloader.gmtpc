@@ -420,7 +420,7 @@ namespace get_link_manga
 
                 var startInfo = new ProcessStartInfo
                 {
-                    FileName = "curl.exe",
+                    FileName = GetCurlPath(),
                     Arguments = arguments,
                     UseShellExecute = false,
                     CreateNoWindow = true,

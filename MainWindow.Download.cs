@@ -4425,6 +4425,26 @@ namespace get_link_manga
             });
         }
 
+        private string GetCurlPath()
+        {
+            try
+            {
+                string windir = Environment.GetEnvironmentVariable("windir") ?? @"C:\Windows";
+                string sysnative = Path.Combine(windir, "sysnative", "curl.exe");
+                if (File.Exists(sysnative))
+                {
+                    return sysnative;
+                }
+                string system32 = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "curl.exe");
+                if (File.Exists(system32))
+                {
+                    return system32;
+                }
+            }
+            catch {}
+            return "curl.exe";
+        }
+
         private async Task DownloadMangadexImageWithCurlAsync(string url, string referer, string filePath, CancellationToken token)
         {
             await Task.Run(() =>
@@ -4446,7 +4466,7 @@ namespace get_link_manga
 
                 var startInfo = new ProcessStartInfo
                 {
-                    FileName = "curl.exe",
+                    FileName = GetCurlPath(),
                     Arguments = arguments,
                     UseShellExecute = false,
                     CreateNoWindow = true,
