@@ -447,6 +447,9 @@
     <None Include="App.config" />
     <None Include="app.manifest" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\1111.png" />
+  </ItemGroup>
   <Target Name="GenerateBuildInfo"
           BeforeTargets="BeforeBuild"
           Condition="'$(Configuration)' == 'Release' and '$(AutoStampBuildInfo)' == 'true'">

@@ -8,6 +8,9 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.IO;
+using System.Net;
+using System.Diagnostics;
 
 namespace get_link_manga
 {
@@ -179,6 +182,58 @@ namespace get_link_manga
             }
 
             return false;
+        }
+
+        private async void BtnDownloadWarp_Click(object sender, RoutedEventArgs e)
+        {
+            btnDownloadWarp.IsEnabled = false;
+            try
+            {
+                string url = "https://downloads.cloudflareclient.com/v1/download/windows/version/2026.6.880.0";
+                string tempDir = Path.Combine(PortablePaths.AppRoot, ".tmp");
+                Directory.CreateDirectory(tempDir);
+                string tempFilePath = Path.Combine(tempDir, "CloudflareWarpInstallerTemp");
+
+                // Download file
+                using (var client = new WebClient())
+                {
+                    await client.DownloadFileTaskAsync(new Uri(url), tempFilePath);
+                }
+
+                // Check extension, if missing set to .msi
+                string finalPath = tempFilePath;
+                if (!Path.HasExtension(tempFilePath) || Path.GetExtension(tempFilePath).ToLower() != ".msi")
+                {
+                    finalPath = tempFilePath + ".msi";
+                    if (File.Exists(finalPath))
+                    {
+                        File.Delete(finalPath);
+                    }
+                    File.Move(tempFilePath, finalPath);
+                }
+
+                // Install with /passive argument
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = finalPath,
+                    Arguments = "/passive",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    _isVietnameseUi 
+                        ? $"Tải hoặc cài đặt Cloudflare Warp thất bại: {ex.Message}" 
+                        : $"Failed to download or install Cloudflare Warp: {ex.Message}",
+                    _isVietnameseUi ? "Lỗi" : "Error", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                btnDownloadWarp.IsEnabled = true;
+            }
         }
 
         private void BtnMainMinimize_Click(object sender, RoutedEventArgs e)

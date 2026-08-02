@@ -88,11 +88,21 @@
                     <TextBlock Name="lblPinWindow" Text="PIN" Foreground="White" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
                     <ToggleButton Name="btnPinWindow" Click="BtnMainTheme_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="Pin window"/>
                 </StackPanel>
+                <Button Name="btnDownloadWarp"
+                        Click="BtnDownloadWarp_Click"
+                        Style="{StaticResource CyberpunkButtonCyan}"
+                        Width="26"
+                        Height="26"
+                        Margin="0,0,6,0"
+                        Padding="2"
+                        ToolTip="Download Cloudflare Warp 1.1.1.1">
+                    <Image Source="Resources/1111.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                </Button>
                 <Button Name="btnMainMinimize"
                         Content="-"
                         Click="BtnMainMinimize_Click"
                         Style="{StaticResource CyberpunkButtonCyan}"
-                        Width="32"
+                        Width="24"
                         Height="26"
                         Margin="0,0,6,0"
                         Padding="0"
@@ -104,7 +114,7 @@
                         FontFamily="Segoe MDL2 Assets"
                         Click="BtnMainMaximize_Click"
                         Style="{StaticResource CyberpunkButtonCyan}"
-                        Width="32"
+                        Width="24"
                         Height="26"
                         Margin="0,0,6,0"
                         Padding="0"
