@@ -3,6 +3,10 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Net;
+using System.Windows;
+using System.Windows.Controls;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace get_link_manga
 {
@@ -23,6 +27,26 @@ namespace get_link_manga
                 Directory.CreateDirectory(binFolder);
 
                 SetDllDirectory(binFolder);
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | (SecurityProtocolType)12288;
+
+                if (NeedsInitialization())
+                {
+                    var window = new DownloadProgressWindow();
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            PerformInitialization(window);
+                        }
+                        catch {}
+                        finally
+                        {
+                            window.Dispatcher.Invoke(new Action(window.Close));
+                        }
+                    });
+                    window.ShowDialog();
+                }
+
                 EnsureBinAssemblies();
                 EnsureSqliteInterop();
                 EnsureWebView2Loader();
@@ -32,6 +56,171 @@ namespace get_link_manga
             }
             catch
             {
+            }
+        }
+
+        private static bool NeedsInitialization()
+        {
+            var binFolder = Path.Combine(PortablePaths.AppRoot, "bin");
+            var ringtonesDir = Path.Combine(binFolder, "ringtones");
+            
+            var assemblies = new[]
+            {
+                "WebDriver.dll",
+                "Newtonsoft.Json.dll",
+                "Microsoft.Web.WebView2.Core.dll",
+                "Microsoft.Web.WebView2.WinForms.dll",
+                "Microsoft.Web.WebView2.Wpf.dll",
+                "System.Data.SQLite.dll",
+                "SQLite.Interop.dll",
+                "WebView2Loader.dll",
+                "selenium-manager.exe"
+            };
+
+            foreach (var dll in assemblies)
+            {
+                if (!File.Exists(Path.Combine(binFolder, dll)))
+                {
+                    return true;
+                }
+            }
+
+            var ringtones = new[] { "download-finish.wav", "error.wav", "Startup.wav" };
+            foreach (var wav in ringtones)
+            {
+                if (!File.Exists(Path.Combine(ringtonesDir, wav)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static void PerformInitialization(DownloadProgressWindow window)
+        {
+            var binFolder = Path.Combine(PortablePaths.AppRoot, "bin");
+            var ringtonesDir = Path.Combine(binFolder, "ringtones");
+
+            var downloads = new List<DownloadItem>
+            {
+                new DownloadItem { Name = "WebDriver.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/WebDriver.dll", Dest = Path.Combine(binFolder, "WebDriver.dll") },
+                new DownloadItem { Name = "Newtonsoft.Json.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/Newtonsoft.Json.dll", Dest = Path.Combine(binFolder, "Newtonsoft.Json.dll") },
+                new DownloadItem { Name = "Microsoft.Web.WebView2.Core.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/Microsoft.Web.WebView2.Core.dll", Dest = Path.Combine(binFolder, "Microsoft.Web.WebView2.Core.dll") },
+                new DownloadItem { Name = "Microsoft.Web.WebView2.WinForms.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/Microsoft.Web.WebView2.WinForms.dll", Dest = Path.Combine(binFolder, "Microsoft.Web.WebView2.WinForms.dll") },
+                new DownloadItem { Name = "Microsoft.Web.WebView2.Wpf.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/Microsoft.Web.WebView2.Wpf.dll", Dest = Path.Combine(binFolder, "Microsoft.Web.WebView2.Wpf.dll") },
+                new DownloadItem { Name = "System.Data.SQLite.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/System.Data.SQLite.dll", Dest = Path.Combine(binFolder, "System.Data.SQLite.dll") },
+                new DownloadItem { Name = "SQLite.Interop.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/SQLite.Interop.dll", Dest = Path.Combine(binFolder, "SQLite.Interop.dll") },
+                new DownloadItem { Name = "WebView2Loader.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/WebView2Loader.dll", Dest = Path.Combine(binFolder, "WebView2Loader.dll") },
+                new DownloadItem { Name = "selenium-manager.exe", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/selenium-manager.exe", Dest = Path.Combine(binFolder, "selenium-manager.exe") },
+                new DownloadItem { Name = "download-finish.wav", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/ringtones-download-finish.wav", Dest = Path.Combine(ringtonesDir, "download-finish.wav") },
+                new DownloadItem { Name = "error.wav", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/ringtones-error.wav", Dest = Path.Combine(ringtonesDir, "error.wav") },
+                new DownloadItem { Name = "Startup.wav", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/ringtones-Startup.wav", Dest = Path.Combine(ringtonesDir, "Startup.wav") }
+            };
+
+            var pending = new List<DownloadItem>();
+            foreach (var item in downloads)
+            {
+                if (!File.Exists(item.Dest))
+                {
+                    pending.Add(item);
+                }
+            }
+
+            if (pending.Count == 0) return;
+
+            Directory.CreateDirectory(binFolder);
+            Directory.CreateDirectory(ringtonesDir);
+
+            for (int i = 0; i < pending.Count; i++)
+            {
+                var item = pending[i];
+                int index = i;
+                
+                using (var client = new WebClient())
+                {
+                    client.DownloadProgressChanged += (s, ev) =>
+                    {
+                        window.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            window.StatusText.Text = $"Đang tải {item.Name} ({index + 1}/{pending.Count})... {ev.ProgressPercentage}%";
+                            window.ProgressBar.Value = ev.ProgressPercentage;
+                        }));
+                    };
+
+                    var syncObject = new object();
+                    bool done = false;
+                    
+                    client.DownloadFileCompleted += (s, ev) =>
+                    {
+                        lock (syncObject)
+                        {
+                            done = true;
+                            System.Threading.Monitor.Pulse(syncObject);
+                        }
+                    };
+
+                    lock (syncObject)
+                    {
+                        client.DownloadFileAsync(new Uri(item.Url), item.Dest);
+                        while (!done)
+                        {
+                            System.Threading.Monitor.Wait(syncObject);
+                        }
+                    }
+                }
+            }
+        }
+
+        private class DownloadItem
+        {
+            public string Name { get; set; }
+            public string Url { get; set; }
+            public string Dest { get; set; }
+        }
+
+        private class DownloadProgressWindow : Window
+        {
+            public TextBlock StatusText { get; }
+            public ProgressBar ProgressBar { get; }
+
+            public DownloadProgressWindow()
+            {
+                Title = "Comic Downloader GMTPC - Khởi tạo thư viện";
+                Width = 450;
+                Height = 130;
+                WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                ResizeMode = ResizeMode.NoResize;
+                WindowStyle = WindowStyle.ThreeDBorderWindow;
+                Topmost = true;
+                Background = System.Windows.Media.Brushes.White;
+
+                var grid = new Grid { Margin = new Thickness(15) };
+                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(10) });
+                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                StatusText = new TextBlock
+                {
+                    Text = "Đang kiểm tra và tải các thư viện cần thiết...",
+                    FontSize = 13,
+                    Margin = new Thickness(0, 0, 0, 5),
+                    TextWrapping = TextWrapping.Wrap
+                };
+                Grid.SetRow(StatusText, 0);
+                grid.Children.Add(StatusText);
+
+                ProgressBar = new ProgressBar
+                {
+                    Height = 20,
+                    Minimum = 0,
+                    Maximum = 100,
+                    IsIndeterminate = false
+                };
+                Grid.SetRow(ProgressBar, 2);
+                grid.Children.Add(ProgressBar);
+
+                Content = grid;
             }
         }
 
