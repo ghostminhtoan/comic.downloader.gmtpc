@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Net;
 
 namespace get_link_manga
 {
@@ -31,8 +32,8 @@ namespace get_link_manga
                 SetDllDirectory(binFolder);
                 EnsureBinAssemblies();
                 EnsureSqliteInterop();
-                EnsureSeleniumManager();
                 MigrateLegacyTempRoot();
+                EnsureSeleniumManager();
             }
             catch
             {
@@ -45,13 +46,23 @@ namespace get_link_manga
         {
             try
             {
-                string binFolder = Path.Combine(PortablePaths.AppRoot, "bin");
-                string destination = Path.Combine(binFolder, "selenium-manager", "windows", "selenium-manager.exe");
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | (SecurityProtocolType)12288;
+                string binDir = Path.Combine(PortablePaths.AppRoot, ".bin");
+                Directory.CreateDirectory(binDir);
+                string exePath = Path.Combine(binDir, "selenium-manager.exe");
 
-                if (!File.Exists(destination))
+                if (!File.Exists(exePath))
                 {
-                    string resourceName = "selenium-manager/windows/selenium-manager.exe";
-                    ExtractEmbeddedResource(resourceName, destination);
+                    string url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/selenium-manager.exe";
+                    using (var client = new WebClient())
+                    {
+                        client.DownloadFile(url, exePath);
+                    }
+                }
+
+                if (File.Exists(exePath))
+                {
+                    Environment.SetEnvironmentVariable("SE_MANAGER_PATH", exePath);
                 }
             }
             catch

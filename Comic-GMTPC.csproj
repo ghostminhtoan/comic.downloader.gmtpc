@@ -481,9 +481,6 @@
     <EmbeddedResource Include="$(LocalPackageRoot)microsoft.web.webview2\1.0.1901.177\lib\net45\Microsoft.Web.WebView2.Wpf.dll">
       <LogicalName>Microsoft.Web.WebView2.Wpf.dll</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="$(LocalPackageRoot)selenium.webdriver\4.22.0\manager\windows\selenium-manager.exe">
-      <LogicalName>selenium-manager/windows/selenium-manager.exe</LogicalName>
-    </EmbeddedResource>
   </ItemGroup>
   <Target Name="GenerateBuildInfo"
           BeforeTargets="BeforeBuild"
