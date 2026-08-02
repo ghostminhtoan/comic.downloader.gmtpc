@@ -226,18 +226,77 @@ namespace get_link_manga
           {
               try
               {
-                  double baseFontSize = 12.0;
-                  double targetSize = baseFontSize * (percent / 100.0);
+                  _textScaleFactor = percent / 100.0;
                   if (Dispatcher.CheckAccess())
                   {
-                      this.FontSize = targetSize;
+                      this.FontSize = 12.0 * _textScaleFactor;
+                      ApplyAdaptiveLayout(new Size(ActualWidth, ActualHeight));
+                      ApplyTextScaleToVisualTree(this);
                   }
                   else
                   {
-                      Dispatcher.BeginInvoke(new Action(() => this.FontSize = targetSize));
+                      Dispatcher.BeginInvoke(new Action(() =>
+                      {
+                          this.FontSize = 12.0 * _textScaleFactor;
+                          ApplyAdaptiveLayout(new Size(ActualWidth, ActualHeight));
+                          ApplyTextScaleToVisualTree(this);
+                      }));
                   }
               }
               catch {}
+          }
+
+          private double ScaledFont(double baseSize)
+          {
+              return baseSize * _textScaleFactor;
+          }
+
+          private static readonly DependencyProperty BaseFontSizeProperty =
+              DependencyProperty.RegisterAttached("_BaseFontSize", typeof(double), typeof(MainWindow),
+                  new PropertyMetadata(double.NaN));
+
+          private void ApplyTextScaleToVisualTree(DependencyObject root)
+          {
+              if (root == null) return;
+              int count = VisualTreeHelper.GetChildrenCount(root);
+              for (int i = 0; i < count; i++)
+              {
+                  var child = VisualTreeHelper.GetChild(root, i);
+                  ScaleElementFont(child);
+                  ApplyTextScaleToVisualTree(child);
+              }
+          }
+
+          private void ScaleElementFont(DependencyObject element)
+          {
+              // Chỉ scale nếu FontSize được set local (hardcoded)
+              if (element is Control ctrl)
+              {
+                  var localVal = ctrl.ReadLocalValue(Control.FontSizeProperty);
+                  if (localVal == DependencyProperty.UnsetValue) return; // kế thừa, skip
+                  double baseVal = (double)ctrl.GetValue(BaseFontSizeProperty);
+                  if (double.IsNaN(baseVal))
+                  {
+                      // Lần đầu: lưu base = giá trị hiện tại (chưa scale)
+                      // Nhưng nếu _textScaleFactor != 1.0, giá trị hiện tại có thể đã scaled bởi ScaledFont()
+                      // Nên chia lại để lấy base đúng
+                      baseVal = ctrl.FontSize / _textScaleFactor;
+                      ctrl.SetValue(BaseFontSizeProperty, baseVal);
+                  }
+                  ctrl.FontSize = Math.Round(baseVal * _textScaleFactor, 1);
+              }
+              else if (element is TextBlock tb)
+              {
+                  var localVal = tb.ReadLocalValue(TextBlock.FontSizeProperty);
+                  if (localVal == DependencyProperty.UnsetValue) return;
+                  double baseVal = (double)tb.GetValue(BaseFontSizeProperty);
+                  if (double.IsNaN(baseVal))
+                  {
+                      baseVal = tb.FontSize / _textScaleFactor;
+                      tb.SetValue(BaseFontSizeProperty, baseVal);
+                  }
+                  tb.FontSize = Math.Round(baseVal * _textScaleFactor, 1);
+              }
           }
 
         private void BuildGlobalDownloadToolbar()
