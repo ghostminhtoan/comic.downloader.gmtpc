@@ -1478,7 +1478,7 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
             return filteredChapters.OrderBy(c => c.ChapterNumber).ThenBy(c => c.SequenceIndex).ToList();
         }
 
-        private async Task<List<MangadexChapterDescriptor>> GetMangadexBookChaptersAsync(string mangaId, IEnumerable<string> translatedLanguages, CancellationToken token)
+        private async Task<List<MangadexChapterDescriptor>> GetMangadexBookChaptersAsync(string mangaId, IEnumerable<string> translatedLanguages, CancellationToken token, bool includeExternalUrl = false)
         {
             var allChapters = new List<MangadexChapterData>();
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -1488,7 +1488,7 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
             {
                 token.ThrowIfCancellationRequested();
                 MangadexListResponse<MangadexChapterData> response = await GetMangadexJsonAsync<MangadexListResponse<MangadexChapterData>>(
-                    BuildMangadexFeedUrl(mangaId, offset, MangadexFeedPageSize, translatedLanguages),
+                    BuildMangadexFeedUrl(mangaId, offset, MangadexFeedPageSize, translatedLanguages, includeExternalUrl),
                     token);
                 List<MangadexChapterData> pageItems = response?.Data ?? new List<MangadexChapterData>();
                 if (pageItems.Count == 0)
@@ -1634,12 +1634,12 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                    $"&limit={limit.ToString(CultureInfo.InvariantCulture)}";
         }
 
-        private static string BuildMangadexFeedUrl(string mangaId, int offset, int limit, string translatedLanguage = null)
+        private static string BuildMangadexFeedUrl(string mangaId, int offset, int limit, string translatedLanguage = null, bool includeExternalUrl = false)
         {
-            return BuildMangadexFeedUrl(mangaId, offset, limit, string.IsNullOrWhiteSpace(translatedLanguage) ? null : new[] { translatedLanguage });
+            return BuildMangadexFeedUrl(mangaId, offset, limit, string.IsNullOrWhiteSpace(translatedLanguage) ? null : new[] { translatedLanguage }, includeExternalUrl);
         }
 
-        private static string BuildMangadexFeedUrl(string mangaId, int offset, int limit, IEnumerable<string> translatedLanguages)
+        private static string BuildMangadexFeedUrl(string mangaId, int offset, int limit, IEnumerable<string> translatedLanguages, bool includeExternalUrl = false)
         {
             string languageQuery = string.Empty;
             foreach (string language in (translatedLanguages ?? Enumerable.Empty<string>())
@@ -1657,7 +1657,7 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                    "&includes%5B%5D=scanlation_group" +
                    "&includeFutureUpdates=0" +
                    "&includeEmptyPages=0" +
-                   "&includeExternalUrl=1" +
+                   $"&includeExternalUrl={(includeExternalUrl ? "1" : "0")}" +
                    "&order%5Bvolume%5D=asc" +
                    "&order%5Bchapter%5D=asc" +
                    "&order%5BreadableAt%5D=asc";
@@ -1677,9 +1677,9 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 return new List<ReaderChapterItem>();
             }
 
-            // Gọi trực tiếp hàm lấy thô nhận IEnumerable<string> để tránh bị lọc qua overload (mangaId, item, token)
-            List<string> targets = new List<string> { "vi", "en" };
-            List<MangadexChapterDescriptor> allChapters = await GetMangadexBookChaptersAsync(mangaId, (IEnumerable<string>)targets, token);
+            // Với riêng mangadex, bất kể người dùng chọn tiếng Anh hay tiếng Việt đều phải scan chapter độc lập cho cả 2 ngôn ngữ của cùng một book.
+            // Nên ta lấy tất cả các chapters của cả "vi" và "en" cùng một lúc để xử lý độc lập.
+            List<MangadexChapterDescriptor> allChapters = await GetMangadexBookChaptersAsync(mangaId, new[] { "vi", "en" }, token, includeExternalUrl: true);
 
             // Group theo TranslatedLanguage để đảm bảo độc lập, sau đó trong mỗi group ta group theo ChapterNumber/Title giống như cũ để tránh trùng lặp nhóm (group filter).
             var result = new List<ReaderChapterItem>();
