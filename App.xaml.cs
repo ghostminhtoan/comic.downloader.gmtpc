@@ -284,6 +284,15 @@ namespace get_link_manga
                     return;
                 }
 
+                // Hỏi ý kiến người dùng trước khi cài
+                string message = "Máy bạn chưa cài Cloudflare Warp (1.1.1.1).\nBạn có muốn cài 1.1.1.1 không? Nếu không cài thì sẽ không tải được truyện trên một số website.";
+                string title = "Cài đặt Cloudflare Warp / Warp Installation Check";
+                var result = MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+
                 // Cài đặt Warp tự động ngầm
                 string url = "https://downloads.cloudflareclient.com/v1/download/windows/version/2026.6.880.0";
                 string tempDir = System.IO.Path.Combine(PortablePaths.AppRoot, ".tmp");
