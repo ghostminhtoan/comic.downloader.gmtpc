@@ -2054,26 +2054,69 @@ namespace get_link_manga
                 };
             }
 
+            string domain = GetDownloadMissingChapterDomainLabel(item);
+            if (domain.IndexOf("mangadex.org", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                // Tách riêng các chapter tiếng Việt và tiếng Anh dựa vào hậu tố [VI] và [EN] trong Name
+                var viChapters = chapters.Where(c => c != null && (c.Name ?? string.Empty).IndexOf("[VI]", StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                var enChapters = chapters.Where(c => c != null && (c.Name ?? string.Empty).IndexOf("[EN]", StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+
+                ReaderChapterAnalysis viAnalysis = AnalyzeReaderChapterNumbers(viChapters);
+                ReaderChapterAnalysis enAnalysis = AnalyzeReaderChapterNumbers(enChapters);
+
+                string viMissing = viAnalysis.MissingRanges.Count == 0
+                    ? (_isVietnameseUi ? "đủ chapter" : "complete")
+                    : string.Join(", ", viAnalysis.MissingRanges);
+
+                string enMissing = enAnalysis.MissingRanges.Count == 0
+                    ? (_isVietnameseUi ? "đủ chapter" : "complete")
+                    : string.Join(", ", enAnalysis.MissingRanges);
+
+                string missingLabel = $"VI: {viMissing} | EN: {enMissing}";
+
+                item.MissingChapterLatestChapterText = GetDownloadLatestChapterText(chapters);
+                List<string> decimalChapters = chapters
+                    .Where(chapter => chapter != null && chapter.IsDecimalChapter)
+                    .OrderBy(chapter => chapter.Name, _readerSortComparer)
+                    .Select(chapter => chapter.Name)
+                    .ToList();
+
+                string viCoverage = BuildDownloadChapterCoverageLabel(viChapters, viAnalysis);
+                string enCoverage = BuildDownloadChapterCoverageLabel(enChapters, enAnalysis);
+                string coverageLabel = $"VI: {viCoverage} | EN: {enCoverage}";
+
+                return new ReaderChapterIssueItem
+                {
+                    DomainLabel = domain,
+                    BookName = item.Name,
+                    BookLink = item.Link,
+                    ChapterLabel = coverageLabel,
+                    MissingChapterLabel = missingLabel,
+                    DecimalChapterLabel = decimalChapters.Count == 0 ? string.Empty : string.Join(", ", decimalChapters),
+                    IsChecked = true
+                };
+            }
+
             ReaderChapterAnalysis analysis = AnalyzeReaderChapterNumbers(chapters);
             item.MissingChapterLatestChapterText = GetDownloadLatestChapterText(chapters);
-            List<string> decimalChapters = chapters
+            List<string> decimalChaptersGeneral = chapters
                 .Where(chapter => chapter != null && chapter.IsDecimalChapter)
                 .OrderBy(chapter => chapter.Name, _readerSortComparer)
                 .Select(chapter => chapter.Name)
                 .ToList();
 
-            string missingLabel = analysis.MissingRanges.Count == 0
+            string missingLabelGeneral = analysis.MissingRanges.Count == 0
                 ? GetDownloadCompleteChapterText()
                 : string.Join(", ", analysis.MissingRanges);
 
             return new ReaderChapterIssueItem
             {
-                DomainLabel = GetDownloadMissingChapterDomainLabel(item),
+                DomainLabel = domain,
                 BookName = item.Name,
                 BookLink = item.Link,
                 ChapterLabel = BuildDownloadChapterCoverageLabel(chapters, analysis),
-                MissingChapterLabel = missingLabel,
-                DecimalChapterLabel = decimalChapters.Count == 0 ? string.Empty : string.Join(", ", decimalChapters),
+                MissingChapterLabel = missingLabelGeneral,
+                DecimalChapterLabel = decimalChaptersGeneral.Count == 0 ? string.Empty : string.Join(", ", decimalChaptersGeneral),
                 IsChecked = true
             };
         }
