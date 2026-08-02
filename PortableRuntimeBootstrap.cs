@@ -42,33 +42,44 @@ namespace get_link_manga
             }
         }
 
-        private static void EnsureSeleniumManager()
-        {
-            try
-            {
-                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | (SecurityProtocolType)12288;
-                string binDir = Path.Combine(PortablePaths.AppRoot, ".bin");
-                Directory.CreateDirectory(binDir);
-                string exePath = Path.Combine(binDir, "selenium-manager.exe");
+         private static void EnsureSeleniumManager()
+         {
+             try
+             {
+                 ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | (SecurityProtocolType)12288;
+                 string binDir = Path.Combine(PortablePaths.AppRoot, "bin");
+                 Directory.CreateDirectory(binDir);
+                 string exePath = Path.Combine(binDir, "selenium-manager.exe");
 
-                if (!File.Exists(exePath))
-                {
-                    string url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/selenium-manager.exe";
-                    using (var client = new WebClient())
-                    {
-                        client.DownloadFile(url, exePath);
-                    }
-                }
+                 if (!File.Exists(exePath))
+                 {
+                     string url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/selenium-manager.exe";
+                     using (var client = new WebClient())
+                     {
+                         client.DownloadFile(url, exePath);
+                     }
+                 }
 
-                if (File.Exists(exePath))
-                {
-                    Environment.SetEnvironmentVariable("SE_MANAGER_PATH", exePath);
-                }
-            }
-            catch
-            {
-            }
-        }
+                 if (File.Exists(exePath))
+                 {
+                     Environment.SetEnvironmentVariable("SE_MANAGER_PATH", exePath);
+                 }
+
+                 // Clean up legacy .bin directory if it exists
+                 string legacyBin = Path.Combine(PortablePaths.AppRoot, ".bin");
+                 if (Directory.Exists(legacyBin))
+                 {
+                     try
+                     {
+                         Directory.Delete(legacyBin, true);
+                     }
+                     catch {}
+                 }
+             }
+             catch
+             {
+             }
+         }
 
         private static void EnsureBinAssemblies()
         {
