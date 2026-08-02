@@ -31,12 +31,31 @@ namespace get_link_manga
                 SetDllDirectory(binFolder);
                 EnsureBinAssemblies();
                 EnsureSqliteInterop();
+                EnsureSeleniumManager();
                 MigrateLegacyTempRoot();
             }
             catch
             {
                 // Best effort only. If the native loader cannot be extracted,
                 // WebView2 will fall back to whatever runtime is available.
+            }
+        }
+
+        private static void EnsureSeleniumManager()
+        {
+            try
+            {
+                string binFolder = Path.Combine(PortablePaths.AppRoot, "bin");
+                string destination = Path.Combine(binFolder, "selenium-manager", "windows", "selenium-manager.exe");
+
+                if (!File.Exists(destination))
+                {
+                    string resourceName = "selenium-manager/windows/selenium-manager.exe";
+                    ExtractEmbeddedResource(resourceName, destination);
+                }
+            }
+            catch
+            {
             }
         }
 
