@@ -51,6 +51,7 @@ namespace get_link_manga
             ["Update"] = "Cập nhật",
             ["Search"] = "Tìm kiếm",
             ["Word wrap"] = "Xuống dòng",
+            ["BOOKS TEXT SCALE"] = "TỶ LỆ CHỮ TRUYỆN",
             ["DOWNLOAD ALL"] = "TẢI TẤT CẢ",
             ["AUTO RETRY UNTIL SETTLED"] = "TỰ THỬ LẠI ĐẾN KHI XONG",
             ["ERROR LOG"] = "NHẬT KÝ LỖI",

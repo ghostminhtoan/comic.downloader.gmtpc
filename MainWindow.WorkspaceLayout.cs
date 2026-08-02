@@ -251,7 +251,7 @@ namespace get_link_manga
               return baseSize * _textScaleFactor;
           }
 
-          private static readonly DependencyProperty BaseFontSizeProperty =
+          internal static readonly DependencyProperty BaseFontSizeProperty =
               DependencyProperty.RegisterAttached("_BaseFontSize", typeof(double), typeof(MainWindow),
                   new PropertyMetadata(double.NaN));
 

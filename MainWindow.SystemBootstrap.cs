@@ -201,6 +201,7 @@ namespace get_link_manga
             InitializeMangadexControls();
             InitializeGlobalAutoPasteClipboard();
             dgResults.ItemsSource = _scrapedItems;
+            dgResults.LoadingRow += DgResults_LoadingRow;
             _scrapedItems.CollectionChanged += ResultsThumbnailItems_CollectionChanged;
             SetResultsPresentationMode(false, false);
             UpdateStats();

@@ -3162,6 +3162,30 @@
                                 </Popup>
                             </Grid>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
+                                <TextBlock Name="txtBooksScaleLabel" Text="BOOKS TEXT SCALE" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <ComboBox Name="cmbBooksTextScale" 
+                                          Style="{StaticResource CyberpunkComboBox}" 
+                                          ItemContainerStyle="{StaticResource CyberpunkComboBoxItemStyle}" 
+                                          Height="22" 
+                                          Width="68"
+                                          VerticalContentAlignment="Center" 
+                                          HorizontalContentAlignment="Left" 
+                                          Margin="0,0,12,0"
+                                          SelectionChanged="CmbBooksTextScale_SelectionChanged">
+                                    <ComboBoxItem Content="80%"/>
+                                    <ComboBoxItem Content="90%"/>
+                                    <ComboBoxItem Content="100%" IsSelected="True"/>
+                                    <ComboBoxItem Content="110%"/>
+                                    <ComboBoxItem Content="120%"/>
+                                    <ComboBoxItem Content="130%"/>
+                                    <ComboBoxItem Content="140%"/>
+                                    <ComboBoxItem Content="150%"/>
+                                    <ComboBoxItem Content="160%"/>
+                                    <ComboBoxItem Content="170%"/>
+                                    <ComboBoxItem Content="180%"/>
+                                    <ComboBoxItem Content="190%"/>
+                                    <ComboBoxItem Content="200%"/>
+                                </ComboBox>
                                 <TextBlock Name="txtWordWrapLabel" Text="WORD WRAP" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <ToggleButton Name="chkWordWrap" Style="{StaticResource ToggleButtonSwitch}" Height="16" Width="32"/>
                             </StackPanel>

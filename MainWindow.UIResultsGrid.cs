@@ -2365,5 +2365,86 @@ namespace get_link_manga
             }
             return list;
         }
+
+        private double _booksTextScaleFactor = 1.0;
+
+        private void CmbBooksTextScale_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cmbBooksTextScale?.SelectedItem is ComboBoxItem item)
+            {
+                string content = item.Content?.ToString() ?? "100%";
+                if (double.TryParse(content.Replace("%", "").Trim(), out double val))
+                {
+                    _booksTextScaleFactor = val / 100.0;
+                    ApplyBooksTextScale();
+                }
+            }
+        }
+
+        private void DgResults_LoadingRow(object sender, DataGridRowEventArgs e)
+        {
+            if (e.Row != null)
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    ApplyBooksTextScaleToVisualTree(e.Row);
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+        }
+
+        private void ApplyBooksTextScale()
+        {
+            if (dgResults == null) return;
+            dgResults.FontSize = 11.0 * _booksTextScaleFactor;
+            
+            for (int i = 0; i < dgResults.Items.Count; i++)
+            {
+                var row = dgResults.ItemContainerGenerator.ContainerFromIndex(i) as DataGridRow;
+                if (row != null)
+                {
+                    ApplyBooksTextScaleToVisualTree(row);
+                }
+            }
+        }
+
+        private void ApplyBooksTextScaleToVisualTree(DependencyObject root)
+        {
+            if (root == null) return;
+            int count = VisualTreeHelper.GetChildrenCount(root);
+            for (int i = 0; i < count; i++)
+            {
+                var child = VisualTreeHelper.GetChild(root, i);
+                ScaleBookElementFont(child);
+                ApplyBooksTextScaleToVisualTree(child);
+            }
+        }
+
+        private void ScaleBookElementFont(DependencyObject element)
+        {
+            if (element is Control ctrl)
+            {
+                var localVal = ctrl.ReadLocalValue(Control.FontSizeProperty);
+                if (localVal == DependencyProperty.UnsetValue) return;
+                double baseVal = (double)ctrl.GetValue(BaseFontSizeProperty);
+                if (double.IsNaN(baseVal))
+                {
+                    baseVal = ctrl.FontSize / _booksTextScaleFactor;
+                    ctrl.SetValue(BaseFontSizeProperty, baseVal);
+                }
+                ctrl.FontSize = Math.Round(baseVal * _booksTextScaleFactor, 1);
+            }
+            else if (element is TextBlock tb)
+            {
+                var localVal = tb.ReadLocalValue(TextBlock.FontSizeProperty);
+                if (localVal == DependencyProperty.UnsetValue) return;
+                double baseVal = (double)tb.GetValue(BaseFontSizeProperty);
+                if (double.IsNaN(baseVal))
+                {
+                    baseVal = tb.FontSize / _booksTextScaleFactor;
+                    tb.SetValue(BaseFontSizeProperty, baseVal);
+                }
+                tb.FontSize = Math.Round(baseVal * _booksTextScaleFactor, 1);
+            }
+        }
     }
 }
