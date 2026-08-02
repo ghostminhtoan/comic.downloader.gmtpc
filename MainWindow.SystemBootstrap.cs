@@ -198,6 +198,7 @@ namespace get_link_manga
             WirePauseButtonToggle();
             InitializeLogPanels();
             InitializeDilibDefaults();
+            InitializeMangadexControls();
             InitializeGlobalAutoPasteClipboard();
             dgResults.ItemsSource = _scrapedItems;
             _scrapedItems.CollectionChanged += ResultsThumbnailItems_CollectionChanged;

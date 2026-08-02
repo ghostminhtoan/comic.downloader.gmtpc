@@ -1484,6 +1484,34 @@ namespace get_link_manga
             }
         }
 
+        private string _mangadexLangPrimary = "vi";
+        public string MangadexLangPrimary
+        {
+            get => _mangadexLangPrimary;
+            set
+            {
+                if (_mangadexLangPrimary != value)
+                {
+                    _mangadexLangPrimary = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _mangadexLangFallback = false;
+        public bool MangadexLangFallback
+        {
+            get => _mangadexLangFallback;
+            set
+            {
+                if (_mangadexLangFallback != value)
+                {
+                    _mangadexLangFallback = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)

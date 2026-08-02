@@ -667,9 +667,9 @@ namespace get_link_manga
                 chkMangadexLangEn.Content = _isVietnameseUi ? "Tiếng Anh" : "English";
             }
 
-            if (chkMangadexLangJa != null)
+            if (chkMangadexLangFallback != null)
             {
-                chkMangadexLangJa.Content = _isVietnameseUi ? "Tiếng Nhật" : "Japanese";
+                chkMangadexLangFallback.Content = _isVietnameseUi ? "Tải ngôn ngữ phụ nếu ngôn ngữ chính không có chap" : "Download fallback language if primary has no chapter";
             }
 
             if (txtMangadexNoPaginationLabel != null)

@@ -899,6 +899,8 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 return;
             }
 
+            SyncMangadexSessionLanguagesFromUi();
+
             CancellationToken effectiveToken = token ?? _downloadCts?.Token ?? CancellationToken.None;
 
             if (clearExisting)
@@ -1072,11 +1074,13 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                     new GalleryItem
                     {
                         Link = BuildMangadexMangaUrl(mangaId, string.IsNullOrWhiteSpace(mangaSlug) ? SlugifyTitle(bookTitle) : mangaSlug),
-                        Name = bookTitle,
+                        Name = AppendMangadexLanguageSuffix(bookTitle, _lastSelectedMangadexLangPrimary, _lastSelectedMangadexLangFallback),
                         LinkCount = string.Empty,
                         HoverPreviewThumbnailUrl = manga == null ? string.Empty : BuildMangadexCoverUrl(manga.Id, manga.CoverFileName),
                         SourceDomain = MangadexSiteFolder,
-                        IsChecked = true
+                        IsChecked = true,
+                        MangadexLangPrimary = _lastSelectedMangadexLangPrimary,
+                        MangadexLangFallback = _lastSelectedMangadexLangFallback
                     }
                 };
             }
@@ -1094,10 +1098,12 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                     new GalleryItem
                     {
                         Link = BuildMangadexChapterUrl(chapterId),
-                        Name = string.IsNullOrWhiteSpace(chapterTitle) ? bookTitle : $"{bookTitle} - {chapterTitle}",
+                        Name = AppendMangadexLanguageSuffix(string.IsNullOrWhiteSpace(chapterTitle) ? bookTitle : $"{bookTitle} - {chapterTitle}", _lastSelectedMangadexLangPrimary, _lastSelectedMangadexLangFallback),
                         HoverPreviewThumbnailUrl = manga == null ? string.Empty : BuildMangadexCoverUrl(manga.Id, manga.CoverFileName),
                         SourceDomain = MangadexSiteFolder,
-                        IsChecked = true
+                        IsChecked = true,
+                        MangadexLangPrimary = _lastSelectedMangadexLangPrimary,
+                        MangadexLangFallback = _lastSelectedMangadexLangFallback
                     }
                 };
             }
@@ -1179,10 +1185,12 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 results.Add(new GalleryItem
                 {
                     Link = url,
-                    Name = title,
+                    Name = AppendMangadexLanguageSuffix(title, _lastSelectedMangadexLangPrimary, _lastSelectedMangadexLangFallback),
                     HoverPreviewThumbnailUrl = BuildMangadexCoverUrl(manga.Id, manga.CoverFileName),
                     SourceDomain = MangadexSiteFolder,
-                    IsChecked = true
+                    IsChecked = true,
+                    MangadexLangPrimary = _lastSelectedMangadexLangPrimary,
+                    MangadexLangFallback = _lastSelectedMangadexLangFallback
                 });
             }
 
@@ -1402,29 +1410,72 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
 
         private async Task<List<MangadexChapterDescriptor>> GetMangadexBookChaptersAsync(string mangaId, CancellationToken token)
         {
-            List<string> languages = new List<string>();
-            Dispatcher.Invoke(() =>
-            {
-                if (chkMangadexLangVi != null && chkMangadexLangVi.IsChecked == true)
-                {
-                    languages.Add("vi");
-                }
-                if (chkMangadexLangEn != null && chkMangadexLangEn.IsChecked == true)
-                {
-                    languages.Add("en");
-                }
-                if (chkMangadexLangJa != null && chkMangadexLangJa.IsChecked == true)
-                {
-                    languages.Add("ja");
-                }
-            });
+            return await GetMangadexBookChaptersAsync(mangaId, (GalleryItem)null, token);
+        }
 
-            if (languages.Count == 0)
+        private async Task<List<MangadexChapterDescriptor>> GetMangadexBookChaptersAsync(string mangaId, GalleryItem item, CancellationToken token)
+        {
+            List<string> languages = new List<string>();
+            string primaryLang = "vi";
+            bool useFallback = false;
+
+            if (item != null)
             {
-                languages.Add("vi");
+                primaryLang = item.MangadexLangPrimary ?? "vi";
+                useFallback = item.MangadexLangFallback;
+            }
+            else
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    if (chkMangadexLangVi != null && chkMangadexLangVi.IsChecked == true) primaryLang = "vi";
+                    else if (chkMangadexLangEn != null && chkMangadexLangEn.IsChecked == true) primaryLang = "en";
+                    useFallback = chkMangadexLangFallback != null && chkMangadexLangFallback.IsChecked == true;
+                });
             }
 
-            return await GetMangadexBookChaptersAsync(mangaId, languages, token);
+            languages.Add(primaryLang);
+            if (useFallback)
+            {
+                string fallbackLang = primaryLang == "vi" ? "en" : "vi";
+                languages.Add(fallbackLang);
+            }
+
+            List<MangadexChapterDescriptor> allChapters = await GetMangadexBookChaptersAsync(mangaId, languages, token);
+
+            // Group and filter based on primary/fallback priority
+            var filteredChapters = new List<MangadexChapterDescriptor>();
+            var chaptersByNumber = allChapters
+                .GroupBy(c => c.ChapterNumber == 0 ? (c.DisplayTitle ?? string.Empty).Trim().ToLowerInvariant() : c.ChapterNumber.ToString(CultureInfo.InvariantCulture))
+                .ToList();
+
+            foreach (var group in chaptersByNumber)
+            {
+                var primaryChapter = group.FirstOrDefault(c => string.Equals(c.TranslatedLanguage, primaryLang, StringComparison.OrdinalIgnoreCase));
+                if (primaryChapter != null)
+                {
+                    filteredChapters.Add(primaryChapter);
+                }
+                else if (useFallback)
+                {
+                    string fallbackLang = primaryLang == "vi" ? "en" : "vi";
+                    var fallbackChapter = group.FirstOrDefault(c => string.Equals(c.TranslatedLanguage, fallbackLang, StringComparison.OrdinalIgnoreCase));
+                    if (fallbackChapter != null)
+                    {
+                        filteredChapters.Add(fallbackChapter);
+                    }
+                    else
+                    {
+                        var firstAvailable = group.FirstOrDefault();
+                        if (firstAvailable != null)
+                        {
+                            filteredChapters.Add(firstAvailable);
+                        }
+                    }
+                }
+            }
+
+            return filteredChapters.OrderBy(c => c.ChapterNumber).ThenBy(c => c.SequenceIndex).ToList();
         }
 
         private async Task<List<MangadexChapterDescriptor>> GetMangadexBookChaptersAsync(string mangaId, IEnumerable<string> translatedLanguages, CancellationToken token)
@@ -1619,14 +1670,14 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
             return string.IsNullOrWhiteSpace(clean) ? "title" : clean;
         }
 
-        private async Task<List<ReaderChapterItem>> GetMangadexReaderChapterItemsAsync(string url, CancellationToken token)
+        private async Task<List<ReaderChapterItem>> GetMangadexReaderChapterItemsAsync(GalleryItem item, string url, CancellationToken token)
         {
             if (!TryParseMangadexMangaId(url, out string mangaId, out _))
             {
                 return new List<ReaderChapterItem>();
             }
 
-            List<MangadexChapterDescriptor> chapters = await GetMangadexBookChaptersAsync(mangaId, token);
+            List<MangadexChapterDescriptor> chapters = await GetMangadexBookChaptersAsync(mangaId, item, token);
             return chapters
                 .Select(chapter => new ReaderChapterItem
                 {
@@ -1770,8 +1821,8 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
             }
 
             MangadexMangaData manga = await GetMangadexMangaAsync(mangaId, token);
-            List<MangadexChapterDescriptor> chapters = await GetMangadexBookChaptersAsync(mangaId, token);
-            item.Name = GetMangadexPreferredTitle(manga.Attributes, mangaSlug);
+            List<MangadexChapterDescriptor> chapters = await GetMangadexBookChaptersAsync(mangaId, item, token);
+            item.Name = AppendMangadexLanguageSuffix(GetMangadexPreferredTitle(manga.Attributes, mangaSlug), item.MangadexLangPrimary, item.MangadexLangFallback);
 
             List<ReaderChapterItem> chapterItems = chapters
                 .Select(chapter => new ReaderChapterItem
@@ -2338,11 +2389,62 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
             }
         }
 
+        private string _lastSelectedMangadexLangPrimary = "vi";
+        private bool _lastSelectedMangadexLangFallback = false;
+
+        private void InitializeMangadexControls()
+        {
+            if (chkMangadexLangVi != null && chkMangadexLangEn != null)
+            {
+                chkMangadexLangVi.Checked += (s, e) =>
+                {
+                    if (chkMangadexLangEn.IsChecked == true) chkMangadexLangEn.IsChecked = false;
+                };
+                chkMangadexLangEn.Checked += (s, e) =>
+                {
+                    if (chkMangadexLangVi.IsChecked == true) chkMangadexLangVi.IsChecked = false;
+                };
+                chkMangadexLangVi.Unchecked += (s, e) =>
+                {
+                    if (chkMangadexLangEn.IsChecked != true) chkMangadexLangVi.IsChecked = true;
+                };
+                chkMangadexLangEn.Unchecked += (s, e) =>
+                {
+                    if (chkMangadexLangVi.IsChecked != true) chkMangadexLangEn.IsChecked = true;
+                };
+            }
+        }
+
+        private void SyncMangadexSessionLanguagesFromUi()
+        {
+            if (chkMangadexLangVi != null && chkMangadexLangVi.IsChecked == true)
+            {
+                _lastSelectedMangadexLangPrimary = "vi";
+            }
+            else if (chkMangadexLangEn != null && chkMangadexLangEn.IsChecked == true)
+            {
+                _lastSelectedMangadexLangPrimary = "en";
+            }
+            _lastSelectedMangadexLangFallback = chkMangadexLangFallback != null && chkMangadexLangFallback.IsChecked == true;
+        }
+
+        private string AppendMangadexLanguageSuffix(string title, string primary, bool fallback)
+        {
+            if (string.IsNullOrWhiteSpace(title)) return title;
+            title = Regex.Replace(title, @"\s*\[MD-[a-z]+(\+[a-z]+)?\]", "");
+            string suffix = fallback ? $"[MD-{primary}+{(primary == "vi" ? "en" : "vi")}]" : $"[MD-{primary}]";
+            return $"{title} {suffix}";
+        }
+
         private async Task<bool> PromptMangadexLanguageSelectionAsync()
         {
             return await Dispatcher.InvokeAsync(() =>
             {
-                var dialog = new MangadexLanguageDialog(_isVietnameseUi)
+                var dialog = new MangadexLanguageDialog(
+                    _isVietnameseUi,
+                    chkMangadexLangVi != null && chkMangadexLangVi.IsChecked == true,
+                    chkMangadexLangEn != null && chkMangadexLangEn.IsChecked == true,
+                    chkMangadexLangFallback != null && chkMangadexLangFallback.IsChecked == true)
                 {
                     Owner = this
                 };
@@ -2355,7 +2457,11 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 {
                     if (chkMangadexLangVi != null) chkMangadexLangVi.IsChecked = dialog.SelectedVi;
                     if (chkMangadexLangEn != null) chkMangadexLangEn.IsChecked = dialog.SelectedEn;
+                    if (chkMangadexLangFallback != null) chkMangadexLangFallback.IsChecked = dialog.SelectedFallback;
                     if (txtMangadexGroupFilter != null) txtMangadexGroupFilter.Text = dialog.SelectedGroup ?? string.Empty;
+
+                    _lastSelectedMangadexLangPrimary = dialog.SelectedVi ? "vi" : "en";
+                    _lastSelectedMangadexLangFallback = dialog.SelectedFallback;
                     return true;
                 }
                 return false;
@@ -2366,13 +2472,14 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
         {
             public bool SelectedVi { get; set; }
             public bool SelectedEn { get; set; }
+            public bool SelectedFallback { get; set; }
             public string SelectedGroup { get; set; }
 
-            public MangadexLanguageDialog(bool isVietnameseUi)
+            public MangadexLanguageDialog(bool isVietnameseUi, bool selectedVi, bool selectedEn, bool selectedFallback)
             {
                 this.Title = isVietnameseUi ? "Ngôn ngữ MangaDex" : "MangaDex Language";
                 this.Width = 340;
-                this.Height = 290;
+                this.Height = 310;
                 this.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 this.ResizeMode = ResizeMode.NoResize;
                 this.Background = Application.Current.TryFindResource("CyberpunkWindowBackgroundBrush") as System.Windows.Media.Brush 
@@ -2396,7 +2503,7 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 var chkVi = new CheckBox
                 {
                     Content = isVietnameseUi ? "Tiếng Việt" : "Vietnamese",
-                    IsChecked = true,
+                    IsChecked = selectedVi,
                     Foreground = Application.Current.TryFindResource("CyberpunkTextBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.White,
                     Margin = new Thickness(0, 0, 0, 10),
                     FontWeight = FontWeights.Bold
@@ -2406,12 +2513,29 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 var chkEn = new CheckBox
                 {
                     Content = isVietnameseUi ? "Tiếng Anh" : "English",
-                    IsChecked = false,
+                    IsChecked = selectedEn,
+                    Foreground = Application.Current.TryFindResource("CyberpunkTextBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.White,
+                    Margin = new Thickness(0, 0, 0, 10),
+                    FontWeight = FontWeights.Bold
+                };
+                mainStack.Children.Add(chkEn);
+
+                chkVi.Checked += (s, e) => { if (chkEn.IsChecked == true) chkEn.IsChecked = false; };
+                chkEn.Checked += (s, e) => { if (chkVi.IsChecked == true) chkVi.IsChecked = false; };
+                chkVi.Unchecked += (s, e) => { if (chkEn.IsChecked != true) chkVi.IsChecked = true; };
+                chkEn.Unchecked += (s, e) => { if (chkVi.IsChecked != true) chkEn.IsChecked = true; };
+
+                var chkFallback = new CheckBox
+                {
+                    Content = isVietnameseUi 
+                        ? "Tải ngôn ngữ phụ nếu ngôn ngữ chính không có chap" 
+                        : "Download fallback language if primary has no chapter",
+                    IsChecked = selectedFallback,
                     Foreground = Application.Current.TryFindResource("CyberpunkTextBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.White,
                     Margin = new Thickness(0, 0, 0, 15),
                     FontWeight = FontWeights.Bold
                 };
-                mainStack.Children.Add(chkEn);
+                mainStack.Children.Add(chkFallback);
 
                 var groupLabel = new TextBlock
                 {
@@ -2460,6 +2584,7 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                     }
                     SelectedVi = chkVi.IsChecked == true;
                     SelectedEn = chkEn.IsChecked == true;
+                    SelectedFallback = chkFallback.IsChecked == true;
                     SelectedGroup = txtGroup.Text.Trim();
                     this.DialogResult = true;
                     this.Close();

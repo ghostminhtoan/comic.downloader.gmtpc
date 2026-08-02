@@ -4173,7 +4173,7 @@ namespace get_link_manga
                 }
                 else if (url.IndexOf("mangadex.org", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    List<ReaderChapterItem> result = await GetMangadexReaderChapterItemsAsync(url, token);
+                    List<ReaderChapterItem> result = await GetMangadexReaderChapterItemsAsync(item, url, token);
                     if (result.Count > 0)
                     {
                         _downloadChapterItemCache[url] = CloneReaderChapterItems(result);

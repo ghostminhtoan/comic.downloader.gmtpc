@@ -124,6 +124,12 @@ namespace get_link_manga
 
             [DataMember(Order = 35)]
             public List<GalleryItemState> ParallelSplitChildren { get; set; } = new List<GalleryItemState>();
+
+            [DataMember(Order = 36)]
+            public string MangadexLangPrimary { get; set; }
+
+            [DataMember(Order = 37)]
+            public bool MangadexLangFallback { get; set; }
         }
 
         [DataContract]
@@ -778,6 +784,8 @@ namespace get_link_manga
                 ParallelSplitChildren = item.HasParallelSplitChildren
                     ? item.ParallelSplitChildren.Select((child, childIndex) => CreateGalleryItemState(child, childIndex)).ToList()
                     : new List<GalleryItemState>(),
+                MangadexLangPrimary = item.MangadexLangPrimary,
+                MangadexLangFallback = item.MangadexLangFallback,
                 Errors = item.GetUniqueErrors().Select(error => new ErrorState
                 {
                     ChapterName = error.ChapterName,
@@ -909,6 +917,8 @@ namespace get_link_manga
                 MissingChapterSortText = string.IsNullOrWhiteSpace(state.MissingChapterSortText) ? state.MissingChapterStatusText : state.MissingChapterSortText,
                 MissingChapterLatestChapterText = state.MissingChapterLatestChapterText,
                 HasMissingChapterIssue = state.HasMissingChapterIssue,
+                MangadexLangPrimary = state.MangadexLangPrimary ?? "vi",
+                MangadexLangFallback = state.MangadexLangFallback,
                 Errors = state.Errors == null
                     ? new List<ErrorDetail>()
                     : state.Errors.Select(error => new ErrorDetail
