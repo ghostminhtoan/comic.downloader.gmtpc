@@ -22,24 +22,16 @@ namespace get_link_manga
                 string binFolder = Path.Combine(PortablePaths.AppRoot, "bin");
                 Directory.CreateDirectory(binFolder);
 
-                string resourceName = GetRuntimeResourceName();
-                if (!string.IsNullOrWhiteSpace(resourceName))
-                {
-                    string destination = Path.Combine(binFolder, LoaderFileName);
-                    ExtractEmbeddedResource(resourceName, destination);
-                }
-
                 SetDllDirectory(binFolder);
                 EnsureBinAssemblies();
                 EnsureSqliteInterop();
+                EnsureWebView2Loader();
                 MigrateLegacyTempRoot();
                 EnsureSeleniumManager();
                 EnsureRingtones();
             }
             catch
             {
-                // Best effort only. If the native loader cannot be extracted,
-                // WebView2 will fall back to whatever runtime is available.
             }
         }
 
@@ -121,22 +113,25 @@ namespace get_link_manga
                 string binFolder = Path.Combine(PortablePaths.AppRoot, "bin");
                 Directory.CreateDirectory(binFolder);
 
-                string[] assemblies = new[]
+                var items = new[]
                 {
-                    "WebDriver.dll",
-                    "Newtonsoft.Json.dll",
-                    "Microsoft.Web.WebView2.Core.dll",
-                    "Microsoft.Web.WebView2.WinForms.dll",
-                    "Microsoft.Web.WebView2.Wpf.dll",
-                    "System.Data.SQLite.dll"
+                    new { Name = "WebDriver.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/WebDriver.dll" },
+                    new { Name = "Newtonsoft.Json.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/Newtonsoft.Json.dll" },
+                    new { Name = "Microsoft.Web.WebView2.Core.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/Microsoft.Web.WebView2.Core.dll" },
+                    new { Name = "Microsoft.Web.WebView2.WinForms.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/Microsoft.Web.WebView2.WinForms.dll" },
+                    new { Name = "Microsoft.Web.WebView2.Wpf.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/Microsoft.Web.WebView2.Wpf.dll" },
+                    new { Name = "System.Data.SQLite.dll", Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/System.Data.SQLite.dll" }
                 };
 
-                foreach (string dll in assemblies)
+                using (var client = new WebClient())
                 {
-                    string destination = Path.Combine(binFolder, dll);
-                    if (!File.Exists(destination))
+                    foreach (var item in items)
                     {
-                        ExtractEmbeddedResource(dll, destination);
+                        string destination = Path.Combine(binFolder, item.Name);
+                        if (!File.Exists(destination))
+                        {
+                            client.DownloadFile(item.Url, destination);
+                        }
                     }
                 }
             }
@@ -149,14 +144,37 @@ namespace get_link_manga
         {
             try
             {
-                string rid = RuntimeInformation.ProcessArchitecture == Architecture.X64 ? "x64" : "x86";
                 string binFolder = Path.Combine(PortablePaths.AppRoot, "bin");
                 string destination = Path.Combine(binFolder, "SQLite.Interop.dll");
 
                 if (!File.Exists(destination))
                 {
-                    string resourceName = $"{rid}/SQLite.Interop.dll";
-                    ExtractEmbeddedResource(resourceName, destination);
+                    string url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/SQLite.Interop.dll";
+                    using (var client = new WebClient())
+                    {
+                        client.DownloadFile(url, destination);
+                    }
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private static void EnsureWebView2Loader()
+        {
+            try
+            {
+                string binFolder = Path.Combine(PortablePaths.AppRoot, "bin");
+                string destination = Path.Combine(binFolder, "WebView2Loader.dll");
+
+                if (!File.Exists(destination))
+                {
+                    string url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/runtimes/WebView2Loader.dll";
+                    using (var client = new WebClient())
+                    {
+                        client.DownloadFile(url, destination);
+                    }
                 }
             }
             catch
