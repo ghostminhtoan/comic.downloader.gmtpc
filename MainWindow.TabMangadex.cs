@@ -2479,7 +2479,7 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
             {
                 this.Title = isVietnameseUi ? "Ngôn ngữ MangaDex" : "MangaDex Language";
                 this.Width = 340;
-                this.Height = 310;
+                this.Height = 335;
                 this.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 this.ResizeMode = ResizeMode.NoResize;
                 this.Background = Application.Current.TryFindResource("CyberpunkWindowBackgroundBrush") as System.Windows.Media.Brush 
@@ -2527,14 +2527,20 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
 
                 var chkFallback = new CheckBox
                 {
-                    Content = isVietnameseUi 
-                        ? "Tải ngôn ngữ phụ nếu ngôn ngữ chính không có chap" 
-                        : "Download fallback language if primary has no chapter",
                     IsChecked = selectedFallback,
                     Foreground = Application.Current.TryFindResource("CyberpunkTextBrush") as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.White,
                     Margin = new Thickness(0, 0, 0, 15),
                     FontWeight = FontWeights.Bold
                 };
+                var tbFallback = new TextBlock
+                {
+                    Text = isVietnameseUi 
+                        ? "Tải ngôn ngữ phụ nếu ngôn ngữ chính không có chap" 
+                        : "Download fallback language if primary has no chapter",
+                    TextWrapping = TextWrapping.Wrap,
+                    Width = 260
+                };
+                chkFallback.Content = tbFallback;
                 mainStack.Children.Add(chkFallback);
 
                 var groupLabel = new TextBlock
