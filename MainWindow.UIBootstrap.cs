@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.IO;
 using System.Net;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace get_link_manga
 {
@@ -213,12 +214,32 @@ namespace get_link_manga
                 }
 
                 // Install with /passive argument
-                Process.Start(new ProcessStartInfo
+                var process = Process.Start(new ProcessStartInfo
                 {
                     FileName = finalPath,
                     Arguments = "/passive",
                     UseShellExecute = true
                 });
+
+                if (process != null)
+                {
+                    await Task.Run(() => process.WaitForExit());
+                }
+
+                // Start WARP from ProgramFiles
+                string pf = Environment.GetEnvironmentVariable("ProgramFiles");
+                if (!string.IsNullOrEmpty(pf))
+                {
+                    string warpPath = Path.Combine(pf, @"Cloudflare\Cloudflare WARP\cloudflare WARP.exe");
+                    if (File.Exists(warpPath))
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = warpPath,
+                            UseShellExecute = true
+                        });
+                    }
+                }
             }
             catch (Exception ex)
             {
