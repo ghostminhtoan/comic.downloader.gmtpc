@@ -947,6 +947,15 @@ namespace get_link_manga
 
             var client = new HttpClient(handler, disposeHandler: false);
             client.Timeout = _httpClient != null ? _httpClient.Timeout : TimeSpan.FromSeconds(30);
+            try
+            {
+                string ua = GetScopedUserAgent(urlOrHost);
+                if (!string.IsNullOrWhiteSpace(ua))
+                {
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd(ua);
+                }
+            }
+            catch {}
             if (!string.IsNullOrWhiteSpace(urlOrHost) && urlOrHost.IndexOf("mangadex.org", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 client.DefaultRequestHeaders.ConnectionClose = true;

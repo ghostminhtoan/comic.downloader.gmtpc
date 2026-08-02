@@ -4471,7 +4471,8 @@ namespace get_link_manga
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardError = true,
-                    RedirectStandardOutput = true
+                    RedirectStandardOutput = true,
+                    WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.System)
                 };
 
                 using (var process = new Process { StartInfo = startInfo })
