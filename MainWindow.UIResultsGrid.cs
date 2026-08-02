@@ -2397,14 +2397,8 @@ namespace get_link_manga
             if (dgResults == null) return;
             dgResults.FontSize = 11.0 * _booksTextScaleFactor;
             
-            for (int i = 0; i < dgResults.Items.Count; i++)
-            {
-                var row = dgResults.ItemContainerGenerator.ContainerFromIndex(i) as DataGridRow;
-                if (row != null)
-                {
-                    ApplyBooksTextScaleToVisualTree(row);
-                }
-            }
+            // Duyệt toàn bộ visual tree của dgResults để scale cả Headers và các phần tử đang hiển thị
+            ApplyBooksTextScaleToVisualTree(dgResults);
         }
 
         private void ApplyBooksTextScaleToVisualTree(DependencyObject root)
@@ -2421,13 +2415,14 @@ namespace get_link_manga
 
         private void ScaleBookElementFont(DependencyObject element)
         {
+            if (element == dgResults) return;
+
             if (element is Control ctrl)
             {
-                var localVal = ctrl.ReadLocalValue(Control.FontSizeProperty);
-                if (localVal == DependencyProperty.UnsetValue) return;
                 double baseVal = (double)ctrl.GetValue(BaseFontSizeProperty);
                 if (double.IsNaN(baseVal))
                 {
+                    // Lấy FontSize hiện tại. Nếu _booksTextScaleFactor khác 1.0, chia ngược lại để có base đúng
                     baseVal = ctrl.FontSize / _booksTextScaleFactor;
                     ctrl.SetValue(BaseFontSizeProperty, baseVal);
                 }
@@ -2435,8 +2430,6 @@ namespace get_link_manga
             }
             else if (element is TextBlock tb)
             {
-                var localVal = tb.ReadLocalValue(TextBlock.FontSizeProperty);
-                if (localVal == DependencyProperty.UnsetValue) return;
                 double baseVal = (double)tb.GetValue(BaseFontSizeProperty);
                 if (double.IsNaN(baseVal))
                 {
