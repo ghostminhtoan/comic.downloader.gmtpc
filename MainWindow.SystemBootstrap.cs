@@ -933,10 +933,6 @@ namespace get_link_manga
                     AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                     UseCookies = useCookies
                 };
-                if (!string.IsNullOrWhiteSpace(urlOrHost) && urlOrHost.IndexOf("mangadex.org", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    newHandler.SslProtocols = SslProtocols.Tls12;
-                }
 
                 if (useCookies)
                 {
