@@ -31,6 +31,9 @@ namespace get_link_manga
 
                 if (NeedsInitialization())
                 {
+                    var oldMode = Application.Current.ShutdownMode;
+                    Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
                     var window = new DownloadProgressWindow();
                     Task.Run(() =>
                     {
@@ -45,6 +48,8 @@ namespace get_link_manga
                         }
                     });
                     window.ShowDialog();
+
+                    Application.Current.ShutdownMode = oldMode;
                 }
 
                 EnsureBinAssemblies();
