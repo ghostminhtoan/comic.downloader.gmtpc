@@ -2064,13 +2064,29 @@ namespace get_link_manga
                 ReaderChapterAnalysis viAnalysis = AnalyzeReaderChapterNumbers(viChapters);
                 ReaderChapterAnalysis enAnalysis = AnalyzeReaderChapterNumbers(enChapters);
 
-                string viMissing = viAnalysis.MissingRanges.Count == 0
-                    ? (_isVietnameseUi ? "đủ chapter" : "complete")
-                    : string.Join(", ", viAnalysis.MissingRanges);
+                string viMissing;
+                if (viChapters.Count == 0)
+                {
+                    viMissing = _isVietnameseUi ? "không có chapter" : "no chapters";
+                }
+                else
+                {
+                    viMissing = viAnalysis.MissingRanges.Count == 0
+                        ? (_isVietnameseUi ? "đủ chapter" : "complete")
+                        : string.Join(", ", viAnalysis.MissingRanges);
+                }
 
-                string enMissing = enAnalysis.MissingRanges.Count == 0
-                    ? (_isVietnameseUi ? "đủ chapter" : "complete")
-                    : string.Join(", ", enAnalysis.MissingRanges);
+                string enMissing;
+                if (enChapters.Count == 0)
+                {
+                    enMissing = _isVietnameseUi ? "không có chapter" : "no chapters";
+                }
+                else
+                {
+                    enMissing = enAnalysis.MissingRanges.Count == 0
+                        ? (_isVietnameseUi ? "đủ chapter" : "complete")
+                        : string.Join(", ", enAnalysis.MissingRanges);
+                }
 
                 string missingLabel = $"VI: {viMissing} | EN: {enMissing}";
 
