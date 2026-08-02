@@ -1677,16 +1677,58 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 return new List<ReaderChapterItem>();
             }
 
-            List<MangadexChapterDescriptor> chapters = await GetMangadexBookChaptersAsync(mangaId, item, token);
-            return chapters
-                .Select(chapter => new ReaderChapterItem
+            // Với riêng mangadex, bất kể người dùng chọn tiếng Anh hay tiếng Việt đều phải scan chapter độc lập cho cả 2 ngôn ngữ của cùng một book.
+            // Nên ta lấy tất cả các chapters của cả "vi" và "en" cùng một lúc để xử lý độc lập.
+            List<MangadexChapterDescriptor> allChapters = await GetMangadexBookChaptersAsync(mangaId, new[] { "vi", "en" }, token);
+
+            // Group theo TranslatedLanguage để đảm bảo độc lập, sau đó trong mỗi group ta group theo ChapterNumber/Title giống như cũ để tránh trùng lặp nhóm (group filter).
+            var result = new List<ReaderChapterItem>();
+            string preferredGroup = string.Empty;
+            Dispatcher.Invoke(() => preferredGroup = txtMangadexGroupFilter?.Text?.Trim() ?? string.Empty);
+
+            var chaptersByLang = allChapters.GroupBy(c => (c.TranslatedLanguage ?? string.Empty).Trim().ToLowerInvariant());
+            foreach (var langGroup in chaptersByLang)
+            {
+                string lang = langGroup.Key; // "vi" hoặc "en"
+                string suffix = lang == "vi" ? " [VI]" : " [EN]";
+
+                var groupedByChap = langGroup.GroupBy(c => c.ChapterNumber == 0 ? (c.DisplayTitle ?? string.Empty).Trim().ToLowerInvariant() : c.ChapterNumber.ToString(CultureInfo.InvariantCulture));
+                foreach (var g in groupedByChap)
                 {
-                    Name = BuildDownloadChapterItemName(chapter.Url, chapter.DisplayTitle),
-                    FolderPath = chapter.Url,
-                    Pages = new List<ReaderPageItem>(),
-                    ParsedChapterNumber = chapter.ChapterNumber
-                })
-                .ToList();
+                    MangadexChapterDescriptor selected = null;
+                    if (!string.IsNullOrWhiteSpace(preferredGroup))
+                    {
+                        selected = g.FirstOrDefault(c =>
+                        {
+                            // Tìm trong cache hoặc tự parse group name từ DisplayTitle
+                            string displayName = c.DisplayTitle ?? string.Empty;
+                            return displayName.IndexOf(preferredGroup, StringComparison.OrdinalIgnoreCase) >= 0;
+                        });
+                    }
+
+                    if (selected == null)
+                    {
+                        selected = g.First();
+                    }
+
+                    // Thêm hậu tố ngôn ngữ để phân biệt rõ ràng từng book, giúp thống kê chuẩn xác thiếu chap nào của ngôn ngữ nào.
+                    string nameWithLang = selected.DisplayTitle;
+                    if (!nameWithLang.EndsWith(" [VI]", StringComparison.OrdinalIgnoreCase) && !nameWithLang.EndsWith(" [EN]", StringComparison.OrdinalIgnoreCase))
+                    {
+                        nameWithLang = nameWithLang + suffix;
+                    }
+
+                    result.Add(new ReaderChapterItem
+                    {
+                        Name = BuildDownloadChapterItemName(selected.Url, nameWithLang),
+                        FolderPath = selected.Url,
+                        Pages = new List<ReaderPageItem>(),
+                        ParsedChapterNumber = selected.ChapterNumber
+                    });
+                }
+            }
+
+            return result;
         }
 
         private async Task DownloadMangadexGalleryAsync(GalleryItem item, string rootFolder, CancellationToken token, GalleryItem queueItem = null, ChapterFilter chapterFilter = null)
