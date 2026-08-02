@@ -226,19 +226,26 @@ namespace get_link_manga
                     await Task.Run(() => process.WaitForExit());
                 }
 
-                // Start WARP from ProgramFiles
-                string pf = Environment.GetEnvironmentVariable("ProgramFiles");
-                if (!string.IsNullOrEmpty(pf))
+                // Start WARP from ProgramFiles or ProgramFiles(x86)
+                string pf = Environment.GetEnvironmentVariable("ProgramFiles") ?? @"C:\Program Files";
+                string pfx86 = Environment.GetEnvironmentVariable("ProgramFiles(x86)") ?? @"C:\Program Files (x86)";
+                
+                string warpPath = Path.Combine(pf, @"Cloudflare\Cloudflare WARP\cloudflare WARP.exe");
+                if (!File.Exists(warpPath))
                 {
-                    string warpPath = Path.Combine(pf, @"Cloudflare\Cloudflare WARP\cloudflare WARP.exe");
-                    if (File.Exists(warpPath))
+                    warpPath = Path.Combine(pfx86, @"Cloudflare\Cloudflare WARP\cloudflare WARP.exe");
+                }
+
+                if (File.Exists(warpPath))
+                {
+                    Process.Start(new ProcessStartInfo
                     {
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = warpPath,
-                            UseShellExecute = true
-                        });
-                    }
+                        FileName = "cmd.exe",
+                        Arguments = $"/c start \"\" \"{warpPath}\"",
+                        CreateNoWindow = true,
+                        UseShellExecute = false,
+                        WindowStyle = ProcessWindowStyle.Hidden
+                    });
                 }
             }
             catch (Exception ex)
