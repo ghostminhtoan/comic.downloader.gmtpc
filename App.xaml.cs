@@ -35,6 +35,9 @@ namespace get_link_manga
                 return;
             }
 
+            // Tự động kiểm tra và cài đặt Cloudflare Warp nếu chưa có
+            EnsureCloudflareWarpInstalled();
+
             ServicePointManager.DefaultConnectionLimit = Math.Max(ServicePointManager.DefaultConnectionLimit, 256);
             ServicePointManager.Expect100Continue = false;
             ServicePointManager.UseNagleAlgorithm = false;
@@ -270,6 +273,130 @@ namespace get_link_manga
             catch
             {
             }
+        }
+
+        private static void EnsureCloudflareWarpInstalled()
+        {
+            try
+            {
+                if (IsCloudflareWarpRegistered())
+                {
+                    return;
+                }
+
+                // Cài đặt Warp tự động ngầm
+                string url = "https://downloads.cloudflareclient.com/v1/download/windows/version/2026.6.880.0";
+                string tempDir = System.IO.Path.Combine(PortablePaths.AppRoot, ".tmp");
+                System.IO.Directory.CreateDirectory(tempDir);
+                string tempFilePath = System.IO.Path.Combine(tempDir, "CloudflareWarpInstallerTemp");
+
+                using (var client = new WebClient())
+                {
+                    client.DownloadFile(new Uri(url), tempFilePath);
+                }
+
+                string finalPath = tempFilePath;
+                if (!System.IO.Path.HasExtension(tempFilePath) || System.IO.Path.GetExtension(tempFilePath).ToLower() != ".msi")
+                {
+                    finalPath = tempFilePath + ".msi";
+                    if (System.IO.File.Exists(finalPath))
+                    {
+                        System.IO.File.Delete(finalPath);
+                    }
+                    System.IO.File.Move(tempFilePath, finalPath);
+                }
+
+                var process = Process.Start(new ProcessStartInfo
+                {
+                    FileName = finalPath,
+                    Arguments = "/passive",
+                    UseShellExecute = true
+                });
+
+                if (process != null)
+                {
+                    process.WaitForExit();
+                }
+
+                // Mở WARP sau khi cài xong
+                string pf = Environment.GetEnvironmentVariable("ProgramFiles") ?? @"C:\Program Files";
+                string pfx86 = Environment.GetEnvironmentVariable("ProgramFiles(x86)") ?? @"C:\Program Files (x86)";
+                
+                string warpPath = System.IO.Path.Combine(pf, @"Cloudflare\Cloudflare WARP\cloudflare WARP.exe");
+                if (!System.IO.File.Exists(warpPath))
+                {
+                    warpPath = System.IO.Path.Combine(pfx86, @"Cloudflare\Cloudflare WARP\cloudflare WARP.exe");
+                }
+
+                if (System.IO.File.Exists(warpPath))
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "cmd.exe",
+                        Arguments = $"/c start \"\" \"{warpPath}\"",
+                        CreateNoWindow = true,
+                        UseShellExecute = false,
+                        WindowStyle = ProcessWindowStyle.Hidden
+                    });
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private static bool IsCloudflareWarpRegistered()
+        {
+            string[] uninstallKeys = {
+                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+                @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+            };
+
+            foreach (var keyPath in uninstallKeys)
+            {
+                using (RegistryKey localMachine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                using (RegistryKey key = localMachine.OpenSubKey(keyPath))
+                {
+                    if (key != null && CheckUninstallSubKeysForCloudflare(key)) return true;
+                }
+
+                using (RegistryKey localMachine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
+                using (RegistryKey key = localMachine.OpenSubKey(keyPath))
+                {
+                    if (key != null && CheckUninstallSubKeysForCloudflare(key)) return true;
+                }
+
+                using (RegistryKey currentUser = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64))
+                using (RegistryKey key = currentUser.OpenSubKey(keyPath))
+                {
+                    if (key != null && CheckUninstallSubKeysForCloudflare(key)) return true;
+                }
+
+                using (RegistryKey currentUser = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32))
+                using (RegistryKey key = currentUser.OpenSubKey(keyPath))
+                {
+                    if (key != null && CheckUninstallSubKeysForCloudflare(key)) return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool CheckUninstallSubKeysForCloudflare(RegistryKey key)
+        {
+            foreach (var subkeyName in key.GetSubKeyNames())
+            {
+                using (RegistryKey subkey = key.OpenSubKey(subkeyName))
+                {
+                    if (subkey == null) continue;
+                    object displayName = subkey.GetValue("DisplayName");
+                    if (displayName != null && displayName.ToString().IndexOf("cloudflare", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }
