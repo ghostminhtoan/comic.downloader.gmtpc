@@ -218,6 +218,7 @@ namespace get_link_manga
 
             Loaded += (s, e) =>
             {
+                _ = AutoInstallWarpIfMissing();
                 StyleComboBoxPopup(cmbCreateSubfolderDomain);
                 StyleComboBoxPopup(cmbNhentaiSort);
                 StyleComboBoxPopup(cmbConnections);
