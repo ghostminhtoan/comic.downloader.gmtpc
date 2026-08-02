@@ -53,7 +53,6 @@ namespace get_link_manga
         private Button _showFloatRailButton;
         private Button _h2rLogButton;
         private TextBlock _brandTitleText;
-        private TextBlock _textScaleTitleText;
         private bool _createSubfolderUiReady;
         private bool _suppressCreateSubfolderEvents;
         private string _createSubfolderSelectedDomainKey;
@@ -136,8 +135,6 @@ namespace get_link_manga
 
              var grid = new Grid();
              grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(8) });
-             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
              // Cột 1: Display Scale
              var leftStack = new StackPanel();
@@ -168,136 +165,18 @@ namespace get_link_manga
              Grid.SetColumn(leftStack, 0);
              grid.Children.Add(leftStack);
 
-             // Cột 2: Text Scale
-             var rightStack = new StackPanel();
-             _textScaleTitleText = new TextBlock
-             {
-                 Text = _isVietnameseUi ? "TỶ LỆ CHỮ" : "TEXT SCALE",
-                 Foreground = (Brush)TryFindResource("CyberpunkMutedTextBrush"),
-                 FontSize = 9,
-                 FontWeight = FontWeights.Bold,
-                 TextWrapping = TextWrapping.Wrap,
-                 Margin = new Thickness(0, 0, 0, 4)
-             };
-             rightStack.Children.Add(_textScaleTitleText);
-
-             _textScaleCombo = new ComboBox
-             {
-                 Name = "cmbTextScale",
-                 Style = TryFindResource("CyberpunkComboBox") as Style,
-                 ItemContainerStyle = TryFindResource("CyberpunkComboBoxItemStyle") as Style,
-                 Height = 22,
-                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                 VerticalContentAlignment = VerticalAlignment.Center,
-                 HorizontalContentAlignment = HorizontalAlignment.Left,
-                 ItemsSource = UiZoomPresets.Select(percent => new UiZoomPreset(percent)).ToList()
-             };
-             rightStack.Children.Add(_textScaleCombo);
-             Grid.SetColumn(rightStack, 2);
-             grid.Children.Add(rightStack);
-
              scaleCard.Child = grid;
              UpdateZoomDisplay();
-             InitializeTextScaleCombo();
-             _textScaleCombo.SelectionChanged += TextScaleCombo_SelectionChanged;
          }
 
-         private void InitializeTextScaleCombo()
+         private void SetTextScalePercent(double percent)
          {
-             if (_textScaleCombo != null)
-             {
-                 var selected = _textScaleCombo.Items.OfType<UiZoomPreset>().FirstOrDefault(item => item.Percent == 100);
-                 if (selected != null)
-                 {
-                     _textScaleCombo.SelectedItem = selected;
-                 }
-             }
+             // No-op
          }
 
-         private void TextScaleCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-         {
-             if (_textScaleCombo?.SelectedItem is UiZoomPreset preset)
-             {
-                 SetTextScalePercent(preset.Percent);
-             }
-         }
-
-          private void SetTextScalePercent(double percent)
-          {
-              try
-              {
-                  _textScaleFactor = percent / 100.0;
-                  if (Dispatcher.CheckAccess())
-                  {
-                      this.FontSize = 12.0 * _textScaleFactor;
-                      ApplyAdaptiveLayout(new Size(ActualWidth, ActualHeight));
-                      ApplyTextScaleToVisualTree(this);
-                  }
-                  else
-                  {
-                      Dispatcher.BeginInvoke(new Action(() =>
-                      {
-                          this.FontSize = 12.0 * _textScaleFactor;
-                          ApplyAdaptiveLayout(new Size(ActualWidth, ActualHeight));
-                          ApplyTextScaleToVisualTree(this);
-                      }));
-                  }
-              }
-              catch {}
-          }
-
-          private double ScaledFont(double baseSize)
-          {
-              return baseSize * _textScaleFactor;
-          }
-
-          internal static readonly DependencyProperty BaseFontSizeProperty =
-              DependencyProperty.RegisterAttached("_BaseFontSize", typeof(double), typeof(MainWindow),
-                  new PropertyMetadata(double.NaN));
-
-          private void ApplyTextScaleToVisualTree(DependencyObject root)
-          {
-              if (root == null) return;
-              int count = VisualTreeHelper.GetChildrenCount(root);
-              for (int i = 0; i < count; i++)
-              {
-                  var child = VisualTreeHelper.GetChild(root, i);
-                  ScaleElementFont(child);
-                  ApplyTextScaleToVisualTree(child);
-              }
-          }
-
-          private void ScaleElementFont(DependencyObject element)
-          {
-              // Chỉ scale nếu FontSize được set local (hardcoded)
-              if (element is Control ctrl)
-              {
-                  var localVal = ctrl.ReadLocalValue(Control.FontSizeProperty);
-                  if (localVal == DependencyProperty.UnsetValue) return; // kế thừa, skip
-                  double baseVal = (double)ctrl.GetValue(BaseFontSizeProperty);
-                  if (double.IsNaN(baseVal))
-                  {
-                      // Lần đầu: lưu base = giá trị hiện tại (chưa scale)
-                      // Nhưng nếu _textScaleFactor != 1.0, giá trị hiện tại có thể đã scaled bởi ScaledFont()
-                      // Nên chia lại để lấy base đúng
-                      baseVal = ctrl.FontSize / _textScaleFactor;
-                      ctrl.SetValue(BaseFontSizeProperty, baseVal);
-                  }
-                  ctrl.FontSize = Math.Round(baseVal * _textScaleFactor, 1);
-              }
-              else if (element is TextBlock tb)
-              {
-                  var localVal = tb.ReadLocalValue(TextBlock.FontSizeProperty);
-                  if (localVal == DependencyProperty.UnsetValue) return;
-                  double baseVal = (double)tb.GetValue(BaseFontSizeProperty);
-                  if (double.IsNaN(baseVal))
-                  {
-                      baseVal = tb.FontSize / _textScaleFactor;
-                      tb.SetValue(BaseFontSizeProperty, baseVal);
-                  }
-                  tb.FontSize = Math.Round(baseVal * _textScaleFactor, 1);
-              }
-          }
+         internal static readonly DependencyProperty BaseFontSizeProperty =
+             DependencyProperty.RegisterAttached("_BaseFontSize", typeof(double), typeof(MainWindow),
+                 new PropertyMetadata(double.NaN));
 
         private void BuildGlobalDownloadToolbar()
         {
@@ -1740,10 +1619,7 @@ namespace get_link_manga
                 _brandTitleText.Text = "COMIC DOWNLOADER GMTPC";
             }
 
-            if (_textScaleTitleText != null)
-            {
-                _textScaleTitleText.Text = _isVietnameseUi ? "TỶ LỆ CHỮ" : "TEXT SCALE";
-            }
+
 
             if (_toolbarClearTempButton != null)
             {

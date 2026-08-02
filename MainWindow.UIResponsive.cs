@@ -13,9 +13,7 @@ namespace get_link_manga
         private static readonly int[] UiZoomPresets = { 90, 100, 110, 120, 130, 140, 150, 160, 175 };
         private const double DefaultUiZoomPercent = 100.0;
         private double _uiZoomPercent = DefaultUiZoomPercent;
-        private double _textScaleFactor = 1.0;
         private ComboBox _dpiPresetCombo;
-        private ComboBox _textScaleCombo;
         private TextBlock _sectionTitleText;
         private TextBlock _sectionHintText;
         private bool _windowPseudoMaximized;
@@ -141,7 +139,7 @@ namespace get_link_manga
             {
                 foreach (Button button in _navigationButtonHost.Children.OfType<Button>())
                 {
-                    button.FontSize = ScaledFont(ultraCompact ? 11 : 12);
+                    button.FontSize = ultraCompact ? 11 : 12;
                     button.Padding = ultraCompact ? new Thickness(8, 8, 8, 8) : new Thickness(14, 10, 14, 10);
                     button.MinHeight = ultraCompact ? 40 : 46;
                     button.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -157,12 +155,12 @@ namespace get_link_manga
 
             if (_sectionTitleText != null)
             {
-                _sectionTitleText.FontSize = ScaledFont(ultraCompact ? 16 : 18);
+                _sectionTitleText.FontSize = ultraCompact ? 16 : 18;
             }
 
             if (_sectionHintText != null)
             {
-                _sectionHintText.FontSize = ScaledFont(ultraCompact ? 10 : 11);
+                _sectionHintText.FontSize = ultraCompact ? 10 : 11;
             }
 
             if (headerUtilityPanel != null)
