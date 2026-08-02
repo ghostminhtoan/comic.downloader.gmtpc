@@ -34,11 +34,44 @@ namespace get_link_manga
                 EnsureSqliteInterop();
                 MigrateLegacyTempRoot();
                 EnsureSeleniumManager();
+                EnsureRingtones();
             }
             catch
             {
                 // Best effort only. If the native loader cannot be extracted,
                 // WebView2 will fall back to whatever runtime is available.
+            }
+        }
+
+        private static void EnsureRingtones()
+        {
+            try
+            {
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | (SecurityProtocolType)12288;
+                string ringtonesDir = Path.Combine(PortablePaths.AppRoot, "bin", "ringtones");
+                Directory.CreateDirectory(ringtonesDir);
+
+                var items = new[]
+                {
+                    new { Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/ringtones-download-finish.wav", Name = "download-finish.wav" },
+                    new { Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/ringtones-error.wav", Name = "error.wav" },
+                    new { Url = "https://github.com/ghostminhtoan/comic.downloader.gmtpc/releases/download/accessories/ringtones-Startup.wav", Name = "Startup.wav" }
+                };
+
+                using (var client = new WebClient())
+                {
+                    foreach (var item in items)
+                    {
+                        string destPath = Path.Combine(ringtonesDir, item.Name);
+                        if (!File.Exists(destPath))
+                        {
+                            client.DownloadFile(item.Url, destPath);
+                        }
+                    }
+                }
+            }
+            catch
+            {
             }
         }
 

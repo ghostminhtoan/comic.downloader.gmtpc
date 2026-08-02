@@ -1130,6 +1130,16 @@ namespace get_link_manga
             {
                 try
                 {
+                    string localPath = Path.Combine(PortablePaths.AppRoot, "bin", "ringtones", filename);
+                    if (File.Exists(localPath))
+                    {
+                        using (var player = new System.Media.SoundPlayer(localPath))
+                        {
+                            player.PlaySync();
+                        }
+                        return;
+                    }
+
                     var assembly = System.Reflection.Assembly.GetExecutingAssembly();
                     string[] resources = assembly.GetManifestResourceNames();
                     string resourceName = resources.FirstOrDefault(r => r.IndexOf(filename, StringComparison.OrdinalIgnoreCase) >= 0);

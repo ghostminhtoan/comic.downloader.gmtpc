@@ -540,10 +540,5 @@
           DestinationFiles="@(ReleaseOutputFiles->'$(ReleasePackageDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Message Text="Published release output to $(ReleasePackageDir)" Importance="High" />
   </Target>
-  <ItemGroup>
-    <EmbeddedResource Include="ringtones\Startup.wav" />
-    <EmbeddedResource Include="ringtones\download-finish.wav" />
-    <EmbeddedResource Include="ringtones\error.wav" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
