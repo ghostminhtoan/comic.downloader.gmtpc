@@ -1657,7 +1657,7 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                    "&includes%5B%5D=scanlation_group" +
                    "&includeFutureUpdates=0" +
                    "&includeEmptyPages=0" +
-                   "&includeExternalUrl=0" +
+                   "&includeExternalUrl=1" +
                    "&order%5Bvolume%5D=asc" +
                    "&order%5Bchapter%5D=asc" +
                    "&order%5BreadableAt%5D=asc";
