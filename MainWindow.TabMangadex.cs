@@ -1677,9 +1677,9 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 return new List<ReaderChapterItem>();
             }
 
-            // Với riêng mangadex, bất kể người dùng chọn tiếng Anh hay tiếng Việt đều phải scan chapter độc lập cho cả 2 ngôn ngữ của cùng một book.
-            // Nên ta lấy tất cả các chapters của cả "vi" và "en" cùng một lúc để xử lý độc lập.
-            List<MangadexChapterDescriptor> allChapters = await GetMangadexBookChaptersAsync(mangaId, new[] { "vi", "en" }, token);
+            // Gọi trực tiếp hàm lấy thô nhận IEnumerable<string> để tránh bị lọc qua overload (mangaId, item, token)
+            List<string> targets = new List<string> { "vi", "en" };
+            List<MangadexChapterDescriptor> allChapters = await GetMangadexBookChaptersAsync(mangaId, (IEnumerable<string>)targets, token);
 
             // Group theo TranslatedLanguage để đảm bảo độc lập, sau đó trong mỗi group ta group theo ChapterNumber/Title giống như cũ để tránh trùng lặp nhóm (group filter).
             var result = new List<ReaderChapterItem>();
