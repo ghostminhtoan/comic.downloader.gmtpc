@@ -5772,10 +5772,24 @@ namespace get_link_manga
         private async Task<string> FetchStringAsync(string url, CancellationToken token)
         {
             using (var httpClient = CreateScopedHttpClient(url))
-            using (var response = await httpClient.GetAsync(url, token))
+            using (var request = new HttpRequestMessage(HttpMethod.Get, url))
             {
-                response.EnsureSuccessStatusCode();
-                return await response.Content.ReadAsStringAsync();
+                if (!string.IsNullOrWhiteSpace(url))
+                {
+                    if (url.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        request.Headers.Referrer = new Uri("https://nhentai.net/");
+                    }
+                    else if (url.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        request.Headers.Referrer = new Uri("https://nhentai.xxx/");
+                    }
+                }
+                using (var response = await httpClient.SendAsync(request, token))
+                {
+                    response.EnsureSuccessStatusCode();
+                    return await response.Content.ReadAsStringAsync();
+                }
             }
         }
 
