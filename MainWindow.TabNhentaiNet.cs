@@ -155,15 +155,6 @@ namespace get_link_manga
 
             try
             {
-                bool ok = await SolveNhentaiCaptchaIfNeededAsync(url);
-                if (!ok)
-                {
-                    lblStatus.Text = "Blocked by Cloudflare.";
-                    btnNhentaiNetFetchInfo.IsEnabled = true;
-                    progressBar.IsIndeterminate = false;
-                    return;
-                }
-
                 string html = null;
                 try
                 {
@@ -171,8 +162,12 @@ namespace get_link_manga
                 }
                 catch (Exception ex)
                 {
-                    Log($"[nhentai.net] HttpClient fetch failed ({ex.Message}), trying resolved captcha HTML fallback...");
-                    html = _lastNhentaiResolvedHtml;
+                    Log($"[nhentai.net] HttpClient fetch failed ({ex.Message}). Trying to resolve captcha...");
+                    bool ok = await SolveNhentaiCaptchaIfNeededAsync(url);
+                    if (ok)
+                    {
+                        html = _lastNhentaiResolvedHtml;
+                    }
                 }
 
                 if (string.IsNullOrWhiteSpace(html) && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
@@ -340,19 +335,18 @@ namespace get_link_manga
                     bool pageLoaded = false;
                     try
                     {
-                        bool ok = await SolveNhentaiCaptchaIfNeededAsync(pageUrl);
-                        if (!ok)
-                        {
-                            throw new Exception("Bị chặn bởi Cloudflare Captcha.");
-                        }
                         try
                         {
                             html = await FetchStringAsync(pageUrl, _downloadCts?.Token ?? CancellationToken.None);
                         }
                         catch (Exception ex)
                         {
-                            Log($"[nhentai.net] HttpClient fetch page {page} failed ({ex.Message}), trying resolved captcha HTML fallback...");
-                            html = _lastNhentaiResolvedHtml;
+                            Log($"[nhentai.net] HttpClient fetch page {page} failed ({ex.Message}). Trying to resolve captcha...");
+                            bool ok = await SolveNhentaiCaptchaIfNeededAsync(pageUrl);
+                            if (ok)
+                            {
+                                html = _lastNhentaiResolvedHtml;
+                            }
                         }
 
                         if (string.IsNullOrWhiteSpace(html) && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
@@ -565,12 +559,32 @@ namespace get_link_manga
                             continue;
                         }
 
-                        bool ok = await SolveNhentaiCaptchaIfNeededAsync(link);
-                        if (!ok)
+                        string html = null;
+                        try
                         {
-                            throw new Exception("Bị chặn bởi Cloudflare Captcha.");
+                            html = await FetchStringAsync(link, _downloadCts?.Token ?? CancellationToken.None);
                         }
-                        string html = await FetchStringAsync(link, _downloadCts?.Token ?? CancellationToken.None);
+                        catch (Exception)
+                        {
+                            // Chỉ giải captcha bằng WebView2 nếu HttpClient thực sự bị lỗi (chặn bởi Cloudflare)
+                            bool ok = await SolveNhentaiCaptchaIfNeededAsync(link);
+                            if (!ok)
+                            {
+                                throw new Exception("Bị chặn bởi Cloudflare Captcha.");
+                            }
+                            html = await FetchStringAsync(link, _downloadCts?.Token ?? CancellationToken.None);
+                        }
+
+                        if (string.IsNullOrWhiteSpace(html) && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
+                        {
+                            html = _lastNhentaiResolvedHtml;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(html))
+                        {
+                            throw new Exception("Nội dung HTML tải về bị trống.");
+                        }
+
                         string galleryId = GetNhentaiGalleryIdFromLink(link);
                         string title = ExtractNhentaiNetGalleryTitle(html, galleryId);
                         string thumbUrl = ExtractNhentaiNetGalleryCover(html);
