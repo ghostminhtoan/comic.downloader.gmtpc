@@ -4176,10 +4176,10 @@ namespace get_link_manga
                 {
                     await await Dispatcher.InvokeAsync(async () =>
                     {
-                        var captchaWin = CreateCaptchaWindow(testUrl, autoDeleteCookiesOnLoad: true, headlessAutomation: _lightNovelAutoFocusEnabled);
+                        var captchaWin = CreateCaptchaWindow(testUrl, autoDeleteCookiesOnLoad: true, headlessAutomation: true);
                         captchaWin.Owner = this;
 
-                        if (await ShowCaptchaWindowWithFocusHandlingAsync(captchaWin, useNovelFocusStealth: _lightNovelAutoFocusEnabled))
+                        if (await ShowCaptchaWindowWithFocusHandlingAsync(captchaWin, useNovelFocusStealth: true))
                         {
                             var originalUri = new Uri(testUrl);
                             var resolvedUri = captchaWin.ResolvedUri ?? originalUri;
