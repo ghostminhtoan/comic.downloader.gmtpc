@@ -4073,6 +4073,21 @@ namespace get_link_manga
                 return CloneReaderChapterItems(cachedItems);
             }
 
+            if (IsNhentaiUrl(url))
+            {
+                var nhentaiItems = new List<ReaderChapterItem>
+                {
+                    new ReaderChapterItem
+                    {
+                        Name = "chap 01",
+                        FolderPath = url.Trim(),
+                        Pages = new List<ReaderPageItem>()
+                    }
+                };
+                _downloadChapterItemCache[url] = CloneReaderChapterItems(nhentaiItems);
+                return nhentaiItems;
+            }
+
             if (IsDamconuongUrl(url))
             {
                 string normalized = NormalizeDamconuongUrl(url);
