@@ -230,7 +230,7 @@ namespace get_link_manga
             _resultsMissingChapterScanningIndicatorDepth++;
             if (txtResultsMissingChapterScanningStatus != null)
             {
-                txtResultsMissingChapterScanningStatus.Visibility = Visibility.Visible;
+                txtResultsMissingChapterScanningStatus.Visibility = Visibility.Collapsed;
             }
         }
 
