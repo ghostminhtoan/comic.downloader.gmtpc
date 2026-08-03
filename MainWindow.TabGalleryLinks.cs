@@ -1532,7 +1532,9 @@ namespace get_link_manga
         private bool ShouldSkipDownloadMissingChapterScan(GalleryItem item)
         {
             string domain = GetDownloadMissingChapterDomainLabel(item);
-            return domain.IndexOf("hentaiforce", StringComparison.OrdinalIgnoreCase) >= 0;
+            return domain.IndexOf("hentaiforce", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   domain.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   domain.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private List<GalleryItem> GetDownloadMissingChapterPendingScanItems()
@@ -2109,6 +2111,22 @@ namespace get_link_manga
                     ChapterLabel = coverageLabel,
                     MissingChapterLabel = missingLabel,
                     DecimalChapterLabel = decimalChapters.Count == 0 ? string.Empty : string.Join(", ", decimalChapters),
+                    IsChecked = true
+                };
+            }
+
+            if (domain.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                domain.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                string msg = _isVietnameseUi ? "Không hỗ trợ nhiều chapter" : "Multiple chapters not supported";
+                return new ReaderChapterIssueItem
+                {
+                    DomainLabel = domain,
+                    BookName = item.Name,
+                    BookLink = item.Link,
+                    ChapterLabel = "1 (1)",
+                    MissingChapterLabel = msg,
+                    DecimalChapterLabel = string.Empty,
                     IsChecked = true
                 };
             }
