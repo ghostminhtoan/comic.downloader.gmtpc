@@ -24,6 +24,7 @@ namespace get_link_manga
         private bool _isNameSortAscending = true;
         private bool _isStatusSortAscending = true;
         private bool _isProcessSortAscending = true;
+        private bool _isSpeedSortAscending = false;
         private Point _resultsDragStartPoint;
         private GalleryItem _resultsDragItem;
         private bool _isResultsThumbnailViewEnabled;
@@ -215,7 +216,9 @@ namespace get_link_manga
             ListSortDirection direction;
             if (ReferenceEquals(e.Column, colSpeed))
             {
-                direction = ListSortDirection.Descending;
+                direction = e.Column.SortDirection == ListSortDirection.Descending
+                    ? ListSortDirection.Ascending
+                    : ListSortDirection.Descending;
             }
             else
             {
@@ -239,6 +242,10 @@ namespace get_link_manga
             else if (ReferenceEquals(e.Column, colProcess))
             {
                 _isProcessSortAscending = direction != ListSortDirection.Ascending;
+            }
+            else if (ReferenceEquals(e.Column, colSpeed))
+            {
+                _isSpeedSortAscending = direction != ListSortDirection.Ascending;
             }
         }
 
@@ -290,12 +297,7 @@ namespace get_link_manga
 
         private void BtnSortBySpeed_Click(object sender, RoutedEventArgs e)
         {
-            ClearResultsColumnSortDirections(colSpeed);
-            if (colSpeed != null)
-            {
-                colSpeed.SortDirection = ListSortDirection.Descending;
-            }
-            ApplyResultsSort("DownloadSpeedSortValue", ListSortDirection.Descending, "Sorted download speed descending.");
+            ApplyResultsSort(colSpeed, "DownloadSpeedSortValue", ref _isSpeedSortAscending, "download speed");
         }
 
         private void BtnRestoreOrder_Click(object sender, RoutedEventArgs e)
@@ -331,6 +333,7 @@ namespace get_link_manga
             _isNameSortAscending = true;
             _isStatusSortAscending = true;
             _isProcessSortAscending = true;
+            _isSpeedSortAscending = false;
             ClearResultsColumnSortDirections();
             ApplyResultsSort("OriginalIndex", ListSortDirection.Ascending, logMessage);
         }
