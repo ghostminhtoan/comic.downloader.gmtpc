@@ -12,21 +12,52 @@ namespace get_link_manga
         private async void BtnCaptcha_Click(object sender, RoutedEventArgs e)
         {
             string url = string.Empty;
+            string defaultFallbackDomain = string.Empty;
             var button = sender as Button;
-            if (button == btnFetchCaptcha) url = txtTagUrl.Text;
-            else if (button == btnNhentaiFetchCaptcha) url = txtNhentaiTagUrl.Text;
-            else if (button == btnViHentaiFetchCaptcha) url = txtViHentaiTagUrl.Text;
-            else if (button == btnTruyenqqFetchCaptcha) url = txtTruyenqqTagUrl.Text;
-            else if (button == btnNettruyenFetchCaptcha) url = txtNettruyenTagUrl.Text;
-            else if (button == btnHakoFetchCaptcha) url = txtHakoTagUrl.Text;
-            else if (button == btnDamconuongFetchCaptcha) url = txtDamconuongTagUrl.Text;
-            else if (button == btnTruyenggvnFetchCaptcha) url = txtTruyenggvnTagUrl.Text;
-            else if (button == btnHentai2readFetchCaptcha) url = txtHentai2readTagUrl.Text;
-            else if (button == btnHentaieraFetchCaptcha) url = txtHentaieraTagUrl.Text;
+            
+            if (button == btnFetchCaptcha) { url = txtTagUrl.Text; defaultFallbackDomain = "hentaiforce.net"; }
+            else if (button == btnNhentaiFetchCaptcha) { url = txtNhentaiTagUrl.Text; defaultFallbackDomain = "nhentai.xxx"; }
+            else if (button == btnViHentaiFetchCaptcha) { url = txtViHentaiTagUrl.Text; defaultFallbackDomain = "vi-hentai.com"; }
+            else if (button == btnTruyenqqFetchCaptcha) { url = txtTruyenqqTagUrl.Text; defaultFallbackDomain = "truyenqq.com.vn"; }
+            else if (button == btnNettruyenFetchCaptcha) { url = txtNettruyenTagUrl.Text; defaultFallbackDomain = "nettruyen.com"; }
+            else if (button == btnHakoFetchCaptcha) { url = txtHakoTagUrl.Text; defaultFallbackDomain = "ln.hako.vn"; }
+            else if (button == btnDamconuongFetchCaptcha) { url = txtDamconuongTagUrl.Text; defaultFallbackDomain = "damconuong.shop"; }
+            else if (button == btnTruyenggvnFetchCaptcha) { url = txtTruyenggvnTagUrl.Text; defaultFallbackDomain = "truyengg.com"; }
+            else if (button == btnHentai2readFetchCaptcha) { url = txtHentai2readTagUrl.Text; defaultFallbackDomain = "hentai2read.com"; }
+            else if (button == btnHentaieraFetchCaptcha) { url = txtHentaieraTagUrl.Text; defaultFallbackDomain = "hentaiera.com"; }
+            else if (button == btnNhentaiNetFetchCaptcha) { url = txtNhentaiNetTagUrl?.Text; defaultFallbackDomain = "nhentai.net"; }
+
+            // Lấy domain cần xóa cookie
+            string targetDomain = defaultFallbackDomain;
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                targetDomain = NormalizeCookieHostKey(url);
+            }
+
+            if (!string.IsNullOrWhiteSpace(targetDomain))
+            {
+                // Thực hiện xóa cookie cho domain này
+                _cookieContainersByHost.TryRemove(targetDomain, out _);
+                string wildCardKey = "." + targetDomain;
+                var subKeys = _cookieContainersByHost.Keys.Where(k => k.EndsWith(wildCardKey, StringComparison.OrdinalIgnoreCase)).ToList();
+                foreach (var subKey in subKeys)
+                {
+                    _cookieContainersByHost.TryRemove(subKey, out _);
+                }
+                
+                // Đồng thời reset cấu trúc SQLite nếu domain là truyenqq
+                if (IsTruyenqqUrl(targetDomain))
+                {
+                    _truyenqqPreferredBaseUrl = null;
+                }
+                
+                Log($"[Captcha] Đã xóa cookie cache của tên miền: {targetDomain}");
+            }
 
             if (string.IsNullOrWhiteSpace(url))
             {
-                ShowWarning("Vui lòng nhập TARGET TAG URL trước.", "Thông báo");
+                // Nếu không nhập URL, chỉ cần xóa cookie trong cache là đủ
+                ShowInfo($"Đã xóa sạch cookie của tên miền {targetDomain}.", "Thông báo");
                 return;
             }
 
