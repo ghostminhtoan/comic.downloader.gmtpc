@@ -588,8 +588,53 @@ namespace get_link_manga
                 Log($"[System] Không thể reset http state: {ex.Message}");
             }
 
+            // Xóa và tạo lại folder captcha WebView2 cho từng domain
+            foreach (var domain in domainsToClear)
+            {
+                string captchaFolderName = GetCaptchaFolderNameFromDomain(domain);
+                string captchaPath = Path.Combine(PortablePaths.WebView2CaptchaUserDataFolder, captchaFolderName);
+                try
+                {
+                    if (Directory.Exists(captchaPath))
+                    {
+                        Directory.Delete(captchaPath, true);
+                        Log($"[System] Đã xóa folder captcha: {captchaFolderName}");
+                    }
+                    Directory.CreateDirectory(captchaPath);
+                }
+                catch (Exception ex)
+                {
+                    Log($"[System] Không thể reset folder captcha {captchaFolderName}: {ex.Message}");
+                }
+            }
+
             Log($"[System] Đã xóa thành công cookie cache của {clearedCount} tên miền: {string.Join(", ", domainsToClear)}");
             ShowInfo($"Đã xóa sạch cookie của các tên miền đang hiển thị ({string.Join(", ", domainsToClear)}).\nCác yêu cầu tiếp theo sẽ sạch như máy mới.", "Thành công");
+        }
+
+        /// <summary>Map domain (ví dụ nhentai.net) → tên folder captcha (nhentai). Giống CaptchaWindow.GetWebView2UserDataFolder.</summary>
+        private static string GetCaptchaFolderNameFromDomain(string domain)
+        {
+            if (string.IsNullOrWhiteSpace(domain)) return "general";
+            string d = domain.ToLowerInvariant();
+            if (d.Contains("truyenqq")) return "truyenqq";
+            if (d.Contains("nettruyen")) return "nettruyen";
+            if (d.Contains("vi-hentai") || d.Contains("hentaivn")) return "hentaivn";
+            if (d.Contains("hentai2read")) return "hentai2read";
+            if (d.Contains("daomeoden")) return "daomeoden";
+            if (d.Contains("nhentai")) return "nhentai";
+            if (d.Contains("hentaiforce")) return "hentaiforce";
+            if (d.Contains("hentaiera")) return "hentaiera";
+            if (d.Contains("damconuong")) return "damconuong";
+            if (d.Contains("hako") || d.Contains("docln")) return "hako";
+            if (d.Contains("truyengg") || d.Contains("sayhentai")) return "truyengg";
+            if (d.Contains("mangadex")) return "mangadex";
+            if (d.Contains("doctruyen")) return "doctruyen";
+            if (d.Contains("dilib") || d.Contains("thuviensach")) return "dilib";
+            if (d.Contains("haibaba")) return "haibaba";
+            // Fallback: lấy phần chính domain
+            var parts = d.Split('.');
+            return parts.Length >= 2 ? parts[parts.Length - 2] : d;
         }
     }
 }

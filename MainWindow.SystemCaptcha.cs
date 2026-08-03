@@ -50,6 +50,23 @@ namespace get_link_manga
                 {
                     _truyenqqPreferredBaseUrl = null;
                 }
+
+                // Xóa và tạo lại folder captcha WebView2
+                string captchaFolderName = GetCaptchaFolderNameFromDomain(targetDomain);
+                string captchaPath = System.IO.Path.Combine(PortablePaths.WebView2CaptchaUserDataFolder, captchaFolderName);
+                try
+                {
+                    if (System.IO.Directory.Exists(captchaPath))
+                    {
+                        System.IO.Directory.Delete(captchaPath, true);
+                        Log($"[Captcha] Đã xóa folder captcha: {captchaFolderName}");
+                    }
+                    System.IO.Directory.CreateDirectory(captchaPath);
+                }
+                catch (Exception ex)
+                {
+                    Log($"[Captcha] Không thể reset folder captcha {captchaFolderName}: {ex.Message}");
+                }
                 
                 Log($"[Captcha] Đã xóa cookie cache của tên miền: {targetDomain}");
             }
