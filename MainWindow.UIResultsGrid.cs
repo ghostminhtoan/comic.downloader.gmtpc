@@ -667,10 +667,41 @@ namespace get_link_manga
                 return;
             }
 
-            GalleryItem item = GetGalleryItemFromDependencyObject(e.OriginalSource as DependencyObject);
-            if (item != null)
+            DependencyObject dep = e.OriginalSource as DependencyObject;
+            if (dep == null) return;
+
+            // Tìm DataGridCell trong visual tree
+            DataGridCell cell = null;
+            DependencyObject temp = dep;
+            while (temp != null)
+            {
+                if (temp is DataGridCell)
+                {
+                    cell = (DataGridCell)temp;
+                    break;
+                }
+                temp = VisualTreeHelper.GetParent(temp);
+            }
+
+            if (cell == null || cell.Column == null) return;
+
+            GalleryItem item = GetGalleryItemFromDependencyObject(dep);
+            if (item == null) return;
+
+            string headerText = cell.Column.Header?.ToString()?.ToUpperInvariant() ?? string.Empty;
+
+            if (headerText.Contains("GALLERY DETAILS"))
             {
                 OpenGalleryItemLink(item, e);
+            }
+            else if (headerText.Contains("PROCESS"))
+            {
+                string targetFolder = ResolveBestFolderForGalleryItem(item);
+                if (!string.IsNullOrWhiteSpace(targetFolder) && System.IO.Directory.Exists(targetFolder))
+                {
+                    ShellFolderLauncher.TryOpenFolder(targetFolder, out _);
+                    e.Handled = true;
+                }
             }
         }
 
