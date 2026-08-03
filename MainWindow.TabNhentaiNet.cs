@@ -164,7 +164,26 @@ namespace get_link_manga
                     return;
                 }
 
-                string html = await FetchStringAsync(url, _downloadCts?.Token ?? CancellationToken.None);
+                string html = null;
+                try
+                {
+                    html = await FetchStringAsync(url, _downloadCts?.Token ?? CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    Log($"[nhentai.net] HttpClient fetch failed ({ex.Message}), trying resolved captcha HTML fallback...");
+                    html = _lastNhentaiResolvedHtml;
+                }
+
+                if (string.IsNullOrWhiteSpace(html) && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
+                {
+                    html = _lastNhentaiResolvedHtml;
+                }
+
+                if (string.IsNullOrWhiteSpace(html))
+                {
+                    throw new Exception("Không lấy được dữ liệu trang HTML (cả HttpClient và Captcha window đều trống).");
+                }
 
                 int maxPage = 1;
 
@@ -326,8 +345,25 @@ namespace get_link_manga
                         {
                             throw new Exception("Bị chặn bởi Cloudflare Captcha.");
                         }
-                        html = await FetchStringAsync(pageUrl, _downloadCts?.Token ?? CancellationToken.None);
-                        pageLoaded = true;
+                        try
+                        {
+                            html = await FetchStringAsync(pageUrl, _downloadCts?.Token ?? CancellationToken.None);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log($"[nhentai.net] HttpClient fetch page {page} failed ({ex.Message}), trying resolved captcha HTML fallback...");
+                            html = _lastNhentaiResolvedHtml;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(html) && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
+                        {
+                            html = _lastNhentaiResolvedHtml;
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(html))
+                        {
+                            pageLoaded = true;
+                        }
                     }
                     catch (Exception ex)
                     {
