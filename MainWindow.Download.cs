@@ -3235,11 +3235,11 @@ namespace get_link_manga
             Log($"[{nhentaiSiteKey}] Book: {normalizedBookUrl} | Pages: {totalPages}");
 
             // Get number of connections
-            // nhentai.net CDN (i1.nhentai.net) rate-limits aggressively — cap at 3 concurrent
+            // nhentai.net CDN (i1.nhentai.net) rate-limits moderately — cap at 5 concurrent to improve download speed safely
             int maxThreads = GetCurrentConnectionLimit();
             if (isNhentaiNet && nhentaiNetImageUrls != null)
             {
-                maxThreads = Math.Min(maxThreads, 3);
+                maxThreads = Math.Min(maxThreads, 5);
             }
 
             Log($"[Đa luồng {nhentaiSiteKey}] Bắt đầu tải {totalPages} trang, tối đa {maxThreads} kết nối song song...");
@@ -3278,9 +3278,10 @@ namespace get_link_manga
                             }
                             token.ThrowIfCancellationRequested();
 
-                            string fileName = BuildOrderedImageFilename(pageNum, preResolvedUrl, ".jpg", $"page-{pageNum}");
-                            string localFilePath = Path.Combine(tempFolder, fileName);
-                            string finalFilePath = Path.Combine(targetFolder, fileName);
+                            // Use pre-resolved extension if available, otherwise default to .jpg for checking existence
+                            string checkFileName = BuildOrderedImageFilename(pageNum, preResolvedUrl, ".jpg", $"page-{pageNum}");
+                            string localFilePath = Path.Combine(tempFolder, checkFileName);
+                            string finalFilePath = Path.Combine(targetFolder, checkFileName);
                             string downloadedPath = localFilePath;
                             var pageWatch = Stopwatch.StartNew();
 
@@ -3340,7 +3341,9 @@ namespace get_link_manga
                                     foreach (var currentExt in extensionsToTry)
                                     {
                                         activeUrl = baseCdnUrl + currentExt;
-                                        directPath = Path.Combine(tempFolder, BuildOrderedImageFilename(pageNum, activeUrl));
+                                        // Build filename matching the active extension we are downloading
+                                        string actualFileName = BuildOrderedImageFilename(pageNum, activeUrl);
+                                        directPath = Path.Combine(tempFolder, actualFileName);
                                         
                                         try
                                         {
