@@ -130,6 +130,9 @@ namespace get_link_manga
 
             [DataMember(Order = 37)]
             public bool MangadexLangFallback { get; set; }
+
+            [DataMember(Order = 38)]
+            public string HoverPreviewThumbnailUrl { get; set; }
         }
 
         [DataContract]
@@ -786,6 +789,7 @@ namespace get_link_manga
                     : new List<GalleryItemState>(),
                 MangadexLangPrimary = item.MangadexLangPrimary,
                 MangadexLangFallback = item.MangadexLangFallback,
+                HoverPreviewThumbnailUrl = item.HoverPreviewThumbnailUrl,
                 Errors = item.GetUniqueErrors().Select(error => new ErrorState
                 {
                     ChapterName = error.ChapterName,
@@ -919,6 +923,7 @@ namespace get_link_manga
                 HasMissingChapterIssue = state.HasMissingChapterIssue,
                 MangadexLangPrimary = state.MangadexLangPrimary ?? "vi",
                 MangadexLangFallback = state.MangadexLangFallback,
+                HoverPreviewThumbnailUrl = state.HoverPreviewThumbnailUrl,
                 Errors = state.Errors == null
                     ? new List<ErrorDetail>()
                     : state.Errors.Select(error => new ErrorDetail

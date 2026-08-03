@@ -675,6 +675,8 @@ namespace get_link_manga
                         ? ExtractDilibPreviewUrlFromHtml(html, link)
                     : IsNettruyenUrl(link)
                         ? ExtractNettruyenviet10PreviewUrlFromHtml(html, link)
+                    : IsNhentaiUrl(link)
+                        ? ExtractNhentaiNetGalleryCover(html)
                     : string.Empty;
             if (string.IsNullOrWhiteSpace(coverUrlNonMangadex))
             {
