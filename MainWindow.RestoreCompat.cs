@@ -790,7 +790,19 @@ namespace get_link_manga
             ApplyResultsSort(colStatus, "StatusSortOrder", ref _isStatusSortAscending, "status");
         }
 
+        private void BtnSortByStatus_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+            ApplyResultsSort(colStatus, "StatusSortOrder", ref _isStatusSortAscending, "status");
+        }
+
         private void BtnSortByProcess_Click(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+            ApplyResultsSort(colProcess, "ProcessSortText", ref _isProcessSortAscending, "process");
+        }
+
+        private void BtnSortByProcess_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             e.Handled = true;
             ApplyResultsSort(colProcess, "ProcessSortText", ref _isProcessSortAscending, "process");
