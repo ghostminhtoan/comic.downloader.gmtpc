@@ -199,12 +199,65 @@ namespace get_link_manga
 
         private async Task<string> TryFetchHakoHtmlByFirecrawlAsync(string normalizedUrl, CancellationToken token)
         {
-            return await TryFetchHtmlByFirecrawlAsync(normalizedUrl, token);
+            // ponytail: Hako Firecrawl chỉ dùng API/CLI thuần, không fallback WebView2.
+            // FetchHakoHtmlAsync sẽ tự check blocked và mở WebView2 khi thật sự cần.
+            string apiKey = GetFirecrawlApiKey();
+            IEnumerable<string> urlsToScrape = IsHakoUrl(normalizedUrl)
+                ? BuildPreferredHakoFirecrawlUrls(normalizedUrl, false)
+                : new[] { normalizedUrl };
+
+            foreach (string candidateUrl in urlsToScrape)
+            {
+                FirecrawlPageSnapshot snapshot = null;
+                if (!string.IsNullOrWhiteSpace(apiKey))
+                {
+                    snapshot = await TryScrapePageByFirecrawlApiAsync(candidateUrl, apiKey, token, false);
+                }
+
+                if (!HasFirecrawlContent(snapshot) && IsFirecrawlCliAvailable())
+                {
+                    snapshot = await TryScrapePageByFirecrawlCliAsync(candidateUrl, token);
+                }
+
+                if (HasFirecrawlContent(snapshot))
+                {
+                    HakoLog($"Firecrawl da tra ve du lieu cho Hako tu {candidateUrl}.");
+                    return snapshot.Html;
+                }
+            }
+
+            return null;
         }
 
         private async Task<FirecrawlPageSnapshot> TryFetchHakoPageByFirecrawlAsync(string normalizedUrl, CancellationToken token, bool preferFastChapterList = false)
         {
-            return await TryFetchPageByFirecrawlAsync(normalizedUrl, token, preferFastChapterList);
+            // ponytail: Hako Firecrawl page fetch chỉ dùng API/CLI thuần, không fallback WebView2.
+            string apiKey = GetFirecrawlApiKey();
+            IEnumerable<string> urlsToScrape = IsHakoUrl(normalizedUrl)
+                ? BuildPreferredHakoFirecrawlUrls(normalizedUrl, preferFastChapterList)
+                : new[] { normalizedUrl };
+
+            foreach (string candidateUrl in urlsToScrape)
+            {
+                FirecrawlPageSnapshot snapshot = null;
+                if (!string.IsNullOrWhiteSpace(apiKey))
+                {
+                    snapshot = await TryScrapePageByFirecrawlApiAsync(candidateUrl, apiKey, token, preferFastChapterList);
+                }
+
+                if (!HasFirecrawlContent(snapshot) && IsFirecrawlCliAvailable())
+                {
+                    snapshot = await TryScrapePageByFirecrawlCliAsync(candidateUrl, token);
+                }
+
+                if (HasFirecrawlContent(snapshot))
+                {
+                    HakoLog($"Firecrawl da tra ve du lieu cho Hako tu {candidateUrl}.");
+                    return snapshot;
+                }
+            }
+
+            return null;
         }
 
         private async Task<FirecrawlPageSnapshot> TryScrapePageByFirecrawlApiAsync(string url, string apiKey, CancellationToken token, bool preferFastChapterList)

@@ -493,7 +493,19 @@ namespace get_link_manga
                 token.ThrowIfCancellationRequested();
             }
 
-            // Step 3: Visible CaptchaWindow — let user bypass Cloudflare once, then HttpClient reuses session
+            // Step 3: Visible CaptchaWindow — only when site actually blocks
+            bool actuallyBlocked = await CheckIfHakoBlockedAsync(normalizedUrl);
+            if (!actuallyBlocked)
+            {
+                _hakoCaptchaSessionReady = true;
+                if (lastError != null)
+                {
+                    throw lastError;
+                }
+
+                throw new Exception("Hako trả lỗi tạm thời, không phải Cloudflare challenge.");
+            }
+
             HakoLog("Mo browser session de vuot challenge Hako.");
             string visibleHtml = await FetchHakoHtmlViaBrowserAsync(normalizedUrl, headlessAutomation: false);
             if (string.IsNullOrWhiteSpace(visibleHtml) || IsHakoChallengeHtml(visibleHtml))
