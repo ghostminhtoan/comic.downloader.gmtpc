@@ -504,6 +504,14 @@ namespace get_link_manga
                 BtnFetchInfo_Click(this, new RoutedEventArgs());
                 await WaitAndScrapeAsync(btnFetchInfo, BtnScrape_Click);
             }
+            else if (lowerUrl.Contains("nhentai.net"))
+            {
+                SelectHentaiSourceRoot();
+                SelectHentaiTabByHeader("nhentai.net");
+                if (txtNhentaiNetTagUrl != null) txtNhentaiNetTagUrl.Text = url;
+                BtnNhentaiNetFetchInfo_Click(this, new RoutedEventArgs());
+                await WaitAndScrapeAsync(btnNhentaiNetFetchInfo, BtnNhentaiNetScrape_Click);
+            }
             else if (lowerUrl.Contains("nhentai"))
             {
                 SelectHentaiSourceRoot();
@@ -865,6 +873,17 @@ namespace get_link_manga
                     SelectHentaiTabByHeader("hentaiforce");
                 }
                 await ImportDirectLinksAsync(new List<string> { url }, showMessageBox);
+                return true;
+            }
+
+            if (lowerUrl.Contains("nhentai.net"))
+            {
+                if (allowUiJump)
+                {
+                    SelectHentaiSourceRoot();
+                    SelectHentaiTabByHeader("nhentai.net");
+                }
+                await ImportNhentaiNetDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;
             }
 

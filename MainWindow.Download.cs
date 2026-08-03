@@ -383,6 +383,11 @@ namespace get_link_manga
                     return "damconuong.shop";
                 }
 
+                if (host.Contains("nhentai.net"))
+                {
+                    return "nhentai.net";
+                }
+
                 if (host.Contains("nhentai"))
                 {
                     return "nhentai.xxx";
@@ -572,6 +577,10 @@ namespace get_link_manga
             else if (lowerKey.Contains("vi-hentai"))
             {
                 siteKey = "vi-hentai.pro";
+            }
+            else if (lowerKey.Contains("nhentai.net"))
+            {
+                siteKey = "nhentai.net";
             }
             else if (lowerKey.Contains("nhentai"))
             {
@@ -3196,7 +3205,9 @@ namespace get_link_manga
             string safeTitle = GetSafePathName(item.Name);
             string resolvedRoot = GetConfiguredDownloadRoot(rootFolder, item);
             string targetFolder = Path.Combine(resolvedRoot, safeTitle);
-            string tempFolder = BuildStableTempFolderPath(resolvedRoot, "nhentai.xxx", safeTitle, item.Link, item.Name);
+            string nhentaiSiteKey = !string.IsNullOrWhiteSpace(item.SourceDomain) && item.SourceDomain.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0
+                ? "nhentai.net" : "nhentai.xxx";
+            string tempFolder = BuildStableTempFolderPath(resolvedRoot, nhentaiSiteKey, safeTitle, item.Link, item.Name);
             Directory.CreateDirectory(tempFolder);
             RegisterTempFolder(tempFolder);
             string normalizedBookUrl = NormalizeNhentaiBookUrl(item.Link);

@@ -482,6 +482,8 @@ namespace get_link_manga
                     return "https://sayhentai.cx/";
                 case "hentaiforce":
                     return "https://hentaiforce.net/";
+                case "nhentai.net":
+                    return "https://nhentai.net/";
                 case "nhentai":
                     return "https://nhentai.xxx/";
                 case "hentaiera":
@@ -523,6 +525,8 @@ namespace get_link_manga
                     return "https://sayhentai.cx/genre/romance";
                 case "hentaiforce":
                     return "https://hentaiforce.net/search?q=%22uncensored%22+%22full+color";
+                case "nhentai.net":
+                    return "https://nhentai.net/tag/raccoon-girl/";
                 case "nhentai":
                     return "https://nhentai.xxx/tag/very-long-hair/";
                 case "hentai2read":
@@ -566,6 +570,8 @@ namespace get_link_manga
                     return txtTruyenggvnTagUrl;
                 case "hentaiforce":
                     return txtTagUrl;
+                case "nhentai.net":
+                    return txtNhentaiNetTagUrl;
                 case "nhentai":
                     return txtNhentaiTagUrl;
                 case "hentai2read":

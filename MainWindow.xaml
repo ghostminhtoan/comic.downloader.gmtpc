@@ -1989,6 +1989,134 @@
                             </ScrollViewer>
                         </TabItem>
 
+                        <!-- nhentai.net tab -->
+                        <TabItem Header="nhentai.net" Style="{StaticResource CyberpunkTabItem}">
+                            <TabItem.Tag>
+                                <SolidColorBrush Color="#e91e63"/>
+                            </TabItem.Tag>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="True" Background="Transparent" BorderThickness="0" Padding="0">
+                            <Grid Margin="0,10,0,0">
+                                <Border Name="borderNhentaiNetLeftPanel" Style="{StaticResource CyberpunkCard}" Padding="15">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/> <!-- Section Title -->
+                                            <RowDefinition Height="Auto"/> <!-- URL Input -->
+                                            <RowDefinition Height="0"/> <!-- Sort Option -->
+                                            <RowDefinition Height="Auto"/> <!-- Fetch Button -->
+                                            <RowDefinition Height="Auto"/> <!-- Page Info -->
+                                            <RowDefinition Height="0"/>    <!-- Row Range Input -->
+                                            <RowDefinition Height="Auto"/> <!-- Scrape Button -->
+                                            <RowDefinition Height="0"/>    <!-- Progress Logs -->
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Panel Header with Bookmarks & History -->
+                                        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                                            <TextBlock Text="PARAMETERS CONFIG" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            <WrapPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                <Button Name="btnOpenHomepageNhentaiNet" Tag="nhentai.net" Content="HOME" Click="BtnOpenHomepage_Click" Style="{StaticResource CompactCyanButton}" MinWidth="86" Padding="8,0" FontWeight="Bold"/>
+                                                <Button Tag="nhentai.net" Content="RESTORE DEFAULT TAG" Click="BtnRestoreDefaultTag_Click" Style="{StaticResource CompactCyanButton}" MinWidth="156" Padding="8,0" FontWeight="Bold"/>
+                                                <Button Content="HISTORY" Click="BtnOpenHistory_Click" Style="{StaticResource CompactCyanButton}" MinWidth="78" Padding="8,0" FontWeight="Bold"/>
+                                                <Button Content="BOOKMARKS" Click="BtnOpenBookmarks_Click" Style="{StaticResource CompactCyanButton}" MinWidth="94" Padding="8,0" FontWeight="Bold"/>
+                                            </WrapPanel>
+                                        </StackPanel>
+
+                                        <!-- Target URL -->
+                                        <StackPanel Grid.Row="1" Margin="0,0,0,12">
+                                            <TextBlock Text="TARGET TAG URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                            <TextBox Name="txtNhentaiNetTagUrl" 
+                                                        Text="https://nhentai.net/tag/raccoon-girl/"
+                                                        Background="#0e121a" 
+                                                        BorderBrush="{StaticResource CyberpunkBorderBrush}" 
+                                                        Foreground="{StaticResource CyberpunkTextBrush}" 
+                                                        CaretBrush="{StaticResource CyberpunkCyanBrush}"
+                                                        Height="32"
+                                                        TextChanged="TxtNhentaiNetTagUrl_TextChanged"/>
+                                        </StackPanel>
+
+                                        <!-- Sort Option -->
+                                        <StackPanel Grid.Row="2" Margin="0,0,0,12" Visibility="Collapsed">
+                                            <TextBlock Text="SORT OPTION" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                            <ComboBox Name="cmbNhentaiNetSort" 
+                                                      Style="{StaticResource CyberpunkComboBox}"
+                                                      Height="32"
+                                                      VerticalContentAlignment="Center"
+                                                      SelectedIndex="0"
+                                                      SelectionChanged="CmbNhentaiNetSort_SelectionChanged">
+                                                <ComboBox.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <VirtualizingStackPanel Background="#121622"/>
+                                                    </ItemsPanelTemplate>
+                                                </ComboBox.ItemsPanel>
+                                                <ComboBox.ItemContainerStyle>
+                                                    <Style TargetType="ComboBoxItem" BasedOn="{StaticResource CyberpunkComboBoxItemStyle}"/>
+                                                </ComboBox.ItemContainerStyle>
+                                                 <ComboBoxItem Content="Recent" Tag="date"/>
+                                                 <ComboBoxItem Content="Popular Today" Tag="popular-today"/>
+                                                 <ComboBoxItem Content="Popular Week" Tag="popular-week"/>
+                                                 <ComboBoxItem Content="Popular All Time" Tag="popular"/>
+                                            </ComboBox>
+                                        </StackPanel>
+
+                                        <!-- Fetch Info Action -->
+                                        <Grid Grid.Row="3" Margin="0,0,0,15">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Name="btnNhentaiNetFetchInfo" Content="ANALYZE TARGET PAGE" Click="BtnNhentaiNetFetchInfo_Click" Style="{StaticResource TabFetchPrimaryButton}"/>
+                                            <Button Grid.Column="2" Name="btnNhentaiNetFetchCaptcha" Content="CLEAR COOKIE" Click="BtnCaptcha_Click" Style="{StaticResource TabFetchSecondaryButton}"/>
+                                        </Grid>
+
+                                        <!-- Page Info Status -->
+                                        <Grid Grid.Row="4" Margin="0,0,0,15">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                <TextBox Name="txtNhentaiNetTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtNhentaiNetTotalPages_TextChanged"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                <TextBox Name="txtNhentaiNetPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="4">
+                                                <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                <TextBox Name="txtNhentaiNetPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Grid Grid.Row="5" Height="0" Margin="0"/>
+
+                                        <!-- Scrape & Direct Import Actions -->
+                                        <Grid Grid.Row="6" Margin="0,15,0,15">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Name="btnNhentaiNetScrape" Content="GET LINK" Click="BtnNhentaiNetScrape_Click" Style="{StaticResource WideActionButton}"/>
+                                            <Button Grid.Column="2" Name="btnNhentaiNetCrawlMore" Content="GET MORE" Click="BtnNhentaiNetCrawlMore_Click" Style="{StaticResource WideActionButton}"/>
+                                            <Button Grid.Column="4" Name="btnNhentaiNetPasteDirect" Content="PASTE DIRECT LINK" Click="BtnNhentaiNetPasteDirect_Click" Style="{StaticResource WideActionButton}"/>
+                                        </Grid>
+
+                                        <Grid Grid.Row="7" Visibility="Collapsed"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                            </ScrollViewer>
+                        </TabItem>
+
                         <!-- nhentai.xxx tab -->
                         <TabItem Header="nhentai.xxx" Style="{StaticResource CyberpunkTabItem}">
                             <TabItem.Tag>
@@ -2877,6 +3005,9 @@
                                         </ComboBoxItem>
                                         <ComboBoxItem>
                                             <CheckBox Content="hentaiforce" Tag="hentaiforce"/>
+                                        </ComboBoxItem>
+                                        <ComboBoxItem>
+                                            <CheckBox Content="nhentai.net" Tag="nhentai.net"/>
                                         </ComboBoxItem>
                                         <ComboBoxItem>
                                             <CheckBox Content="nhentai" Tag="nhentai"/>

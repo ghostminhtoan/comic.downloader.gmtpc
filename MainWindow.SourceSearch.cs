@@ -312,6 +312,8 @@ namespace get_link_manga
                     return "sayhentai.cx";
                 case "hentaiforce":
                     return "hentaiforce.net";
+                case "nhentai.net":
+                    return "nhentai.net";
                 case "nhentai":
                     return "nhentai.xxx";
                 case "hentai2read":
