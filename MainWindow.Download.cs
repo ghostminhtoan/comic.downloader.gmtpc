@@ -4092,6 +4092,17 @@ namespace get_link_manga
                 using (var httpClient = CreateScopedHttpClient(testUrl))
                 using (var request = new HttpRequestMessage(HttpMethod.Get, testUrl))
                 {
+                    if (!string.IsNullOrWhiteSpace(testUrl))
+                    {
+                        if (testUrl.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            request.Headers.Referrer = new Uri("https://nhentai.net/");
+                        }
+                        else if (testUrl.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            request.Headers.Referrer = new Uri("https://nhentai.xxx/");
+                        }
+                    }
                     using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
                     {
                         if (response.StatusCode == HttpStatusCode.Forbidden || response.StatusCode == HttpStatusCode.ServiceUnavailable)
