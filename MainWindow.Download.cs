@@ -4176,10 +4176,14 @@ namespace get_link_manga
                 {
                     await await Dispatcher.InvokeAsync(async () =>
                     {
-                        var captchaWin = CreateCaptchaWindow(testUrl, autoDeleteCookiesOnLoad: true, headlessAutomation: true);
+                        // Nếu là URL danh sách (tag, artist, parody, group, character, search) thì luôn dùng headlessAutomation = true để cào ngầm giống tag
+                        bool isListUrl = testUrl.Contains("/tag/") || testUrl.Contains("/artist/") || testUrl.Contains("/parody/") || testUrl.Contains("/group/") || testUrl.Contains("/character/") || testUrl.Contains("/search/") || testUrl.Contains("?q=");
+                        bool useHeadless = isListUrl ? true : _lightNovelAutoFocusEnabled;
+
+                        var captchaWin = CreateCaptchaWindow(testUrl, autoDeleteCookiesOnLoad: true, headlessAutomation: useHeadless);
                         captchaWin.Owner = this;
 
-                        if (await ShowCaptchaWindowWithFocusHandlingAsync(captchaWin, useNovelFocusStealth: true))
+                        if (await ShowCaptchaWindowWithFocusHandlingAsync(captchaWin, useNovelFocusStealth: useHeadless))
                         {
                             var originalUri = new Uri(testUrl);
                             var resolvedUri = captchaWin.ResolvedUri ?? originalUri;
