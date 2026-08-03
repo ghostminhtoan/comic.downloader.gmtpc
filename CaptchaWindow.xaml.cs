@@ -681,6 +681,7 @@ namespace get_link_manga
                         var uri = new Uri(_targetUrl);
                         string host = uri.Host.ToLower();
                         if (host.Contains("truyenqq")) domain = "truyenqq";
+                        else if (host.Contains("nettruyenviet10.com")) domain = "nettruyenviet10.com";
                         else if (host.Contains("nettruyen")) domain = "nettruyen";
                         else if (host.Contains("vi-hentai") || host.Contains("hentaivn")) domain = "hentaivn";
                         else if (host.Contains("hentai2read")) domain = "hentai2read";

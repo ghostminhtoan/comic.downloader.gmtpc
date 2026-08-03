@@ -620,6 +620,7 @@ namespace get_link_manga
             if (string.IsNullOrWhiteSpace(domain)) return "general";
             string d = domain.ToLowerInvariant();
             if (d.Contains("truyenqq")) return "truyenqq";
+            if (d.Contains("nettruyenviet10.com")) return "nettruyenviet10.com";
             if (d.Contains("nettruyen")) return "nettruyen";
             if (d.Contains("vi-hentai") || d.Contains("hentaivn")) return "hentaivn";
             if (d.Contains("hentai2read")) return "hentai2read";

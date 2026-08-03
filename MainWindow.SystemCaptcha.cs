@@ -19,7 +19,7 @@ namespace get_link_manga
             else if (button == btnNhentaiFetchCaptcha) { url = txtNhentaiTagUrl.Text; defaultFallbackDomain = "nhentai.xxx"; }
             else if (button == btnViHentaiFetchCaptcha) { url = txtViHentaiTagUrl.Text; defaultFallbackDomain = "vi-hentai.com"; }
             else if (button == btnTruyenqqFetchCaptcha) { url = txtTruyenqqTagUrl.Text; defaultFallbackDomain = "truyenqq.com.vn"; }
-            else if (button == btnNettruyenFetchCaptcha) { url = txtNettruyenTagUrl.Text; defaultFallbackDomain = "nettruyen.com"; }
+            else if (button == btnNettruyenFetchCaptcha) { url = txtNettruyenTagUrl.Text; defaultFallbackDomain = "nettruyenviet10.com"; }
             else if (button == btnHakoFetchCaptcha) { url = txtHakoTagUrl.Text; defaultFallbackDomain = "ln.hako.vn"; }
             else if (button == btnDamconuongFetchCaptcha) { url = txtDamconuongTagUrl.Text; defaultFallbackDomain = "damconuong.shop"; }
             else if (button == btnTruyenggvnFetchCaptcha) { url = txtTruyenggvnTagUrl.Text; defaultFallbackDomain = "truyengg.com"; }
