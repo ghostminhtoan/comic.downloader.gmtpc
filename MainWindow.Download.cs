@@ -3381,11 +3381,23 @@ namespace get_link_manga
 
             var patterns = new[]
             {
-                Regex.Match(html, @"(\d+)\s+pages", RegexOptions.IgnoreCase),
-                Regex.Match(html, @"Pages:.*?class=""value""[^>]*>(\d+)", RegexOptions.IgnoreCase | RegexOptions.Singleline),
+                // nhentai.net SvelteKit: escaped JSON \"num_pages\":16
+                Regex.Match(html, @"\\""num_pages\\""\s*:\s*(\d+)", RegexOptions.IgnoreCase),
+                // nhentai.net SvelteKit: unescaped JSON "num_pages":16
                 Regex.Match(html, @"""num_pages""\s*:\s*(\d+)", RegexOptions.IgnoreCase),
+                // nhentai.net HTML: Pages: <span...>16</span>
+                Regex.Match(html, @"Pages:\s*<[^>]*>\s*<[^>]*>\s*<[^>]*[^>]*>\s*<[^>]*>\s*(\d+)\s*<", RegexOptions.IgnoreCase | RegexOptions.Singleline),
+                // nhentai.net: href="/search/?q=pages%3A{N}" or href="...pages:N"
+                Regex.Match(html, @"href=""[^""]*pages(?:%3A|:)(\d+)""", RegexOptions.IgnoreCase),
+                // nhentai.xxx: "N pages"
+                Regex.Match(html, @"(\d+)\s+pages", RegexOptions.IgnoreCase),
+                // nhentai.xxx: Pages: class="value">N
+                Regex.Match(html, @"Pages:.*?class=""value""[^>]*>(\d+)", RegexOptions.IgnoreCase | RegexOptions.Singleline),
+                // nhentai.xxx: <span class="num-pages">N</span>
                 Regex.Match(html, @"<span[^>]*class=""num-pages""[^>]*>\s*(\d+)\s*</span>", RegexOptions.IgnoreCase),
+                // nhentai.xxx: id="load_pages" value="N"
                 Regex.Match(html, @"id=""load_pages""\s+value=""(\d+)""", RegexOptions.IgnoreCase),
+                // nhentai.xxx: <span class="tag_name pages">N</span>
                 Regex.Match(html, @"<span[^>]*class=""tag_name\s+pages""[^>]*>\s*(\d+)\s*</span>", RegexOptions.IgnoreCase)
             };
 
