@@ -3495,7 +3495,7 @@
                                 <DataGridTemplateColumn.Header>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock Text="COMIC BOOKS" Foreground="{StaticResource CyberpunkPinkBrush}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <Button Name="btnSortByName" Content="⇅" PreviewMouseLeftButtonDown="BtnSortByName_PreviewMouseLeftButtonDown" Width="22" Height="18" Padding="0" FontSize="10" ToolTip="SORT BY NAME">
+                                        <Button Name="btnSortByName" Content="⇅" Click="BtnSortByName_Click" Width="22" Height="18" Padding="0" FontSize="10" ToolTip="SORT BY NAME">
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource CyberpunkButtonCyan}">
                                                     <Setter Property="Margin" Value="0"/>
@@ -3691,7 +3691,7 @@
                                  <DataGridTemplateColumn.Header>
                                      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                          <TextBlock Text="STATUS" Foreground="{StaticResource CyberpunkPinkBrush}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                         <Button Name="btnSortByStatus" Content="⇅" PreviewMouseLeftButtonDown="BtnSortByStatus_PreviewMouseLeftButtonDown" Width="22" Height="18" Padding="0" FontSize="10" ToolTip="SORT BY STATUS">
+                                         <Button Name="btnSortByStatus" Content="⇅" Click="BtnSortByStatus_Click" Width="22" Height="18" Padding="0" FontSize="10" ToolTip="SORT BY STATUS">
                                              <Button.Style>
                                                  <Style TargetType="Button" BasedOn="{StaticResource CyberpunkButtonCyan}">
                                                      <Setter Property="Margin" Value="0"/>
@@ -3910,7 +3910,7 @@
                                 <DataGridTemplateColumn.Header>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock Text="PROCESS" Foreground="{StaticResource CyberpunkPinkBrush}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <Button Name="btnSortByProcess" Content="⇅" PreviewMouseLeftButtonDown="BtnSortByProcess_PreviewMouseLeftButtonDown" Width="22" Height="18" Padding="0" FontSize="10" ToolTip="SORT BY PROCESS">
+                                        <Button Name="btnSortByProcess" Content="⇅" Click="BtnSortByProcess_Click" Width="22" Height="18" Padding="0" FontSize="10" ToolTip="SORT BY PROCESS">
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource CyberpunkButtonCyan}">
                                                     <Setter Property="Margin" Value="0"/>
@@ -3966,7 +3966,7 @@
                                 <DataGridTemplateColumn.Header>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <TextBlock x:Name="txtSpeedHeader" Text="SPEED" Foreground="{StaticResource CyberpunkPinkBrush}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <Button Name="btnSortBySpeed" Content="&#x21C5;" PreviewMouseLeftButtonDown="BtnSortBySpeed_PreviewMouseLeftButtonDown" Width="22" Height="18" Padding="0" FontSize="10" ToolTip="SORT BY SPEED">
+                                        <Button Name="btnSortBySpeed" Content="&#x21C5;" Click="BtnSortBySpeed_Click" Width="22" Height="18" Padding="0" FontSize="10" ToolTip="SORT BY SPEED">
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource CyberpunkButtonCyan}">
                                                     <Setter Property="Margin" Value="0"/>
