@@ -600,7 +600,8 @@ namespace get_link_manga
                     IsDilibUrl(link) ||
                     IsHaibabaUrl(link) ||
                     IsNettruyenUrl(link) ||
-                    IsMangadexUrl(link));
+                    IsMangadexUrl(link) ||
+                    IsNhentaiUrl(link));
         }
 
         private async Task EnsureGalleryHoverPreviewAsync(GalleryItem item)

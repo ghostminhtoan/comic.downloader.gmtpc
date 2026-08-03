@@ -662,51 +662,72 @@ namespace get_link_manga
 
         private void DgResults_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (e.ClickCount < 2)
+            // Chỉ xử lý double-click
+            if (e.ClickCount < 2) return;
+
+            DependencyObject dep = e.OriginalSource as DependencyObject;
+            if (dep == null)
             {
+                Log("[DoubleClick] OriginalSource null");
                 return;
             }
 
-            DependencyObject dep = e.OriginalSource as DependencyObject;
-            if (dep == null) return;
+            Log($"[DoubleClick] OriginalSource type={dep.GetType().Name}");
 
             // Tìm DataGridCell trong visual tree
-            DataGridCell cell = null;
-            DependencyObject temp = dep;
-            while (temp != null)
+            DataGridCell cell = FindVisualParent<DataGridCell>(dep);
+            if (cell == null)
             {
-                if (temp is DataGridCell)
-                {
-                    cell = (DataGridCell)temp;
-                    break;
-                }
-                temp = VisualTreeHelper.GetParent(temp);
+                Log("[DoubleClick] Không tìm thấy DataGridCell trong visual tree");
+                return;
             }
 
-            if (cell == null || cell.Column == null) return;
+            if (cell.Column == null)
+            {
+                Log("[DoubleClick] cell.Column null");
+                return;
+            }
 
             GalleryItem item = GetGalleryItemFromDependencyObject(dep);
-            if (item == null) return;
-
-            string colName = cell.Column.Header?.ToString()?.ToUpperInvariant() ?? string.Empty;
-            
-            // So sánh theo Name định nghĩa của cột trong XAML hoặc nội dung text của Header
-            bool isGalleryDetails = cell.Column == colGalleryDetails || colName.Contains("GALLERY DETAILS") || colName.Contains("COMIC BOOKS") || colName.Contains("CHI TIẾT TRUYỆN");
-            bool isProcess = cell.Column == colProcess || colName.Contains("PROCESS") || colName.Contains("TIẾN TRÌNH");
-
-            if (isGalleryDetails)
+            if (item == null)
             {
+                Log("[DoubleClick] Không tìm thấy GalleryItem");
+                return;
+            }
+
+            string sortPath = cell.Column.SortMemberPath;
+            Log($"[DoubleClick] Column Type={cell.Column.GetType().Name}, SortMemberPath={sortPath}");
+
+            bool isDetails = cell.Column == colGalleryDetails || sortPath == "Name";
+            bool isProcess = cell.Column == colProcess || sortPath == "ProcessSortText";
+
+            if (isDetails)
+            {
+                Log($"[DoubleClick] Mở link: {item.Link}");
                 OpenGalleryItemLink(item, e);
             }
             else if (isProcess)
             {
                 string targetFolder = ResolveBestFolderForGalleryItem(item);
+                Log($"[DoubleClick] Mở folder: {targetFolder}");
                 if (!string.IsNullOrWhiteSpace(targetFolder) && System.IO.Directory.Exists(targetFolder))
                 {
                     ShellFolderLauncher.TryOpenFolder(targetFolder, out _);
                     e.Handled = true;
                 }
             }
+        }
+
+        private static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            DependencyObject parentObject = child;
+            while (parentObject != null)
+            {
+                if (parentObject is T parent)
+                    return parent;
+                parentObject = VisualTreeHelper.GetParent(parentObject);
+            }
+            return null;
         }
 
         private void ChkResultsPresentation_Click(object sender, RoutedEventArgs e)

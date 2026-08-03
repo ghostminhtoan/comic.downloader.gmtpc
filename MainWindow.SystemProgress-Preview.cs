@@ -291,6 +291,34 @@ namespace get_link_manga
                 });
             }
 
+            string status = item?.DisplayStatusText;
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                panel.Children.Add(new TextBlock
+                {
+                    Text = "Status: " + status,
+                    Foreground = TryFindResource("CyberpunkCyanBrush") as Brush ?? Brushes.Cyan,
+                    FontWeight = FontWeights.SemiBold,
+                    FontSize = 11,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(2, 2, 2, 0)
+                });
+            }
+
+            string process = item?.CurrentProcess;
+            if (!string.IsNullOrWhiteSpace(process))
+            {
+                panel.Children.Add(new TextBlock
+                {
+                    Text = "Process: " + process,
+                    Foreground = TryFindResource("CyberpunkTextBrush") as Brush ?? Brushes.White,
+                    FontWeight = FontWeights.Normal,
+                    FontSize = 11,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(2, 2, 2, 0)
+                });
+            }
+
             bool isDetailsGrid = false;
             if (_activeGalleryHoverPreviewHost != null)
             {
@@ -319,7 +347,7 @@ namespace get_link_manga
                 {
                     Padding = new Thickness(4),
                     MaxWidth = 250,
-                    MaxHeight = 360,
+                    MaxHeight = 480,
                     Child = panel
                 }
             };
