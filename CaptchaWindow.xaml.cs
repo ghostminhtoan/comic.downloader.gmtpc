@@ -738,7 +738,10 @@ namespace get_link_manga
                     webView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
                     webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
                     webView.CoreWebView2.Settings.IsZoomControlEnabled = true;
-                    webView.CoreWebView2.Settings.UserAgent = UserAgent;
+                    if (UserAgent != "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    {
+                        webView.CoreWebView2.Settings.UserAgent = UserAgent;
+                    }
                     webView.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
                     string initScript = @"
 window.open = () => null;
@@ -765,7 +768,10 @@ textOnlyStyle.textContent = 'img, picture, video, audio, canvas, [style*=""backg
                     _automationWebView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
                     _automationWebView.CoreWebView2.Settings.IsStatusBarEnabled = false;
                     _automationWebView.CoreWebView2.Settings.IsZoomControlEnabled = false;
-                    _automationWebView.CoreWebView2.Settings.UserAgent = UserAgent;
+                    if (UserAgent != "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    {
+                        _automationWebView.CoreWebView2.Settings.UserAgent = UserAgent;
+                    }
                     _automationWebView.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
                     await _automationWebView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(@"
 window.open = () => null;
