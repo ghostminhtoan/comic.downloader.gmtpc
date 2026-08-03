@@ -144,11 +144,14 @@ namespace get_link_manga
             }
 
             view.SortDescriptions.Clear();
-            
-            // Luôn nhóm các phần của cùng một truyện đã split ở cạnh nhau
-            view.SortDescriptions.Add(new SortDescription("ParallelSplitGroupKey", ListSortDirection.Ascending));
-            // Đảm bảo Parent (nếu có) luôn xếp ở đầu nhóm split của nó
-            view.SortDescriptions.Add(new SortDescription("IsParallelSplitParent", ListSortDirection.Descending));
+
+            // Chỉ nhóm split khi thực sự có item split
+            bool hasSplit = _scrapedItems.Any(item => item.IsParallelSplitTask || item.IsParallelSplitParent);
+            if (hasSplit)
+            {
+                view.SortDescriptions.Add(new SortDescription("ParallelSplitGroupKey", ListSortDirection.Ascending));
+                view.SortDescriptions.Add(new SortDescription("IsParallelSplitParent", ListSortDirection.Descending));
+            }
 
             if (!string.Equals(propertyName, "ParallelSplitGroupKey", StringComparison.Ordinal) && 
                 !string.Equals(propertyName, "IsParallelSplitParent", StringComparison.Ordinal))
