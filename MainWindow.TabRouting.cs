@@ -328,6 +328,28 @@ namespace get_link_manga
             }
         }
 
+        private string NormalizeBookUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return url;
+            }
+
+            url = url.Trim();
+            string lower = url.ToLowerInvariant();
+            if (lower.Contains("nhentai.net/g/") || lower.Contains("nhentai.xxx/g/"))
+            {
+                // Regex tìm kiếm pattern /g/{galleryId}/{pageNum}/ hoặc /g/{galleryId}/{pageNum}
+                // ví dụ: https://nhentai.net/g/159844/1/
+                var match = Regex.Match(url, @"^(https?://nhentai\.(?:net|xxx)/g/\d+)/(\d+)/?$", RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    return match.Groups[1].Value + "/";
+                }
+            }
+            return url;
+        }
+
         public async void RouteAndProcessInputLink(string url, bool allowUiJump = true)
         {
             if (string.IsNullOrWhiteSpace(url))
@@ -335,7 +357,7 @@ namespace get_link_manga
                 return;
             }
 
-            url = url.Trim();
+            url = NormalizeBookUrl(url);
             string lowerUrl = url.ToLowerInvariant();
             if (allowUiJump)
             {
@@ -547,7 +569,7 @@ namespace get_link_manga
 
             var links = text
                 .Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(line => line.Trim())
+                .Select(line => NormalizeBookUrl(line.Trim()))
                 .Where(line => !string.IsNullOrWhiteSpace(line))
                 .ToList();
 
