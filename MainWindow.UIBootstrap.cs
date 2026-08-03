@@ -567,6 +567,25 @@ namespace get_link_manga
                 {
                     _cookieContainersByHost.TryRemove(subKey, out _);
                 }
+
+                // Reset state riêng theo domain (giống BtnCaptcha_Click)
+                if (IsTruyenqqUrl(domain))
+                {
+                    _truyenqqPreferredBaseUrl = null;
+                }
+            }
+
+            // Reset toàn bộ http state + portable runtime (giống ResetCookiesForCaptcha)
+            try
+            {
+                InitializeHttpClientState();
+                PortableRuntimeBootstrap.ResetPortableRuntimeStorage();
+                PortableRuntimeBootstrap.EnsurePortableRuntime();
+                _hakoCaptchaSessionReady = false;
+            }
+            catch (Exception ex)
+            {
+                Log($"[System] Không thể reset http state: {ex.Message}");
             }
 
             Log($"[System] Đã xóa thành công cookie cache của {clearedCount} tên miền: {string.Join(", ", domainsToClear)}");
