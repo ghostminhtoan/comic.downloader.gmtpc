@@ -172,6 +172,7 @@ namespace get_link_manga
             {
                 RebuildThumbnailResultsView();
             }
+            SafeRefreshResultsView();
         }
 
         private void ApplyResultsSort(DataGridColumn column, string propertyName, ref bool ascendingFlag, string label)
