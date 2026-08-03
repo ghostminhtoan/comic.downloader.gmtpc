@@ -810,7 +810,16 @@ namespace get_link_manga
 
             try
             {
-                return new Uri(urlOrHost).Host ?? string.Empty;
+                string host = new Uri(urlOrHost).Host ?? string.Empty;
+                // Map nhentai CDN subdomains (i1/i2/t1/t2...) to their root domain
+                // so they share the same cookie container (Cloudflare cookies)
+                if (host.EndsWith(".nhentai.net", StringComparison.OrdinalIgnoreCase))
+                    return "nhentai.net";
+                if (host.EndsWith(".nhentai.xxx", StringComparison.OrdinalIgnoreCase))
+                    return "nhentai.xxx";
+                if (host.EndsWith(".nhentaimg.com", StringComparison.OrdinalIgnoreCase))
+                    return "nhentaimg.com";
+                return host;
             }
             catch
             {
