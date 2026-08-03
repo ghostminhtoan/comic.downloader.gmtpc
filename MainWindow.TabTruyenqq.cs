@@ -97,6 +97,7 @@ namespace get_link_manga
         }
         internal async Task<bool> SolveTruyenqqCaptchaIfNeededAsync(string testUrl)
         {
+            if (IsCaptchaCooldownActive(testUrl)) return true;
             testUrl = ResolveTruyenqqRequestUrl(testUrl);
             BrowserSessionSnapshot cachedSession = GetCachedBrowserSession(testUrl);
             if (cachedSession != null)
@@ -197,6 +198,7 @@ namespace get_link_manga
 
                 if (solved)
                 {
+                    MarkCaptchaSolved(testUrl);
                     TruyenqqLog("Giải captcha thành công. Tiếp tục tải...");
                     _isDownloadPaused = false;
                     return true;

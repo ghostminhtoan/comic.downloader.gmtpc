@@ -4138,6 +4138,8 @@ namespace get_link_manga
 
         internal async Task<bool> SolveNhentaiCaptchaIfNeededAsync(string testUrl)
         {
+            if (IsCaptchaCooldownActive(testUrl)) return true;
+
             bool isBlocked = await CheckIfNhentaiBlockedAsync(testUrl);
             if (!isBlocked)
             {
@@ -4213,6 +4215,7 @@ namespace get_link_manga
 
                 if (solved)
                 {
+                    MarkCaptchaSolved(testUrl);
                     Log("[nhentai.net] Giải captcha thành công. Tiếp tục tải...");
                     _isDownloadPaused = false;
                     return true;
@@ -4280,6 +4283,8 @@ namespace get_link_manga
 
         internal async Task<bool> SolveViHentaiCaptchaIfNeededAsync(string testUrl)
         {
+            if (IsCaptchaCooldownActive(testUrl)) return true;
+
             bool isBlocked = await CheckIfViHentaiBlockedAsync(testUrl);
             if (!isBlocked)
             {
@@ -4345,6 +4350,7 @@ namespace get_link_manga
 
                 if (solved)
                 {
+                    MarkCaptchaSolved(testUrl);
                     Log("[vi-hentai.pro] Xác nhận captcha xong. Tiếp tục tải...");
                     _isDownloadPaused = false;
                     return true;

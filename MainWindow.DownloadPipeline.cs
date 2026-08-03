@@ -522,6 +522,11 @@ namespace get_link_manga
                 }
             });
 
+            if (snapshot != null)
+            {
+                MarkCaptchaSolved(url);
+            }
+
             return snapshot;
         }
 

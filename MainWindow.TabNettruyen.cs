@@ -398,6 +398,7 @@ document.addEventListener('click', function (event) {
 
         internal async Task<bool> SolveNettruyenCaptchaIfNeededAsync(string testUrl)
         {
+            if (IsCaptchaCooldownActive(testUrl)) return true;
             if (IsNettruyenTechUrl(testUrl))
             {
                 return true;
@@ -494,6 +495,7 @@ document.addEventListener('click', function (event) {
 
                 if (solved)
                 {
+                    MarkCaptchaSolved(testUrl);
                     NettruyenLog("Giải captcha thành công. Tiếp tục tải...");
                     _isDownloadPaused = false;
                     return true;

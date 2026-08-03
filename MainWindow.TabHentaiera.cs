@@ -527,6 +527,7 @@ namespace get_link_manga
 
         internal async Task<bool> SolveHentaieraCaptchaIfNeededAsync(string testUrl)
         {
+            if (IsCaptchaCooldownActive(testUrl)) return true;
             // Simple check if it returns Cloudflare title or fails with 403
             bool isBlocked = false;
             try
@@ -596,6 +597,7 @@ namespace get_link_manga
                     HentaieraLog($"[Captcha Error] Lỗi giải captcha: {ex.Message}");
                 }
 
+                if (solved) MarkCaptchaSolved(testUrl);
                 _isCaptchaWindowActive = false;
                 _isDownloadPaused = false;
                 return solved;

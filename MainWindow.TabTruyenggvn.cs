@@ -150,6 +150,7 @@ namespace get_link_manga
 
         internal async Task<bool> SolveTruyenggvnCaptchaIfNeededAsync(string testUrl)
         {
+            if (IsCaptchaCooldownActive(testUrl)) return true;
             bool isBlocked = await CheckIfTruyenggvnBlockedAsync(testUrl);
             if (!isBlocked)
             {
@@ -226,6 +227,7 @@ namespace get_link_manga
                     _isCaptchaWindowActive = false;
                 }
 
+                if (solved) MarkCaptchaSolved(testUrl);
                 _isDownloadPaused = false;
                 return solved;
             }

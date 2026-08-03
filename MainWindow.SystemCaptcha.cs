@@ -67,6 +67,8 @@ namespace get_link_manga
                 {
                     Log($"[Captcha] Không thể reset folder captcha {captchaFolderName}: {ex.Message}");
                 }
+                // Xóa cooldown captcha cho domain
+                _captchaSolvedAtUtc.TryRemove(NormalizeCookieHostKey(targetDomain), out _);
                 
                 Log($"[Captcha] Đã xóa cookie cache của tên miền: {targetDomain}");
             }

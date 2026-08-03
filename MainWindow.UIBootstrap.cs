@@ -582,6 +582,8 @@ namespace get_link_manga
                 PortableRuntimeBootstrap.ResetPortableRuntimeStorage();
                 PortableRuntimeBootstrap.EnsurePortableRuntime();
                 _hakoCaptchaSessionReady = false;
+                // Xóa cooldown captcha cho các domain đang clear
+                foreach (var d in domainsToClear) _captchaSolvedAtUtc.TryRemove(NormalizeCookieHostKey(d), out _);
             }
             catch (Exception ex)
             {

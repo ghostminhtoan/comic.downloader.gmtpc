@@ -326,6 +326,7 @@ namespace get_link_manga
 
         internal async Task<bool> SolveHakoCaptchaIfNeededAsync(string testUrl, bool forceChallengeCheck = false)
         {
+            if (IsCaptchaCooldownActive(testUrl)) return true;
             if (_hakoCaptchaSessionReady && !forceChallengeCheck)
             {
                 return true;
@@ -392,6 +393,7 @@ namespace get_link_manga
 
                 if (solved)
                 {
+                    MarkCaptchaSolved(testUrl);
                     _isDownloadPaused = false;
                     _hakoCaptchaSessionReady = true;
                     HakoLog("Captcha/cookie đồng bộ xong. Tiếp tục.");

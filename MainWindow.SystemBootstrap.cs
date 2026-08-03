@@ -34,6 +34,8 @@ namespace get_link_manga
         private static readonly string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
         private static readonly SemaphoreSlim _captchaSemaphore = new SemaphoreSlim(1, 1);
         private static volatile bool _isCaptchaWindowActive = false;
+        private static readonly ConcurrentDictionary<string, DateTime> _captchaSolvedAtUtc = new ConcurrentDictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
+        private const int CaptchaCooldownSeconds = 120;
         private bool _hakoCaptchaSessionReady;
         private bool _displaySettingsHooked;
         internal string _truyenqqPreferredBaseUrl;
@@ -798,6 +800,28 @@ namespace get_link_manga
             catch
             {
                 persist();
+            }
+        }
+
+        /// <summary>Trả true nếu domain vừa solve captcha thành công trong CaptchaCooldownSeconds giây qua.</summary>
+        private static bool IsCaptchaCooldownActive(string url)
+        {
+            string host = NormalizeCookieHostKey(url);
+            if (string.IsNullOrEmpty(host)) return false;
+            if (_captchaSolvedAtUtc.TryGetValue(host, out DateTime solvedAt))
+            {
+                return (DateTime.UtcNow - solvedAt).TotalSeconds < CaptchaCooldownSeconds;
+            }
+            return false;
+        }
+
+        /// <summary>Ghi nhớ thời điểm solve captcha thành công cho domain.</summary>
+        private static void MarkCaptchaSolved(string url)
+        {
+            string host = NormalizeCookieHostKey(url);
+            if (!string.IsNullOrEmpty(host))
+            {
+                _captchaSolvedAtUtc[host] = DateTime.UtcNow;
             }
         }
 
