@@ -169,10 +169,10 @@ namespace get_link_manga
                 int maxPage = 1;
 
                 // Try class="last" pagination link first (nhentai.net SvelteKit)
-                var lastPageMatch = Regex.Match(html, @"class=""last[^""]*""[^>]*href=""[^""]*page=(\d+)""", RegexOptions.IgnoreCase);
+                var lastPageMatch = Regex.Match(html, @"class=""last[^""]*""[^>]*href=""[^""]*(?:page|page%3D|page=)(\d+)""", RegexOptions.IgnoreCase);
                 if (!lastPageMatch.Success)
                 {
-                    lastPageMatch = Regex.Match(html, @"href=""[^""]*page=(\d+)""[^>]*class=""last", RegexOptions.IgnoreCase);
+                    lastPageMatch = Regex.Match(html, @"href=""[^""]*(?:page|page%3D|page=)(\d+)""[^>]*class=""[^""]*last", RegexOptions.IgnoreCase);
                 }
                 if (lastPageMatch.Success && int.TryParse(lastPageMatch.Groups[1].Value, out int lastPageNum))
                 {
