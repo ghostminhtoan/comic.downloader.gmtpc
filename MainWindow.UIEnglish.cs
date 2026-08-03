@@ -924,6 +924,7 @@ namespace get_link_manga
             // if (btnNoLinkViHentai != null) btnNoLinkViHentai.Content = "No chapters";
             if (btnReverseOrder != null) btnReverseOrder.Content = "Reverse order";
             if (btnClearComplete != null) btnClearComplete.Content = "Remove completed";
+            if (btnExtractClearCookie != null) btnExtractClearCookie.Content = "Clear cookie";
             if (txtWebviewCpuAffinityLabel != null) txtWebviewCpuAffinityLabel.Text = "WEBVIEW CPU LIMIT";
             if (txtWebviewCpuPriorityLabel != null) txtWebviewCpuPriorityLabel.Text = "WEBVIEW CPU PRIORITY";
 

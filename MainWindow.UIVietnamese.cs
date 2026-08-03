@@ -59,6 +59,7 @@ namespace get_link_manga
             // if (btnNoLinkViHentai != null) btnNoLinkViHentai.Content = "Không có chapter";
             if (btnReverseOrder != null) btnReverseOrder.Content = "Đảo thứ tự";
             if (btnClearComplete != null) btnClearComplete.Content = "Ẩn truyện đã xong";
+            if (btnExtractClearCookie != null) btnExtractClearCookie.Content = "Xóa cookie";
             if (btnMergeParallelSplitChapters != null) btnMergeParallelSplitChapters.Content = "TỰ ĐỘNG GỘP CHAPTER";
             if (txtWebviewCpuAffinityLabel != null) txtWebviewCpuAffinityLabel.Text = "GIỚI HẠN CPU WEBVIEW";
             if (txtWebviewCpuPriorityLabel != null) txtWebviewCpuPriorityLabel.Text = "ĐỘ ƯU TIÊN WEBVIEW CPU";

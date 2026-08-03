@@ -530,5 +530,47 @@ namespace get_link_manga
                 RebuildThumbnailResultsView();
             }
         }
+
+        private void BtnExtractClearCookie_Click(object sender, RoutedEventArgs e)
+        {
+            if (_scrapedItems == null || _scrapedItems.Count == 0)
+            {
+                ShowInfo("Danh sách trống, không có domain nào để xóa cookie.", "Thông báo");
+                return;
+            }
+
+            var domainsToClear = _scrapedItems
+                .Where(item => item != null && !string.IsNullOrWhiteSpace(item.SourceDomain))
+                .Select(item => NormalizeCookieHostKey(item.SourceDomain))
+                .Where(domain => !string.IsNullOrWhiteSpace(domain))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (domainsToClear.Count == 0)
+            {
+                ShowInfo("Không phát hiện tên miền hợp lệ trong danh sách để xóa cookie.", "Thông báo");
+                return;
+            }
+
+            int clearedCount = 0;
+            foreach (var domain in domainsToClear)
+            {
+                if (_cookieContainersByHost.TryRemove(domain, out _))
+                {
+                    clearedCount++;
+                }
+
+                // Đồng thời reset luôn container của subdomains tương đương nếu có
+                string wildCardKey = "." + domain;
+                var subKeys = _cookieContainersByHost.Keys.Where(k => k.EndsWith(wildCardKey, StringComparison.OrdinalIgnoreCase)).ToList();
+                foreach (var subKey in subKeys)
+                {
+                    _cookieContainersByHost.TryRemove(subKey, out _);
+                }
+            }
+
+            Log($"[System] Đã xóa thành công cookie cache của {clearedCount} tên miền: {string.Join(", ", domainsToClear)}");
+            ShowInfo($"Đã xóa sạch cookie của các tên miền đang hiển thị ({string.Join(", ", domainsToClear)}).\nCác yêu cầu tiếp theo sẽ sạch như máy mới.", "Thành công");
+        }
     }
 }
