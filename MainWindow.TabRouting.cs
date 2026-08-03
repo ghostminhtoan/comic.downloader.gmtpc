@@ -230,7 +230,7 @@ namespace get_link_manga
             _resultsMissingChapterScanningIndicatorDepth++;
             if (txtResultsMissingChapterScanningStatus != null)
             {
-                txtResultsMissingChapterScanningStatus.Visibility = Visibility.Collapsed;
+                txtResultsMissingChapterScanningStatus.Visibility = Visibility.Visible;
             }
         }
 
@@ -878,6 +878,19 @@ namespace get_link_manga
 
             if (lowerUrl.Contains("nhentai.net"))
             {
+                if (IsNhentaiNetTagOrListUrl(url))
+                {
+                    if (allowUiJump)
+                    {
+                        SelectHentaiSourceRoot();
+                        SelectHentaiTabByHeader("nhentai.net");
+                    }
+                    if (txtNhentaiNetTagUrl != null) txtNhentaiNetTagUrl.Text = url;
+                    BtnNhentaiNetFetchInfo_Click(this, new RoutedEventArgs());
+                    await WaitAndScrapeAsync(btnNhentaiNetFetchInfo, BtnNhentaiNetScrape_Click);
+                    return true;
+                }
+
                 if (allowUiJump)
                 {
                     SelectHentaiSourceRoot();
@@ -957,6 +970,26 @@ namespace get_link_manga
                     return;
                 }
             }
+        }
+
+        private bool IsNhentaiNetTagOrListUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return false;
+            string lower = url.Trim().ToLowerInvariant();
+            
+            // Nếu có /g/ và theo sau là ID số cụ thể thì đó là Link Book chứ không phải Link List
+            if (Regex.IsMatch(lower, @"nhentai\.net/g/\d+"))
+            {
+                return false;
+            }
+
+            return lower.Contains("/tag/") ||
+                   lower.Contains("/artist/") ||
+                   lower.Contains("/parody/") ||
+                   lower.Contains("/group/") ||
+                   lower.Contains("/character/") ||
+                   lower.Contains("/search/") ||
+                   lower.Contains("?q=");
         }
     }
 }
