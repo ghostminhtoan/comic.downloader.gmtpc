@@ -3412,7 +3412,7 @@
                               CanUserSortColumns="True"
                               PreviewKeyDown="DgResults_PreviewKeyDown"
                               PreviewTextInput="DgResults_PreviewTextInput"
-                              PreviewMouseLeftButtonDown="DgResults_MouseDoubleClick"
+                              MouseDoubleClick="DgResults_MouseDoubleClick"
                               SelectionChanged="DgResults_SelectionChanged"
                               Sorting="DgResults_Sorting"
                               VirtualizingPanel.IsVirtualizing="True"

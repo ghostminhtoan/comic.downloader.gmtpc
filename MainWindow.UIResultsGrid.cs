@@ -688,13 +688,17 @@ namespace get_link_manga
             GalleryItem item = GetGalleryItemFromDependencyObject(dep);
             if (item == null) return;
 
-            string headerText = cell.Column.Header?.ToString()?.ToUpperInvariant() ?? string.Empty;
+            string colName = cell.Column.Header?.ToString()?.ToUpperInvariant() ?? string.Empty;
+            
+            // So sánh theo Name định nghĩa của cột trong XAML hoặc nội dung text của Header
+            bool isGalleryDetails = cell.Column == colGalleryDetails || colName.Contains("GALLERY DETAILS") || colName.Contains("COMIC BOOKS") || colName.Contains("CHI TIẾT TRUYỆN");
+            bool isProcess = cell.Column == colProcess || colName.Contains("PROCESS") || colName.Contains("TIẾN TRÌNH");
 
-            if (headerText.Contains("GALLERY DETAILS"))
+            if (isGalleryDetails)
             {
                 OpenGalleryItemLink(item, e);
             }
-            else if (headerText.Contains("PROCESS"))
+            else if (isProcess)
             {
                 string targetFolder = ResolveBestFolderForGalleryItem(item);
                 if (!string.IsNullOrWhiteSpace(targetFolder) && System.IO.Directory.Exists(targetFolder))
