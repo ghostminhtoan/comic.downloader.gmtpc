@@ -3216,15 +3216,15 @@ namespace get_link_manga
                 : await GetNhentaiTotalPagesFromBookAsync(normalizedBookUrl, token);
             if (totalPages <= 0)
             {
-                throw new Exception($"Không xác định được tổng số trang nhentai.xxx. Book: {normalizedBookUrl}");
+                throw new Exception($"Không xác định được tổng số trang {nhentaiSiteKey}. Book: {normalizedBookUrl}");
             }
             item.NhentaiTotalPagesHint = totalPages;
-            Log($"[nhentai.xxx] Book: {normalizedBookUrl} | Pages: {totalPages}");
+            Log($"[{nhentaiSiteKey}] Book: {normalizedBookUrl} | Pages: {totalPages}");
 
             // Get number of connections
             int maxThreads = GetCurrentConnectionLimit();
 
-            Log($"[Đa luồng nhentai.xxx] Bắt đầu tải {totalPages} trang qua redirect page-image, tối đa {maxThreads} kết nối song song...");
+            Log($"[Đa luồng {nhentaiSiteKey}] Bắt đầu tải {totalPages} trang qua redirect page-image, tối đa {maxThreads} kết nối song song...");
 
             using (var semaphore = new DynamicSemaphore(maxThreads, GetCurrentConnectionLimit))
             {
@@ -3294,7 +3294,7 @@ namespace get_link_manga
                                     WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} existed");
                                     Dispatcher.BeginInvoke(new Action(() =>
                                     {
-                                        lblStatus.Text = $"[{completedPages}/{totalPages}] Tải {safeTitle} (nhentai.xxx)";
+                                        lblStatus.Text = $"[{completedPages}/{totalPages}] Tải {safeTitle} ({nhentaiSiteKey})";
                                     }));
                                 }
                                 return;
@@ -3337,7 +3337,7 @@ namespace get_link_manga
                                 {
                                     Dispatcher.BeginInvoke(new Action(() =>
                                     {
-                                        lblStatus.Text = $"[{completedPages}/{totalPages}] Tải {safeTitle} (nhentai.xxx)";
+                                        lblStatus.Text = $"[{completedPages}/{totalPages}] Tải {safeTitle} ({nhentaiSiteKey})";
                                     }));
                                 }
                             }
@@ -3364,10 +3364,11 @@ namespace get_link_manga
                 return url;
             }
 
-            var galleryMatch = Regex.Match(url, @"https?://nhentai\.(?:net|xxx)/g/(?<bookId>\d+)/?", RegexOptions.IgnoreCase);
+            var galleryMatch = Regex.Match(url, @"https?://(nhentai\.(?:net|xxx))/g/(?<bookId>\d+)/?", RegexOptions.IgnoreCase);
             if (galleryMatch.Success)
             {
-                return $"https://nhentai.xxx/g/{galleryMatch.Groups["bookId"].Value}/";
+                string domain = galleryMatch.Groups[1].Value.ToLowerInvariant();
+                return $"https://{domain}/g/{galleryMatch.Groups["bookId"].Value}/";
             }
 
             return url.Trim();
