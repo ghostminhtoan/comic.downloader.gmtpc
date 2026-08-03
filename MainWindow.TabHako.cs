@@ -238,7 +238,7 @@ namespace get_link_manga
             }
             catch
             {
-                return true;
+                return false;
             }
         }
 
