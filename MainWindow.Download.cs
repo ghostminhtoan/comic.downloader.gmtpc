@@ -3205,12 +3205,25 @@ namespace get_link_manga
             string safeTitle = GetSafePathName(item.Name);
             string resolvedRoot = GetConfiguredDownloadRoot(rootFolder, item);
             string targetFolder = Path.Combine(resolvedRoot, safeTitle);
-            string nhentaiSiteKey = !string.IsNullOrWhiteSpace(item.SourceDomain) && item.SourceDomain.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0
-                ? "nhentai.net" : "nhentai.xxx";
+            bool isNhentaiNet = !string.IsNullOrWhiteSpace(item.SourceDomain)
+                && item.SourceDomain.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0;
+            string nhentaiSiteKey = isNhentaiNet ? "nhentai.net" : "nhentai.xxx";
             string tempFolder = BuildStableTempFolderPath(resolvedRoot, nhentaiSiteKey, safeTitle, item.Link, item.Name);
             Directory.CreateDirectory(tempFolder);
             RegisterTempFolder(tempFolder);
             string normalizedBookUrl = NormalizeNhentaiBookUrl(item.Link);
+
+            // nhentai.net: fetch book HTML once → extract all image URLs (avoid N reader page fetches → 429)
+            string[] nhentaiNetImageUrls = null;
+            if (isNhentaiNet)
+            {
+                nhentaiNetImageUrls = await ExtractNhentaiNetImageUrlsAsync(normalizedBookUrl, token);
+                if (nhentaiNetImageUrls != null && nhentaiNetImageUrls.Length > 0)
+                {
+                    item.NhentaiTotalPagesHint = nhentaiNetImageUrls.Length;
+                }
+            }
+
             int totalPages = item.NhentaiTotalPagesHint > 0
                 ? item.NhentaiTotalPagesHint
                 : await GetNhentaiTotalPagesFromBookAsync(normalizedBookUrl, token);
@@ -3224,7 +3237,7 @@ namespace get_link_manga
             // Get number of connections
             int maxThreads = GetCurrentConnectionLimit();
 
-            Log($"[Đa luồng {nhentaiSiteKey}] Bắt đầu tải {totalPages} trang qua redirect page-image, tối đa {maxThreads} kết nối song song...");
+            Log($"[Đa luồng {nhentaiSiteKey}] Bắt đầu tải {totalPages} trang, tối đa {maxThreads} kết nối song song...");
 
             using (var semaphore = new DynamicSemaphore(maxThreads, GetCurrentConnectionLimit))
             {
@@ -3235,6 +3248,10 @@ namespace get_link_manga
                 for (int p = 1; p <= totalPages; p++)
                 {
                     int pageNum = p;
+                    // Pre-resolved image URL for nhentai.net (0-indexed in array)
+                    string preResolvedUrl = (nhentaiNetImageUrls != null && pageNum - 1 < nhentaiNetImageUrls.Length)
+                        ? nhentaiNetImageUrls[pageNum - 1] : null;
+
                     tasks.Add(Task.Run(async () =>
                     {
                         // Check pause/cancel before waiting on semaphore
@@ -3256,7 +3273,7 @@ namespace get_link_manga
                             }
                             token.ThrowIfCancellationRequested();
 
-                            string fileName = BuildOrderedImageFilename(pageNum, null, ".jpg", $"page-{pageNum}");
+                            string fileName = BuildOrderedImageFilename(pageNum, preResolvedUrl, ".jpg", $"page-{pageNum}");
                             string localFilePath = Path.Combine(tempFolder, fileName);
                             string finalFilePath = Path.Combine(targetFolder, fileName);
                             string downloadedPath = localFilePath;
@@ -3302,7 +3319,18 @@ namespace get_link_manga
 
                             try
                             {
-                                downloadedPath = await DownloadNhentaiRedirectPageAsync(normalizedBookUrl, pageNum, tempFolder, token);
+                                if (!string.IsNullOrWhiteSpace(preResolvedUrl))
+                                {
+                                    // nhentai.net: download CDN URL directly (no reader page fetch)
+                                    string directPath = Path.Combine(tempFolder, BuildOrderedImageFilename(pageNum, preResolvedUrl));
+                                    await DownloadUrlToFileWithRefererAsync(preResolvedUrl, normalizedBookUrl, directPath, token);
+                                    downloadedPath = directPath;
+                                    Log($"[nhentai.net] Trang {pageNum} -> {preResolvedUrl}");
+                                }
+                                else
+                                {
+                                    downloadedPath = await DownloadNhentaiRedirectPageAsync(normalizedBookUrl, pageNum, tempFolder, token);
+                                }
                             }
                             catch (Exception pageEx)
                             {
@@ -3310,7 +3338,7 @@ namespace get_link_manga
                                 if (queueItem != null)
                                 {
                                     string pageUrl = item.Link.TrimEnd('/') + "/" + pageNum + "/";
-                                    string directUrl = ExtractNhentaiDirectImageUrl(pageEx.Message);
+                                    string directUrl = preResolvedUrl ?? ExtractNhentaiDirectImageUrl(pageEx.Message);
                                     string traceMessage =
                                         $"Book: {item.Link}{Environment.NewLine}" +
                                         $"Reader: {pageUrl}{Environment.NewLine}" +
@@ -3354,6 +3382,63 @@ namespace get_link_manga
                 WriteTempProgressLog(tempFolder, item, "Done", totalPages, totalPages, $"{totalPages}/{totalPages} pages", "Download completed");
                 MoveTempFolderToTarget(tempFolder, targetFolder, "nhentai");
                 ValidateDownloadedFiles(targetFolder, totalPages, queueItem, string.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Fetch book page nhentai.net một lần, parse JSON embedded để lấy toàn bộ image CDN URLs.
+        /// Tránh fetch N reader pages riêng lẻ (gây 429).
+        /// JSON format: \"pages\":[{\"t\":\"j\"},...] + mediaId từ cover thumbnail URL.
+        /// </summary>
+        private async Task<string[]> ExtractNhentaiNetImageUrlsAsync(string bookUrl, CancellationToken token)
+        {
+            try
+            {
+                string html = await FetchStringAsync(bookUrl, token);
+                if (string.IsNullOrWhiteSpace(html)) return null;
+
+                // Unescape JSON backslash escapes embedded in SvelteKit script
+                string unescaped = html.Replace("\\\"", "\"").Replace("\\/", "/");
+
+                // Extract mediaId from gallery CDN thumbnail (e.g. i1.nhentai.net/galleries/4089909/...)
+                var mediaIdMatch = Regex.Match(unescaped,
+                    @"[it]\d*\.nhentai\.net/galleries/(\d+)/",
+                    RegexOptions.IgnoreCase);
+                if (!mediaIdMatch.Success) return null;
+                string mediaId = mediaIdMatch.Groups[1].Value;
+
+                // Extract subdomain (i1, i2, i3...)
+                string subdomain = "i1";
+                var subMatch = Regex.Match(unescaped,
+                    @"(i\d+)\.nhentai\.net/galleries/" + mediaId,
+                    RegexOptions.IgnoreCase);
+                if (subMatch.Success) subdomain = subMatch.Groups[1].Value.ToLowerInvariant();
+
+                // Extract pages array: ["t":"j"] where t is type (j=jpg, p=png, g=gif, w=webp)
+                var pagesMatch = Regex.Match(unescaped,
+                    @"""pages""\s*:\s*(\[.*?\])",
+                    RegexOptions.Singleline);
+                if (!pagesMatch.Success) return null;
+
+                string pagesJson = pagesMatch.Groups[1].Value;
+                var typeMatches = Regex.Matches(pagesJson, @"""t""\s*:\s*""([a-z])""", RegexOptions.IgnoreCase);
+                if (typeMatches.Count == 0) return null;
+
+                var urls = new string[typeMatches.Count];
+                for (int i = 0; i < typeMatches.Count; i++)
+                {
+                    string typeChar = typeMatches[i].Groups[1].Value.ToLowerInvariant();
+                    string ext = typeChar == "p" ? "png" : typeChar == "g" ? "gif" : typeChar == "w" ? "webp" : "jpg";
+                    urls[i] = $"https://{subdomain}.nhentai.net/galleries/{mediaId}/{i + 1}.{ext}";
+                }
+
+                Log($"[nhentai.net] Đã parse {urls.Length} image URLs từ book HTML (mediaId={mediaId}, sub={subdomain})");
+                return urls;
+            }
+            catch (Exception ex)
+            {
+                Log($"[nhentai.net] ExtractNhentaiNetImageUrlsAsync thất bại: {ex.Message} — fallback về reader page fetch");
+                return null;
             }
         }
 
