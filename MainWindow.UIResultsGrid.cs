@@ -293,11 +293,13 @@ namespace get_link_manga
 
         private void BtnSortByName_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             ApplyResultsSort(colGalleryDetails, "Name", ref _isNameSortAscending, "comic books");
         }
 
         private void BtnSortBySpeed_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             ApplyResultsSort(colSpeed, "DownloadSpeedSortValue", ref _isSpeedSortAscending, "download speed");
         }
 
