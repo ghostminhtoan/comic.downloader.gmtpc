@@ -681,7 +681,7 @@ namespace get_link_manga
         {
             var links = (text ?? string.Empty)
                 .Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(line => line.Trim())
+                .Select(line => NormalizeBookUrl(line.Trim()))
                 .Where(line => !string.IsNullOrWhiteSpace(line))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
