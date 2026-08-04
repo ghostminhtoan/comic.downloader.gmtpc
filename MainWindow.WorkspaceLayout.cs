@@ -1133,13 +1133,22 @@ namespace get_link_manga
                 Text = headerText,
                 FontWeight = FontWeights.Bold,
                 FontSize = 11.5,
-                Margin = new Thickness(10, 5, 10, 5),
-                Foreground = (Brush)TryFindResource("CyberpunkCyanBrush") ?? Brushes.Cyan
+                Margin = new Thickness(12, 6, 12, 6),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
             };
 
-            return new TabItem
+            var border = new Border
             {
-                Header = headerBlock,
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(4, 2, 4, 2),
+                Margin = new Thickness(0, 0, 6, 6),
+                Child = headerBlock
+            };
+
+            var tabItem = new TabItem
+            {
+                Header = border,
                 Content = new ScrollViewer
                 {
                     VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
@@ -1148,6 +1157,40 @@ namespace get_link_manga
                     Content = content
                 }
             };
+
+            // Custom Template to eliminate default white background and active highlights
+            var template = new ControlTemplate(typeof(TabItem));
+            var rootBorder = new FrameworkElementFactory(typeof(Border));
+            rootBorder.Name = "TabBorder";
+            rootBorder.SetValue(Border.CornerRadiusProperty, new CornerRadius(8));
+            rootBorder.SetValue(Border.BorderThicknessProperty, new Thickness(1));
+            rootBorder.SetValue(Border.PaddingProperty, new Thickness(4, 2, 4, 2));
+            rootBorder.SetValue(Border.MarginProperty, new Thickness(0, 0, 6, 6));
+
+            var contentPresenter = new FrameworkElementFactory(typeof(ContentPresenter));
+            contentPresenter.SetValue(ContentPresenter.ContentSourceProperty, "Header");
+            contentPresenter.SetValue(HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            contentPresenter.SetValue(VerticalAlignmentProperty, VerticalAlignment.Center);
+
+            rootBorder.AppendChild(contentPresenter);
+            template.VisualTree = rootBorder;
+
+            // Trigger for Selected State
+            var selectedTrigger = new Trigger { Property = TabItem.IsSelectedProperty, Value = true };
+            selectedTrigger.Setters.Add(new Setter(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0x12, 0x2A, 0x42)), "TabBorder"));
+            selectedTrigger.Setters.Add(new Setter(Border.BorderBrushProperty, (Brush)TryFindResource("CyberpunkCyanBrush") ?? Brushes.Cyan, "TabBorder"));
+            selectedTrigger.Setters.Add(new Setter(TextBlock.ForegroundProperty, (Brush)TryFindResource("CyberpunkCyanBrush") ?? Brushes.Cyan));
+            template.Triggers.Add(selectedTrigger);
+
+            // Trigger for Unselected State
+            var unselectedTrigger = new Trigger { Property = TabItem.IsSelectedProperty, Value = false };
+            unselectedTrigger.Setters.Add(new Setter(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0x0A, 0x10, 0x1C)), "TabBorder"));
+            unselectedTrigger.Setters.Add(new Setter(Border.BorderBrushProperty, (Brush)TryFindResource("CyberpunkBorderBrush") ?? Brushes.DarkGray, "TabBorder"));
+            unselectedTrigger.Setters.Add(new Setter(TextBlock.ForegroundProperty, (Brush)TryFindResource("CyberpunkMutedTextBrush") ?? Brushes.Gray));
+            template.Triggers.Add(unselectedTrigger);
+
+            tabItem.Template = template;
+            return tabItem;
         }
 
         private UIElement CreateDnsTrafficTabContent()
