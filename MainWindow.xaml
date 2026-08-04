@@ -3331,28 +3331,28 @@
                                 <StackPanel.LayoutTransform>
                                     <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
                                 </StackPanel.LayoutTransform>
-                                <TextBlock Name="lblPopupPreview" Text="&#xE890;" FontFamily="Segoe MDL2 Assets" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Name="lblPopupPreview" Text="&#xE890;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <ToggleButton Name="btnPopupPreviewToggle" Click="BtnPopupPreviewToggle_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="True" ToolTip="POPUP PREVIEW"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,10,6" VerticalAlignment="Center">
                                 <StackPanel.LayoutTransform>
                                     <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
                                 </StackPanel.LayoutTransform>
-                                <TextBlock Name="lblCompactRows" Text="&#xE292;" FontFamily="Segoe MDL2 Assets" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Name="lblCompactRows" Text="&#xE14C;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkPinkBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <ToggleButton Name="chkCompactRows" Click="ChkCompactRows_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="COMPACT ROW"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,14,6" VerticalAlignment="Center">
                                 <StackPanel.LayoutTransform>
                                     <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
                                 </StackPanel.LayoutTransform>
-                                <TextBlock Name="lblHideSettings" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Name="lblHideSettings" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <ToggleButton Name="chkHideSettings" Click="ChkHideSettings_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="HIDE SETTINGS"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,14,6" VerticalAlignment="Center">
                                 <StackPanel.LayoutTransform>
                                     <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
                                 </StackPanel.LayoutTransform>
-                                <TextBlock Name="lblResultsPresentation" Text="&#xF0E2;" FontFamily="Segoe MDL2 Assets" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Name="lblResultsPresentation" Text="&#xE8A9;" FontFamily="Segoe MDL2 Assets" Foreground="#00FF87" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <ToggleButton Name="chkResultsPresentation" Click="ChkResultsPresentation_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="LIST / THUMBNAIL"/>
                             </StackPanel>
                             <Button Name="btnToolbarSortByName" Content="SORT BY NAME" Click="BtnSortByName_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
