@@ -344,6 +344,7 @@ namespace get_link_manga
         internal void SetMainLogErrorOnly(bool errorOnly)
         {
             SetLogFilter("main", errorOnly ? LogFilterMode.Error : LogFilterMode.All);
+            ApplyLogFilter();
         }
 
         private void ChkErrorOnlyLog_Checked(object sender, RoutedEventArgs e)

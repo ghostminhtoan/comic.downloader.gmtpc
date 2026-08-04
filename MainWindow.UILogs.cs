@@ -80,9 +80,11 @@ namespace get_link_manga
                 if (txtLog != null)
                 {
                     AppendLogLine(txtLog, logLine, isError);
+                    AppendMarkdownLogCard(logLine, effectiveSeverity);
                     if (chkAutoScrollLog?.IsChecked == true)
                     {
                         ScrollTextBoxToEnd(txtLog);
+                        _scrollLogHost?.ScrollToBottom();
                     }
                 }
 
@@ -226,9 +228,151 @@ namespace get_link_manga
             });
         }
 
+        private void AppendMarkdownLogCard(string logLine, LogSeverity severity)
+        {
+            if (_mdLogStackPanel == null || string.IsNullOrWhiteSpace(logLine))
+            {
+                return;
+            }
+
+            bool isError = severity == LogSeverity.Error;
+            bool isWarning = severity == LogSeverity.Warning;
+            bool isTrace = severity == LogSeverity.Trace;
+
+            var cardBorder = new Border
+            {
+                Margin = new Thickness(0, 2, 0, 2),
+                Padding = new Thickness(8, 4, 8, 4),
+                CornerRadius = new CornerRadius(4),
+                Background = isError
+                    ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x28, 0xff, 0x17, 0x44))
+                    : (isWarning
+                        ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x20, 0xff, 0xea, 0x00))
+                        : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x14, 0x0e, 0x1d, 0x2e))),
+                BorderBrush = isError
+                    ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xff, 0x17, 0x44))
+                    : (isWarning
+                        ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xff, 0xea, 0x00))
+                        : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x30, 0x00, 0xb0, 0xff))),
+                BorderThickness = new Thickness(1),
+                Tag = isError
+            };
+
+            if (chkErrorOnlyLog?.IsChecked == true && !isError)
+            {
+                cardBorder.Visibility = Visibility.Collapsed;
+            }
+
+            var textBlock = new TextBlock
+            {
+                TextWrapping = TextWrapping.Wrap,
+                FontFamily = new System.Windows.Media.FontFamily("Consolas, Segoe UI, sans-serif"),
+                FontSize = 11.5
+            };
+
+            // Format timestamp, level badge, and text
+            string raw = logLine.TrimEnd('\r', '\n');
+            int levelEndPos = raw.IndexOf(']');
+            if (levelEndPos > 0 && raw.StartsWith("["))
+            {
+                string timeStamp = raw.Substring(0, levelEndPos + 1);
+                string rest = raw.Substring(levelEndPos + 1).TrimStart();
+
+                textBlock.Inlines.Add(new System.Windows.Documents.Run(timeStamp + " ")
+                {
+                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x7c, 0xe8, 0xff)),
+                    FontWeight = FontWeights.Bold
+                });
+
+                if (rest.StartsWith("["))
+                {
+                    int tagEnd = rest.IndexOf(']');
+                    if (tagEnd > 0)
+                    {
+                        string badge = rest.Substring(0, tagEnd + 1);
+                        string body = rest.Substring(tagEnd + 1);
+
+                        var badgeBrush = isError
+                            ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xff, 0x52, 0x52))
+                            : (isWarning
+                                ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xff, 0xd7, 0x40))
+                                : (isTrace
+                                    ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x40, 0xc4, 0xff))
+                                    : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x69, 0xf0, 0xae))));
+
+                        textBlock.Inlines.Add(new System.Windows.Documents.Run(badge + " ")
+                        {
+                            Foreground = badgeBrush,
+                            FontWeight = FontWeights.Bold
+                        });
+
+                        textBlock.Inlines.Add(new System.Windows.Documents.Run(body)
+                        {
+                            Foreground = isError
+                                ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xff, 0x8a, 0x80))
+                                : (isWarning
+                                    ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xff, 0xe0, 0x82))
+                                    : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xd1, 0xd5, 0xdb)))
+                        });
+                    }
+                    else
+                    {
+                        textBlock.Inlines.Add(new System.Windows.Documents.Run(rest)
+                        {
+                            Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xd1, 0xd5, 0xdb))
+                        });
+                    }
+                }
+                else
+                {
+                    textBlock.Inlines.Add(new System.Windows.Documents.Run(rest)
+                    {
+                        Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xd1, 0xd5, 0xdb))
+                    });
+                }
+            }
+            else
+            {
+                textBlock.Inlines.Add(new System.Windows.Documents.Run(raw)
+                {
+                    Foreground = isError
+                        ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xff, 0x8a, 0x80))
+                        : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xd1, 0xd5, 0xdb))
+                });
+            }
+
+            cardBorder.Child = textBlock;
+            _mdLogStackPanel.Children.Add(cardBorder);
+
+            // Limit max rows to 500
+            while (_mdLogStackPanel.Children.Count > 500)
+            {
+                _mdLogStackPanel.Children.RemoveAt(0);
+            }
+        }
+
+        private void ApplyLogFilter()
+        {
+            if (_mdLogStackPanel == null)
+            {
+                return;
+            }
+
+            bool errorOnly = chkErrorOnlyLog?.IsChecked == true;
+            foreach (UIElement child in _mdLogStackPanel.Children)
+            {
+                if (child is Border b)
+                {
+                    bool isError = b.Tag is bool && (bool)b.Tag;
+                    b.Visibility = (errorOnly && !isError) ? Visibility.Collapsed : Visibility.Visible;
+                }
+            }
+        }
+
         private void BtnClearLog_Click(object sender, RoutedEventArgs e)
         {
             ClearLogPanel(txtLog);
+            _mdLogStackPanel?.Children.Clear();
         }
 
         private void BtnClearCheckErrors_Click(object sender, RoutedEventArgs e)

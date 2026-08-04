@@ -39,6 +39,8 @@ namespace get_link_manga
         private FrameworkElement _updateSection;
         private FrameworkElement _finishOptionsSection;
         private RichTextBox txtLog;
+        private ScrollViewer _scrollLogHost;
+        private StackPanel _mdLogStackPanel;
         private System.Windows.Controls.Primitives.ToggleButton chkAutoScrollLog;
         private System.Windows.Controls.Primitives.ToggleButton chkErrorOnlyLog;
         private Button btnClearLog;
@@ -1486,26 +1488,38 @@ namespace get_link_manga
 
             var border = new Border
             {
-                Background = new SolidColorBrush(Color.FromRgb(0x0b, 0x10, 0x19)),
+                Background = new SolidColorBrush(Color.FromRgb(0x06, 0x0b, 0x14)),
                 BorderBrush = new SolidColorBrush(Color.FromRgb(0x1d, 0x2b, 0x3d)),
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(10),
-                Padding = new Thickness(0)
+                Padding = new Thickness(6)
             };
 
-            var rtb = new RichTextBox
+            _mdLogStackPanel = new StackPanel
+            {
+                Orientation = Orientation.Vertical
+            };
+
+            _scrollLogHost = new ScrollViewer
             {
                 VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
                 Background = Brushes.Transparent,
                 BorderThickness = new Thickness(0),
-                Foreground = new SolidColorBrush(Color.FromRgb(0xa8, 0xff, 0xb2)),
-                FontFamily = new FontFamily("Consolas, Courier New"),
-                FontSize = 11,
-                IsReadOnly = true,
-                Padding = new Thickness(10)
+                Padding = new Thickness(6),
+                Content = _mdLogStackPanel
             };
-            txtLog = rtb;
-            border.Child = rtb;
+
+            txtLog = new RichTextBox
+            {
+                Visibility = Visibility.Collapsed
+            };
+
+            var containerGrid = new Grid();
+            containerGrid.Children.Add(_scrollLogHost);
+            containerGrid.Children.Add(txtLog);
+
+            border.Child = containerGrid;
 
             Grid.SetRow(border, 1);
             root.Children.Add(border);
