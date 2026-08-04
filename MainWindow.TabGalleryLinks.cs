@@ -4692,14 +4692,24 @@ namespace get_link_manga
                     // 1. Xóa cookie (không báo gì)
                     BtnExtractClearCookie_Click(null, null);
 
+                    // Chờ nửa giây
+                    await Task.Delay(500);
+
                     // 2. Làm mới trạng thái của những truyện lỗi
                     RefreshErrorBooksOnly();
 
                     // 3. Xóa temp
                     ClearTempRootFolder(PortablePaths.PortableTempRoot);
 
-                    // 4. Retry tải (bật btnStartDownload và gọi start queue)
-                    if (btnStartDownload != null && btnStartDownload.IsChecked != true)
+                    // Chờ nửa giây
+                    await Task.Delay(500);
+
+                    // 4. Retry tải (bật cả 2 nút download và retry và gọi start queue)
+                    if (btnAutoRetryErrors != null)
+                    {
+                        btnAutoRetryErrors.IsChecked = true;
+                    }
+                    if (btnStartDownload != null)
                     {
                         btnStartDownload.IsChecked = true;
                         await HandleStartDownloadToggleCheckedAsync();

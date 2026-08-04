@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -602,7 +602,6 @@ namespace get_link_manga
                         Directory.Delete(captchaPath, true);
                         Log($"[System] Đã xóa folder captcha: {captchaFolderName}");
                     }
-                    Directory.CreateDirectory(captchaPath);
                 }
                 catch (Exception ex)
                 {
@@ -625,7 +624,7 @@ namespace get_link_manga
             if (d.Contains("vi-hentai") || d.Contains("hentaivn")) return "hentaivn";
             if (d.Contains("hentai2read")) return "hentai2read";
             if (d.Contains("daomeoden")) return "daomeoden";
-            if (d.Contains("nhentai")) return "nhentai";
+            if (d.Contains("nhentai")) return "nhentai.net";
             if (d.Contains("hentaiforce")) return "hentaiforce";
             if (d.Contains("hentaiera")) return "hentaiera";
             if (d.Contains("damconuong")) return "damconuong";
