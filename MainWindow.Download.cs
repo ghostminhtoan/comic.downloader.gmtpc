@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -5890,6 +5890,120 @@ namespace get_link_manga
                 }
                 catch { }
             });
+        }
+
+        private void CmbClearCookieAndRetry_DropDownOpened(object sender, EventArgs e)
+        {
+            if (cmbClearCookieAndRetry != null)
+            {
+                cmbClearCookieAndRetry.IsDropDownOpen = false;
+            }
+            RunClearCookieAndRetrySequence();
+        }
+
+        private void RunClearCookieAndRetrySequence()
+        {
+            // 1. Silent clear cookies
+            if (_scrapedItems != null && _scrapedItems.Count > 0)
+            {
+                var domainsToClear = _scrapedItems
+                    .Where(item => item != null && !string.IsNullOrWhiteSpace(item.SourceDomain))
+                    .Select(item => NormalizeCookieHostKey(item.SourceDomain))
+                    .Where(domain => !string.IsNullOrWhiteSpace(domain))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+                if (domainsToClear.Count > 0)
+                {
+                    foreach (var domain in domainsToClear)
+                    {
+                        _cookieContainersByHost.TryRemove(domain, out _);
+                        string wildCardKey = "." + domain;
+                        var subKeys = _cookieContainersByHost.Keys.Where(k => k.EndsWith(wildCardKey, StringComparison.OrdinalIgnoreCase)).ToList();
+                        foreach (var subKey in subKeys) _cookieContainersByHost.TryRemove(subKey, out _);
+                        if (IsTruyenqqUrl(domain)) _truyenqqPreferredBaseUrl = null;
+                    }
+                    try
+                    {
+                        InitializeHttpClientState();
+                        PortableRuntimeBootstrap.ResetPortableRuntimeStorage();
+                        PortableRuntimeBootstrap.EnsurePortableRuntime();
+                        _hakoCaptchaSessionReady = false;
+                        foreach (var d in domainsToClear) _captchaSolvedAtUtc.TryRemove(NormalizeCookieHostKey(d), out _);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"[System] Không thể reset http state: {ex.Message}");
+                    }
+                    foreach (var domain in domainsToClear)
+                    {
+                        string captchaFolderName = GetCaptchaFolderNameFromDomain(domain);
+                        string captchaPath = Path.Combine(PortablePaths.WebView2CaptchaUserDataFolder, captchaFolderName);
+                        try
+                        {
+                            if (Directory.Exists(captchaPath)) Directory.Delete(captchaPath, true);
+                            Directory.CreateDirectory(captchaPath);
+                        }
+                        catch {}
+                    }
+                }
+            }
+
+            // 2. Refresh status for error books
+            var errorItems = _scrapedItems != null 
+                ? _scrapedItems.Where(item => item != null && (item.Status == "Error" || item.HasErrors || item.ErrorCount > 0)).ToList()
+                : new List<GalleryItem>();
+
+            foreach (var item in errorItems)
+            {
+                item.Status = null;
+                item.CurrentProcess = "";
+                item.CompletedChapters = 0;
+                item.TotalChapters = 0;
+                item.ProgressPercent = 0;
+                item.DownloadProgressPercent = 0;
+                item.DownloadSpeedBytesPerSecond = 0;
+                item._downloadedBytesAccumulator = 0;
+                item.IsPaused = false;
+                item.IsStopped = false;
+                item.DownloadingChapter = "";
+                item.DownloadingPageProgress = "";
+                item.DownloadingPageLink = "";
+                if (item.Errors != null) item.Errors.Clear();
+                else item.Errors = new List<ErrorDetail>();
+                item.ErrorCount = 0;
+                if (!string.IsNullOrWhiteSpace(item.Link)) _downloadChapterItemCache.Remove(item.Link);
+                DeleteProcessMarkdownForItem(item);
+            }
+            UpdateStats();
+            RequestGalleryListAutosave(0);
+
+            // 3. Clear temp root folder and .tmp
+            ClearTempRootFolder(PortablePaths.PortableTempRoot);
+            string downloadRoot = txtDownloadPath?.Text?.Trim() ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(downloadRoot))
+            {
+                string tempRoot = Path.Combine(downloadRoot, ".tmp");
+                if (Directory.Exists(tempRoot)) ClearTempRootFolder(tempRoot);
+            }
+
+            // 4. Retry download for refreshed error books
+            if (errorItems.Count > 0)
+            {
+                foreach (var item in errorItems)
+                {
+                    item.IsChecked = true;
+                }
+                
+                if (_downloadCts != null)
+                {
+                    QueueDownloadsForCurrentSession(errorItems, preserveExistingState: true);
+                }
+                else
+                {
+                    SetDownloadToggleState(true);
+                    _ = StartDownloadProcessAsync(errorItems, preserveExistingState: true);
+                }
+            }
         }
     }
 }
