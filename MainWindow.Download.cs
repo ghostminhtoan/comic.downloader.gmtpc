@@ -390,7 +390,7 @@ namespace get_link_manga
 
                 if (host.Contains("nhentai"))
                 {
-                    return "nhentai.xxx";
+                    return "nhentai.net";
                 }
 
                 if (host.Contains("hentaiforce"))
@@ -584,7 +584,7 @@ namespace get_link_manga
             }
             else if (lowerKey.Contains("nhentai"))
             {
-                siteKey = "nhentai.xxx";
+                siteKey = "nhentai.net";
             }
             else if (lowerKey.Contains("hentaiforce"))
             {
@@ -2026,6 +2026,8 @@ namespace get_link_manga
             btnBrowseFolder.IsEnabled = false;
             btnScrape.IsEnabled = false;
             btnFetchInfo.IsEnabled = false;
+            if (btnNhentaiNetScrape != null) btnNhentaiNetScrape.IsEnabled = false;
+            if (btnNhentaiNetFetchInfo != null) btnNhentaiNetFetchInfo.IsEnabled = false;
             if (btnViHentaiScrape != null) btnViHentaiScrape.IsEnabled = false;
             if (btnViHentaiFetchInfo != null) btnViHentaiFetchInfo.IsEnabled = false;
             if (btnTruyenqqScrape != null) btnTruyenqqScrape.IsEnabled = false;
@@ -2122,6 +2124,8 @@ namespace get_link_manga
                 btnOpenFolder.IsEnabled = true;
                 btnScrape.IsEnabled = true;
                 btnFetchInfo.IsEnabled = true;
+                if (btnNhentaiNetScrape != null) btnNhentaiNetScrape.IsEnabled = true;
+                if (btnNhentaiNetFetchInfo != null) btnNhentaiNetFetchInfo.IsEnabled = true;
                 if (btnViHentaiScrape != null) btnViHentaiScrape.IsEnabled = true;
                 if (btnViHentaiFetchInfo != null) btnViHentaiFetchInfo.IsEnabled = true;
                 if (btnTruyenqqScrape != null) btnTruyenqqScrape.IsEnabled = true;
@@ -3173,7 +3177,6 @@ namespace get_link_manga
             }
 
             return source.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   source.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0 ||
                    source.IndexOf("nhentaimg.com", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
@@ -3191,19 +3194,26 @@ namespace get_link_manga
             catch
             {
                 return url.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                       url.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0 ||
                        url.IndexOf("nhentaimg.com", StringComparison.OrdinalIgnoreCase) >= 0;
             }
         }
 
         private async Task DownloadNhentaiGalleryAsync(GalleryItem item, string rootFolder, CancellationToken token, GalleryItem queueItem = null)
         {
+            if (item.Link != null && item.Link.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                item.Link = Regex.Replace(item.Link, @"nhentai\.xxx", "nhentai.net", RegexOptions.IgnoreCase);
+            }
+            if (item.SourceDomain != null && item.SourceDomain.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                item.SourceDomain = "nhentai.net";
+            }
+
             string safeTitle = GetSafePathName(item.Name);
             string resolvedRoot = GetConfiguredDownloadRoot(rootFolder, item);
             string targetFolder = Path.Combine(resolvedRoot, safeTitle);
-            bool isNhentaiNet = !string.IsNullOrWhiteSpace(item.SourceDomain)
-                && item.SourceDomain.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0;
-            string nhentaiSiteKey = isNhentaiNet ? "nhentai.net" : "nhentai.xxx";
+            bool isNhentaiNet = true;
+            string nhentaiSiteKey = "nhentai.net";
             string tempFolder = BuildStableTempFolderPath(resolvedRoot, nhentaiSiteKey, safeTitle, item.Link, item.Name);
             Directory.CreateDirectory(tempFolder);
             RegisterTempFolder(tempFolder);
@@ -3373,7 +3383,7 @@ namespace get_link_manga
                                 }
                                 else
                                 {
-                                    downloadedPath = await DownloadNhentaiRedirectPageAsync(normalizedBookUrl, pageNum, tempFolder, token);
+                                    throw new Exception("Không tìm thấy link ảnh CDN được giải mã trước đó cho trang " + pageNum);
                                 }
                             }
                             catch (Exception pageEx)
@@ -3393,7 +3403,7 @@ namespace get_link_manga
                                     {
                                         string pageName = !string.IsNullOrEmpty(directUrl) ? Path.GetFileNameWithoutExtension(directUrl.Split('?')[0]) : pageNum.ToString();
                                         queueItem.AddError(string.Empty, pageNum, traceMessage, directUrl ?? pageUrl, item.Link, pageName);
-                                        RecordCheckError(item.SourceDomain ?? "nhentai.xxx", item.Name, string.Empty, pageNum, traceMessage, directUrl ?? pageUrl, pageName);
+                                        RecordCheckError(item.SourceDomain ?? "nhentai.net", item.Name, string.Empty, pageNum, traceMessage, directUrl ?? pageUrl, pageName);
                                     }));
                                 }
                             }
@@ -3600,75 +3610,7 @@ namespace get_link_manga
             return 0;
         }
 
-        private async Task<string> DownloadNhentaiRedirectPageAsync(string bookUrl, int pageNum, string targetFolder, CancellationToken token)
-        {
-            while (_isDownloadPaused)
-            {
-                token.ThrowIfCancellationRequested();
-                await Task.Delay(200, token);
-            }
-            token.ThrowIfCancellationRequested();
 
-            string pageUrl = $"{bookUrl.TrimEnd('/')}/{pageNum}/";
-                string html = await FetchStringAsync(pageUrl, token);
-            string imageUrl = ExtractNhentaiXxxImageUrl(html, pageNum);
-            if (string.IsNullOrWhiteSpace(imageUrl))
-            {
-                throw new Exception($"Không trích xuất được ảnh thật từ reader page. Reader: {pageUrl}");
-            }
-
-            string finalPath = Path.Combine(targetFolder, BuildOrderedImageFilename(pageNum, imageUrl));
-            await DownloadUrlToFileWithRefererAsync(imageUrl, pageUrl, finalPath, token);
-            Log($"[nhentai.xxx] Trang {pageNum} -> {imageUrl}");
-            return finalPath;
-        }
-
-        private string GuessImageExtensionFromContentType(string mediaType)
-        {
-            switch ((mediaType ?? string.Empty).Trim().ToLowerInvariant())
-            {
-                case "image/webp":
-                    return ".webp";
-                case "image/png":
-                    return ".png";
-                case "image/gif":
-                    return ".gif";
-                case "image/jpeg":
-                case "image/jpg":
-                    return ".jpg";
-                case "image/bmp":
-                    return ".bmp";
-                default:
-                    return null;
-            }
-        }
-
-        private string ExtractNhentaiXxxImageUrl(string html, int pageNum)
-        {
-            if (string.IsNullOrWhiteSpace(html))
-            {
-                return null;
-            }
-
-            html = GetSafeChapterHtml(html);
-
-            string[] patterns =
-            {
-                @"(?:data-src|src)=[""'](?<imgUrl>https?://[a-z0-9-]+\.nhentaimg\.com/[^""']+/" + pageNum + @"\.(?:jpg|png|gif|webp|jpeg|bmp))[""']",
-                @"(?<imgUrl>https?://[a-z0-9-]+\.nhentaimg\.com/[^""']+/" + pageNum + @"\.(?:jpg|png|gif|webp|jpeg|bmp))"
-            };
-
-            foreach (string pattern in patterns)
-            {
-                var match = Regex.Match(html, pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                if (match.Success)
-                {
-                    return match.Groups["imgUrl"].Value;
-                }
-            }
-
-            return null;
-        }
 
         private sealed class NhentaiReaderImageInfo
         {
@@ -4107,10 +4049,7 @@ namespace get_link_manga
                         {
                             request.Headers.Referrer = new Uri("https://nhentai.net/");
                         }
-                        else if (testUrl.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0)
-                        {
-                            request.Headers.Referrer = new Uri("https://nhentai.xxx/");
-                        }
+
                     }
                     using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
                     {
@@ -4126,23 +4065,9 @@ namespace get_link_manga
                             if (html.Contains("cf-challenge") || 
                                 html.Contains("cf-turnstile") || 
                                 html.Contains("Turnstile") || 
-                                html.Contains("Just a moment...") ||
-                                html.Contains("challenge-platform") ||
-                                html.Contains("Verify you are human") ||
-                                html.Contains("cf-cookie-error") ||
-                                html.Contains("challenge-form"))
+                                html.Contains("Just a moment..."))
                             {
                                 return true;
-                            }
-
-                            // Check if redirected to page 1
-                            if (testUrl.Contains("page=") && !testUrl.Contains("page=1"))
-                            {
-                                var currPageMatch = Regex.Match(html, @"class=""[^""]*current[^""]*""[^>]*>\s*(\d+)", RegexOptions.IgnoreCase);
-                                if (currPageMatch.Success && int.TryParse(currPageMatch.Groups[1].Value, out int parsedPage) && parsedPage == 1)
-                                {
-                                    return true; // Treat redirect to page 1 as blocked
-                                }
                             }
                         }
                     }
@@ -4159,11 +4084,11 @@ namespace get_link_manga
             }
         }
 
-        internal async Task<bool> SolveNhentaiCaptchaIfNeededAsync(string testUrl, bool force = false, bool? forceHeadless = null)
+        internal async Task<bool> SolveNhentaiCaptchaIfNeededAsync(string testUrl)
         {
-            if (!force && IsCaptchaCooldownActive(testUrl)) return true;
+            if (IsCaptchaCooldownActive(testUrl)) return true;
 
-            bool isBlocked = force || await CheckIfNhentaiBlockedAsync(testUrl);
+            bool isBlocked = await CheckIfNhentaiBlockedAsync(testUrl);
             if (!isBlocked)
             {
                 return true; // Not blocked, all good!
@@ -4203,10 +4128,9 @@ namespace get_link_manga
                     {
                         // Nếu là URL danh sách (tag, artist, parody, group, character, search) thì luôn dùng headlessAutomation = true để cào ngầm giống tag
                         bool isListUrl = testUrl.Contains("/tag/") || testUrl.Contains("/artist/") || testUrl.Contains("/parody/") || testUrl.Contains("/group/") || testUrl.Contains("/character/") || testUrl.Contains("/search/") || testUrl.Contains("?q=");
-                        bool isSpecialList = testUrl.Contains("/artist/") || testUrl.Contains("/parody/") || testUrl.Contains("/group/") || testUrl.Contains("/character/");
-                        bool useHeadless = forceHeadless ?? ((isListUrl && !isSpecialList) ? true : _lightNovelAutoFocusEnabled);
+                        bool useHeadless = isListUrl ? true : _lightNovelAutoFocusEnabled;
 
-                        var captchaWin = CreateCaptchaWindow(testUrl, autoDeleteCookiesOnLoad: false, headlessAutomation: useHeadless);
+                        var captchaWin = CreateCaptchaWindow(testUrl, autoDeleteCookiesOnLoad: true, headlessAutomation: useHeadless);
                         captchaWin.Owner = this;
 
                         if (await ShowCaptchaWindowWithFocusHandlingAsync(captchaWin, useNovelFocusStealth: useHeadless))
@@ -4485,12 +4409,12 @@ namespace get_link_manga
                     }
                 }
 
-                if (host.Contains("nhentai.xxx") || host.Contains("nhentai.net"))
+                if (host.Contains("nhentai.net"))
                 {
                     var segments = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
                     if (segments.Length >= 2 && segments[0].Equals("g", StringComparison.OrdinalIgnoreCase))
                     {
-                        return "nhentai.xxx|" + segments[1].ToLowerInvariant();
+                        return "nhentai.net|" + segments[1].ToLowerInvariant();
                     }
                 }
 
@@ -4740,7 +4664,7 @@ namespace get_link_manga
 
         private async Task DownloadUrlToFileWithRefererAsync(string url, string referer, string filePath, CancellationToken token, bool isViHentai = false, bool isTruyenqq = false)
         {
-            long minSize = (isTruyenqq || (url != null && (url.Contains("nhentai.xxx") || url.Contains("nhentai.net") || url.Contains("nhentaimg.com")))) ? 0 : 1024;
+            long minSize = (isTruyenqq || (url != null && (url.Contains("nhentai.net") || url.Contains("nhentaimg.com")))) ? 0 : 1024;
             if (File.Exists(filePath) && new FileInfo(filePath).Length > minSize)
             {
                 return; // skip duplicate
@@ -4835,7 +4759,7 @@ namespace get_link_manga
                     }
                     catch (HttpRequestException ex) when (attempt < maxAttempts)
                     {
-                        if (url != null && (url.Contains("nhentai.net") || url.Contains("nhentai.xxx") || url.Contains("nhentaimg.com")) && (ex.Message.Contains("404") || (ex.InnerException != null && ex.InnerException.Message.Contains("404"))))
+                        if (url != null && (url.Contains("nhentai.net") || url.Contains("nhentaimg.com")) && (ex.Message.Contains("404") || (ex.InnerException != null && ex.InnerException.Message.Contains("404"))))
                         {
                             throw;
                         }
@@ -5843,40 +5767,12 @@ namespace get_link_manga
                     {
                         request.Headers.Referrer = new Uri("https://nhentai.net/");
                     }
-                    else if (url.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        request.Headers.Referrer = new Uri("https://nhentai.xxx/");
-                    }
+
                 }
                 using (var response = await httpClient.SendAsync(request, token))
                 {
                     response.EnsureSuccessStatusCode();
-                    string html = await response.Content.ReadAsStringAsync();
-                    if (!string.IsNullOrWhiteSpace(html))
-                    {
-                        if (html.Contains("cf-challenge") || 
-                            html.Contains("cf-turnstile") || 
-                            html.Contains("Turnstile") || 
-                            html.Contains("Just a moment...") ||
-                            html.Contains("challenge-platform") ||
-                            html.Contains("Verify you are human") ||
-                            html.Contains("cf-cookie-error") ||
-                            html.Contains("challenge-form"))
-                        {
-                            throw new System.Net.Http.HttpRequestException("Cloudflare challenge page detected in response HTML");
-                        }
-
-                        // Check if redirected to page 1
-                        if (url.Contains("page=") && !url.Contains("page=1"))
-                        {
-                            var currPageMatch = Regex.Match(html, @"class=""[^""]*current[^""]*""[^>]*>\s*(\d+)", RegexOptions.IgnoreCase);
-                            if (currPageMatch.Success && int.TryParse(currPageMatch.Groups[1].Value, out int parsedPage) && parsedPage == 1)
-                            {
-                                throw new System.Net.Http.HttpRequestException("Redirected to page 1 while requesting page " + url);
-                            }
-                        }
-                    }
-                    return html;
+                    return await response.Content.ReadAsStringAsync();
                 }
             }
         }

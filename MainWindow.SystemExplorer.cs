@@ -279,7 +279,7 @@ namespace get_link_manga
             if (lower.Contains("hentaiforce"))
                 return "hentaiforce.net";
             if (lower.Contains("nhentai"))
-                return "nhentai.xxx";
+                return "nhentai.net";
             if (lower.Contains("hentaiera"))
                 return "hentaiera.com";
             if (lower.Contains("hentai2read"))

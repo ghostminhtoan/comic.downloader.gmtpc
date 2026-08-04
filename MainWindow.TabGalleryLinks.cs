@@ -1560,8 +1560,7 @@ namespace get_link_manga
             if (IsHakoUrl(item.Link)) return true;
             string domain = GetDownloadMissingChapterDomainLabel(item);
             return domain.IndexOf("hentaiforce", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   domain.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   domain.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0;
+                   domain.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private List<GalleryItem> GetDownloadMissingChapterPendingScanItems()
@@ -2156,8 +2155,7 @@ namespace get_link_manga
                 };
             }
 
-            if (domain.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                domain.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0)
+            if (domain.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 string msg = _isVietnameseUi ? "Không hỗ trợ nhiều chapter" : "Multiple chapters not supported";
                 return new ReaderChapterIssueItem

@@ -2118,7 +2118,6 @@
                             </ScrollViewer>
                         </TabItem>
 
-
                         <TabItem Header="hentai2read" Style="{StaticResource CyberpunkTabItem}">
                             <TabItem.Tag>
                                 <SolidColorBrush Color="#7ce8ff"/>

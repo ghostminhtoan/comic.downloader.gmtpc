@@ -315,7 +315,7 @@ namespace get_link_manga
                 case "nhentai.net":
                     return "nhentai.net";
                 case "nhentai":
-                    return "nhentai.xxx";
+                    return "nhentai.net";
                 case "hentai2read":
                     return "hentai2read.com";
                 case "hentaiera":

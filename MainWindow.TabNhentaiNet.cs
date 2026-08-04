@@ -166,15 +166,7 @@ namespace get_link_manga
                     bool ok = await SolveNhentaiCaptchaIfNeededAsync(url);
                     if (ok)
                     {
-                        try
-                        {
-                            html = await FetchStringAsync(url, _downloadCts?.Token ?? CancellationToken.None);
-                        }
-                        catch (Exception ex2)
-                        {
-                            Log($"[nhentai.net] HttpClient retry fetch failed: {ex2.Message}. Fallback to WebView2 HTML.");
-                            html = _lastNhentaiResolvedHtml;
-                        }
+                        html = _lastNhentaiResolvedHtml;
                     }
                 }
 
@@ -336,23 +328,34 @@ namespace get_link_manga
                         token.ThrowIfCancellationRequested();
                     }
 
-                    if (page > pageFrom)
-                    {
-                        Log($"[nhentai.net] Delaying 2 seconds before loading page {page}...");
-                        await Task.Delay(2000, token);
-                    }
-
                     string pageUrl = GetNhentaiNetPageUrl(baseUrl, page);
-                    Log($"[nhentai.net] Requesting page {page} via WebView2 (headless): {pageUrl}");
+                    Log($"[nhentai.net] Requesting page {page}: {pageUrl}");
 
                     string html = null;
                     bool pageLoaded = false;
                     try
                     {
-                        bool ok = await SolveNhentaiCaptchaIfNeededAsync(pageUrl, force: true, forceHeadless: true);
-                        if (ok && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
+                        try
+                        {
+                            html = await FetchStringAsync(pageUrl, _downloadCts?.Token ?? CancellationToken.None);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log($"[nhentai.net] HttpClient fetch page {page} failed ({ex.Message}). Trying to resolve captcha...");
+                            bool ok = await SolveNhentaiCaptchaIfNeededAsync(pageUrl);
+                            if (ok)
+                            {
+                                html = _lastNhentaiResolvedHtml;
+                            }
+                        }
+
+                        if (string.IsNullOrWhiteSpace(html) && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
                         {
                             html = _lastNhentaiResolvedHtml;
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(html))
+                        {
                             pageLoaded = true;
                         }
                     }

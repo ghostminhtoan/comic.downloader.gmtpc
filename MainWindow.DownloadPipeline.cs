@@ -38,7 +38,7 @@ namespace get_link_manga
             new SiteDownloadProfile
             {
                 Id = "nhentai",
-                HostAliases = new[] { "nhentai.xxx", "nhentai.net", "i.nhentai.net", "i1.nhentai.net", "i2.nhentai.net", "i3.nhentai.net", "i4.nhentai.net", "t.nhentai.net" },
+                HostAliases = new[] { "nhentai.net", "i.nhentai.net", "i1.nhentai.net", "i2.nhentai.net", "i3.nhentai.net", "i4.nhentai.net", "t.nhentai.net" },
                 BrowserSessionPreferred = true,
                 ChromeFallbackPreferred = true,
                 DefaultConcurrencyCap = 4,

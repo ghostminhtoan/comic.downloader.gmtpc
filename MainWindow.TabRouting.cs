@@ -338,8 +338,9 @@ namespace get_link_manga
             url = url.Trim();
             if (url.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                url = Regex.Replace(url, "nhentai\\.xxx", "nhentai.net", RegexOptions.IgnoreCase);
+                url = Regex.Replace(url, @"nhentai\.xxx", "nhentai.net", RegexOptions.IgnoreCase);
             }
+
             string lower = url.ToLowerInvariant();
             if (lower.Contains("nhentai.net/g/"))
             {
@@ -530,7 +531,7 @@ namespace get_link_manga
                 BtnFetchInfo_Click(this, new RoutedEventArgs());
                 await WaitAndScrapeAsync(btnFetchInfo, BtnScrape_Click);
             }
-            else if (lowerUrl.Contains("nhentai.net") || lowerUrl.Contains("nhentai"))
+            else if (lowerUrl.Contains("nhentai.net"))
             {
                 SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("nhentai.net");
@@ -909,17 +910,6 @@ namespace get_link_manga
                     return true;
                 }
 
-                if (allowUiJump)
-                {
-                    SelectHentaiSourceRoot();
-                    SelectHentaiTabByHeader("nhentai.net");
-                }
-                await ImportNhentaiNetDirectLinksAsync(new List<string> { url }, showMessageBox);
-                return true;
-            }
-
-            if (lowerUrl.Contains("nhentai"))
-            {
                 if (allowUiJump)
                 {
                     SelectHentaiSourceRoot();

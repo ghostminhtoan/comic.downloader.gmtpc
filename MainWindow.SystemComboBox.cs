@@ -69,5 +69,6 @@ namespace get_link_manga
             UpdateCreateSubfolderFieldsFromSelection();
         }
 
+
     }
 }

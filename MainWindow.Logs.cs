@@ -42,6 +42,7 @@ namespace get_link_manga
         private void InitializeLogPanels()
         {
             RegisterLogPanel("main", txtLog);
+            RegisterLogPanel("nhentai", txtLog);
             RegisterLogPanel("vihentai", txtViHentaiLog);
             RegisterLogPanel("truyenqq", txtTruyenqqLog);
             RegisterLogPanel("nettruyen", txtNettruyenLog);

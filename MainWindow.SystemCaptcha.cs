@@ -139,7 +139,7 @@ namespace get_link_manga
             ResetCookiesForCaptcha(url);
             if (IsNhentaiCaptchaUrl(url))
             {
-                ShowInfo("Đã làm mới cookie cho nhentai.xxx.", "Thông báo");
+                ShowInfo("Đã làm mới cookie cho nhentai.net.", "Thông báo");
                 return;
             }
 
@@ -160,7 +160,7 @@ namespace get_link_manga
             if (tabLeftPanel?.SelectedIndex == 1)
             {
                 string selectedHentai = (tabHentai?.SelectedItem as TabItem)?.Header?.ToString()?.ToLowerInvariant() ?? string.Empty;
-                if (selectedHentai.Contains("nhentai.net") || selectedHentai.Contains("nhentai")) return txtNhentaiNetTagUrl?.Text?.Trim() ?? string.Empty;
+                if (selectedHentai.Contains("nhentai")) return txtNhentaiNetTagUrl?.Text?.Trim() ?? string.Empty;
                 if (selectedHentai.Contains("hentai2read")) return txtHentai2readTagUrl?.Text?.Trim() ?? string.Empty;
                 if (selectedHentai.Contains("hentaiera")) return txtHentaieraTagUrl?.Text?.Trim() ?? string.Empty;
                 if (selectedHentai.Contains("hentaiforce")) return txtTagUrl?.Text?.Trim() ?? string.Empty;

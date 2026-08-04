@@ -485,7 +485,7 @@ namespace get_link_manga
                 case "nhentai.net":
                     return "https://nhentai.net/";
                 case "nhentai":
-                    return "https://nhentai.xxx/";
+                    return "https://nhentai.net/";
                 case "hentaiera":
                     return "https://hentaiera.com/";
                 case "hentai2read":
@@ -528,7 +528,7 @@ namespace get_link_manga
                 case "nhentai.net":
                     return "https://nhentai.net/tag/raccoon-girl/";
                 case "nhentai":
-                    return "https://nhentai.xxx/tag/very-long-hair/";
+                    return "https://nhentai.net/tag/raccoon-girl/";
                 case "hentai2read":
                     return "https://hentai2read.com/";
                 case "hentaiera":
