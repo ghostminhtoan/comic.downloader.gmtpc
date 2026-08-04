@@ -336,42 +336,23 @@ namespace get_link_manga
                         token.ThrowIfCancellationRequested();
                     }
 
+                    if (page > pageFrom)
+                    {
+                        Log($"[nhentai.net] Delaying 2 seconds before loading page {page}...");
+                        await Task.Delay(2000, token);
+                    }
+
                     string pageUrl = GetNhentaiNetPageUrl(baseUrl, page);
-                    Log($"[nhentai.net] Requesting page {page}: {pageUrl}");
+                    Log($"[nhentai.net] Requesting page {page} via WebView2 (headless): {pageUrl}");
 
                     string html = null;
                     bool pageLoaded = false;
                     try
                     {
-                        try
-                        {
-                            html = await FetchStringAsync(pageUrl, _downloadCts?.Token ?? CancellationToken.None);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log($"[nhentai.net] HttpClient fetch page {page} failed ({ex.Message}). Trying to resolve captcha...");
-                            bool ok = await SolveNhentaiCaptchaIfNeededAsync(pageUrl);
-                            if (ok)
-                            {
-                                try
-                                {
-                                    html = await FetchStringAsync(pageUrl, _downloadCts?.Token ?? CancellationToken.None);
-                                }
-                                catch (Exception ex2)
-                                {
-                                    Log($"[nhentai.net] HttpClient retry fetch page {page} failed: {ex2.Message}. Fallback to WebView2 HTML.");
-                                    html = _lastNhentaiResolvedHtml;
-                                }
-                            }
-                        }
-
-                        if (string.IsNullOrWhiteSpace(html) && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
+                        bool ok = await SolveNhentaiCaptchaIfNeededAsync(pageUrl, force: true, forceHeadless: true);
+                        if (ok && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
                         {
                             html = _lastNhentaiResolvedHtml;
-                        }
-
-                        if (!string.IsNullOrWhiteSpace(html))
-                        {
                             pageLoaded = true;
                         }
                     }
@@ -395,25 +376,6 @@ namespace get_link_manga
                             viewMatches = Regex.Matches(html,
                                 @"<a\s+href=""[^""]*?/g/(\d+)/?""[^>]*>.*?<img[^>]+(?:src|data-src)=""([^""]+)""[^>]*/?>.*?<div\s+class=""caption"">([^<]+)</div>",
                                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                        }
-
-                        if (viewMatches.Count == 0)
-                        {
-                            Log($"[nhentai.net] HttpClient found 0 items on page {page}. Forcing WebView2 render...");
-                            bool ok = await SolveNhentaiCaptchaIfNeededAsync(pageUrl, force: true);
-                            if (ok && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
-                            {
-                                html = _lastNhentaiResolvedHtml;
-                                viewMatches = Regex.Matches(html,
-                                    @"<a\s+href=""[^""]*?/g/(\d+)/?""[^>]*class=""cover""[^>]*>.*?<img[^>]+(?:src|data-src)=""([^""]+)""[^>]*/?>.*?<div\s+class=""caption"">([^<]+)</div>",
-                                    RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                                if (viewMatches.Count == 0)
-                                {
-                                    viewMatches = Regex.Matches(html,
-                                        @"<a\s+href=""[^""]*?/g/(\d+)/?""[^>]*>.*?<img[^>]+(?:src|data-src)=""([^""]+)""[^>]*/?>.*?<div\s+class=""caption"">([^<]+)</div>",
-                                        RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                                }
-                            }
                         }
 
                         foreach (Match match in viewMatches)

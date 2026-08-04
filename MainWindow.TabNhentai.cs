@@ -298,20 +298,25 @@ namespace get_link_manga
                         token.ThrowIfCancellationRequested();
                     }
 
+                    if (page > pageFrom)
+                    {
+                        Log($"Delaying 2 seconds before loading page {page}...");
+                        await Task.Delay(2000, token);
+                    }
+
                     string pageUrl = GetNhentaiPageUrl(baseUrl, page);
-                    Log($"Requesting page {page}: {pageUrl}");
+                    Log($"Requesting page {page} via WebView2 (headless): {pageUrl}");
                     
                     string html = null;
                     bool pageLoaded = false;
                     try
                     {
-                        bool ok = await SolveNhentaiCaptchaIfNeededAsync(pageUrl);
-                        if (!ok)
+                        bool ok = await SolveNhentaiCaptchaIfNeededAsync(pageUrl, force: true, forceHeadless: true);
+                        if (ok && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
                         {
-                            throw new Exception("Bị chặn bởi Cloudflare Captcha.");
+                            html = _lastNhentaiResolvedHtml;
+                            pageLoaded = true;
                         }
-                        html = await FetchStringAsync(pageUrl, _downloadCts?.Token ?? CancellationToken.None);
-                        pageLoaded = true;
                     }
                     catch (Exception ex)
                     {
@@ -325,17 +330,6 @@ namespace get_link_manga
                         // Extract view links along with their titles
                         // E.g. <a href="/g/412345/" class="cover">...<div class="caption">Artist - Title</div></a>
                         var viewMatches = Regex.Matches(html, @"<a\s+href=""[^""]*?/g/(\d+)/?""[^>]*>.*?<div\s+class=""caption"">([^<]+)</div>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-                        if (viewMatches.Count == 0)
-                        {
-                            Log($"[nhentai.xxx] HttpClient found 0 items on page {page}. Forcing WebView2 render...");
-                            bool ok = await SolveNhentaiCaptchaIfNeededAsync(pageUrl, force: true);
-                            if (ok && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
-                            {
-                                html = _lastNhentaiResolvedHtml;
-                                viewMatches = Regex.Matches(html, @"<a\s+href=""[^""]*?/g/(\d+)/?""[^>]*>.*?<div\s+class=""caption"">([^<]+)</div>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                            }
-                        }
                         
                         foreach (Match match in viewMatches)
                         {
