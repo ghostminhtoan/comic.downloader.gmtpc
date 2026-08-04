@@ -166,7 +166,15 @@ namespace get_link_manga
                     bool ok = await SolveNhentaiCaptchaIfNeededAsync(url);
                     if (ok)
                     {
-                        html = _lastNhentaiResolvedHtml;
+                        try
+                        {
+                            html = await FetchStringAsync(url, _downloadCts?.Token ?? CancellationToken.None);
+                        }
+                        catch (Exception ex2)
+                        {
+                            Log($"[nhentai.net] HttpClient retry fetch failed: {ex2.Message}. Fallback to WebView2 HTML.");
+                            html = _lastNhentaiResolvedHtml;
+                        }
                     }
                 }
 
@@ -345,7 +353,15 @@ namespace get_link_manga
                             bool ok = await SolveNhentaiCaptchaIfNeededAsync(pageUrl);
                             if (ok)
                             {
-                                html = _lastNhentaiResolvedHtml;
+                                try
+                                {
+                                    html = await FetchStringAsync(pageUrl, _downloadCts?.Token ?? CancellationToken.None);
+                                }
+                                catch (Exception ex2)
+                                {
+                                    Log($"[nhentai.net] HttpClient retry fetch page {page} failed: {ex2.Message}. Fallback to WebView2 HTML.");
+                                    html = _lastNhentaiResolvedHtml;
+                                }
                             }
                         }
 
