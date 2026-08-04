@@ -159,8 +159,14 @@ namespace get_link_manga
             }
 
             Match bookMatch = Regex.Match(segments[1], @"^(?<id>\d+)-(?<slug>.+)$", RegexOptions.IgnoreCase);
-            Match chapterMatch = Regex.Match(segments[2], @"^(?<chapterId>c\d+)-(?<chapterSlug>.+)$", RegexOptions.IgnoreCase);
-            if (!bookMatch.Success || !chapterMatch.Success)
+            if (!bookMatch.Success)
+            {
+                return false;
+            }
+
+            // Tiêu chuẩn Hako: chapterId phải bắt đầu bằng chữ 'c' và theo sau là các chữ số
+            Match chapterMatch = Regex.Match(segments[2], @"^(?<chapterId>c\d+)(?:-(?<chapterSlug>.+))?$", RegexOptions.IgnoreCase);
+            if (!chapterMatch.Success)
             {
                 return false;
             }
@@ -169,12 +175,12 @@ namespace get_link_manga
             bookSlug = bookMatch.Groups["slug"].Value.Trim().Trim('-');
             chapterId = chapterMatch.Groups["chapterId"].Value;
             chapterSlug = chapterMatch.Groups["chapterSlug"].Value.Trim().Trim('-');
-            if (string.IsNullOrWhiteSpace(bookSlug) || string.IsNullOrWhiteSpace(chapterSlug))
+            if (string.IsNullOrWhiteSpace(bookSlug))
             {
                 return false;
             }
 
-            canonicalUrl = $"{uri.Scheme}://{uri.Host}/{segments[0]}/{bookId}-{bookSlug}/{chapterId}-{chapterSlug}";
+            canonicalUrl = $"{uri.Scheme}://{uri.Host}/{segments[0]}/{bookId}-{bookSlug}/{chapterId}{(string.IsNullOrWhiteSpace(chapterSlug) ? string.Empty : "-" + chapterSlug)}";
             return true;
         }
 
