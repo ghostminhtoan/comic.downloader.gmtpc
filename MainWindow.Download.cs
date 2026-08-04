@@ -2026,8 +2026,6 @@ namespace get_link_manga
             btnBrowseFolder.IsEnabled = false;
             btnScrape.IsEnabled = false;
             btnFetchInfo.IsEnabled = false;
-            if (btnNhentaiScrape != null) btnNhentaiScrape.IsEnabled = false;
-            if (btnNhentaiFetchInfo != null) btnNhentaiFetchInfo.IsEnabled = false;
             if (btnViHentaiScrape != null) btnViHentaiScrape.IsEnabled = false;
             if (btnViHentaiFetchInfo != null) btnViHentaiFetchInfo.IsEnabled = false;
             if (btnTruyenqqScrape != null) btnTruyenqqScrape.IsEnabled = false;
@@ -2124,8 +2122,6 @@ namespace get_link_manga
                 btnOpenFolder.IsEnabled = true;
                 btnScrape.IsEnabled = true;
                 btnFetchInfo.IsEnabled = true;
-                if (btnNhentaiScrape != null) btnNhentaiScrape.IsEnabled = true;
-                if (btnNhentaiFetchInfo != null) btnNhentaiFetchInfo.IsEnabled = true;
                 if (btnViHentaiScrape != null) btnViHentaiScrape.IsEnabled = true;
                 if (btnViHentaiFetchInfo != null) btnViHentaiFetchInfo.IsEnabled = true;
                 if (btnTruyenqqScrape != null) btnTruyenqqScrape.IsEnabled = true;

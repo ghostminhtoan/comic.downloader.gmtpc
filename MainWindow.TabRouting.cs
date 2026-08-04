@@ -336,12 +336,16 @@ namespace get_link_manga
             }
 
             url = url.Trim();
+            if (url.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                url = Regex.Replace(url, "nhentai\\.xxx", "nhentai.net", RegexOptions.IgnoreCase);
+            }
             string lower = url.ToLowerInvariant();
-            if (lower.Contains("nhentai.net/g/") || lower.Contains("nhentai.xxx/g/"))
+            if (lower.Contains("nhentai.net/g/"))
             {
                 // Regex tìm kiếm pattern /g/{galleryId}/{pageNum}/ hoặc /g/{galleryId}/{pageNum}
                 // ví dụ: https://nhentai.net/g/159844/1/
-                var match = Regex.Match(url, @"^(https?://nhentai\.(?:net|xxx)/g/\d+)/(\d+)/?$", RegexOptions.IgnoreCase);
+                var match = Regex.Match(url, @"^(https?://nhentai\.net/g/\d+)/(\d+)/?$", RegexOptions.IgnoreCase);
                 if (match.Success)
                 {
                     return match.Groups[1].Value + "/";
@@ -526,21 +530,13 @@ namespace get_link_manga
                 BtnFetchInfo_Click(this, new RoutedEventArgs());
                 await WaitAndScrapeAsync(btnFetchInfo, BtnScrape_Click);
             }
-            else if (lowerUrl.Contains("nhentai.net"))
+            else if (lowerUrl.Contains("nhentai.net") || lowerUrl.Contains("nhentai"))
             {
                 SelectHentaiSourceRoot();
                 SelectHentaiTabByHeader("nhentai.net");
                 if (txtNhentaiNetTagUrl != null) txtNhentaiNetTagUrl.Text = url;
                 BtnNhentaiNetFetchInfo_Click(this, new RoutedEventArgs());
                 await WaitAndScrapeAsync(btnNhentaiNetFetchInfo, BtnNhentaiNetScrape_Click);
-            }
-            else if (lowerUrl.Contains("nhentai"))
-            {
-                SelectHentaiSourceRoot();
-                SelectHentaiTabByHeader("nhentai");
-                if (txtNhentaiTagUrl != null) txtNhentaiTagUrl.Text = url;
-                BtnNhentaiFetchInfo_Click(this, new RoutedEventArgs());
-                await WaitAndScrapeAsync(btnNhentaiFetchInfo, BtnNhentaiScrape_Click);
             }
             else if (lowerUrl.Contains("hentai2read"))
             {
@@ -927,9 +923,9 @@ namespace get_link_manga
                 if (allowUiJump)
                 {
                     SelectHentaiSourceRoot();
-                    SelectHentaiTabByHeader("nhentai");
+                    SelectHentaiTabByHeader("nhentai.net");
                 }
-                await ImportNhentaiDirectLinksAsync(new List<string> { url }, showMessageBox);
+                await ImportNhentaiNetDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;
             }
 

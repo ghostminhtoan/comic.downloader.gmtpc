@@ -573,7 +573,7 @@ namespace get_link_manga
                 case "nhentai.net":
                     return txtNhentaiNetTagUrl;
                 case "nhentai":
-                    return txtNhentaiTagUrl;
+                    return txtNhentaiNetTagUrl;
                 case "hentai2read":
                     return txtHentai2readTagUrl;
                 case "hentaiera":

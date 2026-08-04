@@ -88,14 +88,7 @@ namespace get_link_manga
                     }
                 }
 
-                if (txtNhentaiLog != null)
-                {
-                    AppendLogLine(txtNhentaiLog, logLine, isError);
-                    if (chkAutoScrollNhentaiLog?.IsChecked == true)
-                    {
-                        ScrollTextBoxToEnd(txtNhentaiLog);
-                    }
-                }
+
 
                 if (txtTruyenqqLog != null)
                 {
@@ -380,10 +373,7 @@ namespace get_link_manga
             ClearCheckErrors();
         }
 
-        private void BtnClearNhentaiLog_Click(object sender, RoutedEventArgs e)
-        {
-            ClearLogPanel(txtNhentaiLog);
-        }
+
 
         private void BtnClearViHentaiLog_Click(object sender, RoutedEventArgs e)
         {

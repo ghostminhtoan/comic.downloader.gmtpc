@@ -16,7 +16,6 @@ namespace get_link_manga
             var button = sender as Button;
             
             if (button == btnFetchCaptcha) { url = txtTagUrl.Text; defaultFallbackDomain = "hentaiforce.net"; }
-            else if (button == btnNhentaiFetchCaptcha) { url = txtNhentaiTagUrl.Text; defaultFallbackDomain = "nhentai.xxx"; }
             else if (button == btnViHentaiFetchCaptcha) { url = txtViHentaiTagUrl.Text; defaultFallbackDomain = "vi-hentai.com"; }
             else if (button == btnTruyenqqFetchCaptcha) { url = txtTruyenqqTagUrl.Text; defaultFallbackDomain = "truyenqq.com.vn"; }
             else if (button == btnNettruyenFetchCaptcha) { url = txtNettruyenTagUrl.Text; defaultFallbackDomain = "nettruyenviet10.com"; }
@@ -80,12 +79,7 @@ namespace get_link_manga
                 return;
             }
 
-            if (button == btnNhentaiFetchCaptcha)
-            {
-                ResetCookiesForCaptcha(url);
-                ShowInfo("Đã xóa cookie cho nhentai.xxx. Site này không cần captcha nữa.", "Thông báo");
-                return;
-            }
+
 
             ResetCookiesForCaptcha(url);
 
@@ -166,7 +160,7 @@ namespace get_link_manga
             if (tabLeftPanel?.SelectedIndex == 1)
             {
                 string selectedHentai = (tabHentai?.SelectedItem as TabItem)?.Header?.ToString()?.ToLowerInvariant() ?? string.Empty;
-                if (selectedHentai.Contains("nhentai")) return txtNhentaiTagUrl?.Text?.Trim() ?? string.Empty;
+                if (selectedHentai.Contains("nhentai.net") || selectedHentai.Contains("nhentai")) return txtNhentaiNetTagUrl?.Text?.Trim() ?? string.Empty;
                 if (selectedHentai.Contains("hentai2read")) return txtHentai2readTagUrl?.Text?.Trim() ?? string.Empty;
                 if (selectedHentai.Contains("hentaiera")) return txtHentaieraTagUrl?.Text?.Trim() ?? string.Empty;
                 if (selectedHentai.Contains("hentaiforce")) return txtTagUrl?.Text?.Trim() ?? string.Empty;

@@ -69,27 +69,5 @@ namespace get_link_manga
             UpdateCreateSubfolderFieldsFromSelection();
         }
 
-        private void CmbNhentaiSort_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (_isUpdatingNhentaiUrl) return;
-            if (txtNhentaiTagUrl == null) return;
-
-            if (cmbNhentaiSort.SelectedItem is ComboBoxItem selectedItem)
-            {
-                string sortVal = selectedItem.Tag?.ToString();
-                if (!string.IsNullOrEmpty(sortVal))
-                {
-                    _isUpdatingNhentaiUrl = true;
-                    try
-                    {
-                        txtNhentaiTagUrl.Text = UpdateNhentaiUrlSort(txtNhentaiTagUrl.Text, sortVal);
-                    }
-                    finally
-                    {
-                        _isUpdatingNhentaiUrl = false;
-                    }
-                }
-            }
-        }
     }
 }

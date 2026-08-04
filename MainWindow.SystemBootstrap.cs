@@ -223,7 +223,6 @@ namespace get_link_manga
             Loaded += (s, e) =>
             {
                 StyleComboBoxPopup(cmbCreateSubfolderDomain);
-                StyleComboBoxPopup(cmbNhentaiSort);
                 StyleComboBoxPopup(cmbConnections);
                 StyleComboBoxPopup(cmbMultiDownload);
                 StyleComboBoxPopup(cmbDownloadFolderType);

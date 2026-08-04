@@ -705,5 +705,15 @@ namespace get_link_manga
 
             return string.Empty;
         }
+
+        private string GetNhentaiGalleryIdFromLink(string link)
+        {
+            var match = Regex.Match(link, @"/g/(\d+)", RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+            return "Unknown";
+        }
     }
 }
