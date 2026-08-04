@@ -137,25 +137,27 @@ namespace get_link_manga
             Directory.CreateDirectory(binFolder);
             Directory.CreateDirectory(ringtonesDir);
 
-            for (int i = 0; i < pending.Count; i++)
+            int completedCount = 0;
+            object lockObj = new object();
+
+            Parallel.ForEach(pending, new ParallelOptions { MaxDegreeOfParallelism = 6 }, item =>
             {
-                var item = pending[i];
-                int index = i;
-                
                 using (var client = new WebClient())
                 {
                     client.DownloadProgressChanged += (s, ev) =>
                     {
                         window.Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            window.StatusText.Text = $"Đang tải {item.Name} ({index + 1}/{pending.Count})... {ev.ProgressPercentage}%";
+                            int currentCompleted;
+                            lock (lockObj) { currentCompleted = completedCount; }
+                            window.StatusText.Text = $"Đang tải {item.Name} ({currentCompleted + 1}/{pending.Count})... {ev.ProgressPercentage}%";
                             window.ProgressBar.Value = ev.ProgressPercentage;
                         }));
                     };
 
                     var syncObject = new object();
                     bool done = false;
-                    
+
                     client.DownloadFileCompleted += (s, ev) =>
                     {
                         lock (syncObject)
@@ -174,7 +176,20 @@ namespace get_link_manga
                         }
                     }
                 }
-            }
+
+                lock (lockObj)
+                {
+                    completedCount++;
+                }
+
+                window.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    int currentCompleted;
+                    lock (lockObj) { currentCompleted = completedCount; }
+                    window.StatusText.Text = $"Đã tải ({currentCompleted}/{pending.Count}) file thư viện...";
+                    window.ProgressBar.Value = (int)((double)currentCompleted / pending.Count * 100);
+                }));
+            });
         }
 
         private class DownloadItem

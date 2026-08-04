@@ -3439,19 +3439,19 @@
                             <DataGrid.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Tích chọn dòng đang bôi đen (Check Selected)" Click="MenuCheckSelected_Click">
-                                        <MenuItem.Icon><TextBlock Text="☑" Foreground="#00E5FF" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="☑" Foreground="#0066CC" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Bỏ tích dòng đang bôi đen (Uncheck Selected)" Click="MenuUncheckSelected_Click">
-                                        <MenuItem.Icon><TextBlock Text="☐" Foreground="#888888" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="☐" Foreground="#555555" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Đảo tick các dòng đang bôi đen (Check inverted rows)" Click="MenuInvertSelectedRows_Click">
-                                        <MenuItem.Icon><TextBlock Text="🔄" Foreground="#00E5FF" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="🔄" Foreground="#0066CC" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Đảo ngược trạng thái tích (Invert Checked)" Click="MenuInvertChecked_Click">
-                                        <MenuItem.Icon><TextBlock Text="🔀" Foreground="#00E5FF" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="🔀" Foreground="#0066CC" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Name="menuSplitChaptersToParallelTasks" Header="Split Chapters to Parallel Tasks">
-                                        <MenuItem.Icon><TextBlock Text="⚡" Foreground="#FFD700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="⚡" Foreground="#D97700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                         <MenuItem Header="50" Tag="50" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                         <MenuItem Header="100" Tag="100" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                         <MenuItem Header="200" Tag="200" Click="MenuSplitChaptersToParallelTasks_Click"/>
@@ -3459,60 +3459,60 @@
                                         <MenuItem Header="400" Tag="400" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                     </MenuItem>
                                     <MenuItem Header="Đưa lên đầu" Click="MenuMoveSelectedToTop_Click">
-                                        <MenuItem.Icon><TextBlock Text="⬆" Foreground="#00FF87" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="⬆" Foreground="#008844" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Đưa xuống cuối" Click="MenuMoveSelectedToBottom_Click">
-                                        <MenuItem.Icon><TextBlock Text="⬇" Foreground="#00FF87" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="⬇" Foreground="#008844" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <Separator/>
                                     <MenuItem Header="Mở link trong trình duyệt" Click="MenuOpenInBrowser_Click">
-                                        <MenuItem.Icon><TextBlock Text="🌐" Foreground="#00E5FF" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="🌐" Foreground="#0066CC" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <Separator/>
                                     <MenuItem Header="Copy link các dòng đang chọn (Copy Selected Links)" Click="MenuCopySelectedLinks_Click">
-                                        <MenuItem.Icon><TextBlock Text="📋" Foreground="#FFD700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="📋" Foreground="#D97700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Copy tên + link truyện (Copy Name + Link)" Click="BtnCopyNamesAndLinks_Click">
-                                        <MenuItem.Icon><TextBlock Text="📝" Foreground="#FFD700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="📝" Foreground="#D97700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Copy chapters link" Click="BtnCopyChaptersLink_Click">
-                                        <MenuItem.Icon><TextBlock Text="🔗" Foreground="#FFD700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="🔗" Foreground="#D97700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Merge novel book (Gộp MD)" Click="BtnMergeLightNovelBookMarkdown_Click">
-                                        <MenuItem.Icon><TextBlock Text="📄" Foreground="#C77DFF" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="📄" Foreground="#800080" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Gộp truyện split (Merge Split Chapters)" Click="BtnMergeParallelSplitChapters_Click">
-                                        <MenuItem.Icon><TextBlock Text="🧩" Foreground="#C77DFF" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="🧩" Foreground="#800080" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Quét lại chap thiếu (Rescan Missing Chapter)" Click="BtnRescanMissingChapter_Click">
-                                        <MenuItem.Icon><TextBlock Text="🔍" Foreground="#FF9E00" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="🔍" Foreground="#D97700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Pause chap số nguyên thiếu (Pause Missing Chapter Scan)" Click="BtnPauseResumeDownloadMissingChapters_Click">
-                                        <MenuItem.Icon><TextBlock Text="⏸" Foreground="#FF9E00" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="⏸" Foreground="#D97700" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Mở cache JSON (Open Cache JSON)" Click="BtnOpenDownloadMissingChapterCache_Click">
-                                        <MenuItem.Icon><TextBlock Text="📂" Foreground="#FF9E00" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="📂" Foreground="#D97700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Xóa cache JSON (Clear Cache JSON)" Click="BtnClearDownloadMissingChapterCache_Click">
-                                        <MenuItem.Icon><TextBlock Text="🗑" Foreground="#FF0055" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="🗑" Foreground="#CC0033" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <Separator/>
                                     <MenuItem Header="Xóa các dòng đang bôi đen (Delete Selected)" Click="MenuDeleteSelected_Click">
-                                        <MenuItem.Icon><TextBlock Text="✖" Foreground="#FF0055" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="✖" Foreground="#CC0033" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Xóa các dòng đã tích (Delete Checked)" Click="MenuDeleteChecked_Click">
-                                        <MenuItem.Icon><TextBlock Text="❌" Foreground="#FF0055" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="❌" Foreground="#CC0033" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <Separator/>
                                     <MenuItem Header="Tìm trên các web khác (Search with other websites)" Click="MenuSearchWithOtherWebsites_Click">
-                                        <MenuItem.Icon><TextBlock Text="🔎" Foreground="#00FF87" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="🔎" Foreground="#008844" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <Separator/>
                                     <MenuItem Header="Tải các dòng đang bôi đen (Download highlighted lines)" Click="MenuDownloadSelected_Click">
-                                        <MenuItem.Icon><TextBlock Text="📥" Foreground="#00FF87" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="📥" Foreground="#008844" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Tải các dòng đã tích (Download selected lines)" Click="MenuDownloadChecked_Click">
-                                        <MenuItem.Icon><TextBlock Text="⬇" Foreground="#00FF87" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                        <MenuItem.Icon><TextBlock Text="⬇" Foreground="#008844" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                 </ContextMenu>
                             </DataGrid.ContextMenu>
@@ -4078,19 +4078,19 @@
                         <ListBox.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Tích chọn dòng đang bôi đen (Check Selected)" Click="MenuCheckSelected_Click">
-                                    <MenuItem.Icon><TextBlock Text="☑" Foreground="#00E5FF" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="☑" Foreground="#0066CC" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Bỏ tích dòng đang bôi đen (Uncheck Selected)" Click="MenuUncheckSelected_Click">
-                                    <MenuItem.Icon><TextBlock Text="☐" Foreground="#888888" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="☐" Foreground="#555555" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Đảo tick các dòng đang bôi đen (Check inverted rows)" Click="MenuInvertSelectedRows_Click">
-                                    <MenuItem.Icon><TextBlock Text="🔄" Foreground="#00E5FF" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="🔄" Foreground="#0066CC" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Đảo ngược trạng thái tích (Invert Checked)" Click="MenuInvertChecked_Click">
-                                    <MenuItem.Icon><TextBlock Text="🔀" Foreground="#00E5FF" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="🔀" Foreground="#0066CC" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Name="menuSplitChaptersToParallelTasksThumbnail" Header="Split Chapters to Parallel Tasks">
-                                    <MenuItem.Icon><TextBlock Text="⚡" Foreground="#FFD700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="⚡" Foreground="#D97700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     <MenuItem Header="50" Tag="50" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                     <MenuItem Header="100" Tag="100" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                     <MenuItem Header="200" Tag="200" Click="MenuSplitChaptersToParallelTasks_Click"/>
@@ -4098,56 +4098,56 @@
                                     <MenuItem Header="400" Tag="400" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                 </MenuItem>
                                 <MenuItem Header="Đưa lên đầu" Click="MenuMoveSelectedToTop_Click">
-                                    <MenuItem.Icon><TextBlock Text="⬆" Foreground="#00FF87" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="⬆" Foreground="#008844" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Đưa xuống cuối" Click="MenuMoveSelectedToBottom_Click">
-                                    <MenuItem.Icon><TextBlock Text="⬇" Foreground="#00FF87" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="⬇" Foreground="#008844" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <Separator/>
                                 <MenuItem Header="Mở link trong trình duyệt" Click="MenuOpenInBrowser_Click">
-                                    <MenuItem.Icon><TextBlock Text="🌐" Foreground="#00E5FF" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="🌐" Foreground="#0066CC" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <Separator/>
                                 <MenuItem Header="Copy link các dòng đang chọn (Copy Selected Links)" Click="MenuCopySelectedLinks_Click">
-                                    <MenuItem.Icon><TextBlock Text="📋" Foreground="#FFD700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="📋" Foreground="#D97700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Copy tên + link truyện (Copy Name + Link)" Click="BtnCopyNamesAndLinks_Click">
-                                    <MenuItem.Icon><TextBlock Text="📝" Foreground="#FFD700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="📝" Foreground="#D97700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Copy chapters link" Click="BtnCopyChaptersLink_Click">
-                                    <MenuItem.Icon><TextBlock Text="🔗" Foreground="#FFD700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="🔗" Foreground="#D97700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Merge novel book (Gộp MD)" Click="BtnMergeLightNovelBookMarkdown_Click">
-                                    <MenuItem.Icon><TextBlock Text="📄" Foreground="#C77DFF" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="📄" Foreground="#800080" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Gộp truyện split (Merge Split Chapters)" Click="BtnMergeParallelSplitChapters_Click">
-                                    <MenuItem.Icon><TextBlock Text="🧩" Foreground="#C77DFF" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="🧩" Foreground="#800080" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Quét lại chap thiếu (Rescan Missing Chapter)" Click="BtnRescanMissingChapter_Click">
-                                    <MenuItem.Icon><TextBlock Text="🔍" Foreground="#FF9E00" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="🔍" Foreground="#D97700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Pause chap số nguyên thiếu (Pause Missing Chapter Scan)" Click="BtnPauseResumeDownloadMissingChapters_Click">
-                                    <MenuItem.Icon><TextBlock Text="⏸" Foreground="#FF9E00" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="⏸" Foreground="#D97700" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Mở cache JSON (Open Cache JSON)" Click="BtnOpenDownloadMissingChapterCache_Click">
-                                    <MenuItem.Icon><TextBlock Text="📂" Foreground="#FF9E00" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="📂" Foreground="#D97700" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Xóa cache JSON (Clear Cache JSON)" Click="BtnClearDownloadMissingChapterCache_Click">
-                                    <MenuItem.Icon><TextBlock Text="🗑" Foreground="#FF0055" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="🗑" Foreground="#CC0033" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <Separator/>
                                 <MenuItem Header="Xóa các dòng đang bôi đen (Delete Selected)" Click="MenuDeleteSelected_Click">
-                                    <MenuItem.Icon><TextBlock Text="✖" Foreground="#FF0055" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="✖" Foreground="#CC0033" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Xóa các dòng đã tích (Delete Checked)" Click="MenuDeleteChecked_Click">
-                                    <MenuItem.Icon><TextBlock Text="❌" Foreground="#FF0055" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="❌" Foreground="#CC0033" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <Separator/>
                                 <MenuItem Header="Tải các dòng đang bôi đen (Download highlighted lines)" Click="MenuDownloadSelected_Click">
-                                    <MenuItem.Icon><TextBlock Text="📥" Foreground="#00FF87" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="📥" Foreground="#008844" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem Header="Tải các dòng đã tích (Download selected lines)" Click="MenuDownloadChecked_Click">
-                                    <MenuItem.Icon><TextBlock Text="⬇" Foreground="#00FF87" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    <MenuItem.Icon><TextBlock Text="⬇" Foreground="#008844" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
                             </ContextMenu>
                         </ListBox.ContextMenu>
