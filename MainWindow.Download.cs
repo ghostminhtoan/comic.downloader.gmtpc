@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -3328,13 +3328,18 @@ namespace get_link_manga
                                 if (!string.IsNullOrWhiteSpace(preResolvedUrl))
                                 {
                                     // nhentai.net: download CDN URL directly (no reader page fetch)
-                                    // With intelligent fallback for extension (.gif -> .webp -> .jpg -> .png -> .jpeg -> .bmp) if one fails
+                                    // With intelligent fallback for extension (webp -> jpg -> png) if one fails
                                     string ext = Path.GetExtension(preResolvedUrl);
                                     string baseCdnUrl = preResolvedUrl.Substring(0, preResolvedUrl.Length - ext.Length);
-                                    string[] extensionsToTry = new[] { ext, ".gif", ".webp", ".jpg", ".png", ".jpeg", ".bmp" }
-                                        .Where(e => !string.IsNullOrWhiteSpace(e))
-                                        .Distinct(StringComparer.OrdinalIgnoreCase)
-                                        .ToArray();
+                                    var extList = new System.Collections.Generic.List<string> { ext };
+                                     foreach (var e in new[] { ".webp", ".jpg", ".png", ".gif", ".jpeg", ".bmp" })
+                                     {
+                                         if (!extList.Contains(e, StringComparer.OrdinalIgnoreCase))
+                                         {
+                                             extList.Add(e);
+                                         }
+                                     }
+                                     string[] extensionsToTry = extList.ToArray();
                                     
                                     bool downloadSuccess = false;
                                     Exception lastEx = null;
@@ -3368,7 +3373,7 @@ namespace get_link_manga
                                     {
                                         throw lastEx ?? new Exception($"Không thể tải được ảnh từ CDN với bất kỳ định dạng nào.");
                                     }
-                                    Log($"[nhentai.net] Trang {pageNum} -> {activeUrl}", LogSeverity.Info, "nhentai.net");
+                                    Log($"[nhentai.net] Trang {pageNum} -> {activeUrl}");
                                 }
                                 else
                                 {
@@ -3510,7 +3515,7 @@ namespace get_link_manga
                 if (pagesMatch.Success)
                 {
                     string pagesJson = pagesMatch.Groups[1].Value;
-                    var typeMatches = Regex.Matches(pagesJson, @"""t""\s*:\s*""([a-z]+)""", RegexOptions.IgnoreCase);
+                    var typeMatches = Regex.Matches(pagesJson, @"""t""\s*:\s*""([a-z])""", RegexOptions.IgnoreCase);
                     if (typeMatches.Count == totalPages)
                     {
                         for (int i = 0; i < totalPages; i++)
@@ -4785,6 +4790,10 @@ namespace get_link_manga
                                     {
                                         using (var fallbackResponse = await httpClient.SendAsync(fallbackRequest, HttpCompletionOption.ResponseHeadersRead, token))
                                         {
+                                            if (fallbackResponse.StatusCode == HttpStatusCode.NotFound)
+                                            {
+                                                throw new HttpRequestException("404 (Not Found)");
+                                            }
                                             if (fallbackResponse.IsSuccessStatusCode)
                                             {
                                                 using (var contentStream = await fallbackResponse.Content.ReadAsStreamAsync())
@@ -4798,6 +4807,10 @@ namespace get_link_manga
                                     }
                                 }
 
+                                if (response.StatusCode == HttpStatusCode.NotFound)
+                                {
+                                    throw new HttpRequestException("404 (Not Found)");
+                                }
                                 response.EnsureSuccessStatusCode();
 
                                 using (var contentStream = await response.Content.ReadAsStreamAsync())
@@ -4811,6 +4824,10 @@ namespace get_link_manga
                     }
                     catch (HttpRequestException ex) when (attempt < maxAttempts)
                     {
+                        if (url != null && (url.Contains("nhentai.net") || url.Contains("nhentai.xxx") || url.Contains("nhentaimg.com")) && (ex.Message.Contains("404") || (ex.InnerException != null && ex.InnerException.Message.Contains("404"))))
+                        {
+                            throw;
+                        }
                         if (url != null &&
                             (url.IndexOf("mangadex.network", StringComparison.OrdinalIgnoreCase) >= 0 ||
                              url.IndexOf("uploads.mangadex.org", StringComparison.OrdinalIgnoreCase) >= 0))

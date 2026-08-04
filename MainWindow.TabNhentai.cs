@@ -74,6 +74,21 @@ namespace get_link_manga
             if (url.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 url.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0)
             {
+                if (url.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    _isUpdatingNhentaiUrl = true;
+                    try
+                    {
+                        txtNhentaiTagUrl.Text = url.Replace("nhentai.net", "nhentai.xxx");
+                    }
+                    finally
+                    {
+                        _isUpdatingNhentaiUrl = false;
+                    }
+
+                    url = txtNhentaiTagUrl.Text.Trim();
+                }
+
                 var match = Regex.Match(url, @"[?&](?:amp;)?sort=([^&]+)", RegexOptions.IgnoreCase);
                 if (match.Success)
                 {

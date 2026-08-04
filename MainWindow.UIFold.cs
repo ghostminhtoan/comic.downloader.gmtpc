@@ -239,6 +239,10 @@ namespace get_link_manga
                     SelectAppSection(AppSection.Update);
                     e.Handled = true;
                     return;
+                case Key.L:
+                    SelectAppSection(AppSection.TraceLog);
+                    e.Handled = true;
+                    return;
             }
         }
 
