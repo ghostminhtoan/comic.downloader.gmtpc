@@ -677,6 +677,11 @@ namespace get_link_manga
                 txtMangadexNoPaginationLabel.Text = _isVietnameseUi ? "WEB KHÔNG HỖ TRỢ PHÂN TRANG" : "WEBSITE DOES NOT SUPPORT PAGINATION";
             }
 
+            if (txtDaomeodenNoPaginationLabel != null)
+            {
+                txtDaomeodenNoPaginationLabel.Text = _isVietnameseUi ? "WEB KHÔNG HỖ TRỢ PHÂN TRANG" : "WEBSITE DOES NOT SUPPORT PAGINATION";
+            }
+
             if (txtDamconuongHelpText != null)
             {
                 txtDamconuongHelpText.Text = _isVietnameseUi

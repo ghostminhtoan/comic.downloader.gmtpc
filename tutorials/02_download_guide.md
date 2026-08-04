@@ -31,14 +31,16 @@ en: Download Guide
   - Hentai2read
   - Hentaiera
   - Daomeoden
-  - Mangadex
-
-🔴 CÁC WEB KHÔNG HỖ TRỢ ANALYZE (Chỉ dán link truyện / chapter trực tiếp):
   - Damconuong.shop
-  - Vi-hentai
+  - HentaiVN
+  - Hako / Docln (Light Novel)
   - NHentai (.net / .xxx)
   - Dilib.vn / Thuviensach.vn
-  - Hako / Docln (Light Novel)
+
+
+🔴 CÁC WEB KHÔNG HỖ TRỢ ANALYZE (Chỉ dán link truyện / chapter trực tiếp):
+ - Mangadex
+
 
 <!-- EN -->
 ## 📥 2 MAIN WAYS TO DOWNLOAD COMICS
@@ -61,18 +63,18 @@ The app supports 2 flexible methods to get comic links:
 
 ## 📋 ANALYZE SUPPORT MATRIX
 🟢 SITES WITH ANALYZE SUPPORT (Bulk filter/tag/page extraction):
-  - TruyenQQ
+  - TruyenQQ (truyenqqko.com)
   - Nettruyen / Nettruyen.tech / Nettruyenviet10
   - Sayhentai / Truyengg
   - Hentaiforce
   - Hentai2read
   - Hentaiera
   - Daomeoden
-  - Mangadex
-
-🔴 SITES WITHOUT ANALYZE (Direct book / chapter paste only):
   - Damconuong.shop
-  - Vi-hentai
+  - HentaiVN
+  - Hako / Docln (Light Novel)
   - NHentai (.net / .xxx)
   - Dilib.vn / Thuviensach.vn
-  - Hako / Docln (Light Novel)
+
+🔴 SITES WITHOUT ANALYZE (Direct book / chapter paste only):
+ - Mangadex
