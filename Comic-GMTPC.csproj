@@ -512,5 +512,10 @@
           DestinationFiles="@(ReleaseOutputFiles->'$(ReleasePackageDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Message Text="Published release output to $(ReleasePackageDir)" Importance="High" />
   </Target>
+  <ItemGroup>
+    <Content Include="tutorials\*.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

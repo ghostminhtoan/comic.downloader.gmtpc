@@ -1106,12 +1106,36 @@ namespace get_link_manga
                 Margin = new Thickness(0)
             };
 
-            tabControl.Items.Add(CreateTutorialTab(_isVietnameseUi ? "Thiết lập DNS & Traffic" : "DNS & Traffic Config", CreateDnsTrafficTabContent()));
-            tabControl.Items.Add(CreateTutorialTab(_isVietnameseUi ? "Hướng dẫn download" : "Download Guide", CreateDownloadGuideTabContent()));
-            tabControl.Items.Add(CreateTutorialTab(_isVietnameseUi ? "Thao tác download" : "Download Operations", CreateDownloadOperationsTabContent()));
-            tabControl.Items.Add(CreateTutorialTab(_isVietnameseUi ? "Scan missing chapter" : "Scan Missing Chapters", CreateScanMissingTabContent()));
-            tabControl.Items.Add(CreateTutorialTab(_isVietnameseUi ? "Floating button" : "Floating Button", CreateFloatingButtonTabContent()));
-            tabControl.Items.Add(CreateTutorialTab(_isVietnameseUi ? "Công cụ & Tiện ích" : "Tools & Utilities", CreateToolsAndUtilitiesTabContent()));
+            string tutorialsDir = Path.Combine(PortablePaths.AppRoot, "tutorials");
+            if (Directory.Exists(tutorialsDir))
+            {
+                var mdFiles = Directory.GetFiles(tutorialsDir, "*.md").OrderBy(f => Path.GetFileName(f)).ToArray();
+                foreach (var mdFile in mdFiles)
+                {
+                    try
+                    {
+                        string raw = File.ReadAllText(mdFile, Encoding.UTF8);
+                        ParseTutorialFrontmatter(raw, out string viTitle, out string enTitle, out string viBody, out string enBody);
+                        string tabHeader = _isVietnameseUi ? viTitle : enTitle;
+                        string body = _isVietnameseUi ? viBody : enBody;
+                        if (string.IsNullOrWhiteSpace(tabHeader)) tabHeader = Path.GetFileNameWithoutExtension(mdFile);
+                        tabControl.Items.Add(CreateTutorialTab(tabHeader, RenderMarkdownToUI(body)));
+                    }
+                    catch { /* skip broken md files */ }
+                }
+            }
+
+            if (tabControl.Items.Count == 0)
+            {
+                var fallback = new TextBlock
+                {
+                    Text = _isVietnameseUi ? "Không tìm thấy file hướng dẫn trong folder tutorials/" : "No tutorial files found in tutorials/ folder",
+                    Foreground = (Brush)TryFindResource("CyberpunkTextBrush") ?? Brushes.White,
+                    FontSize = 12,
+                    Margin = new Thickness(12)
+                };
+                return fallback;
+            }
 
             var border = new Border
             {
@@ -1124,6 +1148,99 @@ namespace get_link_manga
 
             border.Child = tabControl;
             return border;
+        }
+
+        private void ParseTutorialFrontmatter(string raw, out string viTitle, out string enTitle, out string viBody, out string enBody)
+        {
+            viTitle = ""; enTitle = ""; viBody = ""; enBody = "";
+            string content = raw;
+
+            // Parse YAML frontmatter between --- lines
+            if (raw.StartsWith("---"))
+            {
+                int endFm = raw.IndexOf("\n---", 3);
+                if (endFm < 0) endFm = raw.IndexOf("\r\n---", 3);
+                if (endFm > 0)
+                {
+                    string fm = raw.Substring(3, endFm - 3);
+                    content = raw.Substring(raw.IndexOf('\n', endFm + 3) + 1);
+                    foreach (var line in fm.Split('\n'))
+                    {
+                        var trimmed = line.Trim().TrimEnd('\r');
+                        if (trimmed.StartsWith("vi:")) viTitle = trimmed.Substring(3).Trim();
+                        else if (trimmed.StartsWith("en:")) enTitle = trimmed.Substring(3).Trim();
+                    }
+                }
+            }
+
+            // Split by <!-- VI --> and <!-- EN --> markers
+            int viIdx = content.IndexOf("<!-- VI -->", StringComparison.OrdinalIgnoreCase);
+            int enIdx = content.IndexOf("<!-- EN -->", StringComparison.OrdinalIgnoreCase);
+
+            if (viIdx >= 0 && enIdx >= 0)
+            {
+                if (viIdx < enIdx)
+                {
+                    viBody = content.Substring(viIdx + 11, enIdx - viIdx - 11).Trim();
+                    enBody = content.Substring(enIdx + 11).Trim();
+                }
+                else
+                {
+                    enBody = content.Substring(enIdx + 11, viIdx - enIdx - 11).Trim();
+                    viBody = content.Substring(viIdx + 11).Trim();
+                }
+            }
+            else
+            {
+                // No language markers — use entire content for both
+                viBody = content.Trim();
+                enBody = content.Trim();
+            }
+        }
+
+        private UIElement RenderMarkdownToUI(string markdown)
+        {
+            var stack = new StackPanel();
+            if (string.IsNullOrWhiteSpace(markdown)) return stack;
+
+            var lines = markdown.Split('\n');
+            var cardBodyLines = new List<string>();
+            string currentCardTitle = null;
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                var line = lines[i].TrimEnd('\r');
+
+                // ## heading = new card
+                if (line.StartsWith("## "))
+                {
+                    // Flush previous card
+                    if (currentCardTitle != null)
+                    {
+                        AddTutorialCard(stack, currentCardTitle, string.Join("\n", cardBodyLines).Trim());
+                        cardBodyLines.Clear();
+                    }
+                    currentCardTitle = line.Substring(3).Trim();
+                }
+                else if (currentCardTitle != null)
+                {
+                    cardBodyLines.Add(line);
+                }
+                else
+                {
+                    // Lines before any ## heading — add as plain text
+                    if (!string.IsNullOrWhiteSpace(line))
+                        cardBodyLines.Add(line);
+                }
+            }
+
+            // Flush last card
+            if (currentCardTitle != null)
+                AddTutorialCard(stack, currentCardTitle, string.Join("\n", cardBodyLines).Trim());
+            else if (cardBodyLines.Count > 0)
+                AddTutorialCard(stack, "", string.Join("\n", cardBodyLines).Trim());
+
+            return stack;
         }
 
         private TabItem CreateTutorialTab(string headerText, UIElement content)
@@ -1193,282 +1310,6 @@ namespace get_link_manga
             return tabItem;
         }
 
-        private UIElement CreateDnsTrafficTabContent()
-        {
-            var stack = new StackPanel();
-            AddTutorialCard(stack, _isVietnameseUi ? "🌐 CẤU HÌNH HỆ THỐNG DNS & TRAFFIC THEO TRANG" : "🌐 SYSTEM DNS & TRAFFIC CONFIG BY DOMAIN",
-                _isVietnameseUi
-                ? "Trong menu Nguồn (Source), các trang web được phân loại chính xác theo giao thức kết nối để tối ưu tốc độ và vượt chặn nhà mạng:"
-                : "In Source menu, websites are mapped to optimal DNS & traffic protocols for speed and bypass:");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "1. Manga / 1.1.1.1 DNS Only (HTTPS)" : "1. Manga / 1.1.1.1 DNS Only (HTTPS)",
-                _isVietnameseUi
-                ? "• 1.1.1.1 của tab Manga: Sử dụng chế độ DNS Only (HTTPS).\n" +
-                  "• Đảm bảo truy cập mượt mà các trang manga thông thường qua Cloudflare DNS mã hóa."
-                : "• 1.1.1.1 tab in Manga section: Uses DNS Only (HTTPS) mode.\n" +
-                  "• Ensures fast & encrypted Cloudflare DNS resolution for manga sites.");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "2. Hentai DNS Only (HTTPS)" : "2. Hentai DNS Only (HTTPS)",
-                _isVietnameseUi
-                ? "Các web hentai sau đây BẮT BUỘC sử dụng chế độ DNS Only (HTTPS):\n" +
-                  "  - damconuong.shop\n" +
-                  "  - sayhentai\n" +
-                  "  - hentaiforce\n" +
-                  "  - nhentai.xxx\n" +
-                  "  - hentai2read\n" +
-                  "  - hentaiera\n" +
-                  "  - daomeoden"
-                : "The following hentai sites MUST use DNS Only (HTTPS) mode:\n" +
-                  "  - damconuong.shop\n" +
-                  "  - sayhentai\n" +
-                  "  - hentaiforce\n" +
-                  "  - nhentai.xxx\n" +
-                  "  - hentai2read\n" +
-                  "  - hentaiera\n" +
-                  "  - daomeoden");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "3. Bắt buộc Traffic & DNS UDP" : "3. Mandatory Traffic & DNS UDP",
-                _isVietnameseUi
-                ? "Các trang web sau đây BẮT BUỘC phải dùng Traffic & DNS UDP để đường truyền ổn định không bị nhà mạng bóp:\n" +
-                  "  - hentaivn\n" +
-                  "  - nhentai.net\n" +
-                  "  - hako (ln.hako.vn / docln.net)"
-                : "The following sites MUST use Traffic & DNS UDP to bypass ISP throttling:\n" +
-                  "  - hentaivn\n" +
-                  "  - nhentai.net\n" +
-                  "  - hako (ln.hako.vn / docln.net)");
-
-            return stack;
-        }
-
-        private UIElement CreateDownloadGuideTabContent()
-        {
-            var stack = new StackPanel();
-
-            AddTutorialCard(stack, _isVietnameseUi ? "📥 HƯỚNG DẪN TẢI TRUYỆN THEO 2 PHƯƠNG THỨC CHÍNH" : "📥 2 MAIN WAYS TO DOWNLOAD COMICS",
-                _isVietnameseUi
-                ? "Ứng dụng hỗ trợ 2 cơ chế lấy link truyện linh hoạt tùy theo nhu cầu của người dùng:"
-                : "The app supports 2 flexible methods to get comic links:");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "Hướng 1: Dán trực tiếp & Drag & Drop / Auto Paste" : "Method 1: Direct Paste & Drag & Drop / Auto Paste",
-                _isVietnameseUi
-                ? "• Ctrl + V: Dán trực tiếp link truyện từ trình duyệt vào ô dán link của app.\n" +
-                  "• Kéo & thả (Drag & Drop): Nắm giữ URL từ trình duyệt và thả thẳng vào danh sách app.\n" +
-                  "• Auto Paste (Nút nổi Floating Button):\n" +
-                  "  - Bật Auto Paste trên nút nổi, bất kỳ link truyện nào bạn Ctrl+C từ trình duyệt sẽ tự động được dán vào hàng chờ app.\n" +
-                  "  ⚠️ LƯU Ý QUAN TRỌNG: Hãy nhớ TẮT AUTO PASTE trên nút nổi khi không cần lấy thêm link nữa để tránh dán nhầm các văn bản/link không liên quan!"
-                : "• Ctrl + V: Copy URL from browser and paste directly into link box.\n" +
-                  "• Drag & Drop: Drag link from browser and drop into queue.\n" +
-                  "• Auto Paste (Floating Button):\n" +
-                  "  - Turn on Auto Paste on floating button. Any comic link copied (Ctrl+C) will automatically enter app queue.\n" +
-                  "  ⚠️ IMPORTANT NOTE: Turn OFF Auto Paste when finished to prevent unwanted pastes!");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "Hướng 2: Analyze (Tải hàng loạt theo bộ lọc từ Web)" : "Method 2: Analyze (Bulk Download with Web Filters)",
-                _isVietnameseUi
-                ? "• Bước 1: Vào tab Nguồn (Source) tương ứng với web truyện bạn muốn tải.\n" +
-                  "• Bước 2: Dán link trang danh sách / bộ lọc / thể loại / tác giả vào ô mục tiêu.\n" +
-                  "• Bước 3: Bấm 'Analyze target page' để kiểm tra tổng số trang.\n" +
-                  "• Bước 4: Nhập khoảng trang (Từ trang ... Đến trang ...).\n" +
-                  "• Bước 5: Chọn 'Get Link' (Tải lại từ đầu) hoặc 'Get More' (Lấy thêm trang mà KHÔNG làm mất danh sách trước đó).\n" +
-                  "  ⚠️ CẢNH BÁO QUAN TRỌNG: Chọn 'Get Link' sẽ XÓA TOÀN BỘ danh sách link đã get trước đó và thay bằng danh sách mới. Hãy sử dụng 'Get More' nếu muốn nối tiếp danh sách!"
-                : "• Step 1: Go to Source tab matching your site.\n" +
-                  "• Step 2: Paste tag / search list URL into target box.\n" +
-                  "• Step 3: Click 'Analyze target page' to analyze total pages.\n" +
-                  "• Step 4: Input range (From page ... To page ...).\n" +
-                  "• Step 5: Choose 'Get Link' (Fresh fetch) or 'Get More' (Append pages without losing existing list).\n" +
-                  "  ⚠️ WARNING: 'Get Link' WIPES ALL existing links in queue! Use 'Get More' to preserve and append list!");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "📋 DANH SÁCH WEB HỖ TRỢ ANALYZE & KHÔNG HỖ TRỢ ANALYZE" : "📋 ANALYZE SUPPORT MATRIX",
-                _isVietnameseUi
-                ? "🟢 CÁC WEB HỖ TRỢ ANALYZE (Tải theo bộ lọc, trang, tác giả, thể loại):\n" +
-                  "  - TruyenQQ (truyenqqko.com)\n" +
-                  "  - Nettruyen / Nettruyen.tech / Nettruyenviet10\n" +
-                  "  - Sayhentai / Truyengg\n" +
-                  "  - Hentaiforce\n" +
-                  "  - Hentai2read\n" +
-                  "  - Hentaiera\n" +
-                  "  - Daomeoden\n" +
-                  "  - Mangadex\n\n" +
-                  "🔴 CÁC WEB KHÔNG HỖ TRỢ ANALYZE (Chỉ dán link truyện / chapter trực tiếp):\n" +
-                  "  - Damconuong.shop\n" +
-                  "  - Vi-hentai\n" +
-                  "  - NHentai (.net / .xxx)\n" +
-                  "  - Dilib.vn / Thuviensach.vn\n" +
-                  "  - Hako / Docln (Light Novel)"
-                : "🟢 SITES WITH ANALYZE SUPPORT (Bulk filter/tag/page extraction):\n" +
-                  "  - TruyenQQ\n" +
-                  "  - Nettruyen / Nettruyen.tech / Nettruyenviet10\n" +
-                  "  - Sayhentai / Truyengg\n" +
-                  "  - Hentaiforce\n" +
-                  "  - Hentai2read\n" +
-                  "  - Hentaiera\n" +
-                  "  - Daomeoden\n" +
-                  "  - Mangadex\n\n" +
-                  "🔴 SITES WITHOUT ANALYZE (Direct book / chapter paste only):\n" +
-                  "  - Damconuong.shop\n" +
-                  "  - Vi-hentai\n" +
-                  "  - NHentai (.net / .xxx)\n" +
-                  "  - Dilib.vn / Thuviensach.vn\n" +
-                  "  - Hako / Docln (Light Novel)");
-
-            return stack;
-        }
-
-        private UIElement CreateDownloadOperationsTabContent()
-        {
-            var stack = new StackPanel();
-
-            AddTutorialCard(stack, _isVietnameseUi ? "⚡ THAO TÁC TRÊN HÀNG CHỜ TẢI (DOWNLOAD QUEUE)" : "⚡ DOWNLOAD QUEUE OPERATIONS",
-                _isVietnameseUi
-                ? "Hướng dẫn chi tiết sử dụng các nút chức năng, bộ sắp xếp và Combobox cấu hình:"
-                : "Detailed guide for action buttons, sorting, and configuration comboboxes:");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "1. Các nút điều khiển chính" : "1. Core Action Buttons",
-                _isVietnameseUi
-                ? "• TẢI TẤT CẢ (DOWNLOAD ALL): Bắt đầu tiến trình tải hàng loạt cho các truyện được tích chọn.\n" +
-                  "• STOP: Dừng ngay tiến trình tải hiện tại. Tiến trình tôn trọng CancellationToken và an toàn khi resume.\n" +
-                  "• TỰ THỬ LẠI ĐẾN KHI XONG (AUTO RETRY): Tự động thử lại các chapter/ảnh bị lỗi do mạng cho đến khi hoàn tất 100%.\n" +
-                  "• DÒNG GỌN (COMPACT ROW): Thu gọn hàng trong bảng chi tiết để xem được nhiều truyện hơn trên màn hình.\n" +
-                  "• XEM TRƯỚC POPUP (POPUP PREVIEW): Bật/tắt cửa sổ di chuột xem thử bìa truyện và thông tin thiếu chap."
-                : "• DOWNLOAD ALL: Start downloading all checked items.\n" +
-                  "• STOP: Gracefully cancel downloading tasks.\n" +
-                  "• AUTO RETRY UNTIL SETTLED: Automatically retry failed chapters/images until 100% complete.\n" +
-                  "• COMPACT ROW: Toggle compact row height to view more items on screen.\n" +
-                  "• POPUP PREVIEW: Toggle hover popup preview for cover & missing chapter info.");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "2. Combobox cấu hình thư mục & Sort" : "2. Folder Mode Combobox & Sort",
-                _isVietnameseUi
-                ? "• Combobox Mode Thư Mục:\n" +
-                  "  - Single comic: Lưu theo cấu trúc `root\\tên truyện\\tên chapter\\ảnh` (Dành cho truyện nhiều tập/chương).\n" +
-                  "  - Multi-comic: Lưu theo cấu trúc gộp thư mục tối ưu cho các bộ hentai/oneshot ngắn.\n" +
-                  "• Combobox / Nút Sắp Sếp (Sort Option):\n" +
-                  "  - Mới nhất (Recent): Sắp xếp danh sách theo chương/truyện cập nhật mới nhất.\n" +
-                  "  - Phổ biến hôm nay / tuần này / mọi lúc: Sắp xếp theo thứ tự lượt xem/độ hot."
-                : "• Folder Mode Combobox:\n" +
-                  "  - Single comic: Standard structure `root\\book name\\chapter name\\images`.\n" +
-                  "  - Multi-comic: Flat folder structure optimized for oneshots/doujinshi.\n" +
-                  "• Sort Option Combobox / Buttons:\n" +
-                  "  - Recent: Sort queue by latest releases.\n" +
-                  "  - Popular Today / Week / All Time: Sort queue by view counts & popularity.");
-
-            return stack;
-        }
-
-        private UIElement CreateScanMissingTabContent()
-        {
-            var stack = new StackPanel();
-
-            AddTutorialCard(stack, _isVietnameseUi ? "🔍 SCAN MISSING INTEGER CHAPTER (QUÉT CHAP SỐ NGUYÊN THIẾU)" : "🔍 SCAN MISSING INTEGER CHAPTERS",
-                _isVietnameseUi
-                ? "Tính năng thông minh tự động phát hiện các chapter số nguyên bị thiếu trong bộ truyện:"
-                : "Smart engine automatically detecting missing integer chapters in a series:");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "1. Tự động Quét & Phân Tích Range" : "1. Auto Scan & Range Analysis",
-                _isVietnameseUi
-                ? "• Ngay sau khi Get Link / Import link, app sẽ tự động quét danh sách chapter từ nguồn web.\n" +
-                  "• Hệ thống phân tích chính xác các label dạng `số:số`, `số-số` (ví dụ `Chapter 58: 59`) là dải phủ đủ chap, không báo thiếu nhầm.\n" +
-                  "• Phân biệt truyện chính xác theo Link/Domain chứ không chỉ theo tên truyện."
-                : "• Auto-triggers right after Get Link or link import.\n" +
-                  "• Parses range labels like `58:59` or `58-59` accurately to prevent false missing reports.\n" +
-                  "• Distinguishes comics by URL/Domain, not just by title.");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "2. Cấu hình Quét Song Song (Multiple Check)" : "2. Parallel Task Combobox (Multiple Check)",
-                _isVietnameseUi
-                ? "• Combobox 'check song song' (Multiple Check) cho phép tùy chỉnh từ 1 đến 16 task chạy cùng lúc (mặc định 8).\n" +
-                  "• Giá trị này thực sự điều khiển luồng scan đa nhiệm giúp tốc độ quét nhanh gấp 10 lần.\n" +
-                  "• Tự động rescan tối đa 3 lần nếu phát hiện thiếu chap 1-3 để đảm bảo chính xác tuyệt đối."
-                : "• 'Multiple Check' combobox configures 1 to 16 parallel tasks (default 8).\n" +
-                  "• Truly controls parallel worker threads for up to 10x faster scans.\n" +
-                  "• Auto rescans up to 3 times if chapters 1-3 appear missing for total accuracy.");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "3. Menu Chuột Phải & Tùy Chọn Wrap" : "3. Context Menu & Wrap Toggle",
-                _isVietnameseUi
-                ? "• Click chuột phải trong tab Scan: Copy link truyện, copy danh sách chap thiếu số nguyên, copy chap thập phân.\n" +
-                  "• Toggle WRAP: Bật/Tắt xuống dòng riêng cho cột chap thập phân để tránh dãn chiều cao bảng."
-                : "• Right-click in Scan tab: Copy book link, copy missing integer chapters, copy decimal chapters.\n" +
-                  "• WRAP Toggle: Toggle line wrapping specifically for decimal chapters column.");
-
-            return stack;
-        }
-
-        private UIElement CreateFloatingButtonTabContent()
-        {
-            var stack = new StackPanel();
-
-            AddTutorialCard(stack, _isVietnameseUi ? "🎈 HƯỚNG DẪN SỬ DỤNG FLOATING BUTTON (NÚT NỔI)" : "🎈 FLOATING BUTTON GUIDE",
-                _isVietnameseUi
-                ? "Floating Button là công cụ điều khiển nhanh luôn nằm trên màn hình giúp thao tác cực tiện lợi:"
-                : "Floating Button provides fast desktop controls for quick actions:");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "1. Phím Tắt Khởi Động & Ghim" : "1. Launch Shortcut & Pin",
-                _isVietnameseUi
-                ? "• Phím tắt `Ctrl + Shift + F`: Bật hoặc ẩn Nút Nổi bất kỳ lúc nào.\n" +
-                  "• PIN (Ghim): Giữ Nút Nổi luôn hiển thị trên cùng (TopMost) đè lên các cửa sổ trình duyệt khác.\n" +
-                  "• MOVE: Nhấp giữ nút MOVE để kéo Nút Nổi đến vị trí bất kỳ trên màn hình."
-                : "• Shortcut `Ctrl + Shift + F`: Show or hide Floating Button anytime.\n" +
-                  "• PIN: Keep Floating Button Always On Top of all browser windows.\n" +
-                  "• MOVE: Drag and position Floating Button anywhere on screen.");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "2. Các Tính Năng Điều Khiển Nhanh" : "2. Quick Control Actions",
-                _isVietnameseUi
-                ? "• AUTO PASTE: Bật tự động bắt link khi Ctrl+C từ trình duyệt (Nhớ tắt khi dừng get link).\n" +
-                  "• DOWNLOAD / RETRY: Bật/Tắt nhanh tiến trình tải hoặc thử lại mà không cần chuyển về cửa sổ app.\n" +
-                  "• OPEN FOLDER (`Ctrl+Shift+O`): Mở ngay thư mục chứa truyện đã tải.\n" +
-                  "• CLEAN TEMP: Dọn dẹp cache ảnh preview và dữ liệu tạm `.tmp` giúp giải phóng ổ cứng.\n" +
-                  "• GLOBAL KEY (`Alt+Shift+G`): Bật hotkey toàn hệ thống kể cả khi đang dùng app khác."
-                : "• AUTO PASTE: Auto capture copied URLs from browser (Remember to turn OFF when done).\n" +
-                  "• DOWNLOAD / RETRY: Quickly toggle download/retry without focusing main window.\n" +
-                  "• OPEN FOLDER (`Ctrl+Shift+O`): Instantly open downloaded root folder.\n" +
-                  "• CLEAN TEMP: Clean `.tmp` and preview image cache to free up disk space.\n" +
-                  "• GLOBAL KEY (`Alt+Shift+G`): Enable global hotkeys while working in other apps.");
-
-            return stack;
-        }
-
-        private UIElement CreateToolsAndUtilitiesTabContent()
-        {
-            var stack = new StackPanel();
-
-            AddTutorialCard(stack, _isVietnameseUi ? "🛠️ CÔNG CỤ, TIỆN ÍCH & TÍNH NĂNG KHÁC" : "🛠️ TOOLS & UTILITIES GUIDE",
-                _isVietnameseUi
-                ? "Tổng hợp các công cụ hỗ trợ tích hợp sẵn trong Comic Downloader GMTPC:"
-                : "All-in-one built-in tools in Comic Downloader GMTPC:");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "1. Tool Tìm Kiếm (Search)" : "1. Search Tool",
-                _isVietnameseUi
-                ? "• Nằm ở tab Search cạnh tab Password trong section Nguồn (Source).\n" +
-                  "• Cho phép gõ tên truyện + chọn domain (TruyenQQ, Nettruyen, Hako...).\n" +
-                  "• Bấm Search để mở Google khóa chính xác theo domain giúp tìm đúng link gốc cực nhanh."
-                : "• Located in Search tab next to Password in Source section.\n" +
-                  "• Enter book name + select target domain checkboxes.\n" +
-                  "• Click Search to perform Google `site:<domain>` query for direct original links.");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "2. Xem Truyện Offline (Watch)" : "2. Offline Reader (Watch)",
-                _isVietnameseUi
-                ? "• Đọc ảnh truyện trực tiếp trong app với phím mũi tên Left/Right hoặc A/D.\n" +
-                  "• Tự động chuyển chapter kế tiếp / trước đó mượt mà.\n" +
-                  "• Hỗ trợ công cụ Split / Merge chapter trực tiếp trên thư mục local."
-                : "• Read comic images inside app with Left/Right or A/D keys.\n" +
-                  "• Auto bridges seamlessly to next/previous chapter.\n" +
-                  "• Integrated Split / Merge chapter tools on local folders.");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "3. XnConvert & Copy GIF Tools" : "3. XnConvert & GIF Tools",
-                _isVietnameseUi
-                ? "• Tích hợp công cụ convert ảnh hàng loạt qua XnConvertPortable.\n" +
-                  "• Quét và copy các file GIF nhanh chóng từ thư mục truyện."
-                : "• Batch image conversion via XnConvertPortable integration.\n" +
-                  "• Quick GIF file scanning & copying tool.");
-
-            AddTutorialCard(stack, _isVietnameseUi ? "4. Tùy Chọn Hoàn Thành & Tắt Máy (Finish Options)" : "4. Finish Options & Auto Shutdown",
-                _isVietnameseUi
-                ? "• Cấu hình hẹn giờ tự động tắt máy (Shutdown Timer) sau khi tải xong toàn bộ queue.\n" +
-                  "• Tự động chạy lệnh custom (Custom Command / Script) khi hoàn thành."
-                : "• Configure auto shutdown timer after download queue completes.\n" +
-                  "• Run custom command / script upon task completion.");
-
-            return stack;
-        }
-
         private void AddTutorialCard(StackPanel parent, string title, string body)
         {
             var card = new Border
@@ -1483,26 +1324,32 @@ namespace get_link_manga
 
             var stack = new StackPanel();
 
-            var titleBlock = new TextBlock
+            if (!string.IsNullOrWhiteSpace(title))
             {
-                Text = title,
-                Foreground = (Brush)TryFindResource("CyberpunkYellowBrush") ?? Brushes.Gold,
-                FontWeight = FontWeights.Bold,
-                FontSize = 12.5,
-                Margin = new Thickness(0, 0, 0, 6)
-            };
+                var titleBlock = new TextBlock
+                {
+                    Text = title,
+                    Foreground = (Brush)TryFindResource("CyberpunkYellowBrush") ?? Brushes.Gold,
+                    FontWeight = FontWeights.Bold,
+                    FontSize = 12.5,
+                    Margin = new Thickness(0, 0, 0, 6)
+                };
+                stack.Children.Add(titleBlock);
+            }
 
-            var bodyBlock = new TextBlock
+            if (!string.IsNullOrWhiteSpace(body))
             {
-                Text = body,
-                Foreground = (Brush)TryFindResource("CyberpunkTextBrush") ?? Brushes.White,
-                FontSize = 11.5,
-                TextWrapping = TextWrapping.Wrap,
-                LineHeight = 18
-            };
+                var bodyBlock = new TextBlock
+                {
+                    Text = body,
+                    Foreground = (Brush)TryFindResource("CyberpunkTextBrush") ?? Brushes.White,
+                    FontSize = 11.5,
+                    TextWrapping = TextWrapping.Wrap,
+                    LineHeight = 18
+                };
+                stack.Children.Add(bodyBlock);
+            }
 
-            stack.Children.Add(titleBlock);
-            stack.Children.Add(bodyBlock);
             card.Child = stack;
             parent.Children.Add(card);
         }
