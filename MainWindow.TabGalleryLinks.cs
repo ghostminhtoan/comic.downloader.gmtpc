@@ -1036,20 +1036,20 @@ namespace get_link_manga
             menu.Resources["MenuPopupBrush"] = backgroundBrush;
             menu.Resources[typeof(Separator)] = BuildDownloadMissingChapterSeparatorStyle();
             menu.Resources[typeof(MenuItem)] = BuildDownloadMissingChapterMenuItemStyle();
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "🌐 Mở link truyện" : "🌐 Open book link", DownloadMissingChapterOpenLink_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "📋 Copy link truyện" : "📋 Copy book link", DownloadMissingChapterCopyLink_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "📋 Copy chap số nguyên thiếu" : "📋 Copy missing integer chapter", DownloadMissingChapterCopyInteger_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "📋 Copy chap thập phân" : "📋 Copy decimal chapter", DownloadMissingChapterCopyDecimal_Click));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Mở link truyện" : "Open book link", DownloadMissingChapterOpenLink_Click, "🌐", "#00E5FF"));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Copy link truyện" : "Copy book link", DownloadMissingChapterCopyLink_Click, "📋", "#FFD700"));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Copy chap số nguyên thiếu" : "Copy missing integer chapter", DownloadMissingChapterCopyInteger_Click, "📋", "#FFD700"));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Copy chap thập phân" : "Copy decimal chapter", DownloadMissingChapterCopyDecimal_Click, "📋", "#FFD700"));
             menu.Items.Add(new Separator());
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "☑️ Chọn" : "☑️ Check", DownloadMissingChapterCheckSelected_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "🔳 Bỏ chọn" : "🔳 Uncheck", DownloadMissingChapterUncheckSelected_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "🔄 Đảo chọn" : "🔄 Toggle", DownloadMissingChapterToggleSelected_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "☑️ Chọn tất cả" : "☑️ Check all", DownloadMissingChapterCheckAll_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "🔳 Bỏ chọn tất cả" : "🔳 Uncheck all", DownloadMissingChapterUncheckAll_Click));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Chọn" : "Check", DownloadMissingChapterCheckSelected_Click, "☑", "#00E5FF"));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Bỏ chọn" : "Uncheck", DownloadMissingChapterUncheckSelected_Click, "☐", "#888888"));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Đảo chọn" : "Toggle", DownloadMissingChapterToggleSelected_Click, "🔄", "#00E5FF"));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Chọn tất cả" : "Check all", DownloadMissingChapterCheckAll_Click, "☑", "#00E5FF"));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Bỏ chọn tất cả" : "Uncheck all", DownloadMissingChapterUncheckAll_Click, "☐", "#888888"));
             return menu;
         }
 
-        private MenuItem CreateDownloadMissingChapterMenuItem(string text, RoutedEventHandler clickHandler)
+        private MenuItem CreateDownloadMissingChapterMenuItem(string text, RoutedEventHandler clickHandler, string iconSymbol = null, string iconColor = null)
         {
             var item = new MenuItem
             {
@@ -1057,6 +1057,20 @@ namespace get_link_manga
                 Foreground = (Brush)TryFindResource("CyberpunkYellowBrush") ?? Brushes.Yellow,
                 Background = Brushes.Transparent
             };
+            if (!string.IsNullOrEmpty(iconSymbol))
+            {
+                var brushConverter = new BrushConverter();
+                var colorBrush = (Brush)brushConverter.ConvertFromString(iconColor ?? "#00E5FF");
+                item.Icon = new TextBlock
+                {
+                    Text = iconSymbol,
+                    Foreground = colorBrush,
+                    FontSize = 13,
+                    FontWeight = FontWeights.Bold,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+            }
             item.Click += clickHandler;
             return item;
         }
@@ -1085,7 +1099,6 @@ namespace get_link_manga
             style.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Transparent));
             style.Setters.Add(new Setter(Control.ForegroundProperty, (Brush)TryFindResource("CyberpunkYellowBrush") ?? Brushes.Yellow));
             style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(10, 6, 10, 6)));
-            style.Setters.Add(new Setter(MenuItem.IconProperty, null));
             style.Setters.Add(new Setter(Control.TemplateProperty, BuildDownloadMissingChapterMenuItemTemplate()));
 
             var highlightedTrigger = new Trigger { Property = MenuItem.IsHighlightedProperty, Value = true };
@@ -1105,13 +1118,25 @@ namespace get_link_manga
             var border = new FrameworkElementFactory(typeof(Border));
             border.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Control.BackgroundProperty));
 
+            var panel = new FrameworkElementFactory(typeof(StackPanel));
+            panel.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
+
+            var iconPresenter = new FrameworkElementFactory(typeof(ContentPresenter));
+            iconPresenter.SetValue(ContentPresenter.ContentSourceProperty, "Icon");
+            iconPresenter.SetValue(ContentPresenter.MarginProperty, new Thickness(8, 0, 8, 0));
+            iconPresenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+            iconPresenter.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            panel.AppendChild(iconPresenter);
+
             var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
             presenter.SetValue(ContentPresenter.ContentSourceProperty, "Header");
             presenter.SetValue(ContentPresenter.MarginProperty, new TemplateBindingExtension(Control.PaddingProperty));
             presenter.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
             presenter.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Left);
             presenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
-            border.AppendChild(presenter);
+            panel.AppendChild(presenter);
+
+            border.AppendChild(panel);
 
             return new ControlTemplate(typeof(MenuItem))
             {
