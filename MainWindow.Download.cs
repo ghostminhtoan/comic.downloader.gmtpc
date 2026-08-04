@@ -3328,10 +3328,13 @@ namespace get_link_manga
                                 if (!string.IsNullOrWhiteSpace(preResolvedUrl))
                                 {
                                     // nhentai.net: download CDN URL directly (no reader page fetch)
-                                    // With intelligent fallback for extension (webp -> jpg -> png) if one fails
+                                    // With intelligent fallback for extension (.gif -> .webp -> .jpg -> .png -> .jpeg -> .bmp) if one fails
                                     string ext = Path.GetExtension(preResolvedUrl);
                                     string baseCdnUrl = preResolvedUrl.Substring(0, preResolvedUrl.Length - ext.Length);
-                                    string[] extensionsToTry = { ext, ".webp", ".jpg", ".png" };
+                                    string[] extensionsToTry = new[] { ext, ".gif", ".webp", ".jpg", ".png", ".jpeg", ".bmp" }
+                                        .Where(e => !string.IsNullOrWhiteSpace(e))
+                                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                                        .ToArray();
                                     
                                     bool downloadSuccess = false;
                                     Exception lastEx = null;
@@ -3507,13 +3510,18 @@ namespace get_link_manga
                 if (pagesMatch.Success)
                 {
                     string pagesJson = pagesMatch.Groups[1].Value;
-                    var typeMatches = Regex.Matches(pagesJson, @"""t""\s*:\s*""([a-z])""", RegexOptions.IgnoreCase);
+                    var typeMatches = Regex.Matches(pagesJson, @"""t""\s*:\s*""([a-z]+)""", RegexOptions.IgnoreCase);
                     if (typeMatches.Count == totalPages)
                     {
                         for (int i = 0; i < totalPages; i++)
                         {
                             string typeChar = typeMatches[i].Groups[1].Value.ToLowerInvariant();
-                            string ext = typeChar == "p" ? "png" : typeChar == "g" ? "gif" : typeChar == "w" ? "webp" : "jpg";
+                            string ext = (typeChar == "g" || typeChar == "gif") ? "gif"
+                                       : (typeChar == "p" || typeChar == "png") ? "png"
+                                       : (typeChar == "w" || typeChar == "webp") ? "webp"
+                                       : (typeChar == "b" || typeChar == "bmp") ? "bmp"
+                                       : (typeChar == "jpeg") ? "jpeg"
+                                       : "jpg";
                             urls[i] = $"https://{subdomain}.nhentai.net/galleries/{mediaId}/{i + 1}.{ext}";
                         }
                         Log($"[nhentai.net] Đã parse thành công {urls.Length} image URLs cụ thể từ pages JSON.");
@@ -5569,7 +5577,7 @@ namespace get_link_manga
                                 var pageWatch = Stopwatch.StartNew();
 
                                 bool exists = false;
-                                string[] extensions = new string[] { ".jpg", ".png", ".jpeg", ".webp" };
+                                string[] extensions = new string[] { ".jpg", ".png", ".jpeg", ".webp", ".gif", ".bmp" };
                                 string[] searchPatterns = new[]
                                 {
                                     $"{pageNum:D4}-*"
