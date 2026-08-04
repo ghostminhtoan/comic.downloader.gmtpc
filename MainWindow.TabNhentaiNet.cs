@@ -397,6 +397,25 @@ namespace get_link_manga
                                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
                         }
 
+                        if (viewMatches.Count == 0)
+                        {
+                            Log($"[nhentai.net] HttpClient found 0 items on page {page}. Forcing WebView2 render...");
+                            bool ok = await SolveNhentaiCaptchaIfNeededAsync(pageUrl, force: true);
+                            if (ok && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
+                            {
+                                html = _lastNhentaiResolvedHtml;
+                                viewMatches = Regex.Matches(html,
+                                    @"<a\s+href=""[^""]*?/g/(\d+)/?""[^>]*class=""cover""[^>]*>.*?<img[^>]+(?:src|data-src)=""([^""]+)""[^>]*/?>.*?<div\s+class=""caption"">([^<]+)</div>",
+                                    RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                                if (viewMatches.Count == 0)
+                                {
+                                    viewMatches = Regex.Matches(html,
+                                        @"<a\s+href=""[^""]*?/g/(\d+)/?""[^>]*>.*?<img[^>]+(?:src|data-src)=""([^""]+)""[^>]*/?>.*?<div\s+class=""caption"">([^<]+)</div>",
+                                        RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                                }
+                            }
+                        }
+
                         foreach (Match match in viewMatches)
                         {
                             string viewId = match.Groups[1].Value;

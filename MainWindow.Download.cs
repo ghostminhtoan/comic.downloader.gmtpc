@@ -4163,11 +4163,11 @@ namespace get_link_manga
             }
         }
 
-        internal async Task<bool> SolveNhentaiCaptchaIfNeededAsync(string testUrl)
+        internal async Task<bool> SolveNhentaiCaptchaIfNeededAsync(string testUrl, bool force = false)
         {
-            if (IsCaptchaCooldownActive(testUrl)) return true;
+            if (!force && IsCaptchaCooldownActive(testUrl)) return true;
 
-            bool isBlocked = await CheckIfNhentaiBlockedAsync(testUrl);
+            bool isBlocked = force || await CheckIfNhentaiBlockedAsync(testUrl);
             if (!isBlocked)
             {
                 return true; // Not blocked, all good!
