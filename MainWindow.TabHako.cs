@@ -2314,11 +2314,12 @@ namespace get_link_manga
                 return titleValue;
             }
 
-            Match linkMatch = Regex.Match(link ?? string.Empty, @"/c\d+-(?:[^/?#]*?)(?<num>\d+(?:\.\d+)?)(?:[^/?#]*)?$", RegexOptions.IgnoreCase);
-            if (linkMatch.Success &&
-                double.TryParse(linkMatch.Groups["num"].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double linkValue))
+            // Nếu không tìm thấy số chương trong tiêu đề (ví dụ chương chỉ ghi tên tập hoặc giao đoạn), 
+            // ta lấy ID chương làm ChapterNumber (ví dụ /c158264 -> 158264) để đảm bảo đếm không bị trùng lặp hay bỏ sót
+            long chapterId = TryExtractHakoChapterId(link);
+            if (chapterId > 0)
             {
-                return linkValue;
+                return (double)chapterId;
             }
 
             return null;
