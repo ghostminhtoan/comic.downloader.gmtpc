@@ -936,7 +936,7 @@
                                             <Button Grid.Column="4" Name="btnDilibPasteDirect" Content="PASTE DIRECT LINK" Click="BtnDilibPasteDirect_Click" Style="{StaticResource WideActionButton}"/>
                                         </Grid>
 
-                                        <Border Grid.Row="6" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="12">
+                                        <Border Grid.Row="6" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="12" Visibility="Collapsed">
                                             <TextBlock Text="Hỗ trợ tag/category, book, chapter. Không cần bypass captcha. Ảnh chapter chỉ lấy file bắt đầu img*." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
                                         </Border>
                                     </Grid>
@@ -997,7 +997,7 @@
                                             <TextBlock Name="txtDoctruyenPageHintText" Text="Web này không hỗ trợ page number." Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="12" FontWeight="Bold" TextWrapping="Wrap"/>
                                         </Border>
 
-                                        <Border Grid.Row="4" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="12">
+                                        <Border Grid.Row="4" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="12" Visibility="Collapsed">
                                             <TextBlock Text="Hỗ trợ link thể loại, book, chapter. Analyze sẽ tự nhận diện URL doctruyen.us và đưa đúng item vào queue. Chapter chỉ lấy ảnh trong reader-images-container, bỏ base64 và chỉ giữ đuôi ảnh hợp lệ." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
                                         </Border>
                                     </Grid>
@@ -1408,7 +1408,7 @@
                                             <Button Grid.Column="4" Name="btnDaomeodenPasteDirect" Content="PASTE DIRECT LINK" Click="BtnDaomeodenPasteDirect_Click" Style="{StaticResource WideActionButton}"/>
                                         </Grid>
 
-                                        <Border Grid.Row="6" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" Padding="12" CornerRadius="3">
+                                        <Border Grid.Row="6" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" Padding="12" CornerRadius="3" Visibility="Collapsed">
                                             <TextBlock Text="Supports tag, book, chapter, and imggo direct image links. For extra pages, you can paste a page-specific URL manually." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
                                         </Border>
                                     </Grid>
@@ -1695,7 +1695,7 @@
                                             <Button Grid.Column="4" Name="btnDamconuongPasteDirect" Content="PASTE DIRECT LINK" Click="BtnDamconuongPasteDirect_Click" Style="{StaticResource WideActionButton}"/>
                                         </Grid>
 
-                                        <Border Grid.Row="6" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" Padding="12" CornerRadius="3">
+                                        <Border Grid.Row="6" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" Padding="12" CornerRadius="3" Visibility="Collapsed">
                                             <TextBlock Name="txtDamconuongHelpText" Text="Hỗ trợ category, book, chapter. Category tự đi page 1 -> cuối. Chapter chỉ lấy ảnh trong #chapter-content / reading-detail box_doc." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
                                         </Border>
                                     </Grid>

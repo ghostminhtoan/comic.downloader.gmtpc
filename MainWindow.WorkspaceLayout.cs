@@ -593,7 +593,6 @@ namespace get_link_manga
 
             navStack.Children.Add(_brandTitleText);
             navStack.Children.Add(floatAndFinishRow);
-            navStack.Children.Add(_h2rLogButton);
             navStack.Children.Add(_navigationButtonHost);
             navStack.Children.Add(_sidebarToolsHost);
 
