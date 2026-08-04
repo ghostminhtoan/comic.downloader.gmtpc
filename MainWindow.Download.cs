@@ -4130,7 +4130,11 @@ namespace get_link_manga
                             if (html.Contains("cf-challenge") || 
                                 html.Contains("cf-turnstile") || 
                                 html.Contains("Turnstile") || 
-                                html.Contains("Just a moment..."))
+                                html.Contains("Just a moment...") ||
+                                html.Contains("challenge-platform") ||
+                                html.Contains("Verify you are human") ||
+                                html.Contains("cf-cookie-error") ||
+                                html.Contains("challenge-form"))
                             {
                                 return true;
                             }
@@ -5841,7 +5845,22 @@ namespace get_link_manga
                 using (var response = await httpClient.SendAsync(request, token))
                 {
                     response.EnsureSuccessStatusCode();
-                    return await response.Content.ReadAsStringAsync();
+                    string html = await response.Content.ReadAsStringAsync();
+                    if (!string.IsNullOrWhiteSpace(html))
+                    {
+                        if (html.Contains("cf-challenge") || 
+                            html.Contains("cf-turnstile") || 
+                            html.Contains("Turnstile") || 
+                            html.Contains("Just a moment...") ||
+                            html.Contains("challenge-platform") ||
+                            html.Contains("Verify you are human") ||
+                            html.Contains("cf-cookie-error") ||
+                            html.Contains("challenge-form"))
+                        {
+                            throw new System.Net.Http.HttpRequestException("Cloudflare challenge page detected in response HTML");
+                        }
+                    }
+                    return html;
                 }
             }
         }
