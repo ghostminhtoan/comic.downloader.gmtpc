@@ -1657,10 +1657,10 @@ namespace get_link_manga
                 {
                     continue;
                 }
-
                 link = canonicalChapterUrl;
                 Uri chapterUri = new Uri(link);
-                if (!chapterUri.AbsolutePath.StartsWith(basePath + "/", StringComparison.OrdinalIgnoreCase))
+                string checkPath = basePath.EndsWith("/") ? basePath : basePath + "/";
+                if (!chapterUri.AbsolutePath.StartsWith(checkPath, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
