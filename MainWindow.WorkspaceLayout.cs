@@ -1445,7 +1445,8 @@ namespace get_link_manga
                 Height = 16,
                 Width = 32,
                 Margin = new Thickness(10, 0, 0, 0),
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                ToolTip = "Start / Pause Trace Log"
             };
             chkAutoScrollLog = toggleAutoScroll;
             DockPanel.SetDock(toggleAutoScroll, Dock.Left);

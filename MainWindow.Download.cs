@@ -3365,7 +3365,7 @@ namespace get_link_manga
                                     {
                                         throw lastEx ?? new Exception($"Không thể tải được ảnh từ CDN với bất kỳ định dạng nào.");
                                     }
-                                    Log($"[nhentai.net] Trang {pageNum} -> {activeUrl}");
+                                    Log($"[nhentai.net] Trang {pageNum} -> {activeUrl}", LogSeverity.Info, "nhentai.net");
                                 }
                                 else
                                 {

@@ -26,18 +26,21 @@ namespace get_link_manga
             }
 
             string lower = message.ToLowerInvariant();
-            return lower.Contains("lỗi") ||
-                   lower.Contains("error") ||
-                   lower.Contains("exception") ||
-                   lower.Contains("failed") ||
-                   lower.Contains("timeout") ||
-                   lower.Contains("forbidden") ||
-                   lower.Contains("too many request") ||
-                   lower.Contains("thất bại") ||
-                   lower.Contains("không thể") ||
-                   lower.Contains("403") ||
-                   lower.Contains("503") ||
-                   lower.Contains("429");
+            if (lower.Contains("lỗi") ||
+                lower.Contains("error") ||
+                lower.Contains("exception") ||
+                lower.Contains("failed") ||
+                lower.Contains("timeout") ||
+                lower.Contains("forbidden") ||
+                lower.Contains("too many request") ||
+                lower.Contains("thất bại") ||
+                lower.Contains("không thể"))
+            {
+                return true;
+            }
+
+            // Word-boundary matching for HTTP status codes so numbers in URLs (like gallery ID 3842902) aren't falsely flagged as errors
+            return System.Text.RegularExpressions.Regex.IsMatch(lower, @"\b(403|503|429|404|500)\b");
         }
 
         private void AppendLogLine(RichTextBox rtb, string text, bool isError)
@@ -79,10 +82,11 @@ namespace get_link_manga
                 }
                 if (txtLog != null)
                 {
-                    AppendLogLine(txtLog, logLine, isError);
-                    AppendMarkdownLogCard(logLine, effectiveSeverity);
+                    // Check if Trace Log is PAUSED / TURNED OFF
                     if (chkAutoScrollLog?.IsChecked == true)
                     {
+                        AppendLogLine(txtLog, logLine, isError);
+                        AppendMarkdownLogCard(logLine, effectiveSeverity);
                         ScrollTextBoxToEnd(txtLog);
                         _scrollLogHost?.ScrollToBottom();
                     }

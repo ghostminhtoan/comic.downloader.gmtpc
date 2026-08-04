@@ -31,7 +31,7 @@ namespace get_link_manga
                 ChromeFallbackPreferred = false,
                 DefaultConcurrencyCap = 6,
                 InterRequestDelayMs = 120,
-                AllowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" },
+                AllowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp" },
                 ChallengeMarkers = new[] { "Just a moment...", "cloudflare", "cf-challenge", "captcha" },
                 RetryPolicy = new RetryPolicyProfile { MaxAttempts = 4, BaseDelayMs = 400, MaxDelayMs = 8000, BrowserChallengeNeedsSessionRefresh = false }
             },
@@ -91,7 +91,7 @@ namespace get_link_manga
                 ChromeFallbackPreferred = false,
                 DefaultConcurrencyCap = 6,
                 InterRequestDelayMs = 100,
-                AllowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" },
+                AllowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp" },
                 ChallengeMarkers = new[] { "Just a moment...", "cloudflare", "cf-challenge", "captcha" },
                 RetryPolicy = new RetryPolicyProfile { MaxAttempts = 4, BaseDelayMs = 600, MaxDelayMs = 10000, BrowserChallengeNeedsSessionRefresh = true }
             },
@@ -103,7 +103,7 @@ namespace get_link_manga
                 ChromeFallbackPreferred = false,
                 DefaultConcurrencyCap = 6,
                 InterRequestDelayMs = 100,
-                AllowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" },
+                AllowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp" },
                 ChallengeMarkers = new[] { "Just a moment...", "cloudflare", "cf-challenge", "captcha" },
                 RetryPolicy = new RetryPolicyProfile { MaxAttempts = 4, BaseDelayMs = 600, MaxDelayMs = 10000, BrowserChallengeNeedsSessionRefresh = true }
             },
