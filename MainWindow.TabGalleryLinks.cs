@@ -1036,16 +1036,16 @@ namespace get_link_manga
             menu.Resources["MenuPopupBrush"] = backgroundBrush;
             menu.Resources[typeof(Separator)] = BuildDownloadMissingChapterSeparatorStyle();
             menu.Resources[typeof(MenuItem)] = BuildDownloadMissingChapterMenuItemStyle();
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Mở link truyện" : "Open book link", DownloadMissingChapterOpenLink_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Copy link truyện" : "Copy book link", DownloadMissingChapterCopyLink_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Copy chap số nguyên thiếu" : "Copy missing integer chapter", DownloadMissingChapterCopyInteger_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Copy chap thập phân" : "Copy decimal chapter", DownloadMissingChapterCopyDecimal_Click));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "🌐 Mở link truyện" : "🌐 Open book link", DownloadMissingChapterOpenLink_Click));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "📋 Copy link truyện" : "📋 Copy book link", DownloadMissingChapterCopyLink_Click));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "📋 Copy chap số nguyên thiếu" : "📋 Copy missing integer chapter", DownloadMissingChapterCopyInteger_Click));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "📋 Copy chap thập phân" : "📋 Copy decimal chapter", DownloadMissingChapterCopyDecimal_Click));
             menu.Items.Add(new Separator());
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Chọn" : "Check", DownloadMissingChapterCheckSelected_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Bỏ chọn" : "Uncheck", DownloadMissingChapterUncheckSelected_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Đảo chọn" : "Toggle", DownloadMissingChapterToggleSelected_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Chọn tất cả" : "Check all", DownloadMissingChapterCheckAll_Click));
-            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "Bỏ chọn tất cả" : "Uncheck all", DownloadMissingChapterUncheckAll_Click));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "☑️ Chọn" : "☑️ Check", DownloadMissingChapterCheckSelected_Click));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "🔳 Bỏ chọn" : "🔳 Uncheck", DownloadMissingChapterUncheckSelected_Click));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "🔄 Đảo chọn" : "🔄 Toggle", DownloadMissingChapterToggleSelected_Click));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "☑️ Chọn tất cả" : "☑️ Check all", DownloadMissingChapterCheckAll_Click));
+            menu.Items.Add(CreateDownloadMissingChapterMenuItem(_isVietnameseUi ? "🔳 Bỏ chọn tất cả" : "🔳 Uncheck all", DownloadMissingChapterUncheckAll_Click));
             return menu;
         }
 

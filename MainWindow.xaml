@@ -3438,39 +3438,39 @@
                             </DataGrid.RowStyle>
                             <DataGrid.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="Tích chọn dòng đang bôi đen (Check Selected)" Click="MenuCheckSelected_Click"/>
-                                    <MenuItem Header="Bỏ tích dòng đang bôi đen (Uncheck Selected)" Click="MenuUncheckSelected_Click"/>
-                                    <MenuItem Header="Đảo tick các dòng đang bôi đen (Check inverted rows)" Click="MenuInvertSelectedRows_Click"/>
-                                    <MenuItem Header="Đảo ngược trạng thái tích (Invert Checked)" Click="MenuInvertChecked_Click"/>
-                                    <MenuItem Name="menuSplitChaptersToParallelTasks" Header="Split Chapters to Parallel Tasks">
+                                    <MenuItem Header="☑️ Tích chọn dòng đang bôi đen (Check Selected)" Click="MenuCheckSelected_Click"/>
+                                    <MenuItem Header="🔳 Bỏ tích dòng đang bôi đen (Uncheck Selected)" Click="MenuUncheckSelected_Click"/>
+                                    <MenuItem Header="🔄 Đảo tick các dòng đang bôi đen (Check inverted rows)" Click="MenuInvertSelectedRows_Click"/>
+                                    <MenuItem Header="🔀 Đảo ngược trạng thái tích (Invert Checked)" Click="MenuInvertChecked_Click"/>
+                                    <MenuItem Name="menuSplitChaptersToParallelTasks" Header="⚡ Split Chapters to Parallel Tasks">
                                         <MenuItem Header="50" Tag="50" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                         <MenuItem Header="100" Tag="100" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                         <MenuItem Header="200" Tag="200" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                         <MenuItem Header="300" Tag="300" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                         <MenuItem Header="400" Tag="400" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                     </MenuItem>
-                                    <MenuItem Header="Đưa lên đầu" Click="MenuMoveSelectedToTop_Click"/>
-                                    <MenuItem Header="Đưa xuống cuối" Click="MenuMoveSelectedToBottom_Click"/>
+                                    <MenuItem Header="⬆️ Đưa lên đầu" Click="MenuMoveSelectedToTop_Click"/>
+                                    <MenuItem Header="⬇️ Đưa xuống cuối" Click="MenuMoveSelectedToBottom_Click"/>
                                     <Separator/>
-                                    <MenuItem Header="Mở link trong trình duyệt" Click="MenuOpenInBrowser_Click"/>
+                                    <MenuItem Header="🌐 Mở link trong trình duyệt" Click="MenuOpenInBrowser_Click"/>
                                     <Separator/>
-                                    <MenuItem Header="Copy link các dòng đang chọn (Copy Selected Links)" Click="MenuCopySelectedLinks_Click"/>
-                                    <MenuItem Header="Copy tên + link truyện (Copy Name + Link)" Click="BtnCopyNamesAndLinks_Click"/>
-                                    <MenuItem Header="Copy chapters link" Click="BtnCopyChaptersLink_Click"/>
-                                    <MenuItem Header="Merge novel book (Gộp MD)" Click="BtnMergeLightNovelBookMarkdown_Click"/>
-                                    <MenuItem Header="Gộp truyện split (Merge Split Chapters)" Click="BtnMergeParallelSplitChapters_Click"/>
-                                    <MenuItem Header="Quét lại chap thiếu (Rescan Missing Chapter)" Click="BtnRescanMissingChapter_Click"/>
-                                    <MenuItem Header="Pause chap số nguyên thiếu (Pause Missing Chapter Scan)" Click="BtnPauseResumeDownloadMissingChapters_Click"/>
-                                    <MenuItem Header="Mở cache JSON (Open Cache JSON)" Click="BtnOpenDownloadMissingChapterCache_Click"/>
-                                    <MenuItem Header="Xóa cache JSON (Clear Cache JSON)" Click="BtnClearDownloadMissingChapterCache_Click"/>
+                                    <MenuItem Header="📋 Copy link các dòng đang chọn (Copy Selected Links)" Click="MenuCopySelectedLinks_Click"/>
+                                    <MenuItem Header="📋 Copy tên + link truyện (Copy Name + Link)" Click="BtnCopyNamesAndLinks_Click"/>
+                                    <MenuItem Header="📋 Copy chapters link" Click="BtnCopyChaptersLink_Click"/>
+                                    <MenuItem Header="📄 Merge novel book (Gộp MD)" Click="BtnMergeLightNovelBookMarkdown_Click"/>
+                                    <MenuItem Header="🧩 Gộp truyện split (Merge Split Chapters)" Click="BtnMergeParallelSplitChapters_Click"/>
+                                    <MenuItem Header="🔍 Quét lại chap thiếu (Rescan Missing Chapter)" Click="BtnRescanMissingChapter_Click"/>
+                                    <MenuItem Header="⏸️ Pause chap số nguyên thiếu (Pause Missing Chapter Scan)" Click="BtnPauseResumeDownloadMissingChapters_Click"/>
+                                    <MenuItem Header="📂 Mở cache JSON (Open Cache JSON)" Click="BtnOpenDownloadMissingChapterCache_Click"/>
+                                    <MenuItem Header="🗑️ Xóa cache JSON (Clear Cache JSON)" Click="BtnClearDownloadMissingChapterCache_Click"/>
                                     <Separator/>
-                                    <MenuItem Header="Xóa các dòng đang bôi đen (Delete Selected)" Click="MenuDeleteSelected_Click"/>
-                                    <MenuItem Header="Xóa các dòng đã tích (Delete Checked)" Click="MenuDeleteChecked_Click"/>
+                                    <MenuItem Header="❌ Xóa các dòng đang bôi đen (Delete Selected)" Click="MenuDeleteSelected_Click"/>
+                                    <MenuItem Header="❌ Xóa các dòng đã tích (Delete Checked)" Click="MenuDeleteChecked_Click"/>
                                     <Separator/>
-                                    <MenuItem Header="Tìm trên các web khác (Search with other websites)" Click="MenuSearchWithOtherWebsites_Click"/>
+                                    <MenuItem Header="🔎 Tìm trên các web khác (Search with other websites)" Click="MenuSearchWithOtherWebsites_Click"/>
                                     <Separator/>
-                                    <MenuItem Header="Tải các dòng đang bôi đen (Download highlighted lines)" Click="MenuDownloadSelected_Click"/>
-                                    <MenuItem Header="Tải các dòng đã tích (Download selected lines)" Click="MenuDownloadChecked_Click"/>
+                                    <MenuItem Header="📥 Tải các dòng đang bôi đen (Download highlighted lines)" Click="MenuDownloadSelected_Click"/>
+                                    <MenuItem Header="📥 Tải các dòng đã tích (Download selected lines)" Click="MenuDownloadChecked_Click"/>
                                 </ContextMenu>
                             </DataGrid.ContextMenu>
                         <DataGrid.Columns>
@@ -4034,37 +4034,37 @@
                              Drop="LbResultsThumbnail_Drop">
                         <ListBox.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="Tích chọn dòng đang bôi đen (Check Selected)" Click="MenuCheckSelected_Click"/>
-                                <MenuItem Header="Bỏ tích dòng đang bôi đen (Uncheck Selected)" Click="MenuUncheckSelected_Click"/>
-                                <MenuItem Header="Đảo tick các dòng đang bôi đen (Check inverted rows)" Click="MenuInvertSelectedRows_Click"/>
-                                <MenuItem Header="Đảo ngược trạng thái tích (Invert Checked)" Click="MenuInvertChecked_Click"/>
-                                <MenuItem Name="menuSplitChaptersToParallelTasksThumbnail" Header="Split Chapters to Parallel Tasks">
+                                <MenuItem Header="☑️ Tích chọn dòng đang bôi đen (Check Selected)" Click="MenuCheckSelected_Click"/>
+                                <MenuItem Header="🔳 Bỏ tích dòng đang bôi đen (Uncheck Selected)" Click="MenuUncheckSelected_Click"/>
+                                <MenuItem Header="🔄 Đảo tick các dòng đang bôi đen (Check inverted rows)" Click="MenuInvertSelectedRows_Click"/>
+                                <MenuItem Header="🔀 Đảo ngược trạng thái tích (Invert Checked)" Click="MenuInvertChecked_Click"/>
+                                <MenuItem Name="menuSplitChaptersToParallelTasksThumbnail" Header="⚡ Split Chapters to Parallel Tasks">
                                     <MenuItem Header="50" Tag="50" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                     <MenuItem Header="100" Tag="100" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                     <MenuItem Header="200" Tag="200" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                     <MenuItem Header="300" Tag="300" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                     <MenuItem Header="400" Tag="400" Click="MenuSplitChaptersToParallelTasks_Click"/>
                                 </MenuItem>
-                                <MenuItem Header="Đưa lên đầu" Click="MenuMoveSelectedToTop_Click"/>
-                                <MenuItem Header="Đưa xuống cuối" Click="MenuMoveSelectedToBottom_Click"/>
+                                <MenuItem Header="⬆️ Đưa lên đầu" Click="MenuMoveSelectedToTop_Click"/>
+                                <MenuItem Header="⬇️ Đưa xuống cuối" Click="MenuMoveSelectedToBottom_Click"/>
                                 <Separator/>
-                                <MenuItem Header="Mở link trong trình duyệt" Click="MenuOpenInBrowser_Click"/>
+                                <MenuItem Header="🌐 Mở link trong trình duyệt" Click="MenuOpenInBrowser_Click"/>
                                 <Separator/>
-                                <MenuItem Header="Copy link các dòng đang chọn (Copy Selected Links)" Click="MenuCopySelectedLinks_Click"/>
-                                <MenuItem Header="Copy tên + link truyện (Copy Name + Link)" Click="BtnCopyNamesAndLinks_Click"/>
-                                <MenuItem Header="Copy chapters link" Click="BtnCopyChaptersLink_Click"/>
-                                <MenuItem Header="Merge novel book (Gộp MD)" Click="BtnMergeLightNovelBookMarkdown_Click"/>
-                                <MenuItem Header="Gộp truyện split (Merge Split Chapters)" Click="BtnMergeParallelSplitChapters_Click"/>
-                                <MenuItem Header="Quét lại chap thiếu (Rescan Missing Chapter)" Click="BtnRescanMissingChapter_Click"/>
-                                <MenuItem Header="Pause chap số nguyên thiếu (Pause Missing Chapter Scan)" Click="BtnPauseResumeDownloadMissingChapters_Click"/>
-                                <MenuItem Header="Mở cache JSON (Open Cache JSON)" Click="BtnOpenDownloadMissingChapterCache_Click"/>
-                                <MenuItem Header="Xóa cache JSON (Clear Cache JSON)" Click="BtnClearDownloadMissingChapterCache_Click"/>
+                                <MenuItem Header="📋 Copy link các dòng đang chọn (Copy Selected Links)" Click="MenuCopySelectedLinks_Click"/>
+                                <MenuItem Header="📋 Copy tên + link truyện (Copy Name + Link)" Click="BtnCopyNamesAndLinks_Click"/>
+                                <MenuItem Header="📋 Copy chapters link" Click="BtnCopyChaptersLink_Click"/>
+                                <MenuItem Header="📄 Merge novel book (Gộp MD)" Click="BtnMergeLightNovelBookMarkdown_Click"/>
+                                <MenuItem Header="🧩 Gộp truyện split (Merge Split Chapters)" Click="BtnMergeParallelSplitChapters_Click"/>
+                                <MenuItem Header="🔍 Quét lại chap thiếu (Rescan Missing Chapter)" Click="BtnRescanMissingChapter_Click"/>
+                                <MenuItem Header="⏸️ Pause chap số nguyên thiếu (Pause Missing Chapter Scan)" Click="BtnPauseResumeDownloadMissingChapters_Click"/>
+                                <MenuItem Header="📂 Mở cache JSON (Open Cache JSON)" Click="BtnOpenDownloadMissingChapterCache_Click"/>
+                                <MenuItem Header="🗑️ Xóa cache JSON (Clear Cache JSON)" Click="BtnClearDownloadMissingChapterCache_Click"/>
                                 <Separator/>
-                                <MenuItem Header="Xóa các dòng đang bôi đen (Delete Selected)" Click="MenuDeleteSelected_Click"/>
-                                <MenuItem Header="Xóa các dòng đã tích (Delete Checked)" Click="MenuDeleteChecked_Click"/>
+                                <MenuItem Header="❌ Xóa các dòng đang bôi đen (Delete Selected)" Click="MenuDeleteSelected_Click"/>
+                                <MenuItem Header="❌ Xóa các dòng đã tích (Delete Checked)" Click="MenuDeleteChecked_Click"/>
                                 <Separator/>
-                                <MenuItem Header="Tải các dòng đang bôi đen (Download highlighted lines)" Click="MenuDownloadSelected_Click"/>
-                                <MenuItem Header="Tải các dòng đã tích (Download selected lines)" Click="MenuDownloadChecked_Click"/>
+                                <MenuItem Header="📥 Tải các dòng đang bôi đen (Download highlighted lines)" Click="MenuDownloadSelected_Click"/>
+                                <MenuItem Header="📥 Tải các dòng đã tích (Download selected lines)" Click="MenuDownloadChecked_Click"/>
                             </ContextMenu>
                         </ListBox.ContextMenu>
                         <ListBox.ItemsPanel>
