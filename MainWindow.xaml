@@ -3342,6 +3342,13 @@
                                 <TextBlock Name="lblCompactRows" Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkPinkBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <ToggleButton Name="chkCompactRows" Click="ChkCompactRows_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="COMPACT ROW"/>
                             </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,10,6" VerticalAlignment="Center">
+                                <StackPanel.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                </StackPanel.LayoutTransform>
+                                <TextBlock Name="lblClearCookieAndRetry" Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkPinkBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <ToggleButton Name="tglClearCookieAndRetry" Click="TglClearCookieAndRetry_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="CLEAR COOKIE &amp; RETRY"/>
+                            </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,14,6" VerticalAlignment="Center">
                                 <StackPanel.LayoutTransform>
                                     <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
@@ -3361,7 +3368,11 @@
                             <Button Name="btnDuplicateName" Content="DUPLICATE NAME" Click="BtnDuplicateName_Click" Style="{StaticResource CompactPinkButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
                             <Button Name="btnReverseOrder" Content="REVERSE ORDER" Click="BtnReverseOrder_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
                             <Button Name="btnClearComplete" Content="CLEAR COMPLETE BOOKS" Click="BtnClearComplete_Click" Style="{StaticResource CompactDarkBlueButton}" MinWidth="120" Width="Auto" Padding="10,2"/>
-                            <Button Name="btnExtractClearCookie" Content="CLEAR COOKIE" Click="BtnExtractClearCookie_Click" Style="{StaticResource CompactPinkButton}" MinWidth="90" Width="Auto" Padding="10,2" Margin="6,0,0,0" ToolTip="Xóa cookie của các trang đang hiển thị trong danh sách"/>
+                            <Button Name="btnExtractClearCookie" Content="CLEAR COOKIE" Click="BtnExtractClearCookie_Click" Style="{StaticResource CompactPinkButton}" MinWidth="90" Width="Auto" Padding="10,2" Margin="6,0,0,0" ToolTip="Xóa cookie của các trang đang hiển thị trong danh sách">
+                                <Button.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.7" ScaleY="0.7"/>
+                                </Button.LayoutTransform>
+                            </Button>
                         </WrapPanel>
                     </Grid>
 
@@ -4533,7 +4544,11 @@
                                 <Button Name="btnCopyChaptersLink" Content="COPY CHAPTERS LINK" Click="BtnCopyChaptersLink_Click" Style="{StaticResource CompactCyanButton}" MinWidth="150" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
                                 <Button Name="btnMergeLightNovelBookMarkdown" Content="MERGE NOVEL BOOK" Click="BtnMergeLightNovelBookMarkdown_Click" Style="{StaticResource CompactPinkButton}" MinWidth="150" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
                                 <Button Name="btnMergeParallelSplitChapters" Content="AUTO MERGE CHAPTER" Click="BtnMergeParallelSplitChapters_Click" Style="{StaticResource CompactPinkButton}" MinWidth="155" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
-                                <Button Name="btnRefreshStatus" Content="REFRESH STATUS" Click="BtnRefreshStatus_Click" Style="{StaticResource CompactCyanButton}" MinWidth="120" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
+                                <Button Name="btnRefreshStatus" Content="REFRESH STATUS" Click="BtnRefreshStatus_Click" Style="{StaticResource CompactCyanButton}" MinWidth="120" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0">
+                                    <Button.LayoutTransform>
+                                        <ScaleTransform ScaleX="0.7" ScaleY="0.7"/>
+                                    </Button.LayoutTransform>
+                                </Button>
                                 <Button Name="btnRescanMissingChapter" Content="RESCAN MISSING CHAPTER" Click="BtnRescanMissingChapter_Click" Style="{StaticResource CompactCyanButton}" MinWidth="170" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
                                 <Button Name="btnPauseMissingChapterScan" Content="PAUSE MISSING CHAPTER" Click="BtnPauseResumeDownloadMissingChapters_Click" Style="{StaticResource CompactPinkButton}" MinWidth="170" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
                                 <Button Name="btnOpenMissingChapterCache" Content="OPEN CACHE JSON" Click="BtnOpenDownloadMissingChapterCache_Click" Style="{StaticResource CompactCyanButton}" MinWidth="145" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
@@ -4701,27 +4716,6 @@
                                             <VirtualizingStackPanel Background="#121622"/>
                                         </ItemsPanelTemplate>
                                     </ComboBox.ItemsPanel>
-                                </ComboBox>
-
-                                <!-- Clear Cookie & Retry ComboBox -->
-                                <ComboBox Name="cmbClearCookieAndRetry" 
-                                          Style="{StaticResource CyberpunkComboBox}"
-                                          Height="26"
-                                          Width="160"
-                                          VerticalContentAlignment="Center"
-                                          HorizontalContentAlignment="Center"
-                                          DropDownOpened="CmbClearCookieAndRetry_DropDownOpened"
-                                          Margin="0,0,12,0"
-                                          VerticalAlignment="Center">
-                                    <ComboBox.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <VirtualizingStackPanel Background="#121622"/>
-                                        </ItemsPanelTemplate>
-                                    </ComboBox.ItemsPanel>
-                                    <ComboBox.ItemContainerStyle>
-                                        <Style TargetType="ComboBoxItem" BasedOn="{StaticResource CyberpunkComboBoxItemStyle}"/>
-                                    </ComboBox.ItemContainerStyle>
-                                    <ComboBoxItem Content="Clear Cookie &amp; Retry"/>
                                 </ComboBox>
 
                                 <ToggleButton Name="tglShutdownAfterDownload" Style="{StaticResource ShutdownActionToggleButton}" Checked="TglShutdownAfterDownload_Checked" Unchecked="TglShutdownAfterDownload_Unchecked" Visibility="Collapsed" ToolTip="Táº¯t mÃ¡y sau khi táº£i xong toÃ n bá»™ vÃ  khÃ´ng cÃ²n cÃ´ng viá»‡c chá»." Margin="0,0,12,0" VerticalAlignment="Center">

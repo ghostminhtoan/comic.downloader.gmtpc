@@ -4636,5 +4636,84 @@ namespace get_link_manga
                 btnApplyAutoSplitChapters.IsEnabled = true;
             }
         }
+
+        private void RefreshErrorBooksOnly()
+        {
+            if (_scrapedItems == null) return;
+            var errorItems = _scrapedItems
+                .Where(item => item != null && (item.ErrorCount > 0 || (item.Status != null && (item.Status.IndexOf("lỗi", StringComparison.OrdinalIgnoreCase) >= 0 || item.Status.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0 || item.Status.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0))))
+                .ToList();
+
+            int count = 0;
+            foreach (var item in errorItems)
+            {
+                item.Status = null;
+                item.CurrentProcess = "";
+                item.CompletedChapters = 0;
+                item.TotalChapters = 0;
+                item.ProgressPercent = 0;
+                item.DownloadProgressPercent = 0;
+                item.DownloadSpeedBytesPerSecond = 0;
+                item._downloadedBytesAccumulator = 0;
+                item.IsPaused = false;
+                item.IsStopped = false;
+                item.DownloadingChapter = "";
+                item.DownloadingPageProgress = "";
+                item.DownloadingPageLink = "";
+
+                if (item.Errors != null)
+                {
+                    item.Errors.Clear();
+                }
+                else
+                {
+                    item.Errors = new List<ErrorDetail>();
+                }
+                item.ErrorCount = 0;
+                if (!string.IsNullOrWhiteSpace(item.Link))
+                {
+                    _downloadChapterItemCache.Remove(item.Link);
+                }
+
+                DeleteProcessMarkdownForItem(item);
+                count++;
+            }
+            UpdateStats();
+            RequestGalleryListAutosave(0);
+            Log(_isVietnameseUi ? $"Đã làm mới trạng thái cho {count} truyện lỗi." : $"Refreshed status for {count} errored books.");
+        }
+
+        private async void TglClearCookieAndRetry_Click(object sender, RoutedEventArgs e)
+        {
+            if (tglClearCookieAndRetry.IsChecked == true)
+            {
+                try
+                {
+                    // 1. Xóa cookie (không báo gì)
+                    BtnExtractClearCookie_Click(null, null);
+
+                    // 2. Làm mới trạng thái của những truyện lỗi
+                    RefreshErrorBooksOnly();
+
+                    // 3. Xóa temp
+                    ClearTempRootFolder(PortablePaths.PortableTempRoot);
+
+                    // 4. Retry tải (bật btnStartDownload và gọi start queue)
+                    if (btnStartDownload != null && btnStartDownload.IsChecked != true)
+                    {
+                        btnStartDownload.IsChecked = true;
+                        await HandleStartDownloadToggleCheckedAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log($"[System] Clear cookie and retry error: {ex.Message}");
+                }
+                finally
+                {
+                    tglClearCookieAndRetry.IsChecked = false;
+                }
+            }
+        }
     }
 }

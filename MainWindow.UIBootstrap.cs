@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -535,7 +535,7 @@ namespace get_link_manga
         {
             if (_scrapedItems == null || _scrapedItems.Count == 0)
             {
-                ShowInfo("Danh sách trống, không có domain nào để xóa cookie.", "Thông báo");
+                Log("[System] Danh sach trong, khong co domain de xoa cookie.");
                 return;
             }
 
@@ -548,7 +548,7 @@ namespace get_link_manga
 
             if (domainsToClear.Count == 0)
             {
-                ShowInfo("Không phát hiện tên miền hợp lệ trong danh sách để xóa cookie.", "Thông báo");
+                Log("[System] Khong phat hien ten mien hop le de xoa cookie.");
                 return;
             }
 
@@ -611,7 +611,7 @@ namespace get_link_manga
             }
 
             Log($"[System] Đã xóa thành công cookie cache của {clearedCount} tên miền: {string.Join(", ", domainsToClear)}");
-            ShowInfo($"Đã xóa sạch cookie của các tên miền đang hiển thị ({string.Join(", ", domainsToClear)}).\nCác yêu cầu tiếp theo sẽ sạch như máy mới.", "Thành công");
+            // ShowInfo
         }
 
         /// <summary>Map domain (ví dụ nhentai.net) → tên folder captcha (nhentai). Giống CaptchaWindow.GetWebView2UserDataFolder.</summary>

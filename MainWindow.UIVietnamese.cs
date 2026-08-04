@@ -53,6 +53,7 @@ namespace get_link_manga
             if (btnToolbarSortByName != null) btnToolbarSortByName.Content = "Sắp xếp theo tên";
             if (btnPopupPreviewToggle != null) btnPopupPreviewToggle.ToolTip = "XEM TRƯỚC POPUP";
             if (chkCompactRows != null) chkCompactRows.ToolTip = "NÉN DÒNG";
+            if (tglClearCookieAndRetry != null) tglClearCookieAndRetry.ToolTip = "XÓA COOKIE & THỬ LẠI";
             if (chkHideSettings != null) chkHideSettings.ToolTip = "ẨN THIẾT LẬP";
             if (chkResultsPresentation != null) chkResultsPresentation.ToolTip = "DANH SÁCH / THUMBNAIL";
             if (btnDuplicateName != null) btnDuplicateName.Content = "Tên trùng";
