@@ -2115,6 +2115,20 @@ namespace get_link_manga
                 };
             }
 
+            if (IsHakoUrl(item.Link))
+            {
+                return new ReaderChapterIssueItem
+                {
+                    DomainLabel = domain,
+                    BookName = item.Name,
+                    BookLink = item.Link,
+                    ChapterLabel = chapters.Count.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    MissingChapterLabel = _isVietnameseUi ? "đủ chapter" : "complete",
+                    DecimalChapterLabel = string.Empty,
+                    IsChecked = true
+                };
+            }
+
             if (domain.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 domain.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0)
             {
