@@ -3980,6 +3980,16 @@ namespace get_link_manga
                     return number > 0d;
                 }
 
+                if (IsHakoUrl(link))
+                {
+                    double? hakoNum = TryExtractHakoChapterNumber(null, link);
+                    if (hakoNum.HasValue)
+                    {
+                        number = hakoNum.Value;
+                        return true;
+                    }
+                }
+
                 if (link.IndexOf("loppytoonn.com", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     number = ParseLoppyChapterNumber(link);
