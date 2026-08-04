@@ -4138,6 +4138,16 @@ namespace get_link_manga
                             {
                                 return true;
                             }
+
+                            // Check if redirected to page 1
+                            if (testUrl.Contains("page=") && !testUrl.Contains("page=1"))
+                            {
+                                var currPageMatch = Regex.Match(html, @"class=""[^""]*current[^""]*""[^>]*>\s*(\d+)", RegexOptions.IgnoreCase);
+                                if (currPageMatch.Success && int.TryParse(currPageMatch.Groups[1].Value, out int parsedPage) && parsedPage == 1)
+                                {
+                                    return true; // Treat redirect to page 1 as blocked
+                                }
+                            }
                         }
                     }
                 }
@@ -4200,7 +4210,7 @@ namespace get_link_manga
                         bool isSpecialList = testUrl.Contains("/artist/") || testUrl.Contains("/parody/") || testUrl.Contains("/group/") || testUrl.Contains("/character/");
                         bool useHeadless = (isListUrl && !isSpecialList) ? true : _lightNovelAutoFocusEnabled;
 
-                        var captchaWin = CreateCaptchaWindow(testUrl, autoDeleteCookiesOnLoad: true, headlessAutomation: useHeadless);
+                        var captchaWin = CreateCaptchaWindow(testUrl, autoDeleteCookiesOnLoad: false, headlessAutomation: useHeadless);
                         captchaWin.Owner = this;
 
                         if (await ShowCaptchaWindowWithFocusHandlingAsync(captchaWin, useNovelFocusStealth: useHeadless))
@@ -5858,6 +5868,16 @@ namespace get_link_manga
                             html.Contains("challenge-form"))
                         {
                             throw new System.Net.Http.HttpRequestException("Cloudflare challenge page detected in response HTML");
+                        }
+
+                        // Check if redirected to page 1
+                        if (url.Contains("page=") && !url.Contains("page=1"))
+                        {
+                            var currPageMatch = Regex.Match(html, @"class=""[^""]*current[^""]*""[^>]*>\s*(\d+)", RegexOptions.IgnoreCase);
+                            if (currPageMatch.Success && int.TryParse(currPageMatch.Groups[1].Value, out int parsedPage) && parsedPage == 1)
+                            {
+                                throw new System.Net.Http.HttpRequestException("Redirected to page 1 while requesting page " + url);
+                            }
                         }
                     }
                     return html;
