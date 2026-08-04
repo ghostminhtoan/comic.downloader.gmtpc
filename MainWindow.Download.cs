@@ -5160,8 +5160,13 @@ namespace get_link_manga
                 return;
             }
 
+            string searchChapter = string.IsNullOrWhiteSpace(chapterName) ? "-" : chapterName.Trim();
+
             var errorsToRemove = queueItem.Errors
-                .Where(e => string.Equals(e.ChapterName, chapterName, StringComparison.OrdinalIgnoreCase))
+                .Where(e => {
+                    string eCh = string.IsNullOrWhiteSpace(e.ChapterName) ? "-" : e.ChapterName.Trim();
+                    return string.Equals(eCh, searchChapter, StringComparison.OrdinalIgnoreCase);
+                })
                 .ToList();
             
             foreach (var err in errorsToRemove)
@@ -5173,8 +5178,9 @@ namespace get_link_manga
             var keysToRemove = _checkErrorIndex.Keys.Where(k => {
                 if (_checkErrorIndex.TryGetValue(k, out var val))
                 {
+                    string vCh = string.IsNullOrWhiteSpace(val.ChapterName) ? "-" : val.ChapterName.Trim();
                     return string.Equals(val.BookName, queueItem.Name, StringComparison.OrdinalIgnoreCase) &&
-                           string.Equals(val.ChapterName, chapterName, StringComparison.OrdinalIgnoreCase);
+                           string.Equals(vCh, searchChapter, StringComparison.OrdinalIgnoreCase);
                 }
                 return false;
             }).ToList();
