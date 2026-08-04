@@ -44,6 +44,8 @@ Mục tiêu: tìm chuỗi UI còn lệch giữa ENG và VI trong `MainWindow.*`.
 | `Search book name, link, or chapter in queue...` | `Tìm kiếm tên truyện, link hoặc chapter trong hàng chờ...` | `MainWindow.xaml` | OK |
 | `Shutdown after done` | `Tắt máy sau khi tải xong toàn bộ và không còn công việc chờ.` | `MainWindow.xaml` | OK |
 | `RESTORE DEFAULT TAG` | `RESTORE DEFAULT TAG` | `MainWindow.xaml` | OK |
+| `Tutorial` | `Hướng dẫn` | `MainWindow.WorkspaceLayout.cs` | OK |
+| `Tutorial & Config` | `Hướng dẫn & Cấu hình` | `MainWindow.WorkspaceLayout.cs` | OK |
 
 Ghi chú:
 - Bảng này chỉ trace chỗ đang lộ trên UI.
