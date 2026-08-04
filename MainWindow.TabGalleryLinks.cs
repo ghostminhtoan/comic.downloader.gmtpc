@@ -1531,6 +1531,8 @@ namespace get_link_manga
 
         private bool ShouldSkipDownloadMissingChapterScan(GalleryItem item)
         {
+            if (item == null) return true;
+            if (IsHakoUrl(item.Link)) return true;
             string domain = GetDownloadMissingChapterDomainLabel(item);
             return domain.IndexOf("hentaiforce", StringComparison.OrdinalIgnoreCase) >= 0 ||
                    domain.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0 ||
