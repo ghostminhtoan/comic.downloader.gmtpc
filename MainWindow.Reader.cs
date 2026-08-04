@@ -781,24 +781,40 @@ namespace get_link_manga
             var menu = new ContextMenu();
             if (TryGetReaderWatchOpenFolderPath(dataContext, out _))
             {
-                menu.Items.Add(CreateReaderWatchMenuItem("open folder", ReaderWatchMenuOpenFolder_Click));
+                menu.Items.Add(CreateReaderWatchMenuItem("Open folder", ReaderWatchMenuOpenFolder_Click, "📂", "#0066CC"));
                 menu.Items.Add(new Separator());
             }
-            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Chọn" : "Check", ReaderWatchMenuCheckSelected_Click));
-            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Bỏ chọn" : "Uncheck", ReaderWatchMenuUncheckSelected_Click));
-            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Đảo chọn" : "Toggle", ReaderWatchMenuToggleSelected_Click));
-            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Chọn tất cả" : "Check all", ReaderWatchMenuCheckAll_Click));
-            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Bỏ chọn tất cả" : "Uncheck all", ReaderWatchMenuUncheckAll_Click));
-            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Copy nhãn" : "Copy labels", ReaderWatchMenuCopySelected_Click));
-            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Xóa" : "Delete", ReaderWatchMenuDeleteSelected_Click));
-            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Xóa tất cả" : "Delete all", ReaderWatchMenuDeleteAll_Click));
+            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Chọn" : "Check", ReaderWatchMenuCheckSelected_Click, "☑", "#0066CC"));
+            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Bỏ chọn" : "Uncheck", ReaderWatchMenuUncheckSelected_Click, "☐", "#555555"));
+            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Đảo chọn" : "Toggle", ReaderWatchMenuToggleSelected_Click, "🔄", "#0066CC"));
+            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Chọn tất cả" : "Check all", ReaderWatchMenuCheckAll_Click, "☑", "#0066CC"));
+            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Bỏ chọn tất cả" : "Uncheck all", ReaderWatchMenuUncheckAll_Click, "☐", "#555555"));
+            menu.Items.Add(new Separator());
+            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Copy nhãn" : "Copy labels", ReaderWatchMenuCopySelected_Click, "📋", "#D97700"));
+            menu.Items.Add(new Separator());
+            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Xóa" : "Delete", ReaderWatchMenuDeleteSelected_Click, "✖", "#CC0033"));
+            menu.Items.Add(CreateReaderWatchMenuItem(_isVietnameseUi ? "Xóa tất cả" : "Delete all", ReaderWatchMenuDeleteAll_Click, "❌", "#CC0033"));
 
             return menu;
         }
 
-        private MenuItem CreateReaderWatchMenuItem(string text, RoutedEventHandler clickHandler)
+        private MenuItem CreateReaderWatchMenuItem(string text, RoutedEventHandler clickHandler, string iconSymbol = null, string iconColor = null)
         {
             var item = new MenuItem { Header = text };
+            if (!string.IsNullOrEmpty(iconSymbol))
+            {
+                var brushConverter = new BrushConverter();
+                var colorBrush = (Brush)brushConverter.ConvertFromString(iconColor ?? "#0066CC");
+                item.Icon = new TextBlock
+                {
+                    Text = iconSymbol,
+                    Foreground = colorBrush,
+                    FontSize = 13,
+                    FontWeight = FontWeights.Bold,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+            }
             item.Click += clickHandler;
             return item;
         }
