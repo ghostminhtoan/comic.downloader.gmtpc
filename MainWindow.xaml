@@ -3338,7 +3338,7 @@
                                 <StackPanel.LayoutTransform>
                                     <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
                                 </StackPanel.LayoutTransform>
-                                <TextBlock Name="lblCompactRows" Text="&#xE14C;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkPinkBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Name="lblCompactRows" Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkPinkBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <ToggleButton Name="chkCompactRows" Click="ChkCompactRows_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="COMPACT ROW"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,14,6" VerticalAlignment="Center">
