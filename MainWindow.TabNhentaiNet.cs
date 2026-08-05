@@ -99,8 +99,6 @@ namespace get_link_manga
                     try
                     {
                         SelectNhentaiNetSortComboBoxByValue("date");
-                        string updatedUrl = UpdateNhentaiNetUrlSort(url, "date");
-                        txtNhentaiNetTagUrl.Text = updatedUrl;
                     }
                     finally
                     {
