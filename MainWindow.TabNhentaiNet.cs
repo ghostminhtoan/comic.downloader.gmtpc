@@ -358,21 +358,6 @@ namespace get_link_manga
 
                     string pageUrl = GetNhentaiNetPageUrl(baseUrl, page);
                     Log($"[nhentai.net] Requesting page {page}: {pageUrl}");
-                    // Clear cookie folder before processing this page
-                    string captchaPathBefore = System.IO.Path.Combine(PortablePaths.WebView2CaptchaUserDataFolder, "nhentai.net");
-                    try
-                    {
-                        if (System.IO.Directory.Exists(captchaPathBefore))
-                        {
-                            System.IO.Directory.Delete(captchaPathBefore, true);
-                            Log($"[nhentai.net] Đã clear cookie folder trước khi cào trang {page}");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log($"[nhentai.net] Không thể tự động clear cookie folder trước khi cào: {ex.Message}");
-                    }
-
                     string html = null;
                     bool pageLoaded = false;
                     try
@@ -492,21 +477,6 @@ namespace get_link_manga
                     lblStatus.Text = $"Searching page {page}/{pageTo} ({progressPct:0}%)";
                     UpdateResultsCrawlProgress(pagesProcessed, totalPages, GuessImportDisplayName(baseUrl));
                     lblLinkCount.Text = _scrapedItems.Count.ToString();
-
-                    // Clear cookie folder after processing each page
-                    string captchaPath = System.IO.Path.Combine(PortablePaths.WebView2CaptchaUserDataFolder, "nhentai.net");
-                    try
-                    {
-                        if (System.IO.Directory.Exists(captchaPath))
-                        {
-                            System.IO.Directory.Delete(captchaPath, true);
-                            Log($"[nhentai.net] Đã clear cookie folder: nhentai.net");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log($"[nhentai.net] Không thể tự động clear cookie folder: {ex.Message}");
-                    }
                 }
 
                 RecalculateDuplicates();
