@@ -1343,14 +1343,33 @@ namespace get_link_manga
                 return;
             }
 
+            string targetUrl = item.Link;
+            string tagStr = item.Tag as string;
+            if (item.SourceDomain == "hitomi.la" && !string.IsNullOrEmpty(tagStr))
+            {
+                try
+                {
+                    var galleryInfo = Newtonsoft.Json.Linq.JObject.Parse(tagStr);
+                    if (galleryInfo != null && galleryInfo["galleryurl"] != null)
+                    {
+                        string galleryUrlPath = galleryInfo["galleryurl"].ToString().TrimStart('/');
+                        targetUrl = "https://hitomi.la/" + galleryUrlPath;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log($"[Hitomi] Lỗi parse Tag lấy galleryurl: {ex.Message}");
+                }
+            }
+
             try
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                 {
-                    FileName = item.Link,
+                    FileName = targetUrl,
                     UseShellExecute = true
                 });
-                Log($"Opened link: {item.Link}");
+                Log($"Opened link: {targetUrl}");
                 if (eventArgs != null)
                 {
                     eventArgs.Handled = true;
