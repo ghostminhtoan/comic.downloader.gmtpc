@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -2824,6 +2825,12 @@ namespace get_link_manga
             if (IsNhentaiUrl(item.Link))
             {
                 await DownloadNhentaiGalleryAsync(item, rootFolder, token, queueItem);
+                return;
+            }
+
+            if (item.Link != null && item.Link.Contains("hitomi.la"))
+            {
+                await DownloadHitomiLaGalleryAsync(item, rootFolder, token, queueItem);
                 return;
             }
 
@@ -5875,6 +5882,169 @@ namespace get_link_manga
                 }
                 catch { }
             });
+        }
+
+        private async Task DownloadHitomiLaGalleryAsync(GalleryItem item, string rootFolder, CancellationToken token, GalleryItem queueItem = null)
+        {
+            string safeTitle = GetSafePathName(item.Name);
+            string resolvedRoot = GetConfiguredDownloadRoot(rootFolder, item);
+            string targetFolder = Path.Combine(resolvedRoot, safeTitle);
+            string tempFolder = BuildStableTempFolderPath(resolvedRoot, "hitomi.la", safeTitle, item.Link, item.Name);
+            Directory.CreateDirectory(tempFolder);
+            RegisterTempFolder(tempFolder);
+
+            // Đọc metadata JSON đã lưu trong Tag
+            string serializedInfo = item.Tag as string;
+            if (string.IsNullOrEmpty(serializedInfo))
+            {
+                // Fallback nếu tag trống (fetch lại)
+                var idMatch = Regex.Match(item.Link, @"(\d+)(?:\.html)?$");
+                if (idMatch.Success)
+                {
+                    string id = idMatch.Groups[1].Value;
+                    string jsContent = await FetchStringAsync($"https://ltn.gold-usergeneratedcontent.net/galleries/{id}.js", token);
+                    if (!string.IsNullOrEmpty(jsContent))
+                    {
+                        serializedInfo = jsContent.Replace("var galleryinfo = ", "").Trim();
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(serializedInfo))
+            {
+                throw new Exception("Không thể lấy thông tin metadata của Hitomi gallery.");
+            }
+
+            dynamic galleryInfo = JsonConvert.DeserializeObject(serializedInfo);
+            var files = galleryInfo.files;
+            if (files == null || files.Count == 0)
+            {
+                throw new Exception("Không có file ảnh nào trong gallery này.");
+            }
+
+            int totalPages = files.Count;
+            if (queueItem != null)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    queueItem.TotalChapters = totalPages;
+                    queueItem.CompletedChapters = 0;
+                });
+            }
+
+            int maxThreads = GetCurrentConnectionLimit();
+            Log($"[hitomi.la] Bắt đầu tải {totalPages} trang với tối đa {maxThreads} kết nối...");
+
+            using (var semaphore = new DynamicSemaphore(maxThreads, GetCurrentConnectionLimit))
+            {
+                var tasks = new System.Collections.Generic.List<Task>();
+                int completedPages = 0;
+                object lockObj = new object();
+
+                for (int p = 1; p <= totalPages; p++)
+                {
+                    int pageNum = p;
+                    var fileItem = files[pageNum - 1];
+                    string hash = fileItem.hash;
+                    string name = fileItem.name;
+
+                    tasks.Add(Task.Run(async () =>
+                    {
+                        while (_isDownloadPaused)
+                        {
+                            token.ThrowIfCancellationRequested();
+                            await Task.Delay(200, token);
+                        }
+                        token.ThrowIfCancellationRequested();
+
+                        await semaphore.WaitAsync(token);
+                        try
+                        {
+                            while (_isDownloadPaused)
+                            {
+                                token.ThrowIfCancellationRequested();
+                                await Task.Delay(200, token);
+                            }
+                            token.ThrowIfCancellationRequested();
+
+                            string checkFileName = BuildOrderedImageFilename(pageNum, name, ".jpg", $"page-{pageNum}");
+                            string localFilePath = Path.Combine(tempFolder, checkFileName);
+                            string finalFilePath = Path.Combine(targetFolder, checkFileName);
+                            string downloadedPath = localFilePath;
+                            var pageWatch = Stopwatch.StartNew();
+
+                            bool alreadyExists = false;
+                            string[] checkExts = { "jpg", "png", "webp", "gif", "jpeg", "bmp" };
+                            foreach (var checkExt in checkExts)
+                            {
+                                string testPathTemp = Path.ChangeExtension(localFilePath, checkExt);
+                                string testPathFinal = Path.ChangeExtension(finalFilePath, checkExt);
+                                if (File.Exists(testPathTemp) && new FileInfo(testPathTemp).Length > 0)
+                                {
+                                    alreadyExists = true;
+                                    break;
+                                }
+                                if (File.Exists(testPathFinal) && new FileInfo(testPathFinal).Length > 0)
+                                {
+                                    alreadyExists = true;
+                                    break;
+                                }
+                            }
+
+                            if (alreadyExists)
+                            {
+                                pageWatch.Stop();
+                                lock (lockObj)
+                                {
+                                    completedPages++;
+                                    UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, $"{completedPages}/{totalPages} pages", 0, 0);
+                                    WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} existed");
+                                }
+                                return;
+                            }
+
+                            string imgUrl = await ResolveHitomiImageUrlAsync(this, hash, name, isThumbnail: false);
+                            string fileExt = Path.GetExtension(imgUrl) ?? ".webp";
+                            string directPath = Path.ChangeExtension(localFilePath, fileExt);
+
+                            await DownloadUrlToFileWithRefererAsync(imgUrl, item.Link, directPath, token);
+                            downloadedPath = directPath;
+
+                            lock (lockObj)
+                            {
+                                completedPages++;
+                                pageWatch.Stop();
+                                long downloadedBytes = File.Exists(downloadedPath) ? new FileInfo(downloadedPath).Length : 0;
+                                UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, $"{completedPages}/{totalPages} pages", downloadedBytes, pageWatch.ElapsedMilliseconds);
+                                WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} completed");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log($"[hitomi.la] Lỗi tải trang {pageNum}: {ex.Message}");
+                            if (queueItem != null)
+                            {
+                                string traceMessage = $"Book: {item.Link}{Environment.NewLine}Page: {pageNum}{Environment.NewLine}Error: {ex.Message}";
+                                Dispatcher.BeginInvoke(new Action(() =>
+                                {
+                                    queueItem.AddError(string.Empty, pageNum, traceMessage, item.Link, item.Link, pageNum.ToString());
+                                    RecordCheckError("hitomi.la", item.Name, string.Empty, pageNum, traceMessage, item.Link, pageNum.ToString());
+                                }));
+                            }
+                        }
+                        finally
+                        {
+                            semaphore.Release();
+                        }
+                    }, token));
+                }
+
+                await Task.WhenAll(tasks);
+
+                WriteTempProgressLog(tempFolder, item, "Done", totalPages, totalPages, $"{totalPages}/{totalPages} pages", "Download completed");
+                MoveTempFolderToTarget(tempFolder, targetFolder, "hitomi.la");
+                ValidateDownloadedFiles(targetFolder, totalPages, queueItem, string.Empty);
+            }
         }
     }
 }

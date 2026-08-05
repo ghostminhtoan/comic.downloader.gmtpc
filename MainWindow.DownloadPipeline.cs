@@ -109,6 +109,18 @@ namespace get_link_manga
             },
             new SiteDownloadProfile
             {
+                Id = "hitomi",
+                HostAliases = new[] { "hitomi.la", "gold-usergeneratedcontent.net" },
+                BrowserSessionPreferred = false,
+                ChromeFallbackPreferred = false,
+                DefaultConcurrencyCap = 8,
+                InterRequestDelayMs = 80,
+                AllowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp" },
+                ChallengeMarkers = new[] { "Just a moment...", "cloudflare", "cf-challenge", "captcha" },
+                RetryPolicy = new RetryPolicyProfile { MaxAttempts = 4, BaseDelayMs = 500, MaxDelayMs = 8000, BrowserChallengeNeedsSessionRefresh = false }
+            },
+            new SiteDownloadProfile
+            {
                 Id = "default",
                 HostAliases = new string[0],
                 BrowserSessionPreferred = false,

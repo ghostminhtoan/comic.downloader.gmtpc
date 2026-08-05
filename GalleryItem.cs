@@ -170,6 +170,7 @@ namespace get_link_manga
 
     public class GalleryItem : INotifyPropertyChanged
     {
+        public object Tag { get; set; }
         private bool _isChecked;
         private string _link;
         private string _name;

@@ -555,6 +555,14 @@ namespace get_link_manga
                 BtnHentaieraFetchInfo_Click(this, new RoutedEventArgs());
                 await WaitAndScrapeAsync(btnHentaieraFetchInfo, BtnHentaieraScrape_Click);
             }
+            else if (lowerUrl.Contains("hitomi.la"))
+            {
+                SelectHentaiSourceRoot();
+                SelectHentaiTabByHeader("hitomi.la");
+                if (txtHitomiLaTagUrl != null) txtHitomiLaTagUrl.Text = url;
+                BtnHitomiLaFetchInfo_Click(this, new RoutedEventArgs());
+                await WaitAndScrapeAsync(btnHitomiLaFetchInfo, BtnHitomiLaScrape_Click);
+            }
         }
 
         public async Task AppendSupportedInputLinks(string text)
@@ -938,6 +946,17 @@ namespace get_link_manga
                     SelectHentaiTabByHeader("hentaiera");
                 }
                 await ImportHentaieraDirectLinksAsync(new List<string> { url }, showMessageBox);
+                return true;
+            }
+
+            if (lowerUrl.Contains("hitomi.la"))
+            {
+                if (allowUiJump)
+                {
+                    SelectHentaiSourceRoot();
+                    SelectHentaiTabByHeader("hitomi.la");
+                }
+                await ImportHitomiLaDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;
             }
 
