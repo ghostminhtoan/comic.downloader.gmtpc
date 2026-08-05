@@ -18,6 +18,7 @@ namespace get_link_manga
     {
         private bool? _lastLatestChapterSortDescending;
         private string _lastNhentaiResolvedHtml;
+        private string _lastNhentaiResolvedUrl;
         private CancellationTokenSource _autoRetryCts;
         private Task _autoRetryLoopTask;
         private const string DefaultListFileName = "gallery-list-default.md";

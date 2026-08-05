@@ -385,15 +385,10 @@ namespace get_link_manga
                         {
                             Log($"[nhentai.net] HttpClient fetch page {page} failed ({ex.Message}). Trying to resolve captcha...");
                             bool ok = await SolveNhentaiCaptchaIfNeededAsync(pageUrl);
-                            if (ok)
+                            if (ok && _lastNhentaiResolvedUrl == pageUrl)
                             {
                                 html = _lastNhentaiResolvedHtml;
                             }
-                        }
-
-                        if (string.IsNullOrWhiteSpace(html) && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
-                        {
-                            html = _lastNhentaiResolvedHtml;
                         }
 
                         if (!string.IsNullOrWhiteSpace(html))

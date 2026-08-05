@@ -4152,6 +4152,7 @@ namespace get_link_manga
                             }
 
                             _lastNhentaiResolvedHtml = captchaWin.ResolvedHtml;
+                            _lastNhentaiResolvedUrl = testUrl;
                             solved = true;
                         }
                     });
