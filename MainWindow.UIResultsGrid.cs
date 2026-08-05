@@ -354,29 +354,44 @@ namespace get_link_manga
 
         private void MoveResultItem(GalleryItem item, int targetIndex, string logMessage)
         {
-            if (item == null || !_scrapedItems.Contains(item))
+            MoveResultItems(new List<GalleryItem> { item }, targetIndex, logMessage);
+        }
+
+        private void MoveResultItems(List<GalleryItem> items, int targetIndex, string logMessage)
+        {
+            if (items == null || items.Count == 0)
             {
                 return;
             }
 
-            int currentIndex = _scrapedItems.IndexOf(item);
-            if (currentIndex < 0)
+            var validItems = items.Where(x => x != null && _scrapedItems.Contains(x)).ToList();
+            if (validItems.Count == 0)
             {
                 return;
             }
 
-            targetIndex = Math.Max(0, Math.Min(targetIndex, _scrapedItems.Count - 1));
-            if (targetIndex == currentIndex)
+            GalleryItem targetItem = null;
+            if (targetIndex >= 0 && targetIndex < _scrapedItems.Count)
             {
-                return;
+                targetItem = _scrapedItems[targetIndex];
             }
 
-            _scrapedItems.RemoveAt(currentIndex);
-            if (targetIndex > currentIndex)
+            foreach (var item in validItems)
             {
-                targetIndex--;
+                _scrapedItems.Remove(item);
             }
-            _scrapedItems.Insert(targetIndex, item);
+
+            int insertIndex = targetItem != null ? _scrapedItems.IndexOf(targetItem) : _scrapedItems.Count;
+            if (insertIndex < 0)
+            {
+                insertIndex = _scrapedItems.Count;
+            }
+
+            for (int i = 0; i < validItems.Count; i++)
+            {
+                _scrapedItems.Insert(insertIndex + i, validItems[i]);
+            }
+
             RenumberResultOrder();
             RestoreResultsOrder(logMessage);
         }
@@ -540,24 +555,25 @@ namespace get_link_manga
                 return;
             }
 
-            if (targetItem == null)
+            List<GalleryItem> dragItems = new List<GalleryItem>();
+            if (dgResults != null && dgResults.SelectedItems.Contains(sourceItem))
             {
-                MoveResultItem(sourceItem, _scrapedItems.Count - 1, $"Moved '{sourceItem.DisplayName}' in gallery list.");
-                return;
+                dragItems = dgResults.SelectedItems.Cast<GalleryItem>()
+                    .Where(x => x != null)
+                    .OrderBy(x => _scrapedItems.IndexOf(x))
+                    .ToList();
+            }
+            else
+            {
+                dragItems.Add(sourceItem);
             }
 
-            if (ReferenceEquals(sourceItem, targetItem))
-            {
-                return;
-            }
+            int targetIndex = targetItem != null ? _scrapedItems.IndexOf(targetItem) : _scrapedItems.Count - 1;
+            string message = dragItems.Count == 1 
+                ? $"Moved '{sourceItem.DisplayName}' in gallery list."
+                : $"Moved {dragItems.Count} items in gallery list.";
 
-            int targetIndex = _scrapedItems.IndexOf(targetItem);
-            if (targetIndex < 0)
-            {
-                return;
-            }
-
-            MoveResultItem(sourceItem, targetIndex, $"Moved '{sourceItem.DisplayName}' in gallery list.");
+            MoveResultItems(dragItems, targetIndex, message);
         }
 
         // private void BtnNoLinkViHentai_Click(object sender, RoutedEventArgs e)
@@ -1023,18 +1039,25 @@ namespace get_link_manga
                 return;
             }
 
-            if (targetItem == null)
+            List<GalleryItem> dragItems = new List<GalleryItem>();
+            if (lbResultsThumbnail != null && lbResultsThumbnail.SelectedItems.Contains(sourceItem))
             {
-                MoveResultItem(sourceItem, _scrapedItems.Count - 1, $"Moved '{sourceItem.DisplayName}' in gallery list.");
+                dragItems = lbResultsThumbnail.SelectedItems.Cast<GalleryItem>()
+                    .Where(x => x != null)
+                    .OrderBy(x => _scrapedItems.IndexOf(x))
+                    .ToList();
             }
-            else if (!ReferenceEquals(sourceItem, targetItem))
+            else
             {
-                int targetIndex = _scrapedItems.IndexOf(targetItem);
-                if (targetIndex >= 0)
-                {
-                    MoveResultItem(sourceItem, targetIndex, $"Moved '{sourceItem.DisplayName}' in gallery list.");
-                }
+                dragItems.Add(sourceItem);
             }
+
+            int targetIndex = targetItem != null ? _scrapedItems.IndexOf(targetItem) : _scrapedItems.Count - 1;
+            string message = dragItems.Count == 1
+                ? $"Moved '{sourceItem.DisplayName}' in gallery list."
+                : $"Moved {dragItems.Count} items in gallery list.";
+
+            MoveResultItems(dragItems, targetIndex, message);
 
             SyncThumbnailSelectionFromResults();
             ScrollThumbnailSelectionIntoView();
