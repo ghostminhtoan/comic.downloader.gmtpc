@@ -1585,14 +1585,7 @@ namespace get_link_manga
                 RestoreMainWindowFromFocusTray(activateWindow: true);
             }
 
-            EnsureLightNovelFloatingControlWindow();
-            if (_lightNovelFloatingControlWindow.WindowState == WindowState.Minimized)
-            {
-                _lightNovelFloatingControlWindow.WindowState = WindowState.Normal;
-            }
-            _lightNovelFloatingControlWindow.ShowWithoutActivationSafe();
-            UpdateLightNovelFloatingControlState();
-            lblStatus.Text = "Đã mở float auto copy text.";
+            ToggleLightNovelFloatingControlWindow();
         }
 
         private void ToggleLightNovelFloatingControlWindow()
