@@ -362,10 +362,14 @@ namespace get_link_manga
                 int hotkeyId = wParam.ToInt32();
                 if (hotkeyId == HOTKEY_ID)
                 {
+                    // Ctrl+Shift+F toggle float luôn hoạt động kể cả khi đang gõ
                     Dispatcher.BeginInvoke(new Action(ToggleLightNovelFloatingControlWindow));
                     handled = true;
                     return IntPtr.Zero;
                 }
+
+                // Không kích hoạt hotkey khi người dùng đang gõ trong ô nhập liệu
+                if (IsTextInputFocused()) return IntPtr.Zero;
 
                 if (_lightNovelGlobalHotkeysEnabled && HandleLightNovelGlobalHotkey(hotkeyId))
                 {
@@ -374,6 +378,16 @@ namespace get_link_manga
                 }
             }
             return IntPtr.Zero;
+        }
+
+        private static bool IsTextInputFocused()
+        {
+            var focused = Keyboard.FocusedElement;
+            if (focused is TextBox tb && tb.IsEnabled) return true;
+            if (focused is PasswordBox pb && pb.IsEnabled) return true;
+            if (focused is RichTextBox rtb && rtb.IsEnabled && !rtb.IsReadOnly) return true;
+            if (focused is ComboBox cb && cb.IsEditable && cb.IsEnabled) return true;
+            return false;
         }
 
         private void ToggleLightNovelGlobalHotkeys()
