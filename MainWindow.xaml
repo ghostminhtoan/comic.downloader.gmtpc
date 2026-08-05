@@ -391,7 +391,7 @@
                                        Margin="0,0,10,0"/>
                             <TextBox Name="txtCreateSubfolderName"
                                      Grid.Column="1"
-                                     Background="#0e121a"
+                                     Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                      BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                      Foreground="{StaticResource CyberpunkTextBrush}"
                                      CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -448,7 +448,7 @@
                                             <TextBlock Name="txtTruyenqqTargetLabel" Text="DOWNLOAD MULTIPLE WITH TAG OR ARTIST" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtTruyenqqTagUrl" 
                                                         Text="https://truyenqqko.com/the-loai/action-26"
-                                                        Background="#0e121a" 
+                                                        Background="{DynamicResource CyberpunkSurfaceAltBrush}" 
                                                         BorderBrush="{StaticResource CyberpunkBorderBrush}" 
                                                         Foreground="{StaticResource CyberpunkTextBrush}" 
                                                         CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -478,17 +478,17 @@
                                             
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Name="txtTruyenqqTotalPagesLabel" Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtTruyenqqTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtTruyenqqTotalPages_TextChanged"/>
+                                                <TextBox Name="txtTruyenqqTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtTruyenqqTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtTruyenqqPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtTruyenqqPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtTruyenqqPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtTruyenqqPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -525,7 +525,7 @@
                                                 <TextBlock Grid.Column="1" Text="{Binding CheckErrors.Count, RelativeSource={RelativeSource AncestorType=Window}, StringFormat=TOTAL: {0}}" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                 <Button Grid.Column="2" Name="btnClearCheckErrorsTruyenqq" Content="CLEAR" Click="BtnClearCheckErrors_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="20" Width="60" FontSize="9" Padding="0"/>
                                             </Grid>
-                                            <Border Grid.Row="1" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
+                                            <Border Grid.Row="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
                                                 <DataGrid Name="dgCheckErrorsTruyenqq"
                                                           ItemsSource="{Binding CheckErrors, RelativeSource={RelativeSource AncestorType=Window}}"
                                                           AutoGenerateColumns="False"
@@ -595,7 +595,7 @@
                                             <TextBlock Text="DOWNLOAD MULTIPLE WITH TAG OR ARTIST" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtNettruyenTagUrl" 
                                                         Text="https://nettruyenviet10.com/tim-truyen/adventure"
-                                                        Background="#0e121a" 
+                                                        Background="{DynamicResource CyberpunkSurfaceAltBrush}" 
                                                         BorderBrush="{StaticResource CyberpunkBorderBrush}" 
                                                         Foreground="{StaticResource CyberpunkTextBrush}" 
                                                         CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -625,17 +625,17 @@
                                             
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtNettruyenTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtNettruyenTotalPages_TextChanged"/>
+                                                <TextBox Name="txtNettruyenTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtNettruyenTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtNettruyenPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtNettruyenPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtNettruyenPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtNettruyenPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -672,7 +672,7 @@
                                                 <TextBlock Grid.Column="1" Text="{Binding CheckErrors.Count, RelativeSource={RelativeSource AncestorType=Window}, StringFormat=TOTAL: {0}}" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                 <Button Grid.Column="2" Name="btnClearCheckErrorsNettruyen" Content="CLEAR" Click="BtnClearCheckErrors_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="20" Width="60" FontSize="9" Padding="0"/>
                                             </Grid>
-                                            <Border Grid.Row="1" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
+                                            <Border Grid.Row="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
                                                 <DataGrid Name="dgCheckErrorsNettruyen"
                                                           ItemsSource="{Binding CheckErrors, RelativeSource={RelativeSource AncestorType=Window}}"
                                                           AutoGenerateColumns="False"
@@ -742,7 +742,7 @@
                                             <TextBlock Text="REDIRECT DOMAIN" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtNettruyenTechRedirectDomain"
                                                         Text=""
-                                                        Background="#0e121a"
+                                                        Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                         BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                         Foreground="{StaticResource CyberpunkTextBrush}"
                                                         CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -751,7 +751,7 @@
                                             <TextBlock Text="DOWNLOAD MULTIPLE WITH TAG OR ARTIST" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtNettruyenTechTagUrl"
                                                         Text="https://nettruyen.tech/the-loai/truyen-scan"
-                                                        Background="#0e121a"
+                                                        Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                         BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                         Foreground="{StaticResource CyberpunkTextBrush}"
                                                         CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -779,17 +779,17 @@
 
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtNettruyenTechTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtNettruyenTechTotalPages_TextChanged"/>
+                                                <TextBox Name="txtNettruyenTechTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtNettruyenTechTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtNettruyenTechPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtNettruyenTechPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtNettruyenTechPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtNettruyenTechPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -823,7 +823,7 @@
                                                 <TextBlock Grid.Column="1" Text="{Binding CheckErrors.Count, RelativeSource={RelativeSource AncestorType=Window}, StringFormat=TOTAL: {0}}" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                 <Button Grid.Column="2" Name="btnClearCheckErrorsNettruyenTech" Content="CLEAR" Click="BtnClearCheckErrors_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="20" Width="60" FontSize="9" Padding="0"/>
                                             </Grid>
-                                            <Border Grid.Row="1" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
+                                            <Border Grid.Row="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
                                                 <DataGrid Name="dgCheckErrorsNettruyenTech"
                                                           ItemsSource="{Binding CheckErrors, RelativeSource={RelativeSource AncestorType=Window}}"
                                                           AutoGenerateColumns="False"
@@ -893,7 +893,7 @@
                                             <TextBlock Text="TARGET URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtDilibTagUrl"
                                                      Text="https://thuviensach.vn/truyen-tranh/shounen/"
-                                                     Background="#0e121a"
+                                                     Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                      BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                      Foreground="{StaticResource CyberpunkTextBrush}"
                                                      CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -916,17 +916,17 @@
 
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtDilibTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtDilibTotalPages_TextChanged"/>
+                                                <TextBox Name="txtDilibTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtDilibTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtDilibPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtDilibPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtDilibPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtDilibPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -943,7 +943,7 @@
                                             <Button Grid.Column="4" Name="btnDilibPasteDirect" Content="PASTE DIRECT LINK" Click="BtnDilibPasteDirect_Click" Style="{StaticResource WideActionButton}"/>
                                         </Grid>
 
-                                        <Border Grid.Row="6" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="12" Visibility="Collapsed">
+                                        <Border Grid.Row="6" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="12" Visibility="Collapsed">
                                             <TextBlock Text="Hỗ trợ tag/category, book, chapter. Không cần bypass captcha. Ảnh chapter chỉ lấy file bắt đầu img*." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
                                         </Border>
                                     </Grid>
@@ -982,7 +982,7 @@
                                             <TextBlock Text="TARGET URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtDoctruyenTagUrl"
                                                      Text="https://doctruyen.us/the-loai/action"
-                                                     Background="#0e121a"
+                                                     Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                      BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                      Foreground="{StaticResource CyberpunkTextBrush}"
                                                      CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -1000,11 +1000,11 @@
                                             <Button Grid.Column="2" Name="btnDoctruyenPasteDirect" Content="PASTE DIRECT LINK" Click="BtnDoctruyenPasteDirect_Click" Style="{StaticResource WideActionButton}"/>
                                         </Grid>
 
-                                        <Border Grid.Row="3" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="12" Margin="0,0,0,15">
+                                        <Border Grid.Row="3" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="12" Margin="0,0,0,15">
                                             <TextBlock Name="txtDoctruyenPageHintText" Text="Web này không hỗ trợ page number." Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="12" FontWeight="Bold" TextWrapping="Wrap"/>
                                         </Border>
 
-                                        <Border Grid.Row="4" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="12" Visibility="Collapsed">
+                                        <Border Grid.Row="4" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="12" Visibility="Collapsed">
                                             <TextBlock Text="Hỗ trợ link thể loại, book, chapter. Analyze sẽ tự nhận diện URL doctruyen.us và đưa đúng item vào queue. Chapter chỉ lấy ảnh trong reader-images-container, bỏ base64 và chỉ giữ đuôi ảnh hợp lệ." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
                                         </Border>
                                     </Grid>
@@ -1046,7 +1046,7 @@
                                             <TextBlock Text="TARGET URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtLoppyTagUrl"
                                                      Text="https://loppytoonn.com/the-loai/lang-man"
-                                                     Background="#0e121a"
+                                                     Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                      BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                      Foreground="{StaticResource CyberpunkTextBrush}"
                                                      CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -1069,17 +1069,17 @@
 
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtLoppyTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtLoppyTotalPages_TextChanged"/>
+                                                <TextBox Name="txtLoppyTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtLoppyTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtLoppyPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtLoppyPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtLoppyPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtLoppyPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -1133,7 +1133,7 @@
                                             <TextBlock Text="TARGET URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtHaibabaTagUrl"
                                                      Text="http://haibabamanga.somee.com/Home/Category?slug=action"
-                                                     Background="#0e121a"
+                                                     Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                      BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                      Foreground="{StaticResource CyberpunkTextBrush}"
                                                      CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -1156,17 +1156,17 @@
 
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtHaibabaTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtHaibabaTotalPages_TextChanged"/>
+                                                <TextBox Name="txtHaibabaTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtHaibabaTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtHaibabaPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtHaibabaPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtHaibabaPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtHaibabaPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -1221,7 +1221,7 @@
                                             <TextBlock Text="TARGET URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtMangadexTagUrl"
                                                      Text="https://mangadex.org/tag/423e2eae-a7a2-4a8b-ac03-a8351462d71d/romance"
-                                                     Background="#0e121a"
+                                                     Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                      BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                      Foreground="{StaticResource CyberpunkTextBrush}"
                                                      CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -1240,7 +1240,7 @@
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Name="txtMangadexLoginEmailLabel" Text="LOGIN EMAIL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                                 <TextBox Name="txtMangadexLoginEmail"
-                                                         Background="#0e121a"
+                                                         Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                          BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                          Foreground="{StaticResource CyberpunkTextBrush}"
                                                          CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -1252,7 +1252,7 @@
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Name="txtMangadexLoginPasswordLabel" Text="LOGIN PASSWORD" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                                 <PasswordBox Name="txtMangadexLoginPassword"
-                                                             Background="#0e121a"
+                                                             Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                              BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                              Foreground="{StaticResource CyberpunkTextBrush}"
                                                              Height="32"
@@ -1277,7 +1277,7 @@
                                                 <CheckBox Name="chkMangadexLangFallback" Content="Tải ngôn ngữ phụ nếu ngôn ngữ chính không có chap" IsChecked="False" Foreground="{StaticResource CyberpunkTextBrush}" FontSize="12" FontWeight="Bold" Margin="0,0,20,0" Style="{StaticResource ShutdownPopupCheckBox}"/>
                                             </WrapPanel>
                                             <TextBlock Text="ƯU TIÊN NHÓM DỊCH (SCANLATOR GROUP)" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                            <TextBox Name="txtMangadexGroupFilter" Text="" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="12" Height="28" Padding="5,2" VerticalContentAlignment="Center" ToolTip="Nhập tên nhóm dịch ưu tiên. Để trống để tải nhóm bất kỳ (không lọc)."/>
+                                            <TextBox Name="txtMangadexGroupFilter" Text="" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="12" Height="28" Padding="5,2" VerticalContentAlignment="Center" ToolTip="Nhập tên nhóm dịch ưu tiên. Để trống để tải nhóm bất kỳ (không lọc)."/>
                                         </StackPanel>
 
                                         <Grid Grid.Row="5" Margin="0,0,0,15" Visibility="Collapsed">
@@ -1291,17 +1291,17 @@
 
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtMangadexTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtMangadexTotalPages_TextChanged"/>
+                                                <TextBox Name="txtMangadexTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtMangadexTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtMangadexPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtMangadexPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtMangadexPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtMangadexPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -1363,7 +1363,7 @@
                                              <TextBlock Text="TARGET URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                              <TextBox Name="txtDaomeodenTagUrl"
                                                       Text="https://daomeoden.net/the-loai/romance.html"
-                                                      Background="#0e121a"
+                                                      Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                       BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                       Foreground="{StaticResource CyberpunkTextBrush}"
                                                       CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -1386,17 +1386,17 @@
 
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtDaomeodenTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtDaomeodenTotalPages_TextChanged"/>
+                                                <TextBox Name="txtDaomeodenTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtDaomeodenTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtDaomeodenPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtDaomeodenPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtDaomeodenPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtDaomeodenPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -1415,7 +1415,7 @@
                                             <Button Grid.Column="4" Name="btnDaomeodenPasteDirect" Content="PASTE DIRECT LINK" Click="BtnDaomeodenPasteDirect_Click" Style="{StaticResource WideActionButton}"/>
                                         </Grid>
 
-                                        <Border Grid.Row="6" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" Padding="12" CornerRadius="3" Visibility="Collapsed">
+                                        <Border Grid.Row="6" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" Padding="12" CornerRadius="3" Visibility="Collapsed">
                                             <TextBlock Text="Supports tag, book, chapter, and imggo direct image links. For extra pages, you can paste a page-specific URL manually." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
                                         </Border>
                                     </Grid>
@@ -1461,7 +1461,7 @@
                                             <TextBlock Text="TARGET TAG URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtViHentaiTagUrl" 
                                                          Text="https://vi-hentai.pro/the-loai/khong-che"
-                                                         Background="#0e121a" 
+                                                         Background="{DynamicResource CyberpunkSurfaceAltBrush}" 
                                                          BorderBrush="{StaticResource CyberpunkBorderBrush}" 
                                                          Foreground="{StaticResource CyberpunkTextBrush}" 
                                                          CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -1491,17 +1491,17 @@
                                             
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtViHentaiTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtViHentaiTotalPages_TextChanged"/>
+                                                <TextBox Name="txtViHentaiTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtViHentaiTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtViHentaiPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtViHentaiPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtViHentaiPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtViHentaiPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -1537,7 +1537,7 @@
                                                 <TextBlock Grid.Column="1" Text="{Binding CheckErrors.Count, RelativeSource={RelativeSource AncestorType=Window}, StringFormat=TOTAL: {0}}" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                 <Button Grid.Column="2" Name="btnClearCheckErrorsViHentai" Content="CLEAR" Click="BtnClearCheckErrors_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="20" Width="60" FontSize="9" Padding="0"/>
                                             </Grid>
-                                            <Border Grid.Row="1" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
+                                            <Border Grid.Row="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
                                                 <DataGrid Name="dgCheckErrorsViHentai"
                                                           ItemsSource="{Binding CheckErrors, RelativeSource={RelativeSource AncestorType=Window}}"
                                                           AutoGenerateColumns="False"
@@ -1603,7 +1603,7 @@
                                             <TextBlock Text="REDIRECT DOMAIN" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtDamconuongRedirectDomain"
                                                      Text=""
-                                                     Background="#0e121a"
+                                                     Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                      BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                      Foreground="{StaticResource CyberpunkTextBrush}"
                                                      CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -1612,7 +1612,7 @@
                                             <TextBlock Text="TARGET URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtDamconuongTagUrl"
                                                      Text="https://damconuong.shop/the-loai/elf"
-                                                     Background="#0e121a"
+                                                     Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                      BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                      Foreground="{StaticResource CyberpunkTextBrush}"
                                                      CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -1630,7 +1630,7 @@
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Name="txtDamconuongLoginEmailLabel" Text="LOGIN EMAIL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                                 <TextBox Name="txtDamconuongLoginEmail"
-                                                         Background="#0e121a"
+                                                         Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                          BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                          Foreground="{StaticResource CyberpunkTextBrush}"
                                                          CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -1642,7 +1642,7 @@
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Name="txtDamconuongLoginPasswordLabel" Text="LOGIN PASSWORD" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                                 <PasswordBox Name="txtDamconuongLoginPassword"
-                                                             Background="#0e121a"
+                                                             Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                              BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                              Foreground="{StaticResource CyberpunkTextBrush}"
                                                              Height="32"
@@ -1675,17 +1675,17 @@
 
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtDamconuongTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtDamconuongTotalPages_TextChanged"/>
+                                                <TextBox Name="txtDamconuongTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtDamconuongTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtDamconuongPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtDamconuongPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtDamconuongPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtDamconuongPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -1702,7 +1702,7 @@
                                             <Button Grid.Column="4" Name="btnDamconuongPasteDirect" Content="PASTE DIRECT LINK" Click="BtnDamconuongPasteDirect_Click" Style="{StaticResource WideActionButton}"/>
                                         </Grid>
 
-                                        <Border Grid.Row="6" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" Padding="12" CornerRadius="3" Visibility="Collapsed">
+                                        <Border Grid.Row="6" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" Padding="12" CornerRadius="3" Visibility="Collapsed">
                                             <TextBlock Name="txtDamconuongHelpText" Text="Hỗ trợ category, book, chapter. Category tự đi page 1 -> cuối. Chapter chỉ lấy ảnh trong #chapter-content / reading-detail box_doc." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
                                         </Border>
                                     </Grid>
@@ -1744,7 +1744,7 @@
                                             <TextBlock Name="txtTruyenggvnTargetLabel" Text="DOWNLOAD MULTIPLE WITH TAG OR BOOK OR CHAPTER" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtTruyenggvnTagUrl"
                                                      Text="https://sayhentai.cx/genre/romance"
-                                                     Background="#0e121a"
+                                                     Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                      BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                      Foreground="{StaticResource CyberpunkTextBrush}"
                                                      CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -1772,17 +1772,17 @@
 
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Name="txtTruyenggvnTotalPagesLabel" Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtTruyenggvnTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtTruyenggvnTotalPages_TextChanged"/>
+                                                <TextBox Name="txtTruyenggvnTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtTruyenggvnTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtTruyenggvnPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtTruyenggvnPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtTruyenggvnPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtTruyenggvnPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -1816,7 +1816,7 @@
                                                 <TextBlock Grid.Column="1" Text="{Binding CheckErrors.Count, RelativeSource={RelativeSource AncestorType=Window}, StringFormat=TOTAL: {0}}" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                 <Button Grid.Column="2" Name="btnClearCheckErrorsTruyenggvn" Content="CLEAR" Click="BtnClearCheckErrors_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="20" Width="60" FontSize="9" Padding="0"/>
                                             </Grid>
-                                            <Border Grid.Row="1" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
+                                            <Border Grid.Row="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
                                                 <DataGrid Name="dgCheckErrorsTruyenggvn"
                                                           ItemsSource="{Binding CheckErrors, RelativeSource={RelativeSource AncestorType=Window}}"
                                                           AutoGenerateColumns="False"
@@ -1889,7 +1889,7 @@
                                             <TextBlock Text="TARGET TAG URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtTagUrl" 
                                                          Text="https://hentaiforce.net/search?q=%22uncensored%22+%22full+color"
-                                                         Background="#0e121a" 
+                                                         Background="{DynamicResource CyberpunkSurfaceAltBrush}" 
                                                          BorderBrush="{StaticResource CyberpunkBorderBrush}" 
                                                          Foreground="{StaticResource CyberpunkTextBrush}" 
                                                          CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -1919,17 +1919,17 @@
                                             
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtTotalPages_TextChanged"/>
+                                                <TextBox Name="txtTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -1965,7 +1965,7 @@
                                                 <TextBlock Grid.Column="1" Text="{Binding CheckErrors.Count, RelativeSource={RelativeSource AncestorType=Window}, StringFormat=TOTAL: {0}}" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                 <Button Grid.Column="2" Name="btnClearCheckErrors" Content="CLEAR" Click="BtnClearCheckErrors_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="20" Width="60" FontSize="9" Padding="0"/>
                                             </Grid>
-                                            <Border Grid.Row="1" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
+                                            <Border Grid.Row="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
                                                 <DataGrid Name="dgCheckErrors"
                                                           ItemsSource="{Binding CheckErrors, RelativeSource={RelativeSource AncestorType=Window}}"
                                                           AutoGenerateColumns="False"
@@ -2033,7 +2033,7 @@
                                             <TextBlock Text="TARGET TAG URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtNhentaiNetTagUrl" 
                                                         Text="https://nhentai.net/tag/raccoon-girl/"
-                                                        Background="#0e121a" 
+                                                        Background="{DynamicResource CyberpunkSurfaceAltBrush}" 
                                                         BorderBrush="{StaticResource CyberpunkBorderBrush}" 
                                                         Foreground="{StaticResource CyberpunkTextBrush}" 
                                                         CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -2052,7 +2052,7 @@
                                                       SelectionChanged="CmbNhentaiNetSort_SelectionChanged">
                                                 <ComboBox.ItemsPanel>
                                                     <ItemsPanelTemplate>
-                                                        <VirtualizingStackPanel Background="#121622"/>
+                                                        <VirtualizingStackPanel Background="{DynamicResource CyberpunkSurfaceEdgeBrush}"/>
                                                     </ItemsPanelTemplate>
                                                 </ComboBox.ItemsPanel>
                                                 <ComboBox.ItemContainerStyle>
@@ -2088,17 +2088,17 @@
                                             
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtNhentaiNetTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtNhentaiNetTotalPages_TextChanged"/>
+                                                <TextBox Name="txtNhentaiNetTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtNhentaiNetTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtNhentaiNetPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtNhentaiNetPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtNhentaiNetPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtNhentaiNetPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -2156,7 +2156,7 @@
                                         <StackPanel Grid.Row="1" Margin="0,0,0,14">
                                             <TextBlock Text="TARGET TAG URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtHentai2readTagUrl"
-                                                     Background="#0e121a"
+                                                     Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                      BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                      Foreground="{StaticResource CyberpunkTextBrush}"
                                                      CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -2185,15 +2185,15 @@
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtHentai2readTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtHentai2readTotalPages_TextChanged"/>
+                                                <TextBox Name="txtHentai2readTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtHentai2readTotalPages_TextChanged"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtHentai2readPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtHentai2readPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtHentai2readPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtHentai2readPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -2250,7 +2250,7 @@
                                             <TextBlock Text="TARGET TAG URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtHentaieraTagUrl" 
                                                         Text="https://hentaiera.com/artist/yamamoto/popular/"
-                                                        Background="#0e121a" 
+                                                        Background="{DynamicResource CyberpunkSurfaceAltBrush}" 
                                                         BorderBrush="{StaticResource CyberpunkBorderBrush}" 
                                                         Foreground="{StaticResource CyberpunkTextBrush}" 
                                                         CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -2280,17 +2280,17 @@
                                             
                                             <StackPanel Grid.Column="0">
                                                 <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtHentaieraTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtHentaieraTotalPages_TextChanged"/>
+                                                <TextBox Name="txtHentaieraTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtHentaieraTotalPages_TextChanged"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtHentaieraPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtHentaieraPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtHentaieraPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                                <TextBox Name="txtHentaieraPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                             </StackPanel>
                                         </Grid>
 
@@ -2326,7 +2326,7 @@
                                                 <TextBlock Grid.Column="1" Text="{Binding CheckErrors.Count, RelativeSource={RelativeSource AncestorType=Window}, StringFormat=TOTAL: {0}}" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                 <Button Grid.Column="2" Name="btnClearCheckErrorsHentaiera" Content="CLEAR" Click="BtnClearCheckErrors_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="20" Width="60" FontSize="9" Padding="0"/>
                                             </Grid>
-                                            <Border Grid.Row="1" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
+                                            <Border Grid.Row="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
                                                 <DataGrid Name="dgCheckErrorsHentaiera"
                                                           ItemsSource="{Binding CheckErrors, RelativeSource={RelativeSource AncestorType=Window}}"
                                                           AutoGenerateColumns="False"
@@ -2412,7 +2412,7 @@
                                         <TextBlock Text="TARGET TAG URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                         <TextBox Name="txtHakoTagUrl"
                                                  Text="https://ln.hako.vn/the-loai/action"
-                                                 Background="#0e121a"
+                                                 Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                  BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                  Foreground="{StaticResource CyberpunkTextBrush}"
                                                  CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -2440,17 +2440,17 @@
 
                                         <StackPanel Grid.Column="0">
                                             <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                            <TextBox Name="txtHakoTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtHakoTotalPages_TextChanged"/>
+                                            <TextBox Name="txtHakoTotalPages" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtHakoTotalPages_TextChanged"/>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="2">
                                             <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                            <TextBox Name="txtHakoPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                            <TextBox Name="txtHakoPageFrom" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="4">
                                             <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                            <TextBox Name="txtHakoPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                            <TextBox Name="txtHakoPageTo" Text="1" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
                                         </StackPanel>
                                     </Grid>
 
@@ -2514,7 +2514,7 @@
                                 <TextBlock Grid.Row="0" Grid.Column="2" Name="txtPasswordManagerUsernameLabel" Text="USERNAME" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                 <TextBlock Grid.Row="0" Grid.Column="4" Name="txtPasswordManagerPasswordLabel" Text="PASSWORD" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
 
-                                <Border Grid.Row="1" Grid.ColumnSpan="5" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="10" Margin="0,0,0,10">
+                                <Border Grid.Row="1" Grid.ColumnSpan="5" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="10" Margin="0,0,0,10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="220"/>
@@ -2527,7 +2527,7 @@
                                         <TextBox Grid.Column="2"
                                                  Name="txtPasswordManagerDamconuongUsername"
                                                  Tag="damconuong.shop"
-                                                 Background="#0e121a"
+                                                 Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                  BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                  Foreground="{StaticResource CyberpunkTextBrush}"
                                                  CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -2542,7 +2542,7 @@
                                             <PasswordBox Name="txtPasswordManagerDamconuongPassword"
                                                          Tag="damconuong.shop"
                                                          Grid.Column="0"
-                                                         Background="#0e121a"
+                                                         Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                          BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                          Foreground="{StaticResource CyberpunkTextBrush}"
                                                          Height="32"
@@ -2550,7 +2550,7 @@
                                             <TextBox Name="txtPasswordManagerDamconuongPasswordVisible"
                                                      Tag="damconuong.shop"
                                                      Grid.Column="0"
-                                                     Background="#0e121a"
+                                                     Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                      BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                      Foreground="{StaticResource CyberpunkTextBrush}"
                                                      CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -2581,7 +2581,7 @@
                                     </Grid>
                                 </Border>
 
-                                <Border Grid.Row="2" Grid.ColumnSpan="5" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="10" Margin="0,0,0,10">
+                                <Border Grid.Row="2" Grid.ColumnSpan="5" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="10" Margin="0,0,0,10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="220"/>
@@ -2594,7 +2594,7 @@
                                         <TextBox Grid.Column="2"
                                                  Name="txtPasswordManagerMangadexUsername"
                                                  Tag="mangadex.org"
-                                                 Background="#0e121a"
+                                                 Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                  BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                  Foreground="{StaticResource CyberpunkTextBrush}"
                                                  CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -2609,7 +2609,7 @@
                                             <PasswordBox Name="txtPasswordManagerMangadexPassword"
                                                          Tag="mangadex.org"
                                                          Grid.Column="0"
-                                                         Background="#0e121a"
+                                                         Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                          BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                          Foreground="{StaticResource CyberpunkTextBrush}"
                                                          Height="32"
@@ -2617,7 +2617,7 @@
                                             <TextBox Name="txtPasswordManagerMangadexPasswordVisible"
                                                      Tag="mangadex.org"
                                                      Grid.Column="0"
-                                                     Background="#0e121a"
+                                                     Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                      BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                                      Foreground="{StaticResource CyberpunkTextBrush}"
                                                      CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -2657,7 +2657,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" Padding="12" CornerRadius="3" Margin="0,0,12,0">
+                                <Border Grid.Column="0" Background="{DynamicResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" Padding="12" CornerRadius="3" Margin="0,0,12,0">
                                     <TextBlock Name="txtPasswordManagerHelpText" Text="APPLY sẽ đẩy username/password sang tab source của domain tương ứng, auto login, rồi tab source tự xóa ô login sau khi hoàn tất. Password sẽ autosave vào autosave_password.md." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
                                 </Border>
                                 <Button Grid.Column="1"
@@ -2726,7 +2726,7 @@
                                              AcceptsReturn="True"
                                              VerticalScrollBarVisibility="Auto"
                                              TextWrapping="Wrap"
-                                             Background="#0e121a"
+                                             Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                              BorderBrush="{StaticResource CyberpunkBorderBrush}"
                                              Foreground="{StaticResource CyberpunkTextBrush}"
                                              CaretBrush="{StaticResource CyberpunkCyanBrush}"
@@ -2752,7 +2752,7 @@
                                             </Style>
                                             <Style TargetType="CheckBox">
                                                 <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
-                                                <Setter Property="Background" Value="#06090e"/>
+                                                <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceAltBrush}"/>
                                                 <Setter Property="FontWeight" Value="Bold"/>
                                                 <Setter Property="Template">
                                                     <Setter.Value>
@@ -2761,7 +2761,7 @@
                                                                 <Border x:Name="Box"
                                                                         Width="14"
                                                                         Height="14"
-                                                                        Background="#06090e"
+                                                                        Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                                                         BorderBrush="#FFFFFF"
                                                                         BorderThickness="1"
                                                                         Margin="0,0,7,0"
@@ -4006,7 +4006,7 @@
                                 <Setter Property="Padding" Value="0"/>
                                 <Setter Property="Margin" Value="0,0,6,6"/>
                                 <Setter Property="Height" Value="{Binding Tag, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
-                                <Setter Property="Background" Value="#09101C"/>
+                                <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceAltBrush}"/>
                                 <Setter Property="BorderBrush" Value="Transparent"/>
                                 <Setter Property="BorderThickness" Value="1"/>
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -4032,7 +4032,7 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border Padding="4"
-                                        Background="#111827"
+                                        Background="{DynamicResource CyberpunkSurfaceAltBrush}"
                                         BorderBrush="{StaticResource CyberpunkCyanBrush}"
                                         BorderThickness="1"
                                         CornerRadius="6"
@@ -4042,7 +4042,7 @@
                                         SnapsToDevicePixels="True">
                                     <Border.Style>
                                             <Style TargetType="Border">
-                                                <Setter Property="Background" Value="#111827"/>
+                                                <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceAltBrush}"/>
                                                 <Setter Property="BorderBrush" Value="{StaticResource CyberpunkCyanBrush}"/>
                                                 <Setter Property="BorderThickness" Value="1"/>
                                                 <Style.Triggers>
@@ -4075,7 +4075,7 @@
 
                                         <Border Grid.Row="0"
                                                 Margin="0,0,0,6"
-                                                Background="#0A1321"
+                                                Background="{DynamicResource CyberpunkSurfaceEdgeBrush}"
                                                 BorderBrush="{StaticResource CyberpunkCyanBrush}"
                                                 BorderThickness="1"
                                                 CornerRadius="4">
@@ -4413,7 +4413,7 @@
                                 <ComboBox Name="cmbDownloadFolderType" Style="{StaticResource CyberpunkComboBox}" Height="26" Width="120" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" SelectedIndex="0" SelectionChanged="CmbDownloadFolderType_SelectionChanged" Margin="0,0,16,0" VerticalAlignment="Center">
                                     <ComboBox.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <VirtualizingStackPanel Background="#121622"/>
+                                            <VirtualizingStackPanel Background="{DynamicResource CyberpunkSurfaceEdgeBrush}"/>
                                         </ItemsPanelTemplate>
                                     </ComboBox.ItemsPanel>
                                     <ComboBox.ItemContainerStyle>
@@ -4426,7 +4426,7 @@
                                 <ComboBox Name="cmbAutoSplitChapters" Style="{StaticResource CyberpunkComboBox}" Height="26" Width="120" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" SelectedIndex="0" Margin="0,0,8,0" VerticalAlignment="Center">
                                     <ComboBox.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <VirtualizingStackPanel Background="#121622"/>
+                                            <VirtualizingStackPanel Background="{DynamicResource CyberpunkSurfaceEdgeBrush}"/>
                                         </ItemsPanelTemplate>
                                     </ComboBox.ItemsPanel>
                                     <ComboBox.ItemContainerStyle>
@@ -4506,7 +4506,7 @@
                                 <ComboBox Name="cmbConnections" Style="{StaticResource CyberpunkComboBox}" Height="26" Width="50" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" SelectionChanged="CmbConnections_SelectionChanged" SelectedIndex="2" Margin="0,0,12,0" VerticalAlignment="Center">
                                     <ComboBox.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <VirtualizingStackPanel Background="#121622"/>
+                                            <VirtualizingStackPanel Background="{DynamicResource CyberpunkSurfaceEdgeBrush}"/>
                                         </ItemsPanelTemplate>
                                     </ComboBox.ItemsPanel>
                                     <ComboBoxItem Content="1"/>
@@ -4520,7 +4520,7 @@
                                 <ComboBox Name="cmbMultiDownload" Style="{StaticResource CyberpunkComboBox}" Height="26" Width="50" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" SelectedIndex="1" SelectionChanged="CmbMultiDownload_SelectionChanged" Margin="0,0,12,0" VerticalAlignment="Center">
                                     <ComboBox.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <VirtualizingStackPanel Background="#121622"/>
+                                            <VirtualizingStackPanel Background="{DynamicResource CyberpunkSurfaceEdgeBrush}"/>
                                         </ItemsPanelTemplate>
                                     </ComboBox.ItemsPanel>
                                     <ComboBoxItem Content="1"/>
@@ -4538,7 +4538,7 @@
                                 <ComboBox Name="cmbWebviewCpuAffinity" Style="{StaticResource CyberpunkComboBox}" Height="26" Width="65" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,12,0" VerticalAlignment="Center">
                                     <ComboBox.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <VirtualizingStackPanel Background="#121622"/>
+                                            <VirtualizingStackPanel Background="{DynamicResource CyberpunkSurfaceEdgeBrush}"/>
                                         </ItemsPanelTemplate>
                                     </ComboBox.ItemsPanel>
                                 </ComboBox>
@@ -4546,7 +4546,7 @@
                                 <ComboBox Name="cmbWebviewCpuPriority" Style="{StaticResource CyberpunkComboBox}" Height="26" Width="110" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,12,0" VerticalAlignment="Center">
                                     <ComboBox.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <VirtualizingStackPanel Background="#121622"/>
+                                            <VirtualizingStackPanel Background="{DynamicResource CyberpunkSurfaceEdgeBrush}"/>
                                         </ItemsPanelTemplate>
                                     </ComboBox.ItemsPanel>
                                 </ComboBox>
