@@ -4086,7 +4086,8 @@ namespace get_link_manga
 
         internal async Task<bool> SolveNhentaiCaptchaIfNeededAsync(string testUrl)
         {
-            if (IsCaptchaCooldownActive(testUrl)) return true;
+            bool isListUrl = testUrl.Contains("/tag/") || testUrl.Contains("/artist/") || testUrl.Contains("/parody/") || testUrl.Contains("/group/") || testUrl.Contains("/character/") || testUrl.Contains("/search/") || testUrl.Contains("?q=");
+            if (!isListUrl && IsCaptchaCooldownActive(testUrl)) return true;
 
             bool isBlocked = await CheckIfNhentaiBlockedAsync(testUrl);
             if (!isBlocked)
@@ -4127,7 +4128,6 @@ namespace get_link_manga
                     await await Dispatcher.InvokeAsync(async () =>
                     {
                         // Nếu là URL danh sách (tag, artist, parody, group, character, search) thì luôn dùng headlessAutomation = true để cào ngầm giống tag
-                        bool isListUrl = testUrl.Contains("/tag/") || testUrl.Contains("/artist/") || testUrl.Contains("/parody/") || testUrl.Contains("/group/") || testUrl.Contains("/character/") || testUrl.Contains("/search/") || testUrl.Contains("?q=");
                         bool useHeadless = isListUrl ? true : _lightNovelAutoFocusEnabled;
 
                         var captchaWin = CreateCaptchaWindow(testUrl, autoDeleteCookiesOnLoad: true, headlessAutomation: useHeadless);
