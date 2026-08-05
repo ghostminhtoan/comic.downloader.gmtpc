@@ -4155,6 +4155,52 @@ namespace get_link_manga
                             _lastNhentaiResolvedUrl = testUrl;
                             solved = true;
                         }
+
+                        // Lần 2 (Self-Healing): Nếu giải lần 1 với session cũ thất bại, tự động xóa folder cookie và giải lại sạch từ đầu
+                        if (!solved)
+                        {
+                            Log("[nhentai.net] Lần 1 giải captcha thất bại (có thể do session cũ bị block). Tiến hành xóa folder cookie nhentai và giải lại sạch...");
+                            string captchaPath = System.IO.Path.Combine(PortablePaths.WebView2CaptchaUserDataFolder, "nhentai.net");
+                            try
+                            {
+                                if (System.IO.Directory.Exists(captchaPath))
+                                {
+                                    System.IO.Directory.Delete(captchaPath, true);
+                                    Log("[nhentai.net] Đã tự động xóa folder cookie nhentai.net");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Log($"[nhentai.net] Không thể tự động xóa folder cookie: {ex.Message}");
+                            }
+
+                            // Khởi tạo cửa sổ captcha sạch
+                            var captchaWinClean = CreateCaptchaWindow(testUrl, autoDeleteCookiesOnLoad: true, headlessAutomation: useHeadless);
+                            captchaWinClean.Owner = this;
+
+                            if (await ShowCaptchaWindowWithFocusHandlingAsync(captchaWinClean, useNovelFocusStealth: useHeadless))
+                            {
+                                var originalUri = new Uri(testUrl);
+                                var resolvedUri = captchaWinClean.ResolvedUri ?? originalUri;
+
+                                MergeCookiesIntoScopedContainer(resolvedUri.AbsoluteUri, resolvedUri, captchaWinClean.ResolvedCookies.GetCookies(resolvedUri).Cast<Cookie>());
+
+                                if (originalUri.Host != resolvedUri.Host)
+                                {
+                                    MergeCookiesIntoScopedContainer(originalUri.AbsoluteUri, originalUri, captchaWinClean.ResolvedCookies.GetCookies(originalUri).Cast<Cookie>());
+                                }
+
+                                if (!string.IsNullOrEmpty(captchaWinClean.UserAgent))
+                                {
+                                    RememberScopedUserAgent(originalUri.AbsoluteUri, captchaWinClean.UserAgent);
+                                    RememberScopedUserAgent(resolvedUri.AbsoluteUri, captchaWinClean.UserAgent);
+                                }
+
+                                _lastNhentaiResolvedHtml = captchaWinClean.ResolvedHtml;
+                                _lastNhentaiResolvedUrl = testUrl;
+                                solved = true;
+                            }
+                        }
                     });
                 }
                 finally
@@ -5767,13 +5813,6 @@ namespace get_link_manga
                     if (url.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         request.Headers.Referrer = new Uri("https://nhentai.net/");
-                        request.Headers.TryAddWithoutValidation("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
-                        request.Headers.TryAddWithoutValidation("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7");
-                        request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "document");
-                        request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "navigate");
-                        request.Headers.TryAddWithoutValidation("Sec-Fetch-Site", "same-origin");
-                        request.Headers.TryAddWithoutValidation("Sec-Fetch-User", "?1");
-                        request.Headers.TryAddWithoutValidation("Upgrade-Insecure-Requests", "1");
                     }
 
                 }
