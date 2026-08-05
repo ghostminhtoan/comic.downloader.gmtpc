@@ -402,6 +402,15 @@ namespace get_link_manga
                 for (int i = 0; i < total; i++)
                 {
                     string link = links[i];
+                    if (string.IsNullOrEmpty(link)) continue;
+
+                    // Strip fragment (#) and query parameters (?)
+                    int hashIdx = link.IndexOf('#');
+                    if (hashIdx >= 0) link = link.Substring(0, hashIdx);
+                    int qIdx = link.IndexOf('?');
+                    if (qIdx >= 0) link = link.Substring(0, qIdx);
+                    link = link.Trim();
+
                     var idMatch = Regex.Match(link, @"(\d+)(?:\.html)?$");
                     if (!idMatch.Success)
                     {
