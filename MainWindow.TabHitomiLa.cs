@@ -281,7 +281,7 @@ namespace get_link_manga
                     if (singleMatch.Success)
                     {
                         string id = singleMatch.Groups[1].Value;
-                        await ImportHitomiLaDirectLinksAsync(new List<string> { $"https://hitomi.la/gallery/{id}.html" });
+                        await ImportHitomiLaDirectLinksAsync(new List<string> { $"https://hitomi.la/reader/{id}.html" });
                     }
                     return;
                 }
@@ -336,7 +336,7 @@ namespace get_link_manga
                         if (targetIndex >= totalIDs) break;
 
                         int id = BigEndianToInt32(data, targetIndex * 4);
-                        idsToFetch.Add($"https://hitomi.la/gallery/{id}.html");
+                        idsToFetch.Add($"https://hitomi.la/reader/{id}.html");
                     }
                 }
 
@@ -460,7 +460,7 @@ namespace get_link_manga
                         {
                             _scrapedItems.Add(new GalleryItem
                             {
-                                Link = $"https://hitomi.la/gallery/{id}.html",
+                                Link = $"https://hitomi.la/reader/{id}.html",
                                 Name = displayName,
                                 OriginalIndex = _scrapedItems.Count,
                                 IsChecked = true,
