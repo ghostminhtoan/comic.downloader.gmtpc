@@ -1070,6 +1070,17 @@ namespace get_link_manga
                 return;
             }
 
+            // Test code: Auto start download after 6 seconds
+            Dispatcher.InvokeAsync(async () =>
+            {
+                await System.Threading.Tasks.Task.Delay(6000);
+                if (btnStartDownload != null && btnStartDownload.IsChecked != true)
+                {
+                    Log("[TEST] Automatically triggering download...");
+                    await StartPictureDownloadFromFloatingAsync();
+                }
+            });
+
             _globalAutoPasteTimer = new DispatcherTimer(DispatcherPriority.Background)
             {
                 Interval = TimeSpan.FromMilliseconds(350)

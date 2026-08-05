@@ -311,8 +311,10 @@ namespace get_link_manga
                 {
                     if (_checkErrorIndex.TryGetValue(k, out var val))
                     {
+                        string valCh = string.IsNullOrWhiteSpace(val.ChapterName) ? "-" : val.ChapterName.Trim();
+                        string errCh = string.IsNullOrWhiteSpace(err.ChapterName) ? "-" : err.ChapterName.Trim();
                         return string.Equals(val.BookName, queueItem.Name, StringComparison.OrdinalIgnoreCase) &&
-                               string.Equals(val.ChapterName, err.ChapterName, StringComparison.OrdinalIgnoreCase) &&
+                               string.Equals(valCh, errCh, StringComparison.OrdinalIgnoreCase) &&
                                val.PageNumber == err.PageNumber;
                     }
                     return false;
@@ -674,8 +676,10 @@ UpdateRetryProgress:
             var keyToRemove = _checkErrorIndex.Keys.FirstOrDefault(k => {
                 if (_checkErrorIndex.TryGetValue(k, out var val))
                 {
+                    string valCh = string.IsNullOrWhiteSpace(val.ChapterName) ? "-" : val.ChapterName.Trim();
+                    string searchCh = string.IsNullOrWhiteSpace(chapterName) ? "-" : chapterName.Trim();
                     return string.Equals(val.BookName, bookName, StringComparison.OrdinalIgnoreCase) &&
-                           string.Equals(val.ChapterName, chapterName, StringComparison.OrdinalIgnoreCase) &&
+                           string.Equals(valCh, searchCh, StringComparison.OrdinalIgnoreCase) &&
                            val.PageNumber == pageNum;
                 }
                 return false;

@@ -112,16 +112,13 @@ namespace get_link_manga
                 string sub = GetHitomiSubdomainAsync(url, "tn", null);
                 return url.Replace("//a.gold-usergeneratedcontent.net/", $"//{sub}.gold-usergeneratedcontent.net/");
             }
-            else
-            {
                 // Full image path
                 string b = _hitomiGG.B;
                 string s = _hitomiGG.GetS(hash);
-                string url = $"https://a.gold-usergeneratedcontent.net/webp/{b}{s}/{hash}.webp"; // Ưu tiên Webp chất lượng cao
+                string fullUrl = $"https://a.gold-usergeneratedcontent.net/{b}{s}/{hash}.webp"; // Ưu tiên Webp chất lượng cao
 
-                string sub = GetHitomiSubdomainAsync(url, null, "webp");
-                return url.Replace("//a.gold-usergeneratedcontent.net/", $"//{sub}.gold-usergeneratedcontent.net/");
-            }
+                string fullSub = GetHitomiSubdomainAsync(fullUrl, null, "webp");
+                return fullUrl.Replace("//a.gold-usergeneratedcontent.net/", $"//{fullSub}.gold-usergeneratedcontent.net/");
         }
 
         private static string GetHitomiSubdomainAsync(string url, string baseDomain, string dir)

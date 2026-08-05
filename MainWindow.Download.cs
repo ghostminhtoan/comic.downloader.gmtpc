@@ -5186,6 +5186,56 @@ namespace get_link_manga
             UpdateStats();
         }
 
+        private void ClearResolvedPageError(GalleryItem queueItem, string chapterName, int pageNumber)
+        {
+            if (queueItem == null) return;
+
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(() => ClearResolvedPageError(queueItem, chapterName, pageNumber));
+                return;
+            }
+
+            string searchChapter = string.IsNullOrWhiteSpace(chapterName) ? "-" : chapterName.Trim();
+
+            // 1. Remove from queueItem.Errors
+            var errorsToRemove = queueItem.Errors
+                .Where(e => {
+                    string eCh = string.IsNullOrWhiteSpace(e.ChapterName) ? "-" : e.ChapterName.Trim();
+                    return string.Equals(eCh, searchChapter, StringComparison.OrdinalIgnoreCase) && e.PageNumber == pageNumber;
+                })
+                .ToList();
+
+            foreach (var err in errorsToRemove)
+            {
+                queueItem.Errors.Remove(err);
+            }
+            queueItem.ErrorCount = queueItem.Errors.Count;
+
+            // 2. Remove from _checkErrors and _checkErrorIndex
+            var keysToRemove = _checkErrorIndex.Keys.Where(k => {
+                if (_checkErrorIndex.TryGetValue(k, out var val))
+                {
+                    string vCh = string.IsNullOrWhiteSpace(val.ChapterName) ? "-" : val.ChapterName.Trim();
+                    return string.Equals(val.BookName, queueItem.Name, StringComparison.OrdinalIgnoreCase) &&
+                           string.Equals(vCh, searchChapter, StringComparison.OrdinalIgnoreCase) &&
+                           val.PageNumber == pageNumber;
+                }
+                return false;
+            }).ToList();
+
+            foreach (var key in keysToRemove)
+            {
+                if (_checkErrorIndex.TryGetValue(key, out var itemToRemove))
+                {
+                    _checkErrors.Remove(itemToRemove);
+                }
+                _checkErrorIndex.Remove(key);
+            }
+
+            UpdateStats();
+        }
+
         private void Delete429ArtifactsForItem(GalleryItem item, string downloadRoot)
         {
             DeleteBookTempFolderForItem(item, downloadRoot);
@@ -6000,6 +6050,7 @@ namespace get_link_manga
                                     UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, $"{completedPages}/{totalPages} pages", 0, 0);
                                     WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} existed");
                                 }
+                                ClearResolvedPageError(queueItem, string.Empty, pageNum);
                                 return;
                             }
 
@@ -6027,6 +6078,7 @@ namespace get_link_manga
                                 UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, $"{completedPages}/{totalPages} pages", downloadedBytes, pageWatch.ElapsedMilliseconds);
                                 WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} completed");
                             }
+                            ClearResolvedPageError(queueItem, string.Empty, pageNum);
                         }
                         catch (Exception ex)
                         {
@@ -6034,7 +6086,7 @@ namespace get_link_manga
                             if (queueItem != null)
                             {
                                 string traceMessage = $"Book: {item.Link}{Environment.NewLine}Page: {pageNum}{Environment.NewLine}Error: {ex.Message}";
-                                Dispatcher.BeginInvoke(new Action(() =>
+                                Dispatcher.Invoke(new Action(() =>
                                 {
                                     queueItem.AddError(string.Empty, pageNum, traceMessage, item.Link, item.Link, pageNum.ToString());
                                     RecordCheckError("hitomi.la", item.Name, string.Empty, pageNum, traceMessage, item.Link, pageNum.ToString());
