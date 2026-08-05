@@ -4130,7 +4130,7 @@ namespace get_link_manga
                         // Nếu là URL danh sách (tag, artist, parody, group, character, search) thì luôn dùng headlessAutomation = true để cào ngầm giống tag
                         bool useHeadless = isListUrl ? true : _lightNovelAutoFocusEnabled;
 
-                        var captchaWin = CreateCaptchaWindow(testUrl, autoDeleteCookiesOnLoad: true, headlessAutomation: useHeadless);
+                        var captchaWin = CreateCaptchaWindow(testUrl, autoDeleteCookiesOnLoad: false, headlessAutomation: useHeadless);
                         captchaWin.Owner = this;
 
                         if (await ShowCaptchaWindowWithFocusHandlingAsync(captchaWin, useNovelFocusStealth: useHeadless))
