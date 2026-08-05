@@ -2153,7 +2153,7 @@
                                         <StackPanel Grid.Row="1" Margin="0,0,0,12">
                                             <TextBlock Text="TARGET TAG URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
                                             <TextBox Name="txtHitomiLaTagUrl" 
-                                                        Text="https://hitomi.la/"
+                                                        Text="https://hitomi.la/artist/yamamoto-all.html"
                                                         Background="#0e121a" 
                                                         BorderBrush="{StaticResource CyberpunkBorderBrush}" 
                                                         Foreground="{StaticResource CyberpunkTextBrush}" 

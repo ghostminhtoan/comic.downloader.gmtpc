@@ -536,6 +536,8 @@ namespace get_link_manga
                     return "https://hentaiera.com/artist/yamamoto/popular/";
                 case "hako":
                     return "https://ln.hako.vn/the-loai/action";
+                case "hitomi.la":
+                    return "https://hitomi.la/artist/yamamoto-all.html";
                 default:
                     return null;
             }
