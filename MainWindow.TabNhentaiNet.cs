@@ -158,6 +158,7 @@ namespace get_link_manga
 
             try
             {
+                _lastNhentaiResolvedHtml = null; // Clear old resolved HTML first
                 string html = null;
                 try
                 {
@@ -165,7 +166,17 @@ namespace get_link_manga
                 }
                 catch (Exception ex)
                 {
-                    Log($"[nhentai.net] HttpClient fetch failed during analyze: {ex.Message}");
+                    Log($"[nhentai.net] HttpClient fetch failed ({ex.Message}). Trying to resolve captcha...");
+                    bool ok = await SolveNhentaiCaptchaIfNeededAsync(url);
+                    if (ok)
+                    {
+                        html = _lastNhentaiResolvedHtml;
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(html) && !string.IsNullOrWhiteSpace(_lastNhentaiResolvedHtml))
+                {
+                    html = _lastNhentaiResolvedHtml;
                 }
 
                 if (string.IsNullOrWhiteSpace(html))
@@ -347,6 +358,20 @@ namespace get_link_manga
 
                     string pageUrl = GetNhentaiNetPageUrl(baseUrl, page);
                     Log($"[nhentai.net] Requesting page {page}: {pageUrl}");
+                    // Clear cookie folder before processing this page
+                    string captchaPathBefore = System.IO.Path.Combine(PortablePaths.WebView2CaptchaUserDataFolder, "nhentai.net");
+                    try
+                    {
+                        if (System.IO.Directory.Exists(captchaPathBefore))
+                        {
+                            System.IO.Directory.Delete(captchaPathBefore, true);
+                            Log($"[nhentai.net] Đã clear cookie folder trước khi cào trang {page}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"[nhentai.net] Không thể tự động clear cookie folder trước khi cào: {ex.Message}");
+                    }
 
                     string html = null;
                     bool pageLoaded = false;
