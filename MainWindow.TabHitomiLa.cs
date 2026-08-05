@@ -497,5 +497,33 @@ namespace get_link_manga
                 if (btnStartDownload != null) btnStartDownload.IsEnabled = true;
             }
         }
+
+        private string ExtractHitomiLaGalleryCover(string html, string pageUrl)
+        {
+            if (string.IsNullOrWhiteSpace(html)) return string.Empty;
+            try
+            {
+                // Tìm <div class="cover"> ... <img src="..."
+                var match = Regex.Match(html, @"class=""cover""[^>]*>.*?<img[^>]+src=""([^""]+)""", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    string src = WebUtility.HtmlDecode(match.Groups[1].Value);
+                    if (src.StartsWith("//"))
+                    {
+                        src = "https:" + src;
+                    }
+                    else if (!src.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    {
+                        src = new Uri(new Uri(pageUrl), src).AbsoluteUri;
+                    }
+                    return src;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"[Hitomi Preview] Lỗi trích xuất cover: {ex.Message}");
+            }
+            return string.Empty;
+        }
     }
 }

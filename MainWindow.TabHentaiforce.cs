@@ -601,7 +601,8 @@ namespace get_link_manga
                     IsHaibabaUrl(link) ||
                     IsNettruyenUrl(link) ||
                     IsMangadexUrl(link) ||
-                    IsNhentaiUrl(link));
+                    IsNhentaiUrl(link) ||
+                    link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         private async Task EnsureGalleryHoverPreviewAsync(GalleryItem item)
@@ -677,6 +678,8 @@ namespace get_link_manga
                         ? ExtractNettruyenviet10PreviewUrlFromHtml(html, link)
                     : IsNhentaiUrl(link)
                         ? ExtractNhentaiNetGalleryCover(html)
+                    : link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0
+                        ? ExtractHitomiLaGalleryCover(html, link)
                     : string.Empty;
             if (string.IsNullOrWhiteSpace(coverUrlNonMangadex))
             {
