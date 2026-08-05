@@ -6007,7 +6007,16 @@ namespace get_link_manga
                             string fileExt = Path.GetExtension(imgUrl) ?? ".webp";
                             string directPath = Path.ChangeExtension(localFilePath, fileExt);
 
-                            await DownloadUrlToFileWithRefererAsync(imgUrl, item.Link, directPath, token);
+                            string hitomiReferer = null;
+                            if (item.Link != null)
+                            {
+                                var idMatch = Regex.Match(item.Link, @"(\d+)");
+                                if (idMatch.Success)
+                                {
+                                    hitomiReferer = $"https://hitomi.la/reader/{idMatch.Value}.html";
+                                }
+                            }
+                            await DownloadUrlToFileWithRefererAsync(imgUrl, hitomiReferer, directPath, token);
                             downloadedPath = directPath;
 
                             lock (lockObj)
