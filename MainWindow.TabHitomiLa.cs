@@ -14,8 +14,6 @@ namespace get_link_manga
 {
     public partial class MainWindow : Window
     {
-        private bool _isUpdatingHitomiLaUrl = false;
-
         // Class đại diện cấu trúc gg.js của hitomi
         public class HitomiGG
         {
@@ -111,7 +109,7 @@ namespace get_link_manga
                 string url = $"https://a.gold-usergeneratedcontent.net/webpbigtn/{realPath}.webp";
                 
                 // subdomain_from_url
-                string sub = await GetHitomiSubdomainAsync(url, "tn", null);
+                string sub = GetHitomiSubdomainAsync(url, "tn", null);
                 return url.Replace("//a.gold-usergeneratedcontent.net/", $"//{sub}.gold-usergeneratedcontent.net/");
             }
             else
@@ -121,12 +119,12 @@ namespace get_link_manga
                 string s = _hitomiGG.GetS(hash);
                 string url = $"https://a.gold-usergeneratedcontent.net/webp/{b}{s}/{hash}.webp"; // Ưu tiên Webp chất lượng cao
 
-                string sub = await GetHitomiSubdomainAsync(url, null, "webp");
+                string sub = GetHitomiSubdomainAsync(url, null, "webp");
                 return url.Replace("//a.gold-usergeneratedcontent.net/", $"//{sub}.gold-usergeneratedcontent.net/");
             }
         }
 
-        private static async Task<string> GetHitomiSubdomainAsync(string url, string baseDomain, string dir)
+        private static string GetHitomiSubdomainAsync(string url, string baseDomain, string dir)
         {
             string retval = "";
             if (string.IsNullOrEmpty(baseDomain))
@@ -164,6 +162,39 @@ namespace get_link_manga
         {
         }
 
+        private bool IsHitomiLaTagOrListUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return false;
+            string lower = url.Trim().ToLowerInvariant();
+            if (Regex.IsMatch(lower, @"hitomi\.la/(?:reader|doujinshi|manga|gamecg|cg|gallery)/.*?(\d+)\.html"))
+            {
+                return false;
+            }
+            if (Regex.IsMatch(lower, @"-\d+\.html"))
+            {
+                return false;
+            }
+            return lower.Contains("/tag/") ||
+                   lower.Contains("/artist/") ||
+                   lower.Contains("/character/") ||
+                   lower.Contains("/series/") ||
+                   lower.Contains("/group/") ||
+                   lower.Contains("/search/") ||
+                   lower.Contains("index-");
+        }
+
+        private string GetHitomiNozomiUrl(string url)
+        {
+            var match = Regex.Match(url, @"/(tag|artist|character|series|group)/([^/#?]+)\.html");
+            if (match.Success)
+            {
+                string category = match.Groups[1].Value;
+                string name = match.Groups[2].Value;
+                return $"https://ltn.gold-usergeneratedcontent.net/n/{category}/{name}.nozomi";
+            }
+            return "https://ltn.gold-usergeneratedcontent.net/index-all.nozomi";
+        }
+
         private async void BtnHitomiLaFetchInfo_Click(object sender, RoutedEventArgs e)
         {
             string url = txtHitomiLaTagUrl.Text.Trim();
@@ -175,16 +206,41 @@ namespace get_link_manga
 
             try
             {
-                // Hitomi.la sử dụng AJAX nozomi để get ID. Ta chỉ cần hiển thị thông báo sẵn sàng.
                 HitomiLaLog($"Analyzing target URL: {url}");
-                lblStatus.Text = "Ready to get links.";
-                txtHitomiLaTotalPages.Text = "1";
-                txtHitomiLaPageFrom.Text = "1";
-                txtHitomiLaPageTo.Text = "1";
+                if (!IsHitomiLaTagOrListUrl(url))
+                {
+                    lblStatus.Text = "Ready to get link.";
+                    txtHitomiLaTotalPages.Text = "1";
+                    txtHitomiLaPageFrom.Text = "1";
+                    txtHitomiLaPageTo.Text = "1";
+                    return;
+                }
+
+                string nozomiUrl = GetHitomiNozomiUrl(url);
+                byte[] data = null;
+                using (var httpClient = CreateScopedHttpClient(nozomiUrl))
+                {
+                    data = await httpClient.GetByteArrayAsync(nozomiUrl);
+                }
+
+                if (data != null && data.Length > 0)
+                {
+                    int totalIDs = data.Length / 4;
+                    int totalPages = (int)Math.Ceiling(totalIDs / 25.0);
+                    txtHitomiLaTotalPages.Text = totalPages.ToString();
+                    txtHitomiLaPageFrom.Text = "1";
+                    txtHitomiLaPageTo.Text = "1";
+                    lblStatus.Text = $"Ready to get links. Found {totalIDs} books ({totalPages} pages).";
+                }
+                else
+                {
+                    lblStatus.Text = "No books found on this page.";
+                }
             }
             catch (Exception ex)
             {
                 HitomiLaLog($"Lỗi: {ex.Message}");
+                lblStatus.Text = $"Analyze error: {ex.Message}";
             }
             finally
             {
@@ -219,33 +275,74 @@ namespace get_link_manga
                     _scrapedItems.Clear();
                 }
 
-                // Nếu là URL truyện đơn lẻ: ví dụ https://hitomi.la/doujinshi/tên-truyện-số_id.html hoặc chỉ chứa ID số
-                var singleMatch = Regex.Match(url, @"(?:-|/)(\d+)\.html");
-                if (singleMatch.Success)
+                if (!IsHitomiLaTagOrListUrl(url))
                 {
-                    string id = singleMatch.Groups[1].Value;
-                    await ImportHitomiLaDirectLinksAsync(new List<string> { $"https://hitomi.la/gallery/{id}.html" });
+                    var singleMatch = Regex.Match(url, @"(?:-|/)(\d+)\.html");
+                    if (singleMatch.Success)
+                    {
+                        string id = singleMatch.Groups[1].Value;
+                        await ImportHitomiLaDirectLinksAsync(new List<string> { $"https://hitomi.la/gallery/{id}.html" });
+                    }
                     return;
                 }
 
-                // Nếu không là page list, dùng default fetch homepage
-                HitomiLaLog("Fetching index list từ hitomi...");
-                // Đọc nozomi từ ltn index
+                string nozomiUrl = GetHitomiNozomiUrl(url);
+                HitomiLaLog($"Fetching nozomi list từ {nozomiUrl}...");
+
                 byte[] data = null;
-                using (var httpClient = CreateScopedHttpClient("https://ltn.gold-usergeneratedcontent.net/index-all.nozomi"))
+                using (var httpClient = CreateScopedHttpClient(nozomiUrl))
                 {
-                    data = await httpClient.GetByteArrayAsync("https://ltn.gold-usergeneratedcontent.net/index-all.nozomi");
+                    data = await httpClient.GetByteArrayAsync(nozomiUrl);
                 }
-                if (data != null && data.Length > 0)
+
+                if (data == null || data.Length == 0)
                 {
-                    int count = data.Length / 4;
-                    var ids = new List<string>();
-                    for (int i = 0; i < Math.Min(count, 40); i++)
+                    HitomiLaLog("Không lấy được dữ liệu từ nozomi index.");
+                    return;
+                }
+
+                int totalIDs = data.Length / 4;
+                int totalPages = (int)Math.Ceiling(totalIDs / 25.0);
+
+                if (!int.TryParse(txtHitomiLaPageFrom.Text, out int pageFrom)) pageFrom = 1;
+                if (!int.TryParse(txtHitomiLaPageTo.Text, out int pageTo)) pageTo = 1;
+
+                if (pageFrom < 1) pageFrom = 1;
+                if (pageTo < pageFrom) pageTo = pageFrom;
+                if (pageTo > totalPages) pageTo = totalPages;
+
+                if (append)
+                {
+                    pageFrom = pageTo + 1;
+                    pageTo = pageFrom;
+                    if (pageFrom > totalPages)
                     {
-                        int id = BigEndianToInt32(data, i * 4);
-                        ids.Add($"https://hitomi.la/gallery/{id}.html");
+                        HitomiLaLog("Đã đạt trang cuối cùng.");
+                        return;
                     }
-                    await ImportHitomiLaDirectLinksAsync(ids, showMessageBox: false);
+                    txtHitomiLaPageFrom.Text = pageFrom.ToString();
+                    txtHitomiLaPageTo.Text = pageTo.ToString();
+                }
+
+                HitomiLaLog($"Đang xử lý nozomi từ trang {pageFrom} đến {pageTo}...");
+
+                var idsToFetch = new List<string>();
+                for (int page = pageFrom; page <= pageTo; page++)
+                {
+                    int startIndex = (page - 1) * 25;
+                    for (int i = 0; i < 25; i++)
+                    {
+                        int targetIndex = startIndex + i;
+                        if (targetIndex >= totalIDs) break;
+
+                        int id = BigEndianToInt32(data, targetIndex * 4);
+                        idsToFetch.Add($"https://hitomi.la/gallery/{id}.html");
+                    }
+                }
+
+                if (idsToFetch.Count > 0)
+                {
+                    await ImportHitomiLaDirectLinksAsync(idsToFetch, showMessageBox: false, keepControlsEnabled: true);
                 }
             }
             catch (Exception ex)

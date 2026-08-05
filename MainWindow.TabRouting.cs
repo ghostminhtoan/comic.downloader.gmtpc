@@ -557,11 +557,21 @@ namespace get_link_manga
             }
             else if (lowerUrl.Contains("hitomi.la"))
             {
-                SelectHentaiSourceRoot();
-                SelectHentaiTabByHeader("hitomi.la");
+                if (allowUiJump)
+                {
+                    SelectHentaiSourceRoot();
+                    SelectHentaiTabByHeader("hitomi.la");
+                }
                 if (txtHitomiLaTagUrl != null) txtHitomiLaTagUrl.Text = url;
-                BtnHitomiLaFetchInfo_Click(this, new RoutedEventArgs());
-                await WaitAndScrapeAsync(btnHitomiLaFetchInfo, BtnHitomiLaScrape_Click);
+                if (IsHitomiLaTagOrListUrl(url))
+                {
+                    BtnHitomiLaFetchInfo_Click(this, new RoutedEventArgs());
+                    await WaitAndScrapeAsync(btnHitomiLaFetchInfo, BtnHitomiLaScrape_Click);
+                }
+                else
+                {
+                    await ImportHitomiLaDirectLinksAsync(new List<string> { url }, showMessageBox: false, keepControlsEnabled: allowUiJump);
+                }
             }
         }
 
@@ -951,6 +961,19 @@ namespace get_link_manga
 
             if (lowerUrl.Contains("hitomi.la"))
             {
+                if (IsHitomiLaTagOrListUrl(url))
+                {
+                    if (allowUiJump)
+                    {
+                        SelectHentaiSourceRoot();
+                        SelectHentaiTabByHeader("hitomi.la");
+                    }
+                    if (txtHitomiLaTagUrl != null) txtHitomiLaTagUrl.Text = url;
+                    BtnHitomiLaFetchInfo_Click(this, new RoutedEventArgs());
+                    await WaitAndScrapeAsync(btnHitomiLaFetchInfo, BtnHitomiLaScrape_Click);
+                    return true;
+                }
+
                 if (allowUiJump)
                 {
                     SelectHentaiSourceRoot();
