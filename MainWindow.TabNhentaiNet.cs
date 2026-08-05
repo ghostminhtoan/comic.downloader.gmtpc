@@ -118,10 +118,15 @@ namespace get_link_manga
                 string sortVal = selectedItem.Tag?.ToString();
                 if (!string.IsNullOrEmpty(sortVal))
                 {
+                    string currentUrl = txtNhentaiNetTagUrl.Text.Trim();
+                    // Chỉ update sort khi URL đã có sort= sẵn, không tự inject sort vào URL sạch
+                    if (!Regex.IsMatch(currentUrl, @"[?&](?:amp;)?sort=", RegexOptions.IgnoreCase))
+                        return;
+
                     _isUpdatingNhentaiNetUrl = true;
                     try
                     {
-                        txtNhentaiNetTagUrl.Text = UpdateNhentaiNetUrlSort(txtNhentaiNetTagUrl.Text, sortVal);
+                        txtNhentaiNetTagUrl.Text = UpdateNhentaiNetUrlSort(currentUrl, sortVal);
                     }
                     finally
                     {
