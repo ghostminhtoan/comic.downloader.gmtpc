@@ -2935,7 +2935,7 @@
                                        PopupAnimation="Fade"
                                        StaysOpen="False">
                                     <Border Style="{StaticResource ShutdownPopupBorder}">
-                                        <Grid Width="750" Margin="16,16,16,10">
+                                        <Grid Width="380" Margin="16,16,16,10">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="*"/>
@@ -2947,174 +2947,162 @@
                                                        Style="{StaticResource ShutdownPopupHeader}"
                                                        HorizontalAlignment="Center"
                                                        FontSize="18"
-                                                       Margin="0,0,0,20"/>
+                                                       Margin="0,0,0,16"/>
                                                        
-                                            <Grid Grid.Row="1">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="32"/> <!-- spacer -->
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                
-                                                <!-- Left Column: Command & Hotkey -->
-                                                <StackPanel Grid.Column="0">
-                                                    <!-- Command -->
-                                                    <TextBlock Name="lblPostDownloadCommand"
-                                                               Text="RUN COMMAND (Win+R style):"
-                                                               Style="{StaticResource ShutdownPopupHeader}"
-                                                               Margin="0,0,0,8"/>
-                                                    <TextBox Name="txtPostDownloadCommand"
-                                                             Style="{StaticResource ShutdownCommandTextBox}"
-                                                             Height="36"
-                                                             VerticalContentAlignment="Center"
-                                                             Margin="0,0,0,20"/>
+                                            <StackPanel Grid.Row="1" Orientation="Vertical">
+                                                <!-- RUN COMMAND -->
+                                                <TextBlock Name="lblPostDownloadCommand"
+                                                           Text="RUN COMMAND (Win+R style):"
+                                                           Style="{StaticResource ShutdownPopupHeader}"
+                                                           Margin="0,0,0,8"/>
+                                                <TextBox Name="txtPostDownloadCommand"
+                                                         Style="{StaticResource ShutdownCommandTextBox}"
+                                                         Height="36"
+                                                         VerticalContentAlignment="Center"
+                                                         Margin="0,0,0,16"/>
 
-                                                    <!-- Hotkey -->
-                                                    <TextBlock Name="lblPostDownloadShortcut"
-                                                               Text="RUN SHORTCUT:"
-                                                               Style="{StaticResource ShutdownPopupHeader}"
-                                                               Margin="0,0,0,8"/>
-                                                    <WrapPanel Margin="0,0,0,10">
-                                                        <CheckBox Name="chkPostCtrl" Content="Ctrl" Style="{StaticResource ShutdownPopupCheckBox}" Margin="0,0,12,0"/>
-                                                        <CheckBox Name="chkPostWin" Content="Win" Style="{StaticResource ShutdownPopupCheckBox}" Margin="0,0,12,0"/>
-                                                        <CheckBox Name="chkPostAlt" Content="Alt" Style="{StaticResource ShutdownPopupCheckBox}" Margin="0,0,12,0"/>
-                                                        <CheckBox Name="chkPostShift" Content="Shift" Style="{StaticResource ShutdownPopupCheckBox}"/>
-                                                    </WrapPanel>
-                                                    
-                                                    <Grid Margin="0,0,0,12">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <ComboBox Name="cmbPostMainKey"
-                                                                  Height="32"
-                                                                  Margin="0,0,6,0"
-                                                                  Background="#0B1726"
-                                                                  Foreground="DarkBlue"
-                                                                  FontWeight="Bold"
-                                                                  VerticalContentAlignment="Center"
-                                                                  IsTextSearchEnabled="False"
-                                                                  PreviewKeyDown="CmbPostMainKey_PreviewKeyDown">
-                                                            <ComboBox.Resources>
-                                                                <Style TargetType="ComboBoxItem">
-                                                                    <Setter Property="Foreground" Value="DarkBlue"/>
-                                                                </Style>
-                                                            </ComboBox.Resources>
-                                                        </ComboBox>
-                                                        <Button Grid.Column="1"
-                                                                Name="btnApplyShortcut"
-                                                                Content="APPLY"
-                                                                Click="BtnApplyShortcut_Click"
-                                                                Style="{StaticResource ShutdownPopupMiniButton}"
-                                                                Width="75"
-                                                                Height="32"
-                                                                Margin="0,0,6,0"/>
-                                                        <Button Grid.Column="2"
-                                                                Name="btnClearShortcut"
-                                                                Content="CLEAR"
-                                                                Click="BtnClearShortcut_Click"
-                                                                Style="{StaticResource ShutdownPopupMiniDangerButton}"
-                                                                Width="75"
-                                                                Height="32"/>
-                                                    </Grid>
-                                                    <TextBox Name="txtPostDownloadShortcut"
-                                                             Style="{StaticResource ShutdownCommandTextBox}"
-                                                             IsReadOnly="True"
-                                                             Height="36"
-                                                             VerticalContentAlignment="Center"
-                                                             Margin="0,0,0,8"/>
-                                                </StackPanel>
+                                                <!-- RUN SHORTCUT -->
+                                                <TextBlock Name="lblPostDownloadShortcut"
+                                                           Text="RUN SHORTCUT:"
+                                                           Style="{StaticResource ShutdownPopupHeader}"
+                                                           Margin="0,0,0,8"/>
+                                                <WrapPanel Margin="0,0,0,8">
+                                                    <CheckBox Name="chkPostCtrl" Content="Ctrl" Style="{StaticResource ShutdownPopupCheckBox}" Margin="0,0,12,0"/>
+                                                    <CheckBox Name="chkPostWin" Content="Win" Style="{StaticResource ShutdownPopupCheckBox}" Margin="0,0,12,0"/>
+                                                    <CheckBox Name="chkPostAlt" Content="Alt" Style="{StaticResource ShutdownPopupCheckBox}" Margin="0,0,12,0"/>
+                                                    <CheckBox Name="chkPostShift" Content="Shift" Style="{StaticResource ShutdownPopupCheckBox}"/>
+                                                </WrapPanel>
                                                 
-                                                <!-- Right Column: Timer & Auto-Shutdown -->
-                                                <StackPanel Grid.Column="2">
-                                                    <!-- Auto-Shutdown Toggle -->
-                                                    <CheckBox Name="chkShutdownAfterCompleted"
-                                                              Content="shutdown after completed"
-                                                              Checked="ChkShutdownAfterCompleted_Checked"
-                                                              Unchecked="ChkShutdownAfterCompleted_Unchecked"
-                                                              Style="{StaticResource ShutdownPopupCheckBox}"
-                                                              Margin="0,0,0,20"/>
-                                                              
-                                                    <!-- Timer Title -->
-                                                    <TextBlock Name="txtShutdownCountdownLabel"
-                                                               Text="shutdown in day:hour:minute:second"
-                                                               Style="{StaticResource ShutdownPopupHeader}"
-                                                               Margin="0,0,0,10"/>
-                                                               
-                                                    <!-- Large, Premium Timer Widget -->
-                                                    <Grid Margin="0,0,0,16">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        
-                                                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                                                            <TextBlock Name="txtShutdownDaysLabel" Text="DAY" Style="{StaticResource ShutdownPopupLabel}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
-                                                            <TextBox Name="txtShutdownDays" Text="0" Style="{StaticResource ShutdownTimeTextBox}" Width="64" Height="44" FontSize="20" FontWeight="Bold" TextAlignment="Center" VerticalContentAlignment="Center"/>
-                                                        </StackPanel>
-                                                        <TextBlock Grid.Column="1" Text=":" Style="{StaticResource ShutdownPopupValueSeparator}" VerticalAlignment="Bottom" Margin="0,0,0,6" FontSize="24"/>
-                                                        
-                                                        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
-                                                            <TextBlock Name="txtShutdownHoursLabel" Text="HOUR" Style="{StaticResource ShutdownPopupLabel}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
-                                                            <TextBox Name="txtShutdownHours" Text="0" Style="{StaticResource ShutdownTimeTextBox}" Width="64" Height="44" FontSize="20" FontWeight="Bold" TextAlignment="Center" VerticalContentAlignment="Center"/>
-                                                        </StackPanel>
-                                                        <TextBlock Grid.Column="3" Text=":" Style="{StaticResource ShutdownPopupValueSeparator}" VerticalAlignment="Bottom" Margin="0,0,0,6" FontSize="24"/>
-                                                        
-                                                        <StackPanel Grid.Column="4" HorizontalAlignment="Center">
-                                                            <TextBlock Name="txtShutdownMinutesLabel" Text="MIN" Style="{StaticResource ShutdownPopupLabel}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
-                                                            <TextBox Name="txtShutdownMinutes" Text="0" Style="{StaticResource ShutdownTimeTextBox}" Width="64" Height="44" FontSize="20" FontWeight="Bold" TextAlignment="Center" VerticalContentAlignment="Center"/>
-                                                        </StackPanel>
-                                                        <TextBlock Grid.Column="5" Text=":" Style="{StaticResource ShutdownPopupValueSeparator}" VerticalAlignment="Bottom" Margin="0,0,0,6" FontSize="24"/>
-                                                        
-                                                        <StackPanel Grid.Column="6" HorizontalAlignment="Center">
-                                                            <TextBlock Name="txtShutdownSecondsLabel" Text="SEC" Style="{StaticResource ShutdownPopupLabel}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
-                                                            <TextBox Name="txtShutdownSeconds" Text="0" Style="{StaticResource ShutdownTimeTextBox}" Width="64" Height="44" FontSize="20" FontWeight="Bold" TextAlignment="Center" VerticalContentAlignment="Center"/>
-                                                        </StackPanel>
-                                                    </Grid>
+                                                <Grid Margin="0,0,0,12">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <ComboBox Name="cmbPostMainKey"
+                                                              Height="32"
+                                                              Margin="0,0,6,0"
+                                                              Background="#0B1726"
+                                                              Foreground="DarkBlue"
+                                                              FontWeight="Bold"
+                                                              VerticalContentAlignment="Center"
+                                                              IsTextSearchEnabled="False"
+                                                              PreviewKeyDown="CmbPostMainKey_PreviewKeyDown">
+                                                        <ComboBox.Resources>
+                                                            <Style TargetType="ComboBoxItem">
+                                                                <Setter Property="Foreground" Value="DarkBlue"/>
+                                                            </Style>
+                                                        </ComboBox.Resources>
+                                                    </ComboBox>
+                                                    <Button Grid.Column="1"
+                                                            Name="btnApplyShortcut"
+                                                            Content="APPLY"
+                                                            Click="BtnApplyShortcut_Click"
+                                                            Style="{StaticResource ShutdownPopupMiniButton}"
+                                                            Width="75"
+                                                            Height="32"
+                                                            Margin="0,0,6,0"/>
+                                                    <Button Grid.Column="2"
+                                                            Name="btnClearShortcut"
+                                                            Content="CLEAR"
+                                                            Click="BtnClearShortcut_Click"
+                                                            Style="{StaticResource ShutdownPopupMiniDangerButton}"
+                                                            Width="75"
+                                                            Height="32"/>
+                                                </Grid>
+                                                <TextBox Name="txtPostDownloadShortcut"
+                                                         Style="{StaticResource ShutdownCommandTextBox}"
+                                                         IsReadOnly="True"
+                                                         Height="36"
+                                                         VerticalContentAlignment="Center"
+                                                         Margin="0,0,0,16"/>
+
+                                                <!-- AUTO-SHUTDOWN -->
+                                                <CheckBox Name="chkShutdownAfterCompleted"
+                                                          Content="shutdown after completed"
+                                                          Checked="ChkShutdownAfterCompleted_Checked"
+                                                          Unchecked="ChkShutdownAfterCompleted_Unchecked"
+                                                          Style="{StaticResource ShutdownPopupCheckBox}"
+                                                          Margin="0,0,0,16"/>
+                                                           
+                                                <!-- TIMER LABEL -->
+                                                <TextBlock Name="txtShutdownCountdownLabel"
+                                                           Text="shutdown in day:hour:minute:second"
+                                                           Style="{StaticResource ShutdownPopupHeader}"
+                                                           Margin="0,0,0,8"/>
+                                                            
+                                                <!-- TIMER CONTROLS -->
+                                                <Grid Margin="0,0,0,12">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
                                                     
-                                                    <TextBlock Name="txtShutdownPopupHint"
-                                                               Text="0:1:30:0 = 1 hour 30 minutes. Schedule uses Windows shutdown command."
-                                                               Style="{StaticResource ShutdownPopupHint}"
-                                                               TextWrapping="Wrap"
-                                                               Margin="0,0,0,16"/>
-                                                               
-                                                    <!-- Action buttons -->
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="12"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Button Grid.Column="0"
-                                                                Name="btnScheduleShutdownTimer"
-                                                                Content="SCHEDULE"
-                                                                Height="36"
-                                                                Click="BtnScheduleShutdownTimer_Click"
-                                                                Style="{StaticResource ShutdownPopupMiniButton}"/>
-                                                        <Button Grid.Column="2"
-                                                                Name="btnCancelShutdownTimer"
-                                                                Content="CANCEL"
-                                                                Height="36"
-                                                                Click="BtnCancelShutdownTimer_Click"
-                                                                Style="{StaticResource ShutdownPopupMiniDangerButton}"/>
-                                                        <Button Grid.Column="3"
-                                                                Name="btnCloseShutdownPopup"
-                                                                Content="CLOSE"
-                                                                Height="36"
-                                                                Click="BtnCloseShutdownPopup_Click"
-                                                                Style="{StaticResource ShutdownPopupMiniButton}"
-                                                                Width="0"
-                                                                Visibility="Collapsed"/>
-                                                    </Grid>
-                                                </StackPanel>
-                                            </Grid>
+                                                    <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                                        <TextBlock Name="txtShutdownDaysLabel" Text="DAY" Style="{StaticResource ShutdownPopupLabel}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                                                        <TextBox Name="txtShutdownDays" Text="0" Style="{StaticResource ShutdownTimeTextBox}" Width="64" Height="44" FontSize="20" FontWeight="Bold" TextAlignment="Center" VerticalContentAlignment="Center"/>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="1" Text=":" Style="{StaticResource ShutdownPopupValueSeparator}" VerticalAlignment="Bottom" Margin="0,0,0,6" FontSize="24"/>
+                                                    
+                                                    <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                                        <TextBlock Name="txtShutdownHoursLabel" Text="HOUR" Style="{StaticResource ShutdownPopupLabel}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                                                        <TextBox Name="txtShutdownHours" Text="0" Style="{StaticResource ShutdownTimeTextBox}" Width="64" Height="44" FontSize="20" FontWeight="Bold" TextAlignment="Center" VerticalContentAlignment="Center"/>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="3" Text=":" Style="{StaticResource ShutdownPopupValueSeparator}" VerticalAlignment="Bottom" Margin="0,0,0,6" FontSize="24"/>
+                                                    
+                                                    <StackPanel Grid.Column="4" HorizontalAlignment="Center">
+                                                        <TextBlock Name="txtShutdownMinutesLabel" Text="MIN" Style="{StaticResource ShutdownPopupLabel}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                                                        <TextBox Name="txtShutdownMinutes" Text="0" Style="{StaticResource ShutdownTimeTextBox}" Width="64" Height="44" FontSize="20" FontWeight="Bold" TextAlignment="Center" VerticalContentAlignment="Center"/>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="5" Text=":" Style="{StaticResource ShutdownPopupValueSeparator}" VerticalAlignment="Bottom" Margin="0,0,0,6" FontSize="24"/>
+                                                    
+                                                    <StackPanel Grid.Column="6" HorizontalAlignment="Center">
+                                                        <TextBlock Name="txtShutdownSecondsLabel" Text="SEC" Style="{StaticResource ShutdownPopupLabel}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                                                        <TextBox Name="txtShutdownSeconds" Text="0" Style="{StaticResource ShutdownTimeTextBox}" Width="64" Height="44" FontSize="20" FontWeight="Bold" TextAlignment="Center" VerticalContentAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                                
+                                                <TextBlock Name="txtShutdownPopupHint"
+                                                           Text="0:1:30:0 = 1 hour 30 minutes. Schedule uses Windows shutdown command."
+                                                           Style="{StaticResource ShutdownPopupHint}"
+                                                           TextWrapping="Wrap"
+                                                           Margin="0,0,0,16"/>
+                                                           
+                                                <!-- Action buttons -->
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="12"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Button Grid.Column="0"
+                                                            Name="btnScheduleShutdownTimer"
+                                                            Content="SCHEDULE"
+                                                            Height="36"
+                                                            Click="BtnScheduleShutdownTimer_Click"
+                                                            Style="{StaticResource ShutdownPopupMiniButton}"/>
+                                                    <Button Grid.Column="2"
+                                                            Name="btnCancelShutdownTimer"
+                                                            Content="CANCEL"
+                                                            Height="36"
+                                                            Click="BtnCancelShutdownTimer_Click"
+                                                            Style="{StaticResource ShutdownPopupMiniDangerButton}"/>
+                                                    <Button Grid.Column="3"
+                                                            Name="btnCloseShutdownPopup"
+                                                            Content="CLOSE"
+                                                            Height="36"
+                                                            Click="BtnCloseShutdownPopup_Click"
+                                                            Style="{StaticResource ShutdownPopupMiniButton}"
+                                                            Width="0"
+                                                            Visibility="Collapsed"/>
+                                                </Grid>
+                                            </StackPanel>
                                         </Grid>
                                     </Border>
                                 </Popup>
