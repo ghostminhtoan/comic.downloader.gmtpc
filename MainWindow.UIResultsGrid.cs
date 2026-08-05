@@ -1635,7 +1635,7 @@ namespace get_link_manga
             string[] hentaiDomains =
             {
                 "hentaiforce", "nhentai", "hentai2read", "hentaiera",
-                "vi-hentai", "daomeoden", "damconuong", "truyengg", "sayhentai"
+                "vi-hentai", "daomeoden", "damconuong", "truyengg", "sayhentai", "hitomi"
             };
 
             return hentaiDomains.Any(domain => haystack.Contains(domain));
@@ -1721,12 +1721,12 @@ namespace get_link_manga
 
         internal static bool HasUncensoredVariant(string name)
         {
-            return Regex.IsMatch(name ?? string.Empty, @"\b(?:decensored|uncensored)\b", RegexOptions.IgnoreCase);
+            return Regex.IsMatch(name ?? string.Empty, @"(?:^|[^a-zA-Z])(?:decensored|uncensored)(?:$|[^a-zA-Z])", RegexOptions.IgnoreCase);
         }
 
         internal static bool HasFullColorVariant(string name)
         {
-            return Regex.IsMatch(name ?? string.Empty, @"\b(?:full\s*color|fullcolor|colorized|colored)\b", RegexOptions.IgnoreCase);
+            return Regex.IsMatch(name ?? string.Empty, @"(?:^|[^a-zA-Z])(?:full\s*color|fullcolor|colorized|colored)(?:$|[^a-zA-Z])", RegexOptions.IgnoreCase);
         }
 
         private void BtnDuplicateName_Click(object sender, RoutedEventArgs e)
