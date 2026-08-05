@@ -5767,6 +5767,13 @@ namespace get_link_manga
                     if (url.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         request.Headers.Referrer = new Uri("https://nhentai.net/");
+                        request.Headers.TryAddWithoutValidation("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
+                        request.Headers.TryAddWithoutValidation("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7");
+                        request.Headers.TryAddWithoutValidation("Sec-Fetch-Dest", "document");
+                        request.Headers.TryAddWithoutValidation("Sec-Fetch-Mode", "navigate");
+                        request.Headers.TryAddWithoutValidation("Sec-Fetch-Site", "same-origin");
+                        request.Headers.TryAddWithoutValidation("Sec-Fetch-User", "?1");
+                        request.Headers.TryAddWithoutValidation("Upgrade-Insecure-Requests", "1");
                     }
 
                 }
