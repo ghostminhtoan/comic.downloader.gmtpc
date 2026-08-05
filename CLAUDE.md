@@ -10,7 +10,7 @@ Before writing, modifying, or analyzing any code in this repository, you MUST re
 👉 [workflow.md](file:///c:/Users/Admin/source/repos/ghostminhtoan/Comic%20Downloader%20GMTPC/workflow.md)
 
 LƯU Ý QUAN TRỌNG:
-Tru?c khi vi?t code, ch?nh s?a ho?c phn tch d? n ny, b?n B?T BU?C ph?i d?c k? ton b? quy t?c code, tiu chu?n giao di?n v lu?ng x? l t?i file:
+Trước khi viết code, chỉnh sửa hoặc phân tích dự án này, bạn BẮT BUỘC phải đọc kỹ toàn bộ quy tắc code, tiêu chuẩn giao diện và luồng xử lý tại file:
 👉 [workflow.md](file:///c:/Users/Admin/source/repos/ghostminhtoan/Comic%20Downloader%20GMTPC/workflow.md)
 
 ### Code Splitting Rule
