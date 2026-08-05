@@ -187,6 +187,7 @@ namespace get_link_manga
 
             UnfreezeApplicationBrushes();
             InitializeComponent();
+            ApplyCurrentTheme();
             InitializeWorkspaceShell();
             HookDisplaySettingsChanged();
             PreviewMouseWheel += MainWindow_PreviewMouseWheel;

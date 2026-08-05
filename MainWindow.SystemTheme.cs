@@ -162,22 +162,38 @@ namespace get_link_manga
 
         private void SetSolidBrushColor(string key, string colorHex)
         {
-            var brush = Application.Current.TryFindResource(key) as SolidColorBrush;
-            if (brush != null)
+            try
             {
-                brush.Color = (Color)ColorConverter.ConvertFromString(colorHex);
+                var color = (Color)ColorConverter.ConvertFromString(colorHex);
+                var brush = new SolidColorBrush(color);
+                Application.Current.Resources[key] = brush;
+                this.Resources[key] = brush;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Theme] SetSolidBrushColor failed for {key}: {ex.Message}");
             }
         }
 
         private void SetGradientBrushStops(string key, params string[] colorHexes)
         {
-            var brush = Application.Current.TryFindResource(key) as GradientBrush;
-            if (brush != null)
+            try
             {
-                for (int i = 0; i < brush.GradientStops.Count && i < colorHexes.Length; i++)
+                var brush = new LinearGradientBrush();
+                brush.StartPoint = new Point(0, 0);
+                brush.EndPoint = new Point(1, 1);
+                for (int i = 0; i < colorHexes.Length; i++)
                 {
-                    brush.GradientStops[i].Color = (Color)ColorConverter.ConvertFromString(colorHexes[i]);
+                    var color = (Color)ColorConverter.ConvertFromString(colorHexes[i]);
+                    double offset = (double)i / Math.Max(colorHexes.Length - 1, 1);
+                    brush.GradientStops.Add(new GradientStop(color, offset));
                 }
+                Application.Current.Resources[key] = brush;
+                this.Resources[key] = brush;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Theme] SetGradientBrushStops failed for {key}: {ex.Message}");
             }
         }
 
