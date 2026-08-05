@@ -220,7 +220,7 @@
     </Style>
 
      <Style x:Key="CyberpunkComboBoxItemStyle" TargetType="ComboBoxItem">
-         <Setter Property="Background" Value="#121622"/>
+         <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceAltBrush}"/>
          <Setter Property="Foreground" Value="{DynamicResource CyberpunkTextBrush}"/>
          <Setter Property="Padding" Value="8,4"/>
          <Setter Property="FontWeight" Value="SemiBold"/>
@@ -236,11 +236,11 @@
                      </Border>
                      <ControlTemplate.Triggers>
                          <Trigger Property="IsMouseOver" Value="True">
-                             <Setter TargetName="Border" Property="Background" Value="#1C2333"/>
+                             <Setter TargetName="Border" Property="Background" Value="{DynamicResource ThemeSidebarButtonHoverBrush}"/>
                              <Setter Property="Foreground" Value="{DynamicResource CyberpunkCyanBrush}"/>
                          </Trigger>
                          <Trigger Property="IsSelected" Value="True">
-                             <Setter TargetName="Border" Property="Background" Value="#1C2333"/>
+                             <Setter TargetName="Border" Property="Background" Value="{DynamicResource ThemeSidebarButtonPressedBrush}"/>
                              <Setter Property="Foreground" Value="{DynamicResource CyberpunkYellowBrush}"/>
                          </Trigger>
                      </ControlTemplate.Triggers>
@@ -250,8 +250,8 @@
      </Style>
 
     <Style x:Key="CyberpunkComboBox" TargetType="ComboBox">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="Foreground" Value="#163A61"/>
+        <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceAltBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource CyberpunkTextBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="6,2"/>
@@ -308,7 +308,7 @@
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource CyberpunkCardBrush}"/>
                             <Setter TargetName="border" Property="BorderBrush" Value="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"/>
-                            <Setter TargetName="headerText" Property="Foreground" Value="{DynamicResource CyberpunkTextBrush}"/>
+                            <Setter TargetName="headerText" Property="Foreground" Value="{DynamicResource CyberpunkCyanBrush}"/>
                             <Setter TargetName="accentBar" Property="Opacity" Value="1"/>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="False">
@@ -389,7 +389,7 @@
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource CyberpunkCardBrush}"/>
                             <Setter TargetName="border" Property="BorderBrush" Value="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"/>
-                            <Setter TargetName="headerText" Property="Foreground" Value="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            <Setter TargetName="headerText" Property="Foreground" Value="{DynamicResource CyberpunkCyanBrush}"/>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="False">
                             <Setter TargetName="border" Property="Opacity" Value="0.9"/>
