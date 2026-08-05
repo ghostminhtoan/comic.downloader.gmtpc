@@ -91,6 +91,7 @@ namespace get_link_manga
         private void ApplyDayThemePalette()
         {
             SetSolidBrushColor("CyberpunkCardBrush", "#F7FAFF");
+            SetSolidBrushColor("CyberpunkControlsHostBrush", "#E0F4F7FC");
             SetSolidBrushColor("CyberpunkCyanBrush", "#0A84C6");
             SetSolidBrushColor("CyberpunkPinkBrush", "#C44569");
             SetSolidBrushColor("CyberpunkYellowBrush", "#D49A00");
@@ -127,6 +128,7 @@ namespace get_link_manga
         private void ApplyNightThemePalette()
         {
             SetSolidBrushColor("CyberpunkCardBrush", "#0D121F");
+            SetSolidBrushColor("CyberpunkControlsHostBrush", "#E0090D16");
             SetSolidBrushColor("CyberpunkCyanBrush", "#00E5FF");
             SetSolidBrushColor("CyberpunkPinkBrush", "#FF2A85");
             SetSolidBrushColor("CyberpunkYellowBrush", "#FFB800");

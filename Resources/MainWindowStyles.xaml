@@ -60,21 +60,21 @@
             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="#20486E"/>
             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="White"/>
         </Style.Resources>
-        <Setter Property="Background" Value="#0B1726"/>
-        <Setter Property="RowBackground" Value="#0B1726"/>
-        <Setter Property="AlternatingRowBackground" Value="#102033"/>
+        <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceAltBrush}"/>
+        <Setter Property="RowBackground" Value="{DynamicResource CyberpunkSurfaceAltBrush}"/>
+        <Setter Property="AlternatingRowBackground" Value="{DynamicResource CyberpunkCardBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="GridLinesVisibility" Value="All"/>
-        <Setter Property="HorizontalGridLinesBrush" Value="#1F3650"/>
-        <Setter Property="VerticalGridLinesBrush" Value="#1F3650"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
+        <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource CyberpunkTextBrush}"/>
         <Setter Property="HeadersVisibility" Value="Column"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
     </Style>
 
     <Style x:Key="CyberpunkDataGridColumnHeader" TargetType="DataGridColumnHeader">
-        <Setter Property="Background" Value="#162842"/>
+        <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceEdgeBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource CyberpunkTextBrush}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="FontSize" Value="11"/>
@@ -84,7 +84,7 @@
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#1c2f47"/>
+                <Setter Property="Background" Value="{DynamicResource ThemeSidebarButtonPressedBrush}"/>
                 <Setter Property="Foreground" Value="{DynamicResource CyberpunkTextBrush}"/>
             </Trigger>
         </Style.Triggers>
@@ -95,10 +95,10 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#17304a"/>
+                <Setter Property="Background" Value="{DynamicResource ThemeSidebarButtonHoverBrush}"/>
             </Trigger>
             <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="#20486E"/>
+                <Setter Property="Background" Value="{DynamicResource ThemeButtonCyanHoverBrush}"/>
                 <Setter Property="Foreground" Value="{DynamicResource CyberpunkTextBrush}"/>
             </Trigger>
         </Style.Triggers>
@@ -267,9 +267,9 @@
     </Style>
 
     <Style x:Key="CyberpunkTabItem" TargetType="TabItem">
-        <Setter Property="Background" Value="#0D1A2A"/>
-        <Setter Property="BorderBrush" Value="#223550"/>
-        <Setter Property="Foreground" Value="#EAF6FF"/>
+        <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceEdgeBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource CyberpunkMutedTextBrush}"/>
         <Setter Property="Padding" Value="6,8"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="FontSize" Value="10"/>
@@ -278,23 +278,22 @@
             <Setter.Value>
                 <ControlTemplate TargetType="TabItem">
                     <Border x:Name="border"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="1"
-                            Margin="{TemplateBinding Margin}"
-                            CornerRadius="4,4,0,0"
-                            Padding="{TemplateBinding Padding}"
-                            SnapsToDevicePixels="True"
-                            Cursor="Hand">
+                             Background="{TemplateBinding Background}"
+                             BorderBrush="{TemplateBinding BorderBrush}"
+                             BorderThickness="1"
+                             Margin="{TemplateBinding Margin}"
+                             CornerRadius="4,4,0,0"
+                             Padding="{TemplateBinding Padding}"
+                             SnapsToDevicePixels="True"
+                             Cursor="Hand">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="3"/>
                             </Grid.RowDefinitions>
                             <Border x:Name="accentBar"
-                                    Grid.Row="1"
-                                    Background="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
-                                    Opacity="0.95"/>
+                                     Background="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
+                                     Opacity="0.95"/>
                             <TextBlock x:Name="headerText"
                                        Grid.Row="0"
                                        Text="{TemplateBinding Header}"
@@ -307,14 +306,14 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="#122238"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource CyberpunkCardBrush}"/>
                             <Setter TargetName="border" Property="BorderBrush" Value="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"/>
-                            <Setter TargetName="headerText" Property="Foreground" Value="#FFFFFF"/>
+                            <Setter TargetName="headerText" Property="Foreground" Value="{DynamicResource CyberpunkTextBrush}"/>
                             <Setter TargetName="accentBar" Property="Opacity" Value="1"/>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="False">
-                            <Setter TargetName="border" Property="BorderBrush" Value="#223550"/>
-                            <Setter TargetName="headerText" Property="Foreground" Value="#EAF6FF"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
+                            <Setter TargetName="headerText" Property="Foreground" Value="{DynamicResource CyberpunkMutedTextBrush}"/>
                             <Setter TargetName="border" Property="Opacity" Value="0.95"/>
                         </Trigger>
                         <MultiTrigger>
@@ -322,8 +321,8 @@
                                 <Condition Property="IsMouseOver" Value="True"/>
                                 <Condition Property="IsSelected" Value="False"/>
                             </MultiTrigger.Conditions>
-                            <Setter TargetName="border" Property="Background" Value="#17304A"/>
-                            <Setter TargetName="headerText" Property="Foreground" Value="#FFFFFF"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ThemeSidebarButtonHoverBrush}"/>
+                            <Setter TargetName="headerText" Property="Foreground" Value="{DynamicResource CyberpunkTextBrush}"/>
                             <Setter TargetName="border" Property="Opacity" Value="1"/>
                         </MultiTrigger>
                         <MultiTrigger>
@@ -331,8 +330,8 @@
                                 <Condition Property="IsMouseOver" Value="True"/>
                                 <Condition Property="IsSelected" Value="True"/>
                             </MultiTrigger.Conditions>
-                            <Setter TargetName="border" Property="Background" Value="#17304A"/>
-                            <Setter TargetName="headerText" Property="Foreground" Value="#FFFFFF"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ThemeSidebarButtonHoverBrush}"/>
+                            <Setter TargetName="headerText" Property="Foreground" Value="{DynamicResource CyberpunkTextBrush}"/>
                             <Setter TargetName="accentBar" Property="Opacity" Value="1"/>
                         </MultiTrigger>
                     </ControlTemplate.Triggers>
@@ -342,7 +341,7 @@
     </Style>
 
     <Style x:Key="HeroStepCard" TargetType="Border">
-        <Setter Property="Background" Value="#101726"/>
+        <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceAltBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="10"/>
@@ -356,9 +355,9 @@
     </Style>
 
     <Style x:Key="WorkspaceTabItem" TargetType="TabItem" BasedOn="{StaticResource CyberpunkTabItem}">
-        <Setter Property="Background" Value="#090E1A"/>
-        <Setter Property="BorderBrush" Value="#1A2436"/>
-        <Setter Property="Foreground" Value="#EAF6FF"/>
+        <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceEdgeBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource CyberpunkMutedTextBrush}"/>
         <Setter Property="Padding" Value="18,10"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="FontSize" Value="13"/>
@@ -367,28 +366,28 @@
             <Setter.Value>
                 <ControlTemplate TargetType="TabItem">
                     <Border x:Name="border"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="1"
-                            Margin="{TemplateBinding Margin}"
-                            CornerRadius="8,8,0,0"
-                            Padding="{TemplateBinding Padding}"
-                            SnapsToDevicePixels="True"
-                            Cursor="Hand">
+                             Background="{TemplateBinding Background}"
+                             BorderBrush="{TemplateBinding BorderBrush}"
+                             BorderThickness="1"
+                             Margin="{TemplateBinding Margin}"
+                             CornerRadius="8,8,0,0"
+                             Padding="{TemplateBinding Padding}"
+                             SnapsToDevicePixels="True"
+                             Cursor="Hand">
                         <Border.Effect>
                             <DropShadowEffect Color="#010204" BlurRadius="10" ShadowDepth="0" Opacity="0.2"/>
                         </Border.Effect>
                         <TextBlock x:Name="headerText"
-                                   Text="{TemplateBinding Header}"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   FontWeight="{TemplateBinding FontWeight}"
-                                   FontSize="{TemplateBinding FontSize}"
-                                   Foreground="{TemplateBinding Foreground}"/>
+                                    Text="{TemplateBinding Header}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontWeight="{TemplateBinding FontWeight}"
+                                    FontSize="{TemplateBinding FontSize}"
+                                    Foreground="{TemplateBinding Foreground}"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="#121B2D"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource CyberpunkCardBrush}"/>
                             <Setter TargetName="border" Property="BorderBrush" Value="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"/>
                             <Setter TargetName="headerText" Property="Foreground" Value="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"/>
                         </Trigger>
@@ -400,9 +399,9 @@
                                 <Condition Property="IsMouseOver" Value="True"/>
                                 <Condition Property="IsSelected" Value="False"/>
                             </MultiTrigger.Conditions>
-                            <Setter TargetName="border" Property="Background" Value="#14213B"/>
-                            <Setter TargetName="border" Property="BorderBrush" Value="#2A3C5B"/>
-                            <Setter TargetName="headerText" Property="Foreground" Value="#FFFFFF"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ThemeSidebarButtonHoverBrush}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
+                            <Setter TargetName="headerText" Property="Foreground" Value="{DynamicResource CyberpunkTextBrush}"/>
                         </MultiTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -446,8 +445,8 @@
     </Style>
 
     <Style x:Key="BadgeCard" TargetType="Border">
-        <Setter Property="Background" Value="#121B2D"/>
-        <Setter Property="BorderBrush" Value="#1D2A44"/>
+        <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceEdgeBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="6"/>
         <Setter Property="Padding" Value="8,4"/>
@@ -455,7 +454,7 @@
     </Style>
 
     <Style x:Key="SurfaceTextBox" TargetType="TextBox">
-        <Setter Property="Background" Value="#090D16"/>
+        <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceAltBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Foreground" Value="{DynamicResource CyberpunkTextBrush}"/>
@@ -466,7 +465,7 @@
     </Style>
 
     <Style x:Key="MetricCard" TargetType="Border">
-        <Setter Property="Background" Value="#0D121F"/>
+        <Setter Property="Background" Value="{DynamicResource CyberpunkCardBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="10"/>
@@ -500,7 +499,7 @@
     </Style>
 
     <Style x:Key="WorkspaceSectionCard" TargetType="Border">
-        <Setter Property="Background" Value="#0D121F"/>
+        <Setter Property="Background" Value="{DynamicResource CyberpunkCardBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="12"/>
