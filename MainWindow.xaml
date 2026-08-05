@@ -3513,7 +3513,7 @@
                                                      </CheckBox.Style>
                                                  </CheckBox>
                                                  <TextBlock Grid.Column="1"
-                                                            Text="{Binding DisplayName}"
+                                                            local:TextBlockLanguageColorizer.HighlightedText="{Binding DisplayName}"
                                                             FontWeight="Bold"
                                                             FontSize="12">
                                                      <TextBlock.Style>
@@ -4237,7 +4237,7 @@
                                                      </CheckBox.Style>
                                                  </CheckBox>
                                                  <TextBlock Grid.Column="1"
-                                                            Text="{Binding DisplayName}"
+                                                            local:TextBlockLanguageColorizer.HighlightedText="{Binding DisplayName}"
                                                             FontWeight="Bold"
                                                             FontSize="9">
                                                      <TextBlock.Style>

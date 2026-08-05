@@ -119,6 +119,9 @@
     <Compile Include="GalleryItem.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="TextBlockLanguageColorizer.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MainWindow.SystemFloatingControlWindow.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -768,18 +768,13 @@ namespace get_link_manga
 
             try
             {
-                var containerMatch = Regex.Match(html, @"Languages:\s*<span[^>]*>(.*?)</span>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
-                if (containerMatch.Success)
+                var matches = Regex.Matches(html, @"/language/([^/""\s>]+)/?", RegexOptions.IgnoreCase);
+                foreach (Match m in matches)
                 {
-                    string tagsSpan = containerMatch.Groups[1].Value;
-                    var matches = Regex.Matches(tagsSpan, @"/language/([^/""\s>]+)/?", RegexOptions.IgnoreCase);
-                    foreach (Match m in matches)
+                    string lang = WebUtility.HtmlDecode(m.Groups[1].Value).Trim().ToLowerInvariant();
+                    if (!languages.Contains(lang))
                     {
-                        string lang = WebUtility.HtmlDecode(m.Groups[1].Value).Trim().ToLowerInvariant();
-                        if (!languages.Contains(lang))
-                        {
-                            languages.Add(lang);
-                        }
+                        languages.Add(lang);
                     }
                 }
             }
