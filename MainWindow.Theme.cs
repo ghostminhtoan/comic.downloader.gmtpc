@@ -46,6 +46,26 @@ namespace get_link_manga
             }
         }
 
+        private void BtnThemeToggle_Click(object sender, RoutedEventArgs e)
+        {
+            _isDayTheme = btnThemeToggle?.IsChecked == true;
+            ApplyCurrentTheme();
+        }
+
+        private void UpdateThemeToggleState()
+        {
+            if (btnThemeToggle != null)
+            {
+                btnThemeToggle.IsChecked = _isDayTheme;
+            }
+            if (lblThemeSwitch != null)
+            {
+                lblThemeSwitch.Text = _isDayTheme
+                    ? (_isVietnameseUi ? "TỐI" : "DARK")
+                    : (_isVietnameseUi ? "SÁNG" : "LIGHT");
+            }
+        }
+
         private void ApplyCurrentTheme()
         {
             try
@@ -59,6 +79,7 @@ namespace get_link_manga
                     ApplyNightThemePalette();
                 }
 
+                UpdateThemeToggleState();
                 UpdateThemeText();
             }
             catch (Exception ex)
