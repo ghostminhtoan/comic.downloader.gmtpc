@@ -450,6 +450,13 @@ namespace get_link_manga
                             thumbUrl = await ResolveHitomiImageUrlAsync(this, firstHash, firstName, isThumbnail: true);
                         }
 
+                        string galleryUrl = $"https://hitomi.la/reader/{id}.html";
+                        if (galleryInfo.galleryurl != null)
+                        {
+                            string relUrl = ((string)galleryInfo.galleryurl).TrimStart('/');
+                            galleryUrl = "https://hitomi.la/" + relUrl;
+                        }
+
                         // Lưu json metadata vào tag của GalleryItem để lúc tải ảnh lôi ra hash
                         string serializedInfo = JsonConvert.SerializeObject(galleryInfo);
 
@@ -457,7 +464,7 @@ namespace get_link_manga
                         {
                             _scrapedItems.Add(new GalleryItem
                             {
-                                Link = $"https://hitomi.la/reader/{id}.html",
+                                Link = galleryUrl,
                                 Name = displayName,
                                 OriginalIndex = _scrapedItems.Count,
                                 IsChecked = true,

@@ -5966,6 +5966,7 @@ namespace get_link_manga
             }
 
             dynamic galleryInfo = JsonConvert.DeserializeObject(serializedInfo);
+            string galleryId = galleryInfo.id != null ? galleryInfo.id.ToString() : string.Empty;
             var files = galleryInfo.files;
             if (files == null || files.Count == 0)
             {
@@ -6059,12 +6060,16 @@ namespace get_link_manga
                             string directPath = Path.ChangeExtension(localFilePath, fileExt);
 
                             string hitomiReferer = null;
-                            if (item.Link != null)
+                            if (!string.IsNullOrEmpty(galleryId))
                             {
-                                var idMatch = Regex.Match(item.Link, @"(\d+)");
+                                hitomiReferer = $"https://hitomi.la/reader/{galleryId}.html";
+                            }
+                            else if (item.Link != null)
+                            {
+                                var idMatch = Regex.Match(item.Link, @"(\d+)(?:\.html)?$");
                                 if (idMatch.Success)
                                 {
-                                    hitomiReferer = $"https://hitomi.la/reader/{idMatch.Value}.html";
+                                    hitomiReferer = $"https://hitomi.la/reader/{idMatch.Groups[1].Value}.html";
                                 }
                             }
                             await DownloadUrlToFileWithRefererAsync(imgUrl, hitomiReferer, directPath, token);
