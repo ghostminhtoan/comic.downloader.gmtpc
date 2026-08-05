@@ -443,6 +443,8 @@ namespace get_link_manga
                         if (galleryInfo.language_localname != null)
                         {
                             language = (string)galleryInfo.language_localname;
+                            if (language == "中文") language = "Chinese";
+                            else if (language == "日本語") language = "Japanese";
                         }
                         if (!string.IsNullOrEmpty(language))
                         {
