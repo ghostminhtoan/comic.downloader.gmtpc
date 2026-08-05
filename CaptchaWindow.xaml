@@ -4,7 +4,7 @@
         Title="GIẢI CAPTCHA CLOUDFLARE" Height="650" Width="850"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        Background="{DynamicResource CyberpunkDarkBrush}">
+        Background="{StaticResource CyberpunkDarkBrush}">
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

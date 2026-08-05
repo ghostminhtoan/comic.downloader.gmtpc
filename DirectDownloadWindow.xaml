@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:get_link_manga"
         mc:Ignorable="d"
         Title="PASTE DIRECT LINKS" Height="450" Width="650"
-        Background="{DynamicResource CyberpunkDarkBrush}"
+        Background="{StaticResource CyberpunkDarkBrush}"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False">
 

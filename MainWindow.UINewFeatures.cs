@@ -44,7 +44,11 @@ namespace get_link_manga
                 {
                     Owner = this
                 };
-                _bookmarkHistoryWindowInstance.Closed += (s, args) => { _bookmarkHistoryWindowInstance = null; };
+                _bookmarkHistoryWindowInstance.Closed += (s, args) => 
+                { 
+                    _bookmarkHistoryWindowInstance = null; 
+                    this.Activate();
+                };
                 _bookmarkHistoryWindowInstance.SelectTab(selectedTab);
                 _bookmarkHistoryWindowInstance.Show();
             }

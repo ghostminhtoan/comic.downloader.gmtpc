@@ -46,26 +46,6 @@ namespace get_link_manga
             }
         }
 
-        private void BtnThemeToggle_Click(object sender, RoutedEventArgs e)
-        {
-            _isDayTheme = btnThemeToggle?.IsChecked == true;
-            ApplyCurrentTheme();
-        }
-
-        private void UpdateThemeToggleState()
-        {
-            if (btnThemeToggle != null)
-            {
-                btnThemeToggle.IsChecked = _isDayTheme;
-            }
-            if (lblThemeSwitch != null)
-            {
-                lblThemeSwitch.Text = _isDayTheme
-                    ? (_isVietnameseUi ? "TỐI" : "DARK")
-                    : (_isVietnameseUi ? "SÁNG" : "LIGHT");
-            }
-        }
-
         private void ApplyCurrentTheme()
         {
             try
@@ -79,7 +59,6 @@ namespace get_link_manga
                     ApplyNightThemePalette();
                 }
 
-                UpdateThemeToggleState();
                 UpdateThemeText();
             }
             catch (Exception ex)
@@ -91,7 +70,6 @@ namespace get_link_manga
         private void ApplyDayThemePalette()
         {
             SetSolidBrushColor("CyberpunkCardBrush", "#F7FAFF");
-            SetSolidBrushColor("CyberpunkControlsHostBrush", "#E0F4F7FC");
             SetSolidBrushColor("CyberpunkCyanBrush", "#0A84C6");
             SetSolidBrushColor("CyberpunkPinkBrush", "#C44569");
             SetSolidBrushColor("CyberpunkYellowBrush", "#D49A00");
@@ -128,7 +106,6 @@ namespace get_link_manga
         private void ApplyNightThemePalette()
         {
             SetSolidBrushColor("CyberpunkCardBrush", "#0D121F");
-            SetSolidBrushColor("CyberpunkControlsHostBrush", "#E0090D16");
             SetSolidBrushColor("CyberpunkCyanBrush", "#00E5FF");
             SetSolidBrushColor("CyberpunkPinkBrush", "#FF2A85");
             SetSolidBrushColor("CyberpunkYellowBrush", "#FFB800");
@@ -164,38 +141,22 @@ namespace get_link_manga
 
         private void SetSolidBrushColor(string key, string colorHex)
         {
-            try
+            var brush = Application.Current.TryFindResource(key) as SolidColorBrush;
+            if (brush != null)
             {
-                var color = (Color)ColorConverter.ConvertFromString(colorHex);
-                var brush = new SolidColorBrush(color);
-                Application.Current.Resources[key] = brush;
-                this.Resources[key] = brush;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Theme] SetSolidBrushColor failed for {key}: {ex.Message}");
+                brush.Color = (Color)ColorConverter.ConvertFromString(colorHex);
             }
         }
 
         private void SetGradientBrushStops(string key, params string[] colorHexes)
         {
-            try
+            var brush = Application.Current.TryFindResource(key) as GradientBrush;
+            if (brush != null)
             {
-                var brush = new LinearGradientBrush();
-                brush.StartPoint = new Point(0, 0);
-                brush.EndPoint = new Point(1, 1);
-                for (int i = 0; i < colorHexes.Length; i++)
+                for (int i = 0; i < brush.GradientStops.Count && i < colorHexes.Length; i++)
                 {
-                    var color = (Color)ColorConverter.ConvertFromString(colorHexes[i]);
-                    double offset = (double)i / Math.Max(colorHexes.Length - 1, 1);
-                    brush.GradientStops.Add(new GradientStop(color, offset));
+                    brush.GradientStops[i].Color = (Color)ColorConverter.ConvertFromString(colorHexes[i]);
                 }
-                Application.Current.Resources[key] = brush;
-                this.Resources[key] = brush;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Theme] SetGradientBrushStops failed for {key}: {ex.Message}");
             }
         }
 

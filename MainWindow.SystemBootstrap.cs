@@ -187,7 +187,6 @@ namespace get_link_manga
 
             UnfreezeApplicationBrushes();
             InitializeComponent();
-            ApplyCurrentTheme();
             InitializeWorkspaceShell();
             HookDisplaySettingsChanged();
             PreviewMouseWheel += MainWindow_PreviewMouseWheel;
@@ -330,12 +329,11 @@ namespace get_link_manga
                 dgResults.AllowDrop = true;
             }
 
-            if (!IsActive)
-            {
-                Activate();
-            }
-
+            Topmost = true;
+            Activate();
             Focus();
+            Topmost = false;
+
             if (dgResults != null && dgResults.IsVisible && dgResults.IsEnabled)
             {
                 dgResults.Focus();

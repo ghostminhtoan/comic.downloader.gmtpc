@@ -1745,7 +1745,11 @@ namespace get_link_manga
             {
                 _duplicateWindowInstance = new DuplicateWindow(this);
                 _duplicateWindowInstance.Owner = this;
-                _duplicateWindowInstance.Closed += (s, args) => { _duplicateWindowInstance = null; };
+                _duplicateWindowInstance.Closed += (s, args) => 
+                { 
+                    _duplicateWindowInstance = null; 
+                    this.Activate();
+                };
                 _duplicateWindowInstance.Show();
             }
         }

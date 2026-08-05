@@ -954,6 +954,7 @@ namespace get_link_manga
             {
                 Owner = this
             };
+            logWindow.Closed += (s, args) => { this.Activate(); };
             logWindow.Show();
         }
 
