@@ -6,40 +6,40 @@
         xmlns:local="clr-namespace:get_link_manga"
         mc:Ignorable="d"
         Title="DUPLICATE NAME MANAGER" Height="600" Width="850"
-        Background="{StaticResource CyberpunkDarkBrush}"
+        Background="{DynamicResource CyberpunkDarkBrush}"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False">
 
     <Window.Resources>
         <!-- DataGrid Style -->
         <Style x:Key="CyberpunkDataGrid" TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
-            <Setter Property="Background" Value="#06090e"/>
-            <Setter Property="RowBackground" Value="#06090e"/>
-            <Setter Property="AlternatingRowBackground" Value="#0c0f17"/>
-            <Setter Property="BorderBrush" Value="{StaticResource CyberpunkBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceAltBrush}"/>
+            <Setter Property="RowBackground" Value="{DynamicResource CyberpunkSurfaceAltBrush}"/>
+            <Setter Property="AlternatingRowBackground" Value="{DynamicResource CyberpunkCardBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="GridLinesVisibility" Value="All"/>
-            <Setter Property="HorizontalGridLinesBrush" Value="#1f293d"/>
-            <Setter Property="VerticalGridLinesBrush" Value="#1f293d"/>
-            <Setter Property="Foreground" Value="{StaticResource CyberpunkTextBrush}"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
+            <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource CyberpunkTextBrush}"/>
             <Setter Property="HeadersVisibility" Value="Column"/>
             <Setter Property="RowHeaderWidth" Value="0"/>
         </Style>
 
         <!-- Column Header Style -->
         <Style x:Key="CyberpunkDataGridColumnHeader" TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="#121622"/>
-            <Setter Property="Foreground" Value="{StaticResource CyberpunkPinkBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceEdgeBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource CyberpunkPinkBrush}"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="Padding" Value="10,8"/>
-            <Setter Property="BorderBrush" Value="{StaticResource CyberpunkBorderBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CyberpunkBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,2"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#1c1122"/>
-                    <Setter Property="Foreground" Value="{StaticResource CyberpunkPinkBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource ThemeSidebarButtonPressedBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource CyberpunkPinkBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -50,11 +50,11 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#161f30"/>
+                    <Setter Property="Background" Value="{DynamicResource ThemeSidebarButtonHoverBrush}"/>
                 </Trigger>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#1e2d4a"/>
-                    <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource ThemeButtonCyanHoverBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource CyberpunkCyanBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>

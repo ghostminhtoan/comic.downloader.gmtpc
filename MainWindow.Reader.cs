@@ -2815,13 +2815,24 @@ namespace get_link_manga
                 return false;
             }
 
-            Match match = Regex.Match(chapterName, @"(?<!\d)(\d+(?:[.,]\d+)?)", RegexOptions.CultureInvariant);
+            // 1. Ưu tiên tìm số chương đứng sau các từ khóa chỉ chương
+            Match match = Regex.Match(
+                chapterName, 
+                @"(?:^|[\s/_-])(?:chap|chapter|chuong|chương|ch|c)\s*(?:[#_: -]+)?\s*(?<num>\d+(?:[.,]\d+)?)", 
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+            if (!match.Success)
+            {
+                // Fallback về khớp số đầu tiên như logic cũ
+                match = Regex.Match(chapterName, @"(?<!\d)(?<num>\d+(?:[.,]\d+)?)", RegexOptions.CultureInvariant);
+            }
+
             if (!match.Success)
             {
                 return false;
             }
 
-            string token = match.Groups[1].Value.Replace(',', '.');
+            string token = match.Groups["num"].Value.Replace(',', '.');
             if (!double.TryParse(token, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out number))
             {
                 return false;
