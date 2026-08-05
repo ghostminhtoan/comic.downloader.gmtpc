@@ -185,7 +185,7 @@ namespace get_link_manga
 
                 int maxPage = 1;
 
-                // Try class="last" pagination link first (nhentai.net SvelteKit)
+                // 1. Try class="last" pagination link first (nhentai.net SvelteKit)
                 var lastPageMatch = Regex.Match(html, @"class=""last[^""]*""[^>]*href=""[^""]*(?:page|page%3D|page=)(\d+)""", RegexOptions.IgnoreCase);
                 if (!lastPageMatch.Success)
                 {
@@ -195,9 +195,33 @@ namespace get_link_manga
                 {
                     maxPage = lastPageNum;
                 }
-                else
+
+                // 2. Scan dedicated pagination section
+                var paginationMatch = Regex.Match(html, @"<section\s+class=""pagination[^""]*""[^>]*>(.*?)</section>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                if (paginationMatch.Success)
                 {
-                    // Fallback: scan all page= links
+                    string paginationHtml = paginationMatch.Groups[1].Value;
+                    var pageMatches = Regex.Matches(paginationHtml, @"[?&](?:page|page%3D|page=)(\d+)", RegexOptions.IgnoreCase);
+                    foreach (Match m in pageMatches)
+                    {
+                        if (int.TryParse(m.Groups[1].Value, out int pNum) && pNum > maxPage)
+                        {
+                            maxPage = pNum;
+                        }
+                    }
+                    var textMatches = Regex.Matches(paginationHtml, @">(\d+)</a>", RegexOptions.IgnoreCase);
+                    foreach (Match m in textMatches)
+                    {
+                        if (int.TryParse(m.Groups[1].Value, out int pNum) && pNum > maxPage)
+                        {
+                            maxPage = pNum;
+                        }
+                    }
+                }
+
+                // 3. Fallback: scan all page= links in the entire document
+                if (maxPage == 1)
+                {
                     var hrefMatches = Regex.Matches(html, @"href\s*=\s*[""']([^""']+)[""']", RegexOptions.IgnoreCase);
                     foreach (Match hrefMatch in hrefMatches)
                     {
