@@ -439,6 +439,19 @@ namespace get_link_manga
                         }
 
                         string displayName = string.IsNullOrEmpty(artist) ? title : $"[{artist}] {title}";
+                        string language = "";
+                        if (galleryInfo.language_localname != null)
+                        {
+                            language = (string)galleryInfo.language_localname;
+                        }
+                        if (!string.IsNullOrEmpty(language))
+                        {
+                            string langSuffix = $"[{language}]";
+                            if (!displayName.EndsWith(langSuffix, StringComparison.OrdinalIgnoreCase))
+                            {
+                                displayName = $"{displayName} {langSuffix}";
+                            }
+                        }
                         displayName = FormatGalleryTitle(displayName);
 
                         // Lấy hash của trang đầu làm preview thumbnail

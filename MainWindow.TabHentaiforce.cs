@@ -689,6 +689,35 @@ namespace get_link_manga
 
             _galleryHoverPreviewUrlCache[link] = coverUrlNonMangadex;
             item.HoverPreviewThumbnailUrl = coverUrlNonMangadex;
+
+            if (IsNhentaiUrl(link))
+            {
+                try
+                {
+                    var langs = ExtractNhentaiNetLanguages(html);
+                    var displayLangs = langs.Where(l => l != "translated").ToList();
+                    string currentName = CleanTranslatedTagFromTitle(item.Name);
+
+                    if (displayLangs.Count > 0)
+                    {
+                        string langStr = string.Join(", ", displayLangs.Select(l => System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(l)));
+                        string suffix = $"[{langStr}]";
+                        if (!currentName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                        {
+                            currentName = $"{currentName} {suffix}";
+                        }
+                    }
+
+                    if (item.Name != currentName)
+                    {
+                        Dispatcher.Invoke(() => item.Name = currentName);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log($"[nhentai Preview] Lỗi cập nhật tên và ngôn ngữ: {ex.Message}");
+                }
+            }
         }
 
         private string ExtractMangadexPreviewUrlFromHtml(string html, string pageUrl)

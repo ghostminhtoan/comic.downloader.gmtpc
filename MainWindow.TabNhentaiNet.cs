@@ -609,6 +609,19 @@ namespace get_link_manga
 
                         string galleryId = GetNhentaiGalleryIdFromLink(link);
                         string title = ExtractNhentaiNetGalleryTitle(html, galleryId);
+                        title = CleanTranslatedTagFromTitle(title);
+                        var langs = ExtractNhentaiNetLanguages(html);
+                        var displayLangs = langs.Where(l => l != "translated").ToList();
+                        if (displayLangs.Count > 0)
+                        {
+                            string langStr = string.Join(", ", displayLangs.Select(l => System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(l)));
+                            string suffix = $"[{langStr}]";
+                            if (!title.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                            {
+                                title = $"{title} {suffix}";
+                            }
+                        }
+
                         string thumbUrl = ExtractNhentaiNetGalleryCover(html);
 
                         Dispatcher.Invoke(() =>
@@ -739,6 +752,42 @@ namespace get_link_manga
                 return match.Groups[1].Value;
             }
             return "Unknown";
+        }
+
+        private string CleanTranslatedTagFromTitle(string title)
+        {
+            if (string.IsNullOrEmpty(title)) return title;
+            title = Regex.Replace(title, @"\s*[\[\(]translated[\]\)]", "", RegexOptions.IgnoreCase);
+            return title.Trim();
+        }
+
+        private List<string> ExtractNhentaiNetLanguages(string html)
+        {
+            var languages = new List<string>();
+            if (string.IsNullOrWhiteSpace(html)) return languages;
+
+            try
+            {
+                var containerMatch = Regex.Match(html, @"Languages:\s*<span[^>]*>(.*?)</span>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                if (containerMatch.Success)
+                {
+                    string tagsSpan = containerMatch.Groups[1].Value;
+                    var matches = Regex.Matches(tagsSpan, @"/language/([^/""\s>]+)/?", RegexOptions.IgnoreCase);
+                    foreach (Match m in matches)
+                    {
+                        string lang = WebUtility.HtmlDecode(m.Groups[1].Value).Trim().ToLowerInvariant();
+                        if (!languages.Contains(lang))
+                        {
+                            languages.Add(lang);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"[nhentai] Lỗi trích xuất ngôn ngữ: {ex.Message}");
+            }
+            return languages;
         }
     }
 }
