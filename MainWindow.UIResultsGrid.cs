@@ -28,6 +28,7 @@ namespace get_link_manga
         private Point _resultsDragStartPoint;
         private GalleryItem _resultsDragItem;
         private bool _isResultsThumbnailViewEnabled;
+        private bool _isFreeArrangementActive = true;
         private bool _isSyncingResultsThumbnailSelection;
         private readonly ObservableCollection<GalleryItem> _thumbnailVisibleItems = new ObservableCollection<GalleryItem>();
         private ScrollViewer _resultsThumbnailScrollViewer;
@@ -145,23 +146,32 @@ namespace get_link_manga
 
             view.SortDescriptions.Clear();
 
-            // Chỉ nhóm split khi thực sự có item split
-            bool hasSplit = _scrapedItems.Any(item => item.IsParallelSplitTask || item.IsParallelSplitParent);
-            if (hasSplit)
+            // Nếu đang bật Free Arrangement và không sắp xếp cột cụ thể nào (hoặc sắp xếp theo OriginalIndex)
+            // thì xóa sạch SortDescriptions để WPF hiển thị hoàn toàn tự do theo thứ tự trong _scrapedItems
+            if (_isFreeArrangementActive && string.Equals(propertyName, "OriginalIndex", StringComparison.Ordinal))
             {
-                view.SortDescriptions.Add(new SortDescription("ParallelSplitGroupKey", ListSortDirection.Ascending));
-                view.SortDescriptions.Add(new SortDescription("IsParallelSplitParent", ListSortDirection.Descending));
+                // Không thêm bất kỳ SortDescriptions nào
             }
-
-            if (!string.Equals(propertyName, "ParallelSplitGroupKey", StringComparison.Ordinal) && 
-                !string.Equals(propertyName, "IsParallelSplitParent", StringComparison.Ordinal))
+            else
             {
-                view.SortDescriptions.Add(new SortDescription(propertyName, direction));
-            }
+                // Chỉ nhóm split khi thực sự có item split
+                bool hasSplit = _scrapedItems.Any(item => item.IsParallelSplitTask || item.IsParallelSplitParent);
+                if (hasSplit)
+                {
+                    view.SortDescriptions.Add(new SortDescription("ParallelSplitGroupKey", ListSortDirection.Ascending));
+                    view.SortDescriptions.Add(new SortDescription("IsParallelSplitParent", ListSortDirection.Descending));
+                }
 
-            if (!string.Equals(propertyName, "OriginalIndex", StringComparison.Ordinal))
-            {
-                view.SortDescriptions.Add(new SortDescription("OriginalIndex", ListSortDirection.Ascending));
+                if (!string.Equals(propertyName, "ParallelSplitGroupKey", StringComparison.Ordinal) && 
+                    !string.Equals(propertyName, "IsParallelSplitParent", StringComparison.Ordinal))
+                {
+                    view.SortDescriptions.Add(new SortDescription(propertyName, direction));
+                }
+
+                if (!string.Equals(propertyName, "OriginalIndex", StringComparison.Ordinal))
+                {
+                    view.SortDescriptions.Add(new SortDescription("OriginalIndex", ListSortDirection.Ascending));
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(logMessage))
@@ -329,6 +339,15 @@ namespace get_link_manga
                     }
                 }
                 Log("[Check Missing] Trả về thứ tự gốc.");
+            }
+        }
+
+        private void BtnFreeArrangement_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is ToggleButton toggleBtn)
+            {
+                _isFreeArrangementActive = toggleBtn.IsChecked == true;
+                RestoreResultsOrder(_isFreeArrangementActive ? "Free arrangement mode enabled." : "Free arrangement mode disabled.");
             }
         }
 
