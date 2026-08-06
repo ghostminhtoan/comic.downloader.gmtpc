@@ -3311,12 +3311,7 @@ namespace get_link_manga
             Log($"[{nhentaiSiteKey}] Book: {normalizedBookUrl} | Pages: {totalPages}");
 
             // Get number of connections
-            // nhentai.net CDN (i1.nhentai.net) rate-limits moderately — cap at 5 concurrent to improve download speed safely
             int maxThreads = GetCurrentConnectionLimit();
-            if (isNhentaiNet && nhentaiNetImageUrls != null)
-            {
-                maxThreads = Math.Min(maxThreads, 5);
-            }
 
             Log($"[Đa luồng {nhentaiSiteKey}] Bắt đầu tải {totalPages} trang, tối đa {maxThreads} kết nối song song...");
 
@@ -3603,9 +3598,11 @@ namespace get_link_manga
                                        : (typeChar == "b" || typeChar == "bmp") ? "bmp"
                                        : (typeChar == "jpeg") ? "jpeg"
                                        : "jpg";
-                            urls[i] = $"https://{subdomain}.nhentai.net/galleries/{mediaId}/{i + 1}.{ext}";
+                            // Phân bổ luân phiên giữa i1, i2, i3, i4 để tăng gấp 4 lần băng thông CDN
+                            string activeSubdomain = $"i{(i % 4) + 1}";
+                            urls[i] = $"https://{activeSubdomain}.nhentai.net/galleries/{mediaId}/{i + 1}.{ext}";
                         }
-                        Log($"[nhentai.net] Đã parse thành công {urls.Length} image URLs cụ thể từ pages JSON.");
+                        Log($"[nhentai.net] Đã parse thành công {urls.Length} image URLs với luân phiên CDN mirrors (i1..i4).");
                         return urls;
                     }
                 }
@@ -3613,9 +3610,10 @@ namespace get_link_manga
                 // Nếu không parse được JSON pages chi tiết, mặc định tạo link webp (hàm download sẽ tự động fallback sang jpg/png nếu lỗi 404)
                 for (int i = 0; i < totalPages; i++)
                 {
-                    urls[i] = $"https://{subdomain}.nhentai.net/galleries/{mediaId}/{i + 1}.webp";
+                    string activeSubdomain = $"i{(i % 4) + 1}";
+                    urls[i] = $"https://{activeSubdomain}.nhentai.net/galleries/{mediaId}/{i + 1}.webp";
                 }
-                Log($"[nhentai.net] Đã generate {urls.Length} image URLs với mặc định đuôi webp (có auto-fallback khi tải).");
+                Log($"[nhentai.net] Đã generate {urls.Length} image URLs với luân phiên CDN mirrors (i1..i4).");
                 return urls;
             }
             catch (Exception ex)
