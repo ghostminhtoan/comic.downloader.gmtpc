@@ -3243,7 +3243,11 @@
 
                     <!-- Toolbar for Filtering and Sorting -->
                     <Grid Grid.Row="1" Margin="0,0,0,12">
-                        <WrapPanel Orientation="Horizontal">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <WrapPanel Grid.Column="0" Orientation="Horizontal">
                             <Button Name="btnSortByLatestChapter" Content="sort by latest chapter" Click="BtnSortByLatestChapter_Click" Style="{StaticResource CompactYellowButton}" MinWidth="130" Width="Auto" Padding="10,2"/>
                             <StackPanel Orientation="Horizontal" Margin="0,0,10,6" VerticalAlignment="Center">
                                 <StackPanel.LayoutTransform>
@@ -3291,39 +3295,57 @@
                                 </Button.LayoutTransform>
                             </Button>
                         </WrapPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,6">
+                            <TextBlock Name="txtSearchLabel" Text="SEARCH" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox Name="txtFilter" TextChanged="TxtFilter_TextChanged" Style="{StaticResource SurfaceTextBox}" Width="200" ToolTip="Tìm kiếm tên truyện, link hoặc chapter..." VerticalAlignment="Center"/>
+                        </StackPanel>
                     </Grid>
 
                     <Border Grid.Row="2" Style="{StaticResource WorkspaceSectionCard}" Padding="14" Margin="0,0,0,12">
                         <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0"
-                                       Text="{Binding Text, ElementName=lblStatus}"
-                                       Foreground="{StaticResource CyberpunkTextBrush}"
-                                       FontSize="12"
-                                       FontWeight="SemiBold"
-                                       TextWrapping="Wrap"
-                                       VerticalAlignment="Center"/>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Name="txtResultsImportingStatus"
-                                           Text="importing link..."
-                                           Foreground="{StaticResource CyberpunkCyanBrush}"
-                                           FontSize="13"
-                                           FontWeight="Bold"
-                                           Margin="12,0,0,0"
-                                           VerticalAlignment="Center"
-                                           Visibility="Collapsed"/>
-                                <TextBlock Name="txtResultsMissingChapterScanningStatus"
-                                           Text="scanning missing chapter..."
-                                           Foreground="{StaticResource CyberpunkCyanBrush}"
-                                           FontSize="13"
-                                           FontWeight="Bold"
-                                           Margin="12,0,0,0"
-                                           VerticalAlignment="Center"
-                                           Visibility="Collapsed"/>
-                            </StackPanel>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding Text, ElementName=lblStatus}"
+                                           Foreground="{StaticResource CyberpunkTextBrush}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Name="txtResultsImportingStatus"
+                                               Text="importing link..."
+                                               Foreground="{StaticResource CyberpunkCyanBrush}"
+                                               FontSize="13"
+                                               FontWeight="Bold"
+                                               Margin="12,0,0,0"
+                                               VerticalAlignment="Center"
+                                               Visibility="Collapsed"/>
+                                    <TextBlock Name="txtResultsMissingChapterScanningStatus"
+                                               Text="scanning missing chapter..."
+                                               Foreground="{StaticResource CyberpunkCyanBrush}"
+                                               FontSize="13"
+                                               FontWeight="Bold"
+                                               Margin="12,0,0,0"
+                                               VerticalAlignment="Center"
+                                               Visibility="Collapsed"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid Grid.Row="1" Margin="0,8,0,0" Name="grdGlobalProgress" Visibility="Collapsed">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ProgressBar Name="prgGlobalDownload" Minimum="0" Maximum="100" Value="0" Height="10" Style="{StaticResource ProgressBarSuccess}" Foreground="{StaticResource CyberpunkCyanBrush}" BorderBrush="#334155" BorderThickness="1" VerticalAlignment="Center"/>
+                                <TextBlock Name="txtGlobalProgressStats" Grid.Column="1" Text="0/0 (0%)" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="11" FontWeight="Bold" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            </Grid>
                         </Grid>
                     </Border>
 
@@ -4441,6 +4463,17 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
 
+                    <!-- Empty State Grid -->
+                    <Grid Grid.Row="3" Name="grdEmptyState" Background="#0A101D" Panel.ZIndex="10" Visibility="Visible">
+                        <Border BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="12" Background="#0A101D">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="📂" FontSize="56" HorizontalAlignment="Center" Foreground="{StaticResource CyberpunkMutedTextBrush}" Margin="0,0,0,16"/>
+                                <TextBlock Name="txtEmptyStateTitle" Text="DANH SÁCH CHỜ TẢI ĐANG TRỐNG" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{StaticResource CyberpunkCyanBrush}" Margin="0,0,0,8"/>
+                                <TextBlock Name="txtEmptyStateDesc" Text="Dán link truyện hoặc kéo thả file/thư mục vào đây để bắt đầu" FontSize="12" HorizontalAlignment="Center" Foreground="{StaticResource CyberpunkMutedTextBrush}"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
                     <!-- Download Section -->
                     <Border Grid.Row="4" Name="borderDownloadSection" Style="{StaticResource WorkspaceSectionCard}" Padding="16" Margin="0,8,0,0">
                             <Grid>
@@ -4455,22 +4488,50 @@
                                     <RowDefinition Height="Auto"/> <!-- Connections and Start Download -->
                                 </Grid.RowDefinitions>
 
+                            <!-- Hidden Panel containing legacy buttons to maintain C# code-behind compatibility -->
+                            <Grid Visibility="Collapsed">
+                                <Button Name="btnCopyLinksOnly" Click="BtnCopyLinksOnly_Click"/>
+                                <Button Name="btnCopyNamesAndLinks" Click="BtnCopyNamesAndLinks_Click"/>
+                                <Button Name="btnCopyChaptersLink" Click="BtnCopyChaptersLink_Click"/>
+                                <Button Name="btnMergeLightNovelBookMarkdown" Click="BtnMergeLightNovelBookMarkdown_Click"/>
+                                <Button Name="btnMergeParallelSplitChapters" Click="BtnMergeParallelSplitChapters_Click"/>
+                                <Button Name="btnRescanMissingChapter" Click="BtnRescanMissingChapter_Click"/>
+                                <Button Name="btnPauseMissingChapterScan" Click="BtnPauseResumeDownloadMissingChapters_Click"/>
+                                <Button Name="btnOpenMissingChapterCache" Click="BtnOpenDownloadMissingChapterCache_Click"/>
+                                <Button Name="btnClearMissingChapterCache" Click="BtnClearDownloadMissingChapterCache_Click"/>
+                            </Grid>
+
                             <WrapPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,6">
-                                <Button Name="btnCopyLinksOnly" Content="COPY BOOK LINKS" Click="BtnCopyLinksOnly_Click" Style="{StaticResource CompactCyanButton}" MinWidth="92" Width="Auto" Padding="10,2" FontWeight="Bold"/>
-                                <Button Name="btnCopyNamesAndLinks" Content="COPY BOOKS NAME + LINK" Click="BtnCopyNamesAndLinks_Click" Style="{StaticResource CompactPinkButton}" MinWidth="128" Width="Auto" Padding="10,2" FontWeight="Bold"/>
-                                <Button Name="btnCopyChaptersLink" Content="COPY CHAPTERS LINK" Click="BtnCopyChaptersLink_Click" Style="{StaticResource CompactCyanButton}" MinWidth="150" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
-                                <Button Name="btnMergeLightNovelBookMarkdown" Content="MERGE NOVEL BOOK" Click="BtnMergeLightNovelBookMarkdown_Click" Style="{StaticResource CompactPinkButton}" MinWidth="150" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
-                                <Button Name="btnMergeParallelSplitChapters" Content="AUTO MERGE CHAPTER" Click="BtnMergeParallelSplitChapters_Click" Style="{StaticResource CompactPinkButton}" MinWidth="155" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
-                                <Button Name="btnRefreshStatus" Content="REFRESH STATUS" Click="BtnRefreshStatus_Click" Style="{StaticResource CompactCyanButton}" MinWidth="120" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0">
-                                    <Button.LayoutTransform>
-                                        <ScaleTransform ScaleX="0.7" ScaleY="0.7"/>
-                                    </Button.LayoutTransform>
+                                <Button Name="btnCopyGroup" Content="SAO CHÉP..." Click="BtnContextMenuOpen_Click" Style="{StaticResource CompactCyanButton}" MinWidth="120" FontWeight="Bold">
+                                    <Button.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Copy link các dòng đang chọn (Copy Selected Links)" Click="MenuCopySelectedLinks_Click"/>
+                                            <MenuItem Header="Copy link các truyện đã tích (Copy Book Links)" Click="BtnCopyLinksOnly_Click"/>
+                                            <MenuItem Header="Copy tên + link truyện (Copy Name + Link)" Click="BtnCopyNamesAndLinks_Click"/>
+                                            <MenuItem Header="Copy chapters link" Click="BtnCopyChaptersLink_Click"/>
+                                        </ContextMenu>
+                                    </Button.ContextMenu>
                                 </Button>
-                                <Button Name="btnRescanMissingChapter" Content="RESCAN MISSING CHAPTER" Click="BtnRescanMissingChapter_Click" Style="{StaticResource CompactCyanButton}" MinWidth="170" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
-                                <Button Name="btnPauseMissingChapterScan" Content="PAUSE MISSING CHAPTER" Click="BtnPauseResumeDownloadMissingChapters_Click" Style="{StaticResource CompactPinkButton}" MinWidth="170" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
-                                <Button Name="btnOpenMissingChapterCache" Content="OPEN CACHE JSON" Click="BtnOpenDownloadMissingChapterCache_Click" Style="{StaticResource CompactCyanButton}" MinWidth="145" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
-                                <Button Name="btnClearMissingChapterCache" Content="CLEAR CACHE JSON" Click="BtnClearDownloadMissingChapterCache_Click" Style="{StaticResource CompactPinkButton}" MinWidth="145" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
-                                <Button Name="btnClearResults" Content="CLEAR" Click="BtnClear_Click" Style="{StaticResource CompactCyanButton}" MinWidth="82" Width="Auto" Padding="10,2" FontWeight="Bold" Margin="4,0,0,0"/>
+                                <Button Name="btnMergeGroup" Content="GỘP TRUYỆN..." Click="BtnContextMenuOpen_Click" Style="{StaticResource CompactPinkButton}" MinWidth="120" FontWeight="Bold" Margin="6,0,0,0">
+                                    <Button.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Gộp Light Novel (Merge Novel Book)" Click="BtnMergeLightNovelBookMarkdown_Click"/>
+                                            <MenuItem Header="Gộp chương Split (Auto Merge Split Chapters)" Click="BtnMergeParallelSplitChapters_Click"/>
+                                        </ContextMenu>
+                                    </Button.ContextMenu>
+                                </Button>
+                                <Button Name="btnScanGroup" Content="QUÉT CHƯƠNG THIẾU..." Click="BtnContextMenuOpen_Click" Style="{StaticResource CompactCyanButton}" MinWidth="160" FontWeight="Bold" Margin="6,0,0,0">
+                                    <Button.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Quét lại chương thiếu (Rescan Missing Chapter)" Click="BtnRescanMissingChapter_Click"/>
+                                            <MenuItem Header="Tạm dừng quét chương thiếu (Pause Scan)" Click="BtnPauseResumeDownloadMissingChapters_Click"/>
+                                            <MenuItem Header="Mở cache JSON (Open Cache JSON)" Click="BtnOpenDownloadMissingChapterCache_Click"/>
+                                            <MenuItem Header="Xóa cache JSON (Clear Cache JSON)" Click="BtnClearDownloadMissingChapterCache_Click"/>
+                                        </ContextMenu>
+                                    </Button.ContextMenu>
+                                </Button>
+                                <Button Name="btnRefreshStatus" Content="LÀM MỚI TRẠNG THÁI" Click="BtnRefreshStatus_Click" Style="{StaticResource CompactCyanButton}" MinWidth="140" FontWeight="Bold" Margin="6,0,0,0"/>
+                                <Button Name="btnClearResults" Content="XÓA HÀNG ĐỢI" Click="BtnClear_Click" Style="{StaticResource CompactPinkButton}" MinWidth="100" FontWeight="Bold" Margin="6,0,0,0"/>
                             </WrapPanel>
 
                             <TextBlock Grid.Row="2"
@@ -4484,8 +4545,6 @@
                                 <TextBox Name="txtDownloadPath" Style="{StaticResource SurfaceTextBox}" IsReadOnly="True" Width="300" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                 <Button Name="btnBrowseFolder" Content="BROWSE" Click="BtnBrowseFolder_Click" Style="{StaticResource CompactCyanButton}" Width="72" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                 <Button Name="btnOpenFolder" Content="&#x1F4C2;" Click="BtnOpenFolder_Click" Style="{StaticResource CompactCyanButton}" Width="92" Margin="0,0,16,0" FontFamily="Segoe UI Emoji" FontSize="12" ToolTip="OPEN FOLDER" VerticalAlignment="Center"/>
-                                <TextBlock Name="txtSearchLabel" Text="SEARCH" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBox Name="txtFilter" TextChanged="TxtFilter_TextChanged" Style="{StaticResource SurfaceTextBox}" Width="260" ToolTip="TÃ¬m kiáº¿m tÃªn truyá»‡n, link hoáº·c chapter trong hÃ ng chá»..." VerticalAlignment="Center"/>
                             </WrapPanel>
 
                             <!-- Row 2: Folder Actions -->
@@ -4696,6 +4755,17 @@
                          Visibility="Collapsed"
                          Panel.ZIndex="1000"
                          Margin="0,0,0,-8"/>
+        <ItemsControl Name="toastContainer"
+                      VerticalAlignment="Top"
+                      HorizontalAlignment="Right"
+                      Margin="0,20,20,0"
+                      Panel.ZIndex="9999">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
     </Grid>
     </Grid>
 </Window>

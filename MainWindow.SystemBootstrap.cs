@@ -207,6 +207,7 @@ namespace get_link_manga
             _scrapedItems.CollectionChanged += ResultsThumbnailItems_CollectionChanged;
             SetResultsPresentationMode(false, false);
             UpdateStats();
+            UpdateEmptyStateVisibility();
             InitializeDownloadMissingChapterTab();
             InitializeWebviewCpuControls();
 

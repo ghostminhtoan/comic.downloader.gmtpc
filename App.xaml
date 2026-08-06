@@ -463,12 +463,12 @@
             <ControlTemplate x:Key="FloatSwitchToggleTemplate" TargetType="ToggleButton">
                 <Border x:Name="track"
                         CornerRadius="12"
-                        BorderThickness="1.3"
+                        BorderThickness="1.5"
                         Width="70"
                         Height="24"
                         Padding="3"
-                        Background="#D8212A"
-                        BorderBrush="#F4626B">
+                        Background="#1A0D1A"
+                        BorderBrush="#FF007F">
                     <Grid x:Name="layout">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -477,12 +477,11 @@
                         <TextBlock x:Name="stateText"
                                    Grid.Column="1"
                                    Text="OFF"
-                                   Foreground="White"
+                                   Foreground="#FF007F"
                                    FontWeight="Bold"
                                    FontSize="10"
                                    VerticalAlignment="Center"
-                                   HorizontalAlignment="Center"
-                                   TextDecorations="Underline"/>
+                                   HorizontalAlignment="Center"/>
                         <Border x:Name="thumb"
                                 Grid.Column="0"
                                 Width="16"

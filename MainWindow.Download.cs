@@ -81,10 +81,13 @@ namespace get_link_manga
             {
                 globalDownloadProgressBar.Visibility = Visibility.Collapsed;
                 globalDownloadProgressBar.Value = 0;
+                if (grdGlobalProgress != null) grdGlobalProgress.Visibility = Visibility.Collapsed;
                 return;
             }
 
             globalDownloadProgressBar.Visibility = Visibility.Visible;
+            if (grdGlobalProgress != null) grdGlobalProgress.Visibility = Visibility.Visible;
+
             double totalProgress = 0;
             int count = 0;
             foreach (var item in _scrapedItems.Where(i => i.IsChecked))
@@ -100,13 +103,33 @@ namespace get_link_manga
                 count++;
             }
 
+            double overallPercent = 0;
             if (count > 0)
             {
-                globalDownloadProgressBar.Value = totalProgress / count;
+                overallPercent = totalProgress / count;
+                globalDownloadProgressBar.Value = overallPercent;
+                if (prgGlobalDownload != null) prgGlobalDownload.Value = overallPercent;
             }
             else
             {
                 globalDownloadProgressBar.Value = 0;
+                if (prgGlobalDownload != null) prgGlobalDownload.Value = 0;
+            }
+
+            if (txtGlobalProgressStats != null)
+            {
+                int completed = _scrapedItems.Count(item => item.IsChecked &&
+                    (string.Equals(item.Status, "Completed", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(item.DownloadingPageProgress, "Done", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(item.DownloadingPageProgress, "Complete", StringComparison.OrdinalIgnoreCase)));
+                int totalToDownload = _scrapedItems.Count(i => i.IsChecked);
+                long totalSpeed = 0;
+                foreach (var item in _scrapedItems)
+                {
+                    totalSpeed += item.DownloadSpeedBytesPerSecond;
+                }
+                string speedStr = totalSpeed > 0 ? $" | Tốc độ: {GalleryItem.FormatSpeedText(totalSpeed)}" : "";
+                txtGlobalProgressStats.Text = $"{completed}/{totalToDownload} truyện ({overallPercent:F0}%){speedStr}";
             }
         }
 

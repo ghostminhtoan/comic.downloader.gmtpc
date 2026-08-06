@@ -624,6 +624,12 @@ namespace get_link_manga
             };
 
             button.Content = CreateNavigationButtonContent(text, shortcut);
+            if (!string.IsNullOrEmpty(shortcut))
+            {
+                button.ToolTip = _isVietnameseUi ? $"Phím tắt: {shortcut}" : $"Shortcut: {shortcut}";
+                ToolTipService.SetInitialShowDelay(button, 100);
+                ToolTipService.SetShowDuration(button, 10000);
+            }
 
             button.Click += (sender, args) => SelectAppSection(section);
             _navigationButtons[section] = button;

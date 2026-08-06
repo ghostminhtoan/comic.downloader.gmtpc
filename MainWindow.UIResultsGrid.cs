@@ -847,6 +847,8 @@ namespace get_link_manga
         private void ResultsThumbnailItems_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             QueueCheckedDownloadsForActiveSession();
+            UpdateEmptyStateVisibility();
+            UpdateGlobalProgressBar();
 
             if (!_isResultsThumbnailViewEnabled)
             {
