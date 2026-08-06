@@ -418,6 +418,9 @@ namespace get_link_manga
                     }
                 }
 
+                ShowResultsImportingIndicator();
+                UpdateResultsImportingProgress(imported, cleanIds.Count);
+
                 // Tải song song thông tin các gallery trong trang với batch size 8
                 int batchSize = 8;
                 for (int b = 0; b < cleanIds.Count; b += batchSize)
@@ -509,6 +512,7 @@ namespace get_link_manga
                                 item.OriginalIndex = _scrapedItems.Count;
                                 _scrapedItems.Add(item);
                             }
+                            UpdateResultsImportingProgress(imported, cleanIds.Count, newItems.LastOrDefault()?.Name);
                         });
                     }
                 }
@@ -519,6 +523,7 @@ namespace get_link_manga
             }
             finally
             {
+                HideResultsImportingIndicator();
                 if (!keepControlsEnabled)
                 {
                     btnHitomiLaScrape.IsEnabled = true;
