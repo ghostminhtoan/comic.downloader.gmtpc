@@ -3508,15 +3508,29 @@ namespace get_link_manga
         {
             try
             {
-                // Solve Cloudflare captcha if needed before fetching book HTML
-                bool ok = await SolveNhentaiCaptchaIfNeededAsync(bookUrl);
-                if (!ok)
+                string html = null;
+                try
                 {
-                    Log($"[nhentai.net] ExtractNhentaiNetImageUrlsAsync: Cloudflare block — fallback về reader page fetch");
-                    return null;
+                    html = await FetchStringAsync(bookUrl, token);
+                }
+                catch (Exception fetchEx)
+                {
+                    if (fetchEx.Message.Contains("403") || fetchEx.Message.Contains("503") || fetchEx.Message.Contains("Forbidden"))
+                    {
+                        bool ok = await SolveNhentaiCaptchaIfNeededAsync(bookUrl);
+                        if (!ok)
+                        {
+                            Log($"[nhentai.net] ExtractNhentaiNetImageUrlsAsync: Cloudflare block — fallback về reader page fetch");
+                            return null;
+                        }
+                        html = await FetchStringAsync(bookUrl, token);
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
 
-                string html = await FetchStringAsync(bookUrl, token);
                 if (string.IsNullOrWhiteSpace(html)) return null;
 
                 // Unescape JSON backslash escapes embedded in SvelteKit script
