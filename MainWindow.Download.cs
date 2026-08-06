@@ -5981,7 +5981,10 @@ namespace get_link_manga
                     {
                         request.Headers.Referrer = new Uri("https://nhentai.net/");
                     }
-
+                    else if (url.IndexOf("hentai2read.com", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        request.Headers.Referrer = new Uri("https://hentai2read.com/");
+                    }
                 }
                 using (var response = await httpClient.SendAsync(request, token))
                 {
