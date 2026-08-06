@@ -34,7 +34,9 @@ if exist "%TARGET_DIR%\Comic-GMTPC-old.exe" (
 )
 
 echo [3/4] Dang tien hanh Build du an...
-"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe" "%~dp0Comic-GMTPC.csproj" /t:Rebuild /p:Configuration=Release /p:Platform=AnyCPU /p:AutoStampBuildInfo=true /p:AutoPublishRelease=true
+set "MSBUILD_EXE=C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe"
+if not exist "%MSBUILD_EXE%" set "MSBUILD_EXE=C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe"
+"%MSBUILD_EXE%" "%~dp0Comic-GMTPC.csproj" /t:Rebuild /p:Configuration=Release /p:Platform=AnyCPU /p:AutoStampBuildInfo=true /p:AutoPublishRelease=true
 set BUILD_STATUS=%ERRORLEVEL%
 
 ping 127.0.0.1 -n 3 > nul
