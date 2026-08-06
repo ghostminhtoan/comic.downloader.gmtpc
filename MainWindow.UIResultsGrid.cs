@@ -302,6 +302,11 @@ namespace get_link_manga
             ApplyResultsSort(colSpeed, "DownloadSpeedSortValue", ref _isSpeedSortAscending, "download speed");
         }
 
+        private void BtnRestoreOrder_Click(object sender, RoutedEventArgs e)
+        {
+            RestoreResultsOrder("Original order restored.");
+        }
+
         internal void RestoreResultsOrder(string logMessage)
         {
             _isNameSortAscending = true;
