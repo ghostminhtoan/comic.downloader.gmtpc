@@ -63,8 +63,6 @@
             <EventSetter Event="MouseEnter" Handler="DuplicatePreviewRow_MouseEnter"/>
             <EventSetter Event="MouseMove" Handler="DuplicatePreviewRow_MouseMove"/>
             <EventSetter Event="MouseLeave" Handler="DuplicatePreviewRow_MouseLeave"/>
-            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="DgDuplicates_PreviewMouseLeftButtonDown"/>
-            <EventSetter Event="PreviewMouseMove" Handler="DgDuplicates_PreviewMouseMove"/>
         </Style>
 
         <!-- Cell Style -->
@@ -174,9 +172,6 @@
                   CanUserDeleteRows="False"
                   SelectionMode="Extended"
                   SelectionUnit="FullRow"
-                  AllowDrop="True"
-                  DragOver="DgDuplicates_DragOver"
-                  Drop="DgDuplicates_Drop"
                   PreviewKeyDown="DgDuplicates_PreviewKeyDown"
                   PreviewTextInput="DgDuplicates_PreviewTextInput"
                   MouseDoubleClick="DgDuplicates_MouseDoubleClick">
@@ -287,10 +282,7 @@
                  SelectionChanged="LbDuplicatesThumbnail_SelectionChanged"
                  PreviewKeyDown="DgDuplicates_PreviewKeyDown"
                  PreviewTextInput="DgDuplicates_PreviewTextInput"
-                 MouseDoubleClick="DgDuplicates_MouseDoubleClick"
-                 AllowDrop="True"
-                 DragOver="DgDuplicates_DragOver"
-                 Drop="LbDuplicatesThumbnail_Drop">
+                 MouseDoubleClick="DgDuplicates_MouseDoubleClick">
             <ListBox.ContextMenu>
                 <Binding ElementName="dgDuplicates" Path="ContextMenu"/>
             </ListBox.ContextMenu>
@@ -310,9 +302,6 @@
                     <Setter Property="BorderThickness" Value="1"/>
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     <Setter Property="VerticalContentAlignment" Value="Stretch"/>
-                    <Setter Property="AllowDrop" Value="True"/>
-                    <EventSetter Event="PreviewMouseLeftButtonDown" Handler="LbDuplicatesThumbnail_PreviewMouseLeftButtonDown"/>
-                    <EventSetter Event="PreviewMouseMove" Handler="LbDuplicatesThumbnail_PreviewMouseMove"/>
                     <Style.Triggers>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Background" Value="#3A3200"/>
