@@ -398,21 +398,11 @@ namespace get_link_manga
 
         private static bool IsDragCandidate(DependencyObject source)
         {
-            while (source != null)
+            // Chỉ cho phép drag khi click trực tiếp vào nút drag_handle (icon ☰)
+            if (source is FrameworkElement fe && string.Equals(fe.Tag as string, "drag_handle", StringComparison.Ordinal))
             {
-                if (source is ButtonBase || source is TextBoxBase || source is PasswordBox || source is ComboBox || source is ToggleButton || source is ScrollBar || source is Thumb || source is MenuItem)
-                {
-                    return false;
-                }
-
-                if (source is DataGridRow || source is DataGridCell)
-                {
-                    return true;
-                }
-
-                source = VisualTreeHelper.GetParent(source);
+                return true;
             }
-
             return false;
         }
 
@@ -1519,21 +1509,11 @@ namespace get_link_manga
 
         private static bool IsThumbnailDragCandidate(DependencyObject source)
         {
-            while (source != null)
+            // Chỉ cho phép drag ở Thumbnail view khi click trực tiếp vào nút drag_handle (icon ☰)
+            if (source is FrameworkElement fe && string.Equals(fe.Tag as string, "drag_handle", StringComparison.Ordinal))
             {
-                if (source is ButtonBase || source is TextBoxBase || source is PasswordBox || source is ComboBox || source is ToggleButton || source is ScrollBar || source is Thumb || source is MenuItem)
-                {
-                    return false;
-                }
-
-                if (source is ListBoxItem)
-                {
-                    return true;
-                }
-
-                source = VisualTreeHelper.GetParent(source);
+                return true;
             }
-
             return false;
         }
 

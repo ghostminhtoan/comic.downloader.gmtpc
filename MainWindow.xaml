@@ -3487,6 +3487,23 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
+                            <!-- Drag Handle Column -->
+                            <DataGridTemplateColumn Width="30">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="☰" 
+                                                   Foreground="#00F0FF" 
+                                                   FontSize="16" 
+                                                   FontWeight="Bold" 
+                                                   HorizontalAlignment="Center" 
+                                                   VerticalAlignment="Center" 
+                                                   Cursor="SizeAll" 
+                                                   Background="Transparent"
+                                                   Tag="drag_handle"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
                             <!-- Gallery Details Column (Vertical stack of Name and Link) -->
                             <DataGridTemplateColumn x:Name="colGalleryDetails" Width="3.1*" SortMemberPath="Name">
                                 <DataGridTemplateColumn.Header>
@@ -4230,6 +4247,25 @@
                                                           Margin="4"
                                                           HorizontalAlignment="Left"
                                                           VerticalAlignment="Top"/>
+                                                
+                                                <!-- Thumbnail Drag Handle -->
+                                                <Border Background="#CC09101C"
+                                                        CornerRadius="3"
+                                                        Width="18"
+                                                        Height="18"
+                                                        Margin="4"
+                                                        HorizontalAlignment="Right"
+                                                        VerticalAlignment="Top"
+                                                        Cursor="SizeAll"
+                                                        ToolTip="Kéo thả để sắp xếp">
+                                                    <TextBlock Text="☰"
+                                                               Foreground="#00F0FF"
+                                                               FontSize="12"
+                                                               FontWeight="Bold"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               Tag="drag_handle"/>
+                                                </Border>
                                             </Grid>
                                         </Border>
 
