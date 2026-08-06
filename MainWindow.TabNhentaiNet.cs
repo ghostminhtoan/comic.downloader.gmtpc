@@ -426,7 +426,8 @@ namespace get_link_manga
                                     OriginalIndex = _scrapedItems.Count,
                                     IsChecked = false,
                                     HoverPreviewThumbnailUrl = thumbUrl,
-                                    SourceDomain = "nhentai.net"
+                                    SourceDomain = "nhentai.net",
+                                    Tag = thumbUrl
                                 });
                                 pageCount++;
                             }
@@ -633,7 +634,8 @@ namespace get_link_manga
                                 OriginalIndex = _scrapedItems.Count,
                                 IsChecked = true,
                                 HoverPreviewThumbnailUrl = thumbUrl,
-                                SourceDomain = "nhentai.net"
+                                SourceDomain = "nhentai.net",
+                                Tag = thumbUrl
                             });
                         });
 

@@ -3293,7 +3293,7 @@ namespace get_link_manga
             string[] nhentaiNetImageUrls = null;
             if (isNhentaiNet)
             {
-                nhentaiNetImageUrls = await ExtractNhentaiNetImageUrlsAsync(normalizedBookUrl, token);
+                nhentaiNetImageUrls = await ExtractNhentaiNetImageUrlsAsync(item, normalizedBookUrl, token);
                 if (nhentaiNetImageUrls != null && nhentaiNetImageUrls.Length > 0)
                 {
                     item.NhentaiTotalPagesHint = nhentaiNetImageUrls.Length;
@@ -3507,48 +3507,64 @@ namespace get_link_manga
             }
         }
 
-        private async Task<string[]> ExtractNhentaiNetImageUrlsAsync(string bookUrl, CancellationToken token)
+        private async Task<string[]> ExtractNhentaiNetImageUrlsAsync(GalleryItem item, string bookUrl, CancellationToken token)
         {
             try
             {
-                string html = null;
-                try
+                // Kiểm tra xem đã có mediaId trong HoverPreviewThumbnailUrl / Tag của item chưa
+                string cachedCoverUrl = item?.HoverPreviewThumbnailUrl ?? (item?.Tag as string);
+                string mediaId = null;
+                if (!string.IsNullOrWhiteSpace(cachedCoverUrl))
                 {
-                    html = await FetchStringAsync(bookUrl, token);
-                }
-                catch (Exception fetchEx)
-                {
-                    if (fetchEx.Message.Contains("403") || fetchEx.Message.Contains("503") || fetchEx.Message.Contains("Forbidden"))
+                    var mediaIdMatchCached = Regex.Match(cachedCoverUrl, @"[it]\d*\.nhentai\.net/galleries/(\d+)/", RegexOptions.IgnoreCase);
+                    if (mediaIdMatchCached.Success)
                     {
-                        bool ok = await SolveNhentaiCaptchaIfNeededAsync(bookUrl);
-                        if (!ok)
-                        {
-                            Log($"[nhentai.net] ExtractNhentaiNetImageUrlsAsync: Cloudflare block — fallback về reader page fetch");
-                            return null;
-                        }
+                        mediaId = mediaIdMatchCached.Groups[1].Value;
+                    }
+                }
+
+                string html = null;
+                if (string.IsNullOrEmpty(mediaId))
+                {
+                    try
+                    {
                         html = await FetchStringAsync(bookUrl, token);
                     }
-                    else
+                    catch (Exception fetchEx)
                     {
-                        throw;
+                        if (fetchEx.Message.Contains("403") || fetchEx.Message.Contains("503") || fetchEx.Message.Contains("Forbidden"))
+                        {
+                            bool ok = await SolveNhentaiCaptchaIfNeededAsync(bookUrl);
+                            if (!ok)
+                            {
+                                Log($"[nhentai.net] ExtractNhentaiNetImageUrlsAsync: Cloudflare block — fallback về reader page fetch");
+                                return null;
+                            }
+                            html = await FetchStringAsync(bookUrl, token);
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
+
+                    if (string.IsNullOrWhiteSpace(html)) return null;
                 }
 
-                if (string.IsNullOrWhiteSpace(html)) return null;
+                string unescaped = html != null ? html.Replace("\\\"", "\"").Replace("\\/", "/") : string.Empty;
 
-                // Unescape JSON backslash escapes embedded in SvelteKit script
-                string unescaped = html.Replace("\\\"", "\"").Replace("\\/", "/");
-
-                // Extract mediaId from gallery CDN thumbnail (e.g. t1.nhentai.net/galleries/4089909/...)
-                var mediaIdMatch = Regex.Match(unescaped,
-                    @"[it]\d*\.nhentai\.net/galleries/(\d+)/",
-                    RegexOptions.IgnoreCase);
-                if (!mediaIdMatch.Success)
+                if (string.IsNullOrEmpty(mediaId))
                 {
-                    Log($"[nhentai.net] Không tìm thấy mediaId trong HTML — fallback về reader page fetch");
-                    return null;
+                    var mediaIdMatch = Regex.Match(unescaped,
+                        @"[it]\d*\.nhentai\.net/galleries/(\d+)/",
+                        RegexOptions.IgnoreCase);
+                    if (!mediaIdMatch.Success)
+                    {
+                        Log($"[nhentai.net] Không tìm thấy mediaId trong HTML — fallback về reader page fetch");
+                        return null;
+                    }
+                    mediaId = mediaIdMatch.Groups[1].Value;
                 }
-                string mediaId = mediaIdMatch.Groups[1].Value;
 
                 // Derive image subdomain: t1→i1, t2→i2... If "i" subdomain exists, use directly
                 string subdomain = "i1";
