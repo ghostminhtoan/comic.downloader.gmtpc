@@ -44,7 +44,9 @@ namespace get_link_manga
                 // Tập hợp các ngôn ngữ cần highlight (để tránh highlight các tag không phải ngôn ngữ)
                 var langKeywords = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    "english", "japanese", "korean", "chinese", "日本語", "中文", "한국어", "italiano", "french", "spanish", "russian", "portuguese", "thai", "vietnamese", "tiếng việt"
+                    "english", "japanese", "korean", "chinese", "日本語", "中文", "한국어", "italiano", "french", "spanish", "russian", "portuguese", "thai", "vietnamese", "tiếng việt",
+                    "german", "italian", "tagalog", "polish", "swedish", "turkish", "finnish", "indonesian", "arabic", "hebrew", "hindi", "greek", "dutch", "romanian", "hungarian",
+                    "czech", "croatian", "slovak", "danish", "norwegian", "ukrainian", "latin", "esperanto", "japanese*"
                 };
 
                 foreach (Match match in matches)
@@ -63,7 +65,14 @@ namespace get_link_manga
 
                     // Add highlighted language run
                     var run = new Run(match.Value);
-                    run.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 255)); // Cyberpunk Magenta làm màu nổi bật
+                    if (innerVal.Equals("japanese*", StringComparison.OrdinalIgnoreCase))
+                    {
+                        run.Foreground = new SolidColorBrush(Color.FromRgb(255, 234, 0)); // Màu vàng Cyberpunk đặc biệt cho japanese tự gán
+                    }
+                    else
+                    {
+                        run.Foreground = new SolidColorBrush(Color.FromRgb(255, 0, 255)); // Cyberpunk Magenta mặc định
+                    }
                     run.FontWeight = FontWeights.Bold;
                     textBlock.Inlines.Add(run);
 

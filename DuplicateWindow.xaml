@@ -138,6 +138,8 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <TextBox Name="txtFilter" 
@@ -151,6 +153,10 @@
 
             <Button Grid.Column="2" Name="btnCheckAll" Content="CHECK ALL" Click="BtnCheckAll_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="30" Width="100" FontSize="11"/>
             <Button Grid.Column="4" Name="btnUncheckAll" Content="UNCHECK ALL" Click="BtnUncheckAll_Click" Style="{StaticResource CyberpunkButtonPink}" Height="30" Width="100" FontSize="11"/>
+            <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Name="lblResultsPresentation" Text="&#xE8A9;" FontFamily="Segoe MDL2 Assets" Foreground="#00FF87" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <ToggleButton Name="chkResultsPresentation" Click="ChkResultsPresentation_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="LIST / THUMBNAIL"/>
+            </StackPanel>
         </Grid>
 
         <DataGrid Grid.Row="2"
@@ -160,6 +166,7 @@
                   ColumnHeaderStyle="{StaticResource CyberpunkDataGridColumnHeader}"
                   RowStyle="{StaticResource DuplicatePreviewRowStyle}"
                   CellStyle="{StaticResource CyberpunkDataGridCell}"
+                  SelectionChanged="DgDuplicates_SelectionChanged"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
                   CanUserDeleteRows="False"
@@ -261,6 +268,72 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+
+        <ListBox Grid.Row="2"
+                 Name="lbDuplicatesThumbnail"
+                 Margin="0,0,0,15"
+                 Visibility="Collapsed"
+                 Background="Transparent"
+                 BorderThickness="0"
+                 SelectionMode="Extended"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ItemsSource="{Binding ElementName=dgDuplicates, Path=ItemsSource}"
+                 SelectionChanged="LbDuplicatesThumbnail_SelectionChanged"
+                 PreviewKeyDown="DgDuplicates_PreviewKeyDown"
+                 PreviewTextInput="DgDuplicates_PreviewTextInput"
+                 MouseDoubleClick="DgDuplicates_MouseDoubleClick">
+            <ListBox.ContextMenu>
+                <Binding ElementName="dgDuplicates" Path="ContextMenu"/>
+            </ListBox.ContextMenu>
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Margin" Value="0,0,8,8"/>
+                    <Setter Property="Width" Value="150"/>
+                    <Setter Property="Height" Value="220"/>
+                    <Setter Property="Background" Value="#09101C"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#3A3200"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
+                            <Setter Property="BorderThickness" Value="2"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border Padding="4" Background="#111827" BorderBrush="{StaticResource CyberpunkCyanBrush}" BorderThickness="1" CornerRadius="6">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="140"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <Grid Grid.Row="0">
+                                <Image Source="{Binding HoverPreviewThumbnailUrl}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4"/>
+                            </Grid>
+                            
+                            <StackPanel Grid.Row="1" Margin="2,4,2,2">
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="10" TextTrimming="CharacterEllipsis" TextWrapping="Wrap" Height="30" Foreground="{StaticResource CyberpunkTextBrush}"/>
+                                <TextBlock Text="{Binding HoverPreviewIndicatorText}" FontSize="8" Foreground="{StaticResource CyberpunkMutedTextBrush}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
         <!-- Footer -->
         <Grid Grid.Row="3">

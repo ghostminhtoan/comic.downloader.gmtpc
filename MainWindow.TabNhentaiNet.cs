@@ -422,7 +422,7 @@ namespace get_link_manga
                                 _scrapedItems.Add(new GalleryItem
                                 {
                                     Link = fullLink,
-                                    Name = title,
+                                    Name = ApplyDefaultNhentaiLanguage(title),
                                     OriginalIndex = _scrapedItems.Count,
                                     IsChecked = false,
                                     HoverPreviewThumbnailUrl = thumbUrl,
@@ -455,7 +455,7 @@ namespace get_link_manga
                                 _scrapedItems.Add(new GalleryItem
                                 {
                                     Link = fullLink,
-                                    Name = title,
+                                    Name = ApplyDefaultNhentaiLanguage(title),
                                     OriginalIndex = _scrapedItems.Count,
                                     IsChecked = false,
                                     HoverPreviewThumbnailUrl = thumbUrl,
@@ -629,7 +629,7 @@ namespace get_link_manga
                             _scrapedItems.Add(new GalleryItem
                             {
                                 Link = link,
-                                Name = title,
+                                Name = ApplyDefaultNhentaiLanguage(title),
                                 OriginalIndex = _scrapedItems.Count,
                                 IsChecked = true,
                                 HoverPreviewThumbnailUrl = thumbUrl,
@@ -783,6 +783,32 @@ namespace get_link_manga
                 Log($"[nhentai] Lỗi trích xuất ngôn ngữ: {ex.Message}");
             }
             return languages;
+        }
+
+        private string ApplyDefaultNhentaiLanguage(string title)
+        {
+            if (string.IsNullOrEmpty(title)) return title;
+
+            string[] knownLangs = new[] { "english", "japanese", "korean", "chinese", "日本語", "中文", "한국어", "italiano", "french", "spanish", "russian", "portuguese", "thai", "vietnamese", "tiếng việt", "german", "italian", "tagalog", "polish", "swedish", "turkish", "finnish", "indonesian", "arabic", "hebrew", "hindi", "greek", "dutch", "romanian", "hungarian", "czech", "croatian", "slovak", "danish", "norwegian", "ukrainian", "latin", "esperanto" };
+
+            bool hasLanguageTag = false;
+            foreach (var lang in knownLangs)
+            {
+                if (title.IndexOf("[" + lang, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    title.IndexOf(" " + lang + "]", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    title.EndsWith("[" + lang + "]", StringComparison.OrdinalIgnoreCase))
+                {
+                    hasLanguageTag = true;
+                    break;
+                }
+            }
+
+            if (!hasLanguageTag)
+            {
+                title = title + " [Japanese*]";
+            }
+
+            return title;
         }
     }
 }

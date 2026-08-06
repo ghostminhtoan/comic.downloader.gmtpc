@@ -487,5 +487,50 @@ namespace get_link_manga
 
             _mainWindow?.PrefetchGalleryHoverPreview(visibleItems);
         }
+
+        private void ChkResultsPresentation_Click(object sender, RoutedEventArgs e)
+        {
+            if (chkResultsPresentation == null) return;
+            bool isThumbnail = chkResultsPresentation.IsChecked == true;
+            dgDuplicates.Visibility = isThumbnail ? Visibility.Collapsed : Visibility.Visible;
+            lbDuplicatesThumbnail.Visibility = isThumbnail ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private bool _isSyncingSelection = false;
+        private void DgDuplicates_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isSyncingSelection || dgDuplicates == null || lbDuplicatesThumbnail == null) return;
+            _isSyncingSelection = true;
+            try
+            {
+                lbDuplicatesThumbnail.SelectedItems.Clear();
+                foreach (var item in dgDuplicates.SelectedItems)
+                {
+                    lbDuplicatesThumbnail.SelectedItems.Add(item);
+                }
+            }
+            finally
+            {
+                _isSyncingSelection = false;
+            }
+        }
+
+        private void LbDuplicatesThumbnail_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isSyncingSelection || dgDuplicates == null || lbDuplicatesThumbnail == null) return;
+            _isSyncingSelection = true;
+            try
+            {
+                dgDuplicates.SelectedItems.Clear();
+                foreach (var item in lbDuplicatesThumbnail.SelectedItems)
+                {
+                    dgDuplicates.SelectedItems.Add(item);
+                }
+            }
+            finally
+            {
+                _isSyncingSelection = false;
+            }
+        }
     }
 }
