@@ -591,7 +591,7 @@ namespace get_link_manga
             return Regex.Replace(cleanTitle, @"\s+", " ").Trim();
         }
 
-        private bool SupportsHoverPreview(GalleryItem item)
+        internal bool SupportsHoverPreview(GalleryItem item)
         {
             string link = item?.Link?.Trim();
             return !string.IsNullOrWhiteSpace(link) &&

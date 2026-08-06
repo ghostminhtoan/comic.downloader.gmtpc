@@ -332,7 +332,7 @@ namespace get_link_manga
             }
         }
 
-        private void RestoreResultsOrder(string logMessage)
+        internal void RestoreResultsOrder(string logMessage)
         {
             _isNameSortAscending = true;
             _isStatusSortAscending = true;
@@ -342,7 +342,7 @@ namespace get_link_manga
             ApplyResultsSort("OriginalIndex", ListSortDirection.Ascending, logMessage);
         }
 
-        private void RenumberResultOrder()
+        internal void RenumberResultOrder()
         {
             for (int i = 0; i < _scrapedItems.Count; i++)
             {
