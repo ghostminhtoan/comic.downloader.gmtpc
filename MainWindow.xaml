@@ -3278,7 +3278,7 @@
                                 <ToggleButton Name="chkResultsPresentation" Click="ChkResultsPresentation_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="LIST / THUMBNAIL"/>
                             </StackPanel>
                             <Button Name="btnToolbarSortByName" Content="SORT BY NAME" Click="BtnSortByName_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
-                            <Button Name="btnRestoreOrder" Content="RESTORE ORDER" Click="BtnRestoreOrder_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
+                            <ToggleButton Name="btnFreeArrangement" Content="FREE ARRANGEMENT" Click="BtnFreeArrangement_Click" Style="{StaticResource CompactYellowToggleButton}" MinWidth="110" Width="Auto" Padding="10,2" IsChecked="True"/>
                             <Button Name="btnDuplicateName" Content="DUPLICATE NAME" Click="BtnDuplicateName_Click" Style="{StaticResource CompactPinkButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
                             <Button Name="btnReverseOrder" Content="REVERSE ORDER" Click="BtnReverseOrder_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
                             <Button Name="btnClearComplete" Content="CLEAR COMPLETE BOOKS" Click="BtnClearComplete_Click" Style="{StaticResource CompactDarkBlueButton}" MinWidth="120" Width="Auto" Padding="10,2"/>

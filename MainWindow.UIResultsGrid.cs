@@ -28,6 +28,7 @@ namespace get_link_manga
         private Point _resultsDragStartPoint;
         private GalleryItem _resultsDragItem;
         private bool _isResultsThumbnailViewEnabled;
+        private bool _isFreeArrangementActive = true;
         private bool _isSyncingResultsThumbnailSelection;
         private readonly ObservableCollection<GalleryItem> _thumbnailVisibleItems = new ObservableCollection<GalleryItem>();
         private ScrollViewer _resultsThumbnailScrollViewer;
@@ -138,14 +139,20 @@ namespace get_link_manga
         private void ApplyResultsSort(string propertyName, ListSortDirection direction, string logMessage = null)
         {
             var view = ResultsView;
-            if (view == null)
+            if (view == null || string.IsNullOrWhiteSpace(propertyName))
             {
                 return;
             }
 
             view.SortDescriptions.Clear();
 
-            if (!string.IsNullOrWhiteSpace(propertyName) && !string.Equals(propertyName, "OriginalIndex", StringComparison.Ordinal))
+            // Nếu đang bật Free Arrangement và không sắp xếp cột cụ thể nào (hoặc sắp xếp theo OriginalIndex)
+            // thì xóa sạch SortDescriptions để WPF hiển thị hoàn toàn tự do theo thứ tự trong _scrapedItems
+            if (_isFreeArrangementActive && string.Equals(propertyName, "OriginalIndex", StringComparison.Ordinal))
+            {
+                // Không thêm bất kỳ SortDescriptions nào
+            }
+            else
             {
                 // Chỉ nhóm split khi thực sự có item split
                 bool hasSplit = _scrapedItems.Any(item => item.IsParallelSplitTask || item.IsParallelSplitParent);
@@ -159,6 +166,11 @@ namespace get_link_manga
                     !string.Equals(propertyName, "IsParallelSplitParent", StringComparison.Ordinal))
                 {
                     view.SortDescriptions.Add(new SortDescription(propertyName, direction));
+                }
+
+                if (!string.Equals(propertyName, "OriginalIndex", StringComparison.Ordinal))
+                {
+                    view.SortDescriptions.Add(new SortDescription("OriginalIndex", ListSortDirection.Ascending));
                 }
             }
 
@@ -302,9 +314,13 @@ namespace get_link_manga
             ApplyResultsSort(colSpeed, "DownloadSpeedSortValue", ref _isSpeedSortAscending, "download speed");
         }
 
-        private void BtnRestoreOrder_Click(object sender, RoutedEventArgs e)
+        private void BtnFreeArrangement_Click(object sender, RoutedEventArgs e)
         {
-            RestoreResultsOrder("Original order restored.");
+            if (sender is ToggleButton toggleBtn)
+            {
+                _isFreeArrangementActive = toggleBtn.IsChecked == true;
+                RestoreResultsOrder(_isFreeArrangementActive ? "Free arrangement mode enabled." : "Free arrangement mode disabled.");
+            }
         }
 
         internal void RestoreResultsOrder(string logMessage)
@@ -323,6 +339,8 @@ namespace get_link_manga
             {
                 _scrapedItems[i].OriginalIndex = i;
             }
+
+            Debug.Assert(_scrapedItems.Select((item, index) => item.OriginalIndex == index).All(match => match));
         }
 
         private void MoveResultItem(GalleryItem item, int targetIndex, string logMessage)
@@ -366,7 +384,14 @@ namespace get_link_manga
             }
 
             RenumberResultOrder();
-            ApplyResultsSort("OriginalIndex", ListSortDirection.Ascending, logMessage);
+            if (_isFreeArrangementActive)
+            {
+                ApplyResultsSort("OriginalIndex", ListSortDirection.Ascending, logMessage);
+            }
+            else
+            {
+                RestoreResultsOrder(logMessage);
+            }
         }
 
         private static bool IsDragCandidate(DependencyObject source)
