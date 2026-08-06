@@ -605,8 +605,8 @@ namespace get_link_manga
             }
         }
 
-        private readonly System.Collections.Generic.Stack<System.Collections.Generic.List<GalleryItem>> _undoDeleteStack = new System.Collections.Generic.Stack<System.Collections.Generic.List<GalleryItem>>();
-        private readonly System.Collections.Generic.Stack<System.Collections.Generic.List<GalleryItem>> _redoDeleteStack = new System.Collections.Generic.Stack<System.Collections.Generic.List<GalleryItem>>();
+        internal readonly System.Collections.Generic.Stack<System.Collections.Generic.List<GalleryItem>> _undoDeleteStack = new System.Collections.Generic.Stack<System.Collections.Generic.List<GalleryItem>>();
+        internal readonly System.Collections.Generic.Stack<System.Collections.Generic.List<GalleryItem>> _redoDeleteStack = new System.Collections.Generic.Stack<System.Collections.Generic.List<GalleryItem>>();
 
         private void DgResults_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -830,6 +830,23 @@ namespace get_link_manga
             {
                 ScrollThumbnailSelectionIntoView();
             }
+
+            // Tự động load thumbnail cho các item được chọn nếu chưa có
+            if (dgResults.SelectedItems.Count > 0)
+            {
+                var itemsToPrefetch = new System.Collections.Generic.List<GalleryItem>();
+                foreach (var item in dgResults.SelectedItems.OfType<GalleryItem>())
+                {
+                    if (SupportsHoverPreview(item) && !item.HasHoverPreviewThumbnailFile)
+                    {
+                        itemsToPrefetch.Add(item);
+                    }
+                }
+                if (itemsToPrefetch.Count > 0)
+                {
+                    PrefetchGalleryHoverPreview(itemsToPrefetch);
+                }
+            }
         }
 
         private void SetResultsPresentationMode(bool showThumbnailView, bool shouldPrefetch)
@@ -1025,6 +1042,12 @@ namespace get_link_manga
                     lbResultsThumbnail.SelectedItems.Clear();
                     lbResultsThumbnail.SelectedItem = clickedItem;
                     SyncResultsSelectionFromThumbnail();
+                }
+
+                // Tự động load thumbnail khi click chuột trái
+                if (SupportsHoverPreview(clickedItem) && !clickedItem.HasHoverPreviewThumbnailFile)
+                {
+                    PrefetchGalleryHoverPreview(new System.Collections.Generic.List<GalleryItem> { clickedItem });
                 }
             }
 

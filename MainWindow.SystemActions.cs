@@ -540,6 +540,13 @@ namespace get_link_manga
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
+            if (_scrapedItems.Count > 0)
+            {
+                var itemsToRemove = _scrapedItems.ToList();
+                _undoDeleteStack.Push(itemsToRemove);
+                _redoDeleteStack.Clear();
+            }
+
             _scrapedItems.Clear();
             ClearDownloadMissingChapterCacheState();
             _downloadMissingChapterRows.Clear();
