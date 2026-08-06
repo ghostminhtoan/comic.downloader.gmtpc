@@ -29,6 +29,7 @@ namespace get_link_manga
         private static readonly ConcurrentDictionary<string, CookieContainer> _cookieContainersByHost = new ConcurrentDictionary<string, CookieContainer>(StringComparer.OrdinalIgnoreCase);
         private static readonly ConcurrentDictionary<string, string> _userAgentsByHost = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private static readonly ConcurrentDictionary<string, HttpClientHandler> _scopedHandlers = new ConcurrentDictionary<string, HttpClientHandler>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, HttpClient> _scopedClients = new ConcurrentDictionary<string, HttpClient>(StringComparer.OrdinalIgnoreCase);
         private static HttpClientHandler _httpHandler;
         private static HttpClient _httpClient;
         private static readonly string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
@@ -963,68 +964,76 @@ namespace get_link_manga
         private HttpClient CreateScopedHttpClient(string urlOrHost)
         {
             string host = NormalizeCookieHostKey(urlOrHost) ?? "default";
-            var handler = _scopedHandlers.GetOrAdd(host, h =>
+            return _scopedClients.GetOrAdd(host, h =>
             {
-                bool useCookies = true;
-                if (!string.IsNullOrWhiteSpace(urlOrHost) && urlOrHost.IndexOf("haibabamanga.somee.com", StringComparison.OrdinalIgnoreCase) >= 0)
+                var handler = _scopedHandlers.GetOrAdd(host, k =>
                 {
-                    useCookies = false;
-                }
-                if (!string.IsNullOrWhiteSpace(urlOrHost) && urlOrHost.IndexOf("mangadex.org", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    useCookies = false;
-                }
+                    bool useCookies = true;
+                    if (!string.IsNullOrWhiteSpace(urlOrHost) && urlOrHost.IndexOf("haibabamanga.somee.com", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        useCookies = false;
+                    }
+                    if (!string.IsNullOrWhiteSpace(urlOrHost) && urlOrHost.IndexOf("mangadex.org", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        useCookies = false;
+                    }
 
-                var newHandler = new HttpClientHandler
-                {
-                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-                    UseCookies = useCookies
-                };
+                    var newHandler = new HttpClientHandler
+                    {
+                        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                        UseCookies = useCookies
+                    };
 
-                if (useCookies)
-                {
-                    newHandler.CookieContainer = GetScopedCookieContainer(urlOrHost);
-                }
-                return newHandler;
-            });
+                    if (useCookies)
+                    {
+                        newHandler.CookieContainer = GetScopedCookieContainer(urlOrHost);
+                    }
+                    return newHandler;
+                });
 
-            var client = new HttpClient(handler, disposeHandler: false);
-            client.Timeout = _httpClient != null ? _httpClient.Timeout : TimeSpan.FromSeconds(30);
-            try
-            {
-                string ua = GetScopedUserAgent(urlOrHost);
-                if (!string.IsNullOrWhiteSpace(ua))
-                {
-                    client.DefaultRequestHeaders.UserAgent.ParseAdd(ua);
-                }
-            }
-            catch {}
-            if (!string.IsNullOrWhiteSpace(urlOrHost) && urlOrHost.IndexOf("mangadex.org", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                client.DefaultRequestHeaders.ConnectionClose = true;
+                var client = new NonDisposableHttpClient(handler);
+                client.Timeout = _httpClient != null ? _httpClient.Timeout : TimeSpan.FromSeconds(30);
                 try
                 {
-                    if (Uri.TryCreate(urlOrHost, UriKind.Absolute, out Uri uri))
+                    string ua = GetScopedUserAgent(urlOrHost);
+                    if (!string.IsNullOrWhiteSpace(ua))
                     {
-                        ServicePoint point = ServicePointManager.FindServicePoint(uri);
-                        if (point != null)
-                        {
-                            point.ConnectionLeaseTimeout = 0;
-                            point.MaxIdleTime = 1000;
-                        }
+                        client.DefaultRequestHeaders.UserAgent.ParseAdd(ua);
                     }
                 }
-                catch
-                {
-                }
-            }
-            string userAgent = GetScopedUserAgent(urlOrHost);
-            if (!string.IsNullOrWhiteSpace(userAgent))
-            {
-                client.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent);
-            }
+                catch { }
 
-            return client;
+                if (!string.IsNullOrWhiteSpace(urlOrHost) && urlOrHost.IndexOf("mangadex.org", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    client.DefaultRequestHeaders.ConnectionClose = true;
+                    try
+                    {
+                        if (Uri.TryCreate(urlOrHost, UriKind.Absolute, out Uri uri))
+                        {
+                            ServicePoint point = ServicePointManager.FindServicePoint(uri);
+                            if (point != null)
+                            {
+                                point.ConnectionLeaseTimeout = 0;
+                                point.MaxIdleTime = 1000;
+                            }
+                        }
+                    }
+                    catch { }
+                }
+
+                string userAgent = GetScopedUserAgent(urlOrHost);
+                if (!string.IsNullOrWhiteSpace(userAgent))
+                {
+                    try
+                    {
+                        client.DefaultRequestHeaders.UserAgent.Clear();
+                        client.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent);
+                    }
+                    catch { }
+                }
+
+                return client;
+            });
         }
 
         private void HookDisplaySettingsChanged()
@@ -1209,6 +1218,19 @@ namespace get_link_manga
                     Log($"[Sound] Error playing sound {filename}: {ex.Message}");
                 }
             });
+        }
+    }
+
+    public class NonDisposableHttpClient : HttpClient
+    {
+        public NonDisposableHttpClient(HttpMessageHandler handler) : base(handler, false) { }
+        protected override void Dispose(bool disposing)
+        {
+            // Do not dispose to keep connection pool alive
+        }
+        public void ReallyDispose()
+        {
+            base.Dispose(true);
         }
     }
 }

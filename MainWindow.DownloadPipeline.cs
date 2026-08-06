@@ -765,13 +765,50 @@ namespace get_link_manga
         {
             if (File.Exists(filePath) && new FileInfo(filePath).Length > 1024)
             {
-                string existingExt = DetectImageExtensionFromFile(filePath);
-                return new DownloadFileResult
+                long localLength = new FileInfo(filePath).Length;
+                bool isSizeMatched = false;
+                try
                 {
-                    FinalPath = filePath,
-                    ActualExtension = existingExt,
-                    FileSize = new FileInfo(filePath).Length
-                };
+                    using (var cts = CancellationTokenSource.CreateLinkedTokenSource(token))
+                    {
+                        cts.CancelAfter(TimeSpan.FromSeconds(3)); // Timeout 3s
+                        using (var headRequest = new HttpRequestMessage(HttpMethod.Head, url))
+                        {
+                            if (!string.IsNullOrEmpty(referer))
+                            {
+                                headRequest.Headers.Referrer = new Uri(referer);
+                            }
+                            using (var httpClient = CreateScopedHttpClient(url))
+                            using (var headResponse = await httpClient.SendAsync(headRequest, HttpCompletionOption.ResponseHeadersRead, cts.Token))
+                            {
+                                if (headResponse.IsSuccessStatusCode)
+                                {
+                                    long? serverLength = headResponse.Content.Headers.ContentLength;
+                                    if (serverLength.HasValue && serverLength.Value == localLength)
+                                    {
+                                        isSizeMatched = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // HEAD request errors (like 405 Method Not Allowed or timeout), fallback to trusting existing file
+                    isSizeMatched = true;
+                }
+
+                if (isSizeMatched)
+                {
+                    string existingExt = DetectImageExtensionFromFile(filePath);
+                    return new DownloadFileResult
+                    {
+                        FinalPath = filePath,
+                        ActualExtension = existingExt,
+                        FileSize = localLength
+                    };
+                }
             }
 
             string parentFolder = Path.GetDirectoryName(filePath);
