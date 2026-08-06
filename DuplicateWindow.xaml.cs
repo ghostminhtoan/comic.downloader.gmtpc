@@ -157,34 +157,72 @@ namespace get_link_manga
 
         private void DgDuplicates_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (!(sender is DataGrid grid) || grid.Items.Count == 0) return;
+            var isThumbnail = chkResultsPresentation?.IsChecked == true;
+            var itemsCount = isThumbnail ? lbDuplicatesThumbnail.Items.Count : dgDuplicates.Items.Count;
+            if (itemsCount == 0) return;
 
             if (e.Key == Key.Home)
             {
-                grid.SelectedIndex = 0;
-                grid.ScrollIntoView(grid.SelectedItem);
+                if (isThumbnail)
+                {
+                    lbDuplicatesThumbnail.SelectedIndex = 0;
+                    lbDuplicatesThumbnail.ScrollIntoView(lbDuplicatesThumbnail.SelectedItem);
+                }
+                else
+                {
+                    dgDuplicates.SelectedIndex = 0;
+                    dgDuplicates.ScrollIntoView(dgDuplicates.SelectedItem);
+                }
                 e.Handled = true;
             }
             else if (e.Key == Key.End)
             {
-                grid.SelectedIndex = grid.Items.Count - 1;
-                grid.ScrollIntoView(grid.SelectedItem);
+                if (isThumbnail)
+                {
+                    lbDuplicatesThumbnail.SelectedIndex = lbDuplicatesThumbnail.Items.Count - 1;
+                    lbDuplicatesThumbnail.ScrollIntoView(lbDuplicatesThumbnail.SelectedItem);
+                }
+                else
+                {
+                    dgDuplicates.SelectedIndex = dgDuplicates.Items.Count - 1;
+                    dgDuplicates.ScrollIntoView(dgDuplicates.SelectedItem);
+                }
                 e.Handled = true;
             }
             else if (e.Key == Key.Delete)
             {
-                DeleteSelectedItems(grid);
+                DeleteSelectedItems();
                 e.Handled = true;
+            }
+            else if (e.Key == Key.Space)
+            {
+                var selected = isThumbnail 
+                    ? lbDuplicatesThumbnail.SelectedItems.Cast<GalleryItem>().ToList()
+                    : dgDuplicates.SelectedItems.Cast<GalleryItem>().ToList();
+
+                if (selected.Count > 0)
+                {
+                    bool targetState = !selected[0].IsChecked;
+                    foreach (var item in selected)
+                    {
+                        item.IsChecked = targetState;
+                    }
+                    e.Handled = true;
+                }
             }
         }
 
         private void DeleteSelectedItems(DataGrid grid = null)
         {
-            DataGrid activeGrid = grid ?? dgDuplicates;
-            if (activeGrid.SelectedItems.Count == 0) return;
+            bool isThumbnail = chkResultsPresentation?.IsChecked == true;
+            int selectedIndex = isThumbnail ? lbDuplicatesThumbnail.SelectedIndex : dgDuplicates.SelectedIndex;
 
-            int selectedIndex = activeGrid.SelectedIndex;
-            var itemsToRemove = activeGrid.SelectedItems.Cast<GalleryItem>().ToList();
+            var itemsToRemove = isThumbnail
+                ? lbDuplicatesThumbnail.SelectedItems.Cast<GalleryItem>().ToList()
+                : dgDuplicates.SelectedItems.Cast<GalleryItem>().ToList();
+
+            if (itemsToRemove.Count == 0) return;
+
             foreach (var item in itemsToRemove)
             {
                 _mainWindow._scrapedItems.Remove(item);
@@ -193,30 +231,46 @@ namespace get_link_manga
             _mainWindow.RecalculateDuplicates();
             _mainWindow.UpdateLinkCount();
             
-            // Note: because items are removed from _mainWindow._scrapedItems,
-            // they automatically trigger ScrapedItems_CollectionChanged which calls UpdateStatus.
             _mainWindow.Log($"Deleted {itemsToRemove.Count} duplicate item(s) from duplicates review.");
             lblStatus.Text = $"Deleted {itemsToRemove.Count} item(s).";
 
-            if (activeGrid.Items.Count > 0)
+            if (isThumbnail)
             {
-                int newIndex = Math.Min(selectedIndex, activeGrid.Items.Count - 1);
-                if (newIndex >= 0)
+                if (lbDuplicatesThumbnail.Items.Count > 0)
                 {
-                    activeGrid.SelectedIndex = newIndex;
-                    var item = activeGrid.SelectedItem;
-                    if (item != null)
+                    int newIndex = Math.Min(selectedIndex, lbDuplicatesThumbnail.Items.Count - 1);
+                    if (newIndex >= 0)
                     {
-                        activeGrid.ScrollIntoView(item);
-                        // Delay focus slightly to let the visual tree update after removal
-                        Dispatcher.BeginInvoke(new Action(() =>
+                        lbDuplicatesThumbnail.SelectedIndex = newIndex;
+                        var item = lbDuplicatesThumbnail.SelectedItem;
+                        if (item != null)
                         {
-                            var row = (DataGridRow)activeGrid.ItemContainerGenerator.ContainerFromItem(item);
-                            if (row != null)
-                            {
-                                row.Focus();
-                            }
-                        }), System.Windows.Threading.DispatcherPriority.Background);
+                            lbDuplicatesThumbnail.ScrollIntoView(item);
+                            Dispatcher.BeginInvoke(new Action(() => {
+                                var container = lbDuplicatesThumbnail.ItemContainerGenerator.ContainerFromItem(item) as ListBoxItem;
+                                container?.Focus();
+                            }), System.Windows.Threading.DispatcherPriority.Background);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (dgDuplicates.Items.Count > 0)
+                {
+                    int newIndex = Math.Min(selectedIndex, dgDuplicates.Items.Count - 1);
+                    if (newIndex >= 0)
+                    {
+                        dgDuplicates.SelectedIndex = newIndex;
+                        var item = dgDuplicates.SelectedItem;
+                        if (item != null)
+                        {
+                            dgDuplicates.ScrollIntoView(item);
+                            Dispatcher.BeginInvoke(new Action(() => {
+                                var row = dgDuplicates.ItemContainerGenerator.ContainerFromItem(item) as DataGridRow;
+                                row?.Focus();
+                            }), System.Windows.Threading.DispatcherPriority.Background);
+                        }
                     }
                 }
             }
@@ -529,11 +583,273 @@ namespace get_link_manga
             {
                 _isSyncingSelection = false;
             }
+
+            // Tự động load thumbnail cho item duplicate được chọn
+            if (dgDuplicates.SelectedItems.Count > 0 && _mainWindow != null)
+            {
+                var itemsToPrefetch = new System.Collections.Generic.List<GalleryItem>();
+                foreach (var item in dgDuplicates.SelectedItems.OfType<GalleryItem>())
+                {
+                    if (_mainWindow.SupportsHoverPreview(item) && !item.HasHoverPreviewThumbnailFile)
+                    {
+                        itemsToPrefetch.Add(item);
+                    }
+                }
+                if (itemsToPrefetch.Count > 0)
+                {
+                    _mainWindow.PrefetchGalleryHoverPreview(itemsToPrefetch);
+                }
+            }
         }
 
-        private void LbDuplicatesThumbnail_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private Point _dragStartPoint;
+        private GalleryItem _dragItem;
+
+        private void DgDuplicates_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (_isSyncingSelection || dgDuplicates == null || lbDuplicatesThumbnail == null) return;
+            if (e.ButtonState != MouseButtonState.Pressed || !IsDragCandidate(e.OriginalSource as DependencyObject))
+            {
+                _dragItem = null;
+                return;
+            }
+
+            if (sender is DataGridRow row && row.Item is GalleryItem item)
+            {
+                _dragStartPoint = e.GetPosition(null);
+                _dragItem = item;
+            }
+        }
+
+        private void DgDuplicates_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton != MouseButtonState.Pressed || _dragItem == null || !(sender is DataGridRow row))
+            {
+                return;
+            }
+
+            Point currentPosition = e.GetPosition(null);
+            if (Math.Abs(currentPosition.X - _dragStartPoint.X) < SystemParameters.MinimumHorizontalDragDistance &&
+                Math.Abs(currentPosition.Y - _dragStartPoint.Y) < SystemParameters.MinimumVerticalDragDistance)
+            {
+                return;
+            }
+
+            try
+            {
+                DragDrop.DoDragDrop(row, _dragItem, DragDropEffects.Move);
+            }
+            finally
+            {
+                _dragItem = null;
+            }
+        }
+
+        private void DgDuplicates_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effects = e.Data.GetDataPresent(typeof(GalleryItem)) ? DragDropEffects.Move : DragDropEffects.None;
+            e.Handled = true;
+        }
+
+        private void DgDuplicates_Drop(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(typeof(GalleryItem)))
+            {
+                return;
+            }
+
+            var sourceItem = e.Data.GetData(typeof(GalleryItem)) as GalleryItem;
+            var targetRow = GetResultsRow(e.OriginalSource as DependencyObject);
+            var targetItem = targetRow?.Item as GalleryItem;
+
+            if (sourceItem == null || _mainWindow == null)
+            {
+                return;
+            }
+
+            System.Collections.Generic.List<GalleryItem> dragItems = new System.Collections.Generic.List<GalleryItem>();
+            if (dgDuplicates.SelectedItems.Contains(sourceItem))
+            {
+                dragItems = dgDuplicates.SelectedItems.Cast<GalleryItem>()
+                    .Where(x => x != null)
+                    .OrderBy(x => _mainWindow._scrapedItems.IndexOf(x))
+                    .ToList();
+            }
+            else
+            {
+                dragItems.Add(sourceItem);
+            }
+
+            int targetIndex = targetItem != null ? _mainWindow._scrapedItems.IndexOf(targetItem) : _mainWindow._scrapedItems.Count - 1;
+            string message = dragItems.Count == 1 
+                ? $"Moved '{sourceItem.DisplayName}' in duplicates review."
+                : $"Moved {dragItems.Count} items in duplicates review.";
+
+            // Move in master list
+            MoveMasterItems(dragItems, targetIndex, message);
+
+            // Restore selection/focus
+            dgDuplicates.SelectedItems.Clear();
+            foreach (var item in dragItems)
+            {
+                dgDuplicates.SelectedItems.Add(item);
+            }
+            if (sourceItem != null)
+            {
+                dgDuplicates.SelectedItem = sourceItem;
+                dgDuplicates.ScrollIntoView(sourceItem);
+                Dispatcher.BeginInvoke(new Action(() => {
+                    var row = dgDuplicates.ItemContainerGenerator.ContainerFromItem(sourceItem) as DataGridRow;
+                    row?.Focus();
+                }), System.Windows.Threading.DispatcherPriority.Background);
+            }
+        }
+
+        private void LbDuplicatesThumbnail_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!(sender is ListBoxItem itemContainer))
+            {
+                return;
+            }
+
+            itemContainer.Focus();
+
+            if (lbDuplicatesThumbnail != null && itemContainer.DataContext is GalleryItem clickedItem)
+            {
+                if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                {
+                    if (lbDuplicatesThumbnail.SelectedItems.Contains(clickedItem))
+                    {
+                        lbDuplicatesThumbnail.SelectedItems.Remove(clickedItem);
+                    }
+                    else
+                    {
+                        lbDuplicatesThumbnail.SelectedItems.Add(clickedItem);
+                        lbDuplicatesThumbnail.SelectedItem = clickedItem;
+                    }
+                    SyncDuplicatesSelectionFromThumbnail();
+                    e.Handled = true;
+                    return;
+                }
+
+                if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                {
+                    int currentIndex = lbDuplicatesThumbnail.Items.IndexOf(clickedItem);
+                    int anchorIndex = lbDuplicatesThumbnail.SelectedIndex;
+                    if (anchorIndex < 0)
+                    {
+                        anchorIndex = currentIndex;
+                    }
+
+                    lbDuplicatesThumbnail.SelectedItems.Clear();
+                    for (int i = Math.Min(anchorIndex, currentIndex); i <= Math.Max(anchorIndex, currentIndex); i++)
+                    {
+                        if (lbDuplicatesThumbnail.Items[i] is GalleryItem rangeItem)
+                        {
+                            lbDuplicatesThumbnail.SelectedItems.Add(rangeItem);
+                        }
+                    }
+
+                    lbDuplicatesThumbnail.SelectedItem = clickedItem;
+                    SyncDuplicatesSelectionFromThumbnail();
+                    e.Handled = true;
+                    return;
+                }
+
+                if (!lbDuplicatesThumbnail.SelectedItems.Contains(clickedItem) || lbDuplicatesThumbnail.SelectedItems.Count > 1)
+                {
+                    lbDuplicatesThumbnail.SelectedItems.Clear();
+                    lbDuplicatesThumbnail.SelectedItem = clickedItem;
+                    SyncDuplicatesSelectionFromThumbnail();
+                }
+            }
+
+            if (e.ButtonState != MouseButtonState.Pressed || !IsThumbnailDragCandidate(e.OriginalSource as DependencyObject))
+            {
+                _dragItem = null;
+                return;
+            }
+
+            _dragStartPoint = e.GetPosition(null);
+            _dragItem = itemContainer.DataContext as GalleryItem;
+        }
+
+        private void LbDuplicatesThumbnail_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton != MouseButtonState.Pressed || _dragItem == null || !(sender is ListBoxItem itemContainer))
+            {
+                return;
+            }
+
+            Point currentPosition = e.GetPosition(null);
+            if (Math.Abs(currentPosition.X - _dragStartPoint.X) < SystemParameters.MinimumHorizontalDragDistance &&
+                Math.Abs(currentPosition.Y - _dragStartPoint.Y) < SystemParameters.MinimumVerticalDragDistance)
+            {
+                return;
+            }
+
+            try
+            {
+                DragDrop.DoDragDrop(itemContainer, _dragItem, DragDropEffects.Move);
+            }
+            finally
+            {
+                _dragItem = null;
+            }
+        }
+
+        private void LbDuplicatesThumbnail_Drop(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(typeof(GalleryItem)))
+            {
+                return;
+            }
+
+            var sourceItem = e.Data.GetData(typeof(GalleryItem)) as GalleryItem;
+            ListBoxItem targetContainer = GetResultsThumbnailItemContainer(e.OriginalSource as DependencyObject);
+            GalleryItem targetItem = targetContainer?.DataContext as GalleryItem;
+
+            if (sourceItem == null || _mainWindow == null)
+            {
+                return;
+            }
+
+            System.Collections.Generic.List<GalleryItem> dragItems = new System.Collections.Generic.List<GalleryItem>();
+            if (lbDuplicatesThumbnail.SelectedItems.Contains(sourceItem))
+            {
+                dragItems = lbDuplicatesThumbnail.SelectedItems.Cast<GalleryItem>()
+                    .Where(x => x != null)
+                    .OrderBy(x => _mainWindow._scrapedItems.IndexOf(x))
+                    .ToList();
+            }
+            else
+            {
+                dragItems.Add(sourceItem);
+            }
+
+            int targetIndex = targetItem != null ? _mainWindow._scrapedItems.IndexOf(targetItem) : _mainWindow._scrapedItems.Count - 1;
+            string message = dragItems.Count == 1 
+                ? $"Moved '{sourceItem.DisplayName}' in duplicates review."
+                : $"Moved {dragItems.Count} items in duplicates review.";
+
+            // Move in master list
+            MoveMasterItems(dragItems, targetIndex, message);
+
+            // Sync and restore focus
+            SyncDuplicatesSelectionFromThumbnail();
+            if (sourceItem != null)
+            {
+                lbDuplicatesThumbnail.SelectedItem = sourceItem;
+                lbDuplicatesThumbnail.ScrollIntoView(sourceItem);
+                Dispatcher.BeginInvoke(new Action(() => {
+                    var container = lbDuplicatesThumbnail.ItemContainerGenerator.ContainerFromItem(sourceItem) as ListBoxItem;
+                    container?.Focus();
+                }), System.Windows.Threading.DispatcherPriority.Background);
+            }
+        }
+
+        private void SyncDuplicatesSelectionFromThumbnail()
+        {
+            if (dgDuplicates == null || lbDuplicatesThumbnail == null) return;
             _isSyncingSelection = true;
             try
             {
@@ -547,6 +863,89 @@ namespace get_link_manga
             {
                 _isSyncingSelection = false;
             }
+        }
+
+        private void MoveMasterItems(System.Collections.Generic.List<GalleryItem> items, int targetIndex, string logMessage)
+        {
+            if (items == null || items.Count == 0 || _mainWindow == null) return;
+
+            var validItems = items.Where(x => x != null && _mainWindow._scrapedItems.Contains(x)).ToList();
+            if (validItems.Count == 0) return;
+
+            GalleryItem targetItem = null;
+            if (targetIndex >= 0 && targetIndex < _mainWindow._scrapedItems.Count)
+            {
+                targetItem = _mainWindow._scrapedItems[targetIndex];
+            }
+
+            foreach (var item in validItems)
+            {
+                _mainWindow._scrapedItems.Remove(item);
+            }
+
+            int insertIndex = targetItem != null ? _mainWindow._scrapedItems.IndexOf(targetItem) : _mainWindow._scrapedItems.Count;
+            if (insertIndex < 0) insertIndex = _mainWindow._scrapedItems.Count;
+
+            for (int i = 0; i < validItems.Count; i++)
+            {
+                _mainWindow._scrapedItems.Insert(insertIndex + i, validItems[i]);
+            }
+
+            _mainWindow.RenumberResultOrder();
+            _mainWindow.RestoreResultsOrder(logMessage);
+            _duplicatesView.Refresh();
+        }
+
+        private static bool IsDragCandidate(DependencyObject source)
+        {
+            while (source != null)
+            {
+                if (source is Button || source is TextBox || source is PasswordBox || source is ComboBox || source is System.Windows.Controls.Primitives.ToggleButton || source is System.Windows.Controls.Primitives.ScrollBar || source is System.Windows.Controls.Primitives.Thumb || source is MenuItem)
+                {
+                    return false;
+                }
+                if (source is DataGridRow || source is DataGridCell)
+                {
+                    return true;
+                }
+                source = VisualTreeHelper.GetParent(source);
+            }
+            return false;
+        }
+
+        private static bool IsThumbnailDragCandidate(DependencyObject source)
+        {
+            while (source != null)
+            {
+                if (source is Button || source is TextBox || source is PasswordBox || source is ComboBox || source is System.Windows.Controls.Primitives.ToggleButton || source is System.Windows.Controls.Primitives.ScrollBar || source is System.Windows.Controls.Primitives.Thumb || source is MenuItem)
+                {
+                    return false;
+                }
+                if (source is ListBoxItem)
+                {
+                    return true;
+                }
+                source = VisualTreeHelper.GetParent(source);
+            }
+            return false;
+        }
+
+        private DataGridRow GetResultsRow(DependencyObject source)
+        {
+            while (source != null && !(source is DataGridRow))
+            {
+                source = VisualTreeHelper.GetParent(source);
+            }
+            return source as DataGridRow;
+        }
+
+        private ListBoxItem GetResultsThumbnailItemContainer(DependencyObject source)
+        {
+            while (source != null && !(source is ListBoxItem))
+            {
+                source = VisualTreeHelper.GetParent(source);
+            }
+            return source as ListBoxItem;
         }
     }
 }

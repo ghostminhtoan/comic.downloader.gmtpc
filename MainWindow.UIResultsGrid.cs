@@ -574,6 +574,22 @@ namespace get_link_manga
                 : $"Moved {dragItems.Count} items in gallery list.";
 
             MoveResultItems(dragItems, targetIndex, message);
+
+            // Khôi phục selection và focus
+            dgResults.SelectedItems.Clear();
+            foreach (var item in dragItems)
+            {
+                dgResults.SelectedItems.Add(item);
+            }
+            if (sourceItem != null)
+            {
+                dgResults.SelectedItem = sourceItem;
+                dgResults.ScrollIntoView(sourceItem);
+                Dispatcher.BeginInvoke(new Action(() => {
+                    var row = dgResults.ItemContainerGenerator.ContainerFromItem(sourceItem) as DataGridRow;
+                    row?.Focus();
+                }), System.Windows.Threading.DispatcherPriority.Background);
+            }
         }
 
         // private void BtnNoLinkViHentai_Click(object sender, RoutedEventArgs e)
@@ -645,6 +661,30 @@ namespace get_link_manga
                     {
                         RebuildThumbnailResultsView();
                     }
+
+                    // Giữ focus và chọn item được khôi phục đầu tiên
+                    var firstRestored = itemsToRestore.FirstOrDefault();
+                    if (firstRestored != null)
+                    {
+                        if (_isResultsThumbnailViewEnabled)
+                        {
+                            lbResultsThumbnail.SelectedItem = firstRestored;
+                            lbResultsThumbnail.ScrollIntoView(firstRestored);
+                            Dispatcher.BeginInvoke(new Action(() => {
+                                var container = lbResultsThumbnail.ItemContainerGenerator.ContainerFromItem(firstRestored) as ListBoxItem;
+                                container?.Focus();
+                            }), System.Windows.Threading.DispatcherPriority.Background);
+                        }
+                        else
+                        {
+                            dgResults.SelectedItem = firstRestored;
+                            dgResults.ScrollIntoView(firstRestored);
+                            Dispatcher.BeginInvoke(new Action(() => {
+                                var row = dgResults.ItemContainerGenerator.ContainerFromItem(firstRestored) as DataGridRow;
+                                row?.Focus();
+                            }), System.Windows.Threading.DispatcherPriority.Background);
+                        }
+                    }
                 }
                 e.Handled = true;
             }
@@ -668,6 +708,40 @@ namespace get_link_manga
                     if (_isResultsThumbnailViewEnabled)
                     {
                         RebuildThumbnailResultsView();
+                    }
+
+                    // Giữ focus vào item gần nhất
+                    if (_isResultsThumbnailViewEnabled)
+                    {
+                        if (lbResultsThumbnail.Items.Count > 0)
+                        {
+                            lbResultsThumbnail.SelectedIndex = Math.Max(0, lbResultsThumbnail.SelectedIndex);
+                            var sel = lbResultsThumbnail.SelectedItem;
+                            if (sel != null)
+                            {
+                                lbResultsThumbnail.ScrollIntoView(sel);
+                                Dispatcher.BeginInvoke(new Action(() => {
+                                    var container = lbResultsThumbnail.ItemContainerGenerator.ContainerFromItem(sel) as ListBoxItem;
+                                    container?.Focus();
+                                }), System.Windows.Threading.DispatcherPriority.Background);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (dgResults.Items.Count > 0)
+                        {
+                            dgResults.SelectedIndex = Math.Max(0, dgResults.SelectedIndex);
+                            var sel = dgResults.SelectedItem;
+                            if (sel != null)
+                            {
+                                dgResults.ScrollIntoView(sel);
+                                Dispatcher.BeginInvoke(new Action(() => {
+                                    var row = dgResults.ItemContainerGenerator.ContainerFromItem(sel) as DataGridRow;
+                                    row?.Focus();
+                                }), System.Windows.Threading.DispatcherPriority.Background);
+                            }
+                        }
                     }
                 }
                 e.Handled = true;
@@ -720,9 +794,25 @@ namespace get_link_manga
 
         private void DeleteSelectedItems()
         {
-            if (dgResults.SelectedItems.Count == 0) return;
+            var activeGrid = dgResults;
+            var activeListBox = lbResultsThumbnail;
+            bool isThumbnail = _isResultsThumbnailViewEnabled;
 
-            var itemsToRemove = dgResults.SelectedItems.Cast<GalleryItem>().ToList();
+            int selectedIndex = -1;
+            if (isThumbnail && activeListBox != null)
+            {
+                selectedIndex = activeListBox.SelectedIndex;
+            }
+            else if (activeGrid != null)
+            {
+                selectedIndex = activeGrid.SelectedIndex;
+            }
+
+            var itemsToRemove = isThumbnail 
+                ? activeListBox.SelectedItems.Cast<GalleryItem>().ToList()
+                : activeGrid.SelectedItems.Cast<GalleryItem>().ToList();
+
+            if (itemsToRemove.Count == 0) return;
             
             // Push to Undo Stack
             _undoDeleteStack.Push(itemsToRemove);
@@ -739,6 +829,48 @@ namespace get_link_manga
             lblStatus.Text = $"Deleted {itemsToRemove.Count} item(s).";
             
             RecalculateDuplicates();
+
+            if (isThumbnail && activeListBox != null)
+            {
+                RebuildThumbnailResultsView();
+                if (activeListBox.Items.Count > 0)
+                {
+                    int newIndex = Math.Min(selectedIndex, activeListBox.Items.Count - 1);
+                    if (newIndex >= 0)
+                    {
+                        activeListBox.SelectedIndex = newIndex;
+                        var item = activeListBox.SelectedItem;
+                        if (item != null)
+                        {
+                            activeListBox.ScrollIntoView(item);
+                            Dispatcher.BeginInvoke(new Action(() => {
+                                var container = activeListBox.ItemContainerGenerator.ContainerFromItem(item) as ListBoxItem;
+                                container?.Focus();
+                            }), System.Windows.Threading.DispatcherPriority.Background);
+                        }
+                    }
+                }
+            }
+            else if (activeGrid != null)
+            {
+                if (activeGrid.Items.Count > 0)
+                {
+                    int newIndex = Math.Min(selectedIndex, activeGrid.Items.Count - 1);
+                    if (newIndex >= 0)
+                    {
+                        activeGrid.SelectedIndex = newIndex;
+                        var item = activeGrid.SelectedItem;
+                        if (item != null)
+                        {
+                            activeGrid.ScrollIntoView(item);
+                            Dispatcher.BeginInvoke(new Action(() => {
+                                var row = activeGrid.ItemContainerGenerator.ContainerFromItem(item) as DataGridRow;
+                                row?.Focus();
+                            }), System.Windows.Threading.DispatcherPriority.Background);
+                        }
+                    }
+                }
+            }
         }
 
         private void DgResults_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -1144,6 +1276,14 @@ namespace get_link_manga
 
             SyncThumbnailSelectionFromResults();
             ScrollThumbnailSelectionIntoView();
+
+            if (sourceItem != null)
+            {
+                Dispatcher.BeginInvoke(new Action(() => {
+                    var container = lbResultsThumbnail.ItemContainerGenerator.ContainerFromItem(sourceItem) as ListBoxItem;
+                    container?.Focus();
+                }), System.Windows.Threading.DispatcherPriority.Background);
+            }
         }
 
         private void SyncResultsSelectionFromThumbnail()
