@@ -542,7 +542,31 @@ namespace get_link_manga
                     _errorCount = value;
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(HasErrors));
+                    OnPropertyChanged(nameof(DetailedErrorToolTip));
                 }
+            }
+        }
+
+        public string DetailedErrorToolTip
+        {
+            get
+            {
+                if (_errors == null || _errors.Count == 0)
+                {
+                    return null;
+                }
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine(IsVietnameseUiEnabled() ? "Chi tiết các lỗi ghi nhận:" : "Detailed errors logged:");
+                int limit = 15;
+                foreach (var err in _errors.Take(limit))
+                {
+                    sb.AppendLine($"- {err}");
+                }
+                if (_errors.Count > limit)
+                {
+                    sb.AppendLine($"... và {_errors.Count - limit} lỗi khác.");
+                }
+                return sb.ToString().Trim();
             }
         }
 

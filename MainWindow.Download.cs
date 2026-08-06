@@ -2035,6 +2035,26 @@ namespace get_link_manga
                 }
             }
 
+            // 17. Kiểm tra dung lượng đĩa trống trước khi tải (DriveInfo)
+            try
+            {
+                var drive = new DriveInfo(Path.GetPathRoot(Path.GetFullPath(downloadRoot)));
+                if (drive.IsReady && drive.AvailableFreeSpace < 1024L * 1024 * 1024) // < 1GB
+                {
+                    var msgVi = $"Cảnh báo: Dung lượng ổ đĩa {drive.Name} còn trống rất ít ({drive.AvailableFreeSpace / 1024 / 1024} MB, dưới 1GB). Bạn có muốn tiếp tục?";
+                    var msgEn = $"Warning: Free space on drive {drive.Name} is very low ({drive.AvailableFreeSpace / 1024 / 1024} MB, under 1GB). Do you want to continue?";
+                    if (MessageBox.Show(_isVietnameseUi ? msgVi : msgEn, "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                    {
+                        SetDownloadToggleState(false);
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Không thể kiểm tra dung lượng ổ đĩa: {ex.Message}");
+            }
+
             _downloadCts = new CancellationTokenSource();
             CancellationToken token = _downloadCts.Token;
             _isDownloadPaused = false;
@@ -2089,6 +2109,8 @@ namespace get_link_manga
 
                     RunPostDownloadActions();
 
+                    ShowToast(_isVietnameseUi ? "Tải xuống toàn bộ thành công! 🎉" : "All downloads completed successfully! 🎉");
+
                     if (_shutdownAfterCompleted)
                     {
                         Log("[Shutdown] Tải hoàn tất và tùy chọn tự động tắt máy đang bật. Hệ thống sẽ tắt sau 15 giây.");
@@ -2104,6 +2126,8 @@ namespace get_link_manga
 
                     RunPostDownloadActions();
 
+                    ShowToast(_isVietnameseUi ? "Tải xong nhưng có lỗi xảy ra! ⚠️" : "Downloads completed with errors! ⚠️");
+
                     if (_shutdownAfterCompleted)
                     {
                         Log("[Shutdown] Tải xong (có lỗi) và tùy chọn tự động tắt máy đang bật. Hệ thống sẽ tắt sau 15 giây.");
@@ -2117,12 +2141,14 @@ namespace get_link_manga
             {
                 Log("Quá trình tải xuống đã bị dừng bởi người dùng.");
                 lblStatus.Text = _isVietnameseUi ? "Đã dừng tải." : "Download stopped.";
+                ShowToast(_isVietnameseUi ? "Đã dừng quá trình tải." : "Download process stopped.");
             }
             catch (Exception ex)
             {
                 Log($"Critical download error: {ex.Message}");
                 lblStatus.Text = _isVietnameseUi ? "Tải xuống thất bại." : "Download failed.";
                 PlaySoundResource("error.wav");
+                ShowToast(_isVietnameseUi ? "Lỗi tải xuống nghiêm trọng!" : "Critical download error!");
             }
             finally
             {
@@ -2444,6 +2470,14 @@ namespace get_link_manga
                 if (btnStartDownload == null)
                 {
                     return;
+                }
+
+                if (lblDownloadToggleText != null)
+                {
+                    lblDownloadToggleText.Text = isRunning ? (_isVietnameseUi ? "ĐANG TẢI" : "DOWNLOADING") : (_isVietnameseUi ? "DOWNLOAD" : "DOWNLOAD");
+                    lblDownloadToggleText.Foreground = isRunning 
+                        ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x39, 0xFF, 0x14)) // Neon Green
+                        : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0x00, 0x7F)); // Cyberpunk Pink/Red
                 }
 
                 _suppressDownloadToggleEvent = true;

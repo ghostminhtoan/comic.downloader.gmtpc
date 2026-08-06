@@ -3448,6 +3448,16 @@
                                         <MenuItem.Icon><TextBlock Text="❌" Foreground="#CC0033" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
                                     <Separator/>
+                                     <MenuItem Header="Tải lại các dòng lỗi (Retry error lines)" Click="MenuRetryErrors_Click">
+                                         <MenuItem.Icon><TextBlock Text="🔄" Foreground="#CC0033" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                     </MenuItem>
+                                     <MenuItem Header="Mở thư mục lưu truyện (Open Download Folder)" Click="MenuOpenDownloadFolderInRow_Click">
+                                         <MenuItem.Icon><TextBlock Text="📂" Foreground="#00F0FF" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                     </MenuItem>
+                                     <MenuItem Header="Xuất danh sách truyện lỗi (.txt)" Click="MenuExportErrors_Click">
+                                         <MenuItem.Icon><TextBlock Text="📝" Foreground="#FFD78BFF" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                     </MenuItem>
+                                     <Separator/>
                                     <MenuItem Header="Tìm trên các web khác (Search with other websites)" Click="MenuSearchWithOtherWebsites_Click">
                                         <MenuItem.Icon><TextBlock Text="🔎" Foreground="#008844" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
@@ -3716,7 +3726,7 @@
 
                                                  <!-- Status Display -->
                                                  <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Background="Transparent">
-                                                     <TextBlock FontSize="10" FontWeight="Bold" Foreground="{StaticResource CyberpunkCyanBrush}" Text="{Binding DisplayStatusText}">
+                                                     <TextBlock FontSize="10" FontWeight="Bold" Foreground="{StaticResource CyberpunkCyanBrush}" Text="{Binding DisplayStatusText}" ToolTip="{Binding DetailedErrorToolTip}">
                                                          <TextBlock.Style>
                                                              <Style TargetType="TextBlock">
                                                                  <Style.Triggers>
@@ -4316,7 +4326,7 @@
                                                     </Style>
                                                 </TextBlock.Style>
                                             </TextBlock>
-                                            <TextBlock Text="{Binding DisplayStatusText, StringFormat=Status: {0}}"
+                                            <TextBlock Text="{Binding DisplayStatusText, StringFormat=Status: {0}}" ToolTip="{Binding DetailedErrorToolTip}"
                                                        Foreground="{StaticResource CyberpunkCyanBrush}"
                                                        FontSize="9"
                                                        FontWeight="SemiBold"
@@ -4710,7 +4720,7 @@
                                         <ScaleTransform ScaleX="0.7" ScaleY="0.7"/>
                                     </Grid.LayoutTransform>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="DOWNLOAD" Foreground="White" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock Name="lblDownloadToggleText" Text="DOWNLOAD" Foreground="White" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                         <ToggleButton Name="btnStartDownload" Click="BtnStartDownloadToggle_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="DOWNLOAD ALL"/>
                                     </StackPanel>
                                 </Grid>

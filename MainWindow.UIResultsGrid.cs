@@ -2531,5 +2531,82 @@ namespace get_link_manga
                 tb.FontSize = Math.Round(baseVal * _booksTextScaleFactor, 1);
             }
         }
+
+        private async void MenuRetryErrors_Click(object sender, RoutedEventArgs e)
+        {
+            var errorItems = dgResults.SelectedItems.Cast<GalleryItem>()
+                .Where(item => item.ErrorCount > 0 || string.Equals(item.Status, "Error", StringComparison.OrdinalIgnoreCase) || string.Equals(item.DownloadingPageProgress, "Error", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (errorItems.Count == 0)
+            {
+                errorItems = _scrapedItems
+                    .Where(item => item.ErrorCount > 0 || string.Equals(item.Status, "Error", StringComparison.OrdinalIgnoreCase) || string.Equals(item.DownloadingPageProgress, "Error", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            if (errorItems.Count == 0)
+            {
+                MessageBox.Show(_isVietnameseUi ? "Không tìm thấy truyện lỗi nào." : "No error items found.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            foreach (var item in errorItems)
+            {
+                item.Status = "Ready";
+                item.ErrorCount = 0;
+                item.Errors?.Clear();
+            }
+            await StartDownloadProcessAsync(errorItems, preserveExistingState: true);
+        }
+
+        private void MenuOpenDownloadFolderInRow_Click(object sender, RoutedEventArgs e)
+        {
+            if (dgResults.SelectedItem is GalleryItem item)
+            {
+                string downloadRoot = txtDownloadPath.Text.Trim();
+                if (!string.IsNullOrEmpty(downloadRoot))
+                {
+                    string path = System.IO.Path.Combine(downloadRoot, item.Name);
+                    if (System.IO.Directory.Exists(path))
+                    {
+                        System.Diagnostics.Process.Start("explorer.exe", $"\"{path}\"");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Process.Start("explorer.exe", $"\"{downloadRoot}\"");
+                    }
+                }
+            }
+        }
+
+        private void MenuExportErrors_Click(object sender, RoutedEventArgs e)
+        {
+            var errorItems = _scrapedItems.Where(item => item.ErrorCount > 0 || string.Equals(item.Status, "Error", StringComparison.OrdinalIgnoreCase)).ToList();
+            if (errorItems.Count == 0)
+            {
+                MessageBox.Show(_isVietnameseUi ? "Không có truyện nào bị lỗi để xuất." : "No error items to export.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*",
+                FileName = "error_books.txt"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var lines = errorItems.Select(item => $"Tên: {item.Name}\nLink: {item.Link}\nLỗi: {item.DetailedErrorToolTip ?? "Không rõ chi tiết"}\n------------------------");
+                    System.IO.File.WriteAllLines(dialog.FileName, lines);
+                    Log($"Đã xuất danh sách truyện lỗi sang {dialog.FileName}");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi khi xuất file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
     }
 }

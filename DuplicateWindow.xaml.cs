@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
@@ -182,6 +182,7 @@ namespace get_link_manga
             DataGrid activeGrid = grid ?? dgDuplicates;
             if (activeGrid.SelectedItems.Count == 0) return;
 
+            int selectedIndex = activeGrid.SelectedIndex;
             var itemsToRemove = activeGrid.SelectedItems.Cast<GalleryItem>().ToList();
             foreach (var item in itemsToRemove)
             {
@@ -195,6 +196,29 @@ namespace get_link_manga
             // they automatically trigger ScrapedItems_CollectionChanged which calls UpdateStatus.
             _mainWindow.Log($"Deleted {itemsToRemove.Count} duplicate item(s) from duplicates review.");
             lblStatus.Text = $"Deleted {itemsToRemove.Count} item(s).";
+
+            if (activeGrid.Items.Count > 0)
+            {
+                int newIndex = Math.Min(selectedIndex, activeGrid.Items.Count - 1);
+                if (newIndex >= 0)
+                {
+                    activeGrid.SelectedIndex = newIndex;
+                    var item = activeGrid.SelectedItem;
+                    if (item != null)
+                    {
+                        activeGrid.ScrollIntoView(item);
+                        // Delay focus slightly to let the visual tree update after removal
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            var row = (DataGridRow)activeGrid.ItemContainerGenerator.ContainerFromItem(item);
+                            if (row != null)
+                            {
+                                row.Focus();
+                            }
+                        }), System.Windows.Threading.DispatcherPriority.Background);
+                    }
+                }
+            }
         }
 
         private void DgDuplicates_PreviewTextInput(object sender, TextCompositionEventArgs e)

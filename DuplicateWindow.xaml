@@ -50,10 +50,10 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource ThemeSidebarButtonHoverBrush}"/>
+                    <Setter Property="Background" Value="#3a1f4d"/>
                 </Trigger>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource ThemeButtonCyanHoverBrush}"/>
+                    <Setter Property="Background" Value="#1d3b4a"/>
                     <Setter Property="Foreground" Value="{DynamicResource CyberpunkCyanBrush}"/>
                 </Trigger>
             </Style.Triggers>
@@ -80,6 +80,12 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#1d3b4a"/>
+                    <Setter Property="Foreground" Value="{DynamicResource CyberpunkCyanBrush}"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
 
