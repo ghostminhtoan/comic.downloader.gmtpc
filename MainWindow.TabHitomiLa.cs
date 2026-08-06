@@ -396,106 +396,120 @@ namespace get_link_manga
 
             try
             {
-                for (int i = 0; i < total; i++)
+                var cleanIds = new List<string>();
+                foreach (var link in links)
                 {
-                    string link = links[i];
                     if (string.IsNullOrEmpty(link)) continue;
+                    string targetLink = link;
+                    int hashIdx = targetLink.IndexOf('#');
+                    if (hashIdx >= 0) targetLink = targetLink.Substring(0, hashIdx);
+                    int qIdx = targetLink.IndexOf('?');
+                    if (qIdx >= 0) targetLink = targetLink.Substring(0, qIdx);
+                    targetLink = targetLink.Trim();
 
-                    // Strip fragment (#) and query parameters (?)
-                    int hashIdx = link.IndexOf('#');
-                    if (hashIdx >= 0) link = link.Substring(0, hashIdx);
-                    int qIdx = link.IndexOf('?');
-                    if (qIdx >= 0) link = link.Substring(0, qIdx);
-                    link = link.Trim();
-
-                    var idMatch = Regex.Match(link, @"(\d+)(?:\.html)?$");
-                    if (!idMatch.Success)
+                    var idMatch = Regex.Match(targetLink, @"(\d+)(?:\.html)?$");
+                    if (idMatch.Success)
+                    {
+                        cleanIds.Add(idMatch.Groups[1].Value);
+                    }
+                    else
                     {
                         failed++;
-                        continue;
                     }
+                }
 
-                    string id = idMatch.Groups[1].Value;
-                    string apiJsonUrl = $"https://ltn.gold-usergeneratedcontent.net/galleries/{id}.js";
-
-                    try
+                // Tải song song thông tin các gallery trong trang với batch size 8
+                int batchSize = 8;
+                for (int b = 0; b < cleanIds.Count; b += batchSize)
+                {
+                    var batch = cleanIds.Skip(b).Take(batchSize).ToList();
+                    var tasks = batch.Select(async id =>
                     {
-                        string jsContent = await FetchStringAsync(apiJsonUrl, CancellationToken.None);
-                        if (string.IsNullOrEmpty(jsContent))
+                        string apiJsonUrl = $"https://ltn.gold-usergeneratedcontent.net/galleries/{id}.js";
+                        try
                         {
-                            failed++;
-                            continue;
-                        }
+                            string jsContent = await FetchStringAsync(apiJsonUrl, CancellationToken.None);
+                            if (string.IsNullOrEmpty(jsContent)) return null;
 
-                        // Remove "var galleryinfo = " prefix
-                        string json = jsContent.Replace("var galleryinfo = ", "").Trim();
-                        dynamic galleryInfo = JsonConvert.DeserializeObject(json);
+                            string json = jsContent.Replace("var galleryinfo = ", "").Trim();
+                            dynamic galleryInfo = JsonConvert.DeserializeObject(json);
 
-                        string title = galleryInfo.title;
-                        string artist = "";
-                        if (galleryInfo.artists != null && galleryInfo.artists.Count > 0)
-                        {
-                            artist = galleryInfo.artists[0].artist;
-                        }
-
-                        string displayName = string.IsNullOrEmpty(artist) ? title : $"[{artist}] {title}";
-                        string language = "";
-                        if (galleryInfo.language_localname != null)
-                        {
-                            language = (string)galleryInfo.language_localname;
-                            if (language == "中文") language = "Chinese";
-                            else if (language == "日本語") language = "Japanese";
-                            else if (language == "한국어") language = "Korean";
-                        }
-                        if (!string.IsNullOrEmpty(language))
-                        {
-                            string langSuffix = $"[{language}]";
-                            if (!displayName.EndsWith(langSuffix, StringComparison.OrdinalIgnoreCase))
+                            string title = galleryInfo.title;
+                            string artist = "";
+                            if (galleryInfo.artists != null && galleryInfo.artists.Count > 0)
                             {
-                                displayName = $"{displayName} {langSuffix}";
+                                artist = galleryInfo.artists[0].artist;
                             }
-                        }
-                        displayName = FormatGalleryTitle(displayName);
 
-                        // Lấy hash của trang đầu làm preview thumbnail
-                        string thumbUrl = "";
-                        if (galleryInfo.files != null && galleryInfo.files.Count > 0)
-                        {
-                            string firstHash = galleryInfo.files[0].hash;
-                            string firstName = galleryInfo.files[0].name;
-                            thumbUrl = await ResolveHitomiImageUrlAsync(this, firstHash, firstName, isThumbnail: true);
-                        }
+                            string displayName = string.IsNullOrEmpty(artist) ? title : $"[{artist}] {title}";
+                            string language = "";
+                            if (galleryInfo.language_localname != null)
+                            {
+                                language = (string)galleryInfo.language_localname;
+                                if (language == "中文") language = "Chinese";
+                                else if (language == "日本語") language = "Japanese";
+                                else if (language == "한국어") language = "Korean";
+                            }
+                            if (!string.IsNullOrEmpty(language))
+                            {
+                                string langSuffix = $"[{language}]";
+                                if (!displayName.EndsWith(langSuffix, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    displayName = $"{displayName} {langSuffix}";
+                                }
+                            }
+                            displayName = FormatGalleryTitle(displayName);
 
-                        string galleryUrl = $"https://hitomi.la/reader/{id}.html";
-                        if (galleryInfo.galleryurl != null)
-                        {
-                            string relUrl = ((string)galleryInfo.galleryurl).TrimStart('/');
-                            galleryUrl = "https://hitomi.la/" + relUrl;
-                        }
+                            string thumbUrl = "";
+                            if (galleryInfo.files != null && galleryInfo.files.Count > 0)
+                            {
+                                string firstHash = galleryInfo.files[0].hash;
+                                string firstName = galleryInfo.files[0].name;
+                                thumbUrl = await ResolveHitomiImageUrlAsync(this, firstHash, firstName, isThumbnail: true);
+                            }
 
-                        // Lưu json metadata vào tag của GalleryItem để lúc tải ảnh lôi ra hash
-                        string serializedInfo = JsonConvert.SerializeObject(galleryInfo);
+                            string galleryUrl = $"https://hitomi.la/reader/{id}.html";
+                            if (galleryInfo.galleryurl != null)
+                            {
+                                string relUrl = ((string)galleryInfo.galleryurl).TrimStart('/');
+                                galleryUrl = "https://hitomi.la/" + relUrl;
+                            }
 
-                        Dispatcher.Invoke(() =>
-                        {
-                            _scrapedItems.Add(new GalleryItem
+                            string serializedInfo = JsonConvert.SerializeObject(galleryInfo);
+
+                            return new GalleryItem
                             {
                                 Link = galleryUrl,
                                 Name = displayName,
-                                OriginalIndex = _scrapedItems.Count,
                                 IsChecked = true,
                                 HoverPreviewThumbnailUrl = thumbUrl,
                                 SourceDomain = "hitomi.la",
-                                Tag = serializedInfo // Đút dữ liệu đầy đủ của book vào đây
-                            });
-                        });
+                                Tag = serializedInfo
+                            };
+                        }
+                        catch (Exception ex)
+                        {
+                            HitomiLaLog($"Lỗi import ID {id}: {ex.Message}");
+                            return null;
+                        }
+                    }).ToList();
 
-                        imported++;
-                    }
-                    catch (Exception ex)
+                    var results = await Task.WhenAll(tasks);
+                    var newItems = results.Where(item => item != null).ToList();
+
+                    imported += newItems.Count;
+                    failed += batch.Count - newItems.Count;
+
+                    if (newItems.Count > 0)
                     {
-                        failed++;
-                        HitomiLaLog($"Lỗi import ID {id}: {ex.Message}");
+                        Dispatcher.Invoke(() =>
+                        {
+                            foreach (var item in newItems)
+                            {
+                                item.OriginalIndex = _scrapedItems.Count;
+                                _scrapedItems.Add(item);
+                            }
+                        });
                     }
                 }
 
