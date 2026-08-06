@@ -418,12 +418,15 @@ namespace get_link_manga
 
         private DataGridRow GetResultsRow(DependencyObject source)
         {
-            while (source != null && !(source is DataGridRow))
+            while (source != null)
             {
+                if (source is DataGridRow row)
+                {
+                    return row;
+                }
                 source = VisualTreeHelper.GetParent(source);
             }
-
-            return source as DataGridRow;
+            return null;
         }
 
         private void DgResultsRow_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

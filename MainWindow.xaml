@@ -4155,14 +4155,14 @@
                                                 <Setter Property="BorderBrush" Value="{StaticResource CyberpunkCyanBrush}"/>
                                                 <Setter Property="BorderThickness" Value="1"/>
                                                 <Style.Triggers>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=IsPortraitMode}" Value="True"/>
-                                                                    <Condition Binding="{Binding IsChecked, ElementName=chkCompactRows}" Value="True"/>
-                                                                    <Condition Binding="{Binding IsChecked, ElementName=chkHideSettings}" Value="False"/>
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                            </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=IsPortraitMode}" Value="True"/>
+                                                            <Condition Binding="{Binding IsChecked, ElementName=chkCompactRows}" Value="True"/>
+                                                            <Condition Binding="{Binding IsChecked, ElementName=chkHideSettings}" Value="False"/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </MultiDataTrigger>
                                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
                                                         <Setter Property="Background" Value="#3A3200"/>
                                                         <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
