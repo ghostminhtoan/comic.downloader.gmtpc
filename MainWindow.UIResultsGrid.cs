@@ -398,10 +398,13 @@ namespace get_link_manga
 
         private static bool IsDragCandidate(DependencyObject source)
         {
-            // Chỉ cho phép drag khi click trực tiếp vào nút drag_handle (icon ☰)
-            if (source is FrameworkElement fe && string.Equals(fe.Tag as string, "drag_handle", StringComparison.Ordinal))
+            while (source != null)
             {
-                return true;
+                if (source is FrameworkElement fe && string.Equals(fe.Tag as string, "drag_handle", StringComparison.Ordinal))
+                {
+                    return true;
+                }
+                source = VisualTreeHelper.GetParent(source);
             }
             return false;
         }
@@ -1509,10 +1512,13 @@ namespace get_link_manga
 
         private static bool IsThumbnailDragCandidate(DependencyObject source)
         {
-            // Chỉ cho phép drag ở Thumbnail view khi click trực tiếp vào nút drag_handle (icon ☰)
-            if (source is FrameworkElement fe && string.Equals(fe.Tag as string, "drag_handle", StringComparison.Ordinal))
+            while (source != null)
             {
-                return true;
+                if (source is FrameworkElement fe && string.Equals(fe.Tag as string, "drag_handle", StringComparison.Ordinal))
+                {
+                    return true;
+                }
+                source = VisualTreeHelper.GetParent(source);
             }
             return false;
         }
