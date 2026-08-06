@@ -605,6 +605,9 @@ namespace get_link_manga
             }
         }
 
+        private readonly System.Collections.Generic.Stack<System.Collections.Generic.List<GalleryItem>> _undoDeleteStack = new System.Collections.Generic.Stack<System.Collections.Generic.List<GalleryItem>>();
+        private readonly System.Collections.Generic.Stack<System.Collections.Generic.List<GalleryItem>> _redoDeleteStack = new System.Collections.Generic.Stack<System.Collections.Generic.List<GalleryItem>>();
+
         private void DgResults_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (IsTypingInEditableTextBox())
@@ -612,11 +615,61 @@ namespace get_link_manga
                 return;
             }
 
-            if (dgResults.Items.Count == 0) return;
+            if (dgResults.Items.Count == 0 && e.Key != Key.Z && e.Key != Key.Y) return;
 
             if (e.Key == Key.C && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
                 MenuCopySelectedLinks_Click(null, null);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Z && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                // Undo
+                if (_undoDeleteStack.Count > 0)
+                {
+                    var itemsToRestore = _undoDeleteStack.Pop();
+                    _redoDeleteStack.Push(itemsToRestore);
+                    foreach (var item in itemsToRestore)
+                    {
+                        if (!_scrapedItems.Contains(item))
+                        {
+                            _scrapedItems.Add(item);
+                        }
+                    }
+                    RenumberResultOrder();
+                    lblLinkCount.Text = _scrapedItems.Count.ToString();
+                    Log($"Undo: Khôi phục {itemsToRestore.Count} truyện đã xóa.");
+                    lblStatus.Text = $"Undo: Khôi phục {itemsToRestore.Count} truyện.";
+                    RecalculateDuplicates();
+                    if (_isResultsThumbnailViewEnabled)
+                    {
+                        RebuildThumbnailResultsView();
+                    }
+                }
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Y && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                // Redo
+                if (_redoDeleteStack.Count > 0)
+                {
+                    var itemsToRemove = _redoDeleteStack.Pop();
+                    _undoDeleteStack.Push(itemsToRemove);
+                    RemoveDownloadMissingChapterRows(itemsToRemove);
+                    foreach (var item in itemsToRemove)
+                    {
+                        _scrapedItems.Remove(item);
+                    }
+                    RenumberResultOrder();
+                    lblLinkCount.Text = _scrapedItems.Count.ToString();
+                    Log($"Redo: Xóa lại {itemsToRemove.Count} truyện.");
+                    lblStatus.Text = $"Redo: Xóa {itemsToRemove.Count} truyện.";
+                    RecalculateDuplicates();
+                    if (_isResultsThumbnailViewEnabled)
+                    {
+                        RebuildThumbnailResultsView();
+                    }
+                }
                 e.Handled = true;
             }
             else if (e.Key == Key.Home)
@@ -670,6 +723,11 @@ namespace get_link_manga
             if (dgResults.SelectedItems.Count == 0) return;
 
             var itemsToRemove = dgResults.SelectedItems.Cast<GalleryItem>().ToList();
+            
+            // Push to Undo Stack
+            _undoDeleteStack.Push(itemsToRemove);
+            _redoDeleteStack.Clear(); // Clear Redo since new action performed
+
             RemoveDownloadMissingChapterRows(itemsToRemove);
             foreach (var item in itemsToRemove)
             {
@@ -1765,6 +1823,10 @@ namespace get_link_manga
         {
             var itemsToRemove = _scrapedItems.Where(item => item.IsChecked).ToList();
             if (!itemsToRemove.Any()) return;
+
+            // Push to Undo Stack
+            _undoDeleteStack.Push(itemsToRemove);
+            _redoDeleteStack.Clear();
 
             RemoveDownloadMissingChapterRows(itemsToRemove);
             foreach (var item in itemsToRemove)
