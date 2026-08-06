@@ -4705,7 +4705,8 @@
                                 </ToggleButton>
                                 <TextBlock Name="txtBuildInfo" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="10" FontWeight="Bold" VerticalAlignment="Center" Margin="8,0,12,0"/>
 
-                                <Grid Name="grdClearCookieAndRetryToggle" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                                <StackPanel Orientation='Horizontal' VerticalAlignment='Center'>
+<Grid Name="grdClearCookieAndRetryToggle" Margin="0,0,6,0" VerticalAlignment="Center">
                                      <Grid.LayoutTransform>
                                          <ScaleTransform ScaleX="0.7" ScaleY="0.7"/>
                                      </Grid.LayoutTransform>
@@ -4733,6 +4734,7 @@
                                         <ToggleButton Name="btnAutoRetryErrors" Checked="BtnAutoRetryErrors_Checked" Unchecked="BtnAutoRetryErrors_Unchecked" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="AUTO RETRY UNTIL SETTLED"/>
                                     </StackPanel>
                                 </Grid>
+                                </StackPanel>
                                 <Button Name="btnRetryErrorLog" Content="LOG" Click="BtnRetryErrorLog_Click" Style="{StaticResource CyberpunkButtonPink}" Height="24" MinWidth="50" FontSize="11" ToolTip="ERROR LOG" Margin="0,0,6,0" VerticalAlignment="Center"/>
                             </WrapPanel>
                         </Grid>
