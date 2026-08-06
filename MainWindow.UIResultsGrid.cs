@@ -536,14 +536,79 @@ namespace get_link_manga
             return new List<GalleryItem>();
         }
 
+        private DataGridRow _lastDragOverRow = null;
+        private ListBoxItem _lastDragOverThumbnailContainer = null;
+
         private void DgResults_DragOver(object sender, DragEventArgs e)
         {
-            e.Effects = e.Data.GetDataPresent(typeof(GalleryItem)) ? DragDropEffects.Move : DragDropEffects.None;
+            if (!e.Data.GetDataPresent(typeof(GalleryItem)))
+            {
+                e.Effects = DragDropEffects.None;
+                e.Handled = true;
+                return;
+            }
+
+            e.Effects = DragDropEffects.Move;
             e.Handled = true;
+
+            // Auto Scroll DataGrid khi kéo chuột lên mép trên / mép dưới
+            if (sender is FrameworkElement element)
+            {
+                Point pos = e.GetPosition(element);
+                double tolerance = 35;
+                ScrollViewer scrollViewer = GetVisualChild<ScrollViewer>(dgResults);
+                if (scrollViewer != null)
+                {
+                    if (pos.Y < tolerance)
+                    {
+                        scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - 2);
+                    }
+                    else if (pos.Y > element.ActualHeight - tolerance)
+                    {
+                        scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + 2);
+                    }
+                }
+            }
+
+            // Target Highlight Effect khi kéo qua hàng
+            var targetRow = GetResultsRow(e.OriginalSource as DependencyObject);
+            if (_lastDragOverRow != targetRow)
+            {
+                ClearDragOverHighlight();
+                _lastDragOverRow = targetRow;
+                if (_lastDragOverRow != null)
+                {
+                    _lastDragOverRow.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00F0FF"));
+                    _lastDragOverRow.BorderThickness = new Thickness(0, 0, 0, 2);
+                }
+            }
+        }
+
+        private void DgResults_DragLeave(object sender, DragEventArgs e)
+        {
+            ClearDragOverHighlight();
+        }
+
+        private void ClearDragOverHighlight()
+        {
+            if (_lastDragOverRow != null)
+            {
+                _lastDragOverRow.BorderBrush = null;
+                _lastDragOverRow.BorderThickness = new Thickness(0);
+                _lastDragOverRow = null;
+            }
+            if (_lastDragOverThumbnailContainer != null)
+            {
+                _lastDragOverThumbnailContainer.BorderBrush = null;
+                _lastDragOverThumbnailContainer.BorderThickness = new Thickness(0);
+                _lastDragOverThumbnailContainer = null;
+            }
         }
 
         private void DgResults_Drop(object sender, DragEventArgs e)
         {
+            ClearDragOverHighlight();
+
             if (!e.Data.GetDataPresent(typeof(GalleryItem)))
             {
                 return;
@@ -1237,12 +1302,57 @@ namespace get_link_manga
 
         private void LbResultsThumbnail_DragOver(object sender, DragEventArgs e)
         {
-            e.Effects = e.Data.GetDataPresent(typeof(GalleryItem)) ? DragDropEffects.Move : DragDropEffects.None;
+            if (!e.Data.GetDataPresent(typeof(GalleryItem)))
+            {
+                e.Effects = DragDropEffects.None;
+                e.Handled = true;
+                return;
+            }
+
+            e.Effects = DragDropEffects.Move;
             e.Handled = true;
+
+            // Auto scroll Thumbnail view khi kéo lên/xuống mép
+            if (sender is FrameworkElement element)
+            {
+                Point pos = e.GetPosition(element);
+                double tolerance = 35;
+                ScrollViewer scrollViewer = GetVisualChild<ScrollViewer>(lbResultsThumbnail);
+                if (scrollViewer != null)
+                {
+                    if (pos.Y < tolerance)
+                    {
+                        scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - 3);
+                    }
+                    else if (pos.Y > element.ActualHeight - tolerance)
+                    {
+                        scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + 3);
+                    }
+                }
+            }
+
+            var targetContainer = GetResultsThumbnailItemContainer(e.OriginalSource as DependencyObject);
+            if (_lastDragOverThumbnailContainer != targetContainer)
+            {
+                ClearDragOverHighlight();
+                _lastDragOverThumbnailContainer = targetContainer;
+                if (_lastDragOverThumbnailContainer != null)
+                {
+                    _lastDragOverThumbnailContainer.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00F0FF"));
+                    _lastDragOverThumbnailContainer.BorderThickness = new Thickness(2);
+                }
+            }
+        }
+
+        private void LbResultsThumbnail_DragLeave(object sender, DragEventArgs e)
+        {
+            ClearDragOverHighlight();
         }
 
         private void LbResultsThumbnail_Drop(object sender, DragEventArgs e)
         {
+            ClearDragOverHighlight();
+
             if (!e.Data.GetDataPresent(typeof(GalleryItem)))
             {
                 return;

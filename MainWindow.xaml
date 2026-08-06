@@ -3364,6 +3364,7 @@
                               VirtualizingPanel.ScrollUnit="Item"
                               AllowDrop="True"
                               DragOver="DgResults_DragOver"
+                              DragLeave="DgResults_DragLeave"
                               Drop="DgResults_Drop"
                               EnableRowVirtualization="True"
                               MinRowHeight="32"
@@ -4045,6 +4046,7 @@
                              MouseDoubleClick="LbResultsThumbnail_MouseDoubleClick"
                              SizeChanged="LbResultsThumbnail_SizeChanged"
                              DragOver="LbResultsThumbnail_DragOver"
+                             DragLeave="LbResultsThumbnail_DragLeave"
                              Drop="LbResultsThumbnail_Drop">
                         <ListBox.ContextMenu>
                             <ContextMenu>
