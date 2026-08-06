@@ -313,8 +313,15 @@
             </ListBox.ItemContainerStyle>
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Border Padding="4" Background="#111827" BorderBrush="{StaticResource CyberpunkCyanBrush}" BorderThickness="1" CornerRadius="6">
-                        <Grid>
+                    <Border Padding="4" 
+                            Background="#111827" 
+                            BorderBrush="{StaticResource CyberpunkCyanBrush}" 
+                            BorderThickness="1" 
+                            CornerRadius="6"
+                            MouseEnter="DuplicatePreviewRow_MouseEnter"
+                            MouseMove="DuplicatePreviewRow_MouseMove"
+                            MouseLeave="DuplicatePreviewRow_MouseLeave">
+                        <Grid SnapsToDevicePixels="True">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="140"/>
                                 <RowDefinition Height="*"/>
@@ -326,7 +333,50 @@
                             </Grid>
                             
                             <StackPanel Grid.Row="1" Margin="2,4,2,2">
-                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="10" TextTrimming="CharacterEllipsis" TextWrapping="Wrap" Height="30" Foreground="{StaticResource CyberpunkTextBrush}"/>
+                                <TextBlock local:TextBlockLanguageColorizer.HighlightedText="{Binding Name}"
+                                           FontWeight="Bold" 
+                                           FontSize="10" 
+                                           TextTrimming="CharacterEllipsis" 
+                                           TextWrapping="Wrap" 
+                                           Height="30">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsNumberedVariantDuplicate}" Value="True">
+                                                    <Setter Property="Foreground" Value="#FFFFA347"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsCensorshipUncensoredVariant}" Value="True">
+                                                    <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsCensorshipFullColorVariant}" Value="True">
+                                                    <Setter Property="Foreground" Value="#FFD78BFF"/>
+                                                </DataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                                 <TextBlock Text="{Binding HoverPreviewIndicatorText}" FontSize="8" Foreground="{StaticResource CyberpunkMutedTextBrush}"/>
                             </StackPanel>
                         </Grid>
