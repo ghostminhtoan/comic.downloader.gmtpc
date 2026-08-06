@@ -250,15 +250,24 @@ namespace get_link_manga
             string title = item?.DisplayName;
             if (!string.IsNullOrWhiteSpace(title))
             {
-                panel.Children.Add(new TextBlock
+                var titleBlock = new TextBlock
                 {
-                    Text = title,
-                    Foreground = TryFindResource("CyberpunkYellowBrush") as Brush ?? Brushes.Gold,
                     FontWeight = FontWeights.Bold,
                     FontSize = 12,
                     TextWrapping = TextWrapping.Wrap,
                     Margin = new Thickness(2, 6, 2, 0)
-                });
+                };
+                TextBlockLanguageColorizer.SetHighlightedText(titleBlock, title);
+                if (titleBlock.Inlines.Count == 0)
+                {
+                    titleBlock.Text = title;
+                    titleBlock.Foreground = TryFindResource("CyberpunkYellowBrush") as Brush ?? Brushes.Gold;
+                }
+                else
+                {
+                    titleBlock.Foreground = TryFindResource("CyberpunkYellowBrush") as Brush ?? Brushes.Gold;
+                }
+                panel.Children.Add(titleBlock);
             }
 
             string latestChapter = item?.MissingChapterLatestChapterText;
@@ -832,13 +841,20 @@ namespace get_link_manga
                 DirectoryInfo dir = new DirectoryInfo(previewRoot);
                 FileInfo[] files = dir.GetFiles();
                 long totalSize = files.Sum(f => f.Length);
-                if (totalSize > 20971520) // 20 MB
+                if (totalSize > 209715200) // 200 MB
                 {
-                    foreach (FileInfo file in files)
+                    // Xóa LRU: file cũ nhất trước, giảm xuống còn 150 MB
+                    foreach (FileInfo file in files.OrderBy(f => f.LastAccessTimeUtc))
                     {
                         try
                         {
+                            long len = file.Length;
                             file.Delete();
+                            totalSize -= len;
+                            if (totalSize <= 157286400) // 150 MB
+                            {
+                                break;
+                            }
                         }
                         catch
                         {

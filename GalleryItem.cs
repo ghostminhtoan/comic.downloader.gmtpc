@@ -607,7 +607,7 @@ namespace get_link_manga
 
         public bool HasHoverPreviewThumbnail => !string.IsNullOrWhiteSpace(_hoverPreviewThumbnailUrl);
 
-        public bool HasHoverPreviewThumbnailFile => !string.IsNullOrWhiteSpace(_hoverPreviewThumbnailLocalPath);
+        public bool HasHoverPreviewThumbnailFile => !string.IsNullOrWhiteSpace(_hoverPreviewThumbnailLocalPath) || !string.IsNullOrWhiteSpace(_hoverPreviewLocalPath);
 
         public string HoverPreviewLocalPath
         {
@@ -619,6 +619,7 @@ namespace get_link_manga
                     _hoverPreviewLocalPath = value;
                     _hoverPreviewThumbnailImageSource = null; // Xóa cache ảnh cũ để nạp lại từ ảnh lớn mới
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(HasHoverPreviewThumbnailFile));
                     OnPropertyChanged(nameof(HoverPreviewThumbnailImageSource));
                 }
             }
