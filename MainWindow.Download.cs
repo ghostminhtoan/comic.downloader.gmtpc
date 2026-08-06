@@ -41,6 +41,75 @@ namespace get_link_manga
         private volatile int _cachedConnectionLimit = 4;
         private volatile int _cachedMultiDownloadLimit = 2;
 
+        public static string GetDoneProcessText(GalleryItem item, bool hasErrors)
+        {
+            string pagesInfo = null;
+            if (item != null)
+            {
+                if (!string.IsNullOrEmpty(item.DownloadingPageProgress))
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(item.DownloadingPageProgress, @"(\d+/\d+)");
+                    if (match.Success)
+                    {
+                        pagesInfo = match.Value;
+                    }
+                }
+                if (string.IsNullOrEmpty(pagesInfo) && !string.IsNullOrEmpty(item.CurrentProcess))
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(item.CurrentProcess, @"(\d+/\d+)");
+                    if (match.Success)
+                    {
+                        pagesInfo = match.Value;
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(pagesInfo))
+            {
+                return hasErrors ? $"Done with errors ({pagesInfo})" : $"Done ({pagesInfo})";
+            }
+            return hasErrors ? "Done with errors" : "Done";
+        }
+
+        public static string GetDoneProcessTextForGroup(IEnumerable<GalleryItem> group, bool hasErrors)
+        {
+            int totalPagesSum = 0;
+            int completedPagesSum = 0;
+            bool hasPageInfo = false;
+            if (group != null)
+            {
+                foreach (var child in group)
+                {
+                    if (child == null) continue;
+                    if (!string.IsNullOrEmpty(child.DownloadingPageProgress))
+                    {
+                        var match = System.Text.RegularExpressions.Regex.Match(child.DownloadingPageProgress, @"(\d+)/(\d+)");
+                        if (match.Success && int.TryParse(match.Groups[1].Value, out int comp) && int.TryParse(match.Groups[2].Value, out int tot))
+                        {
+                            completedPagesSum += comp;
+                            totalPagesSum += tot;
+                            hasPageInfo = true;
+                        }
+                    }
+                    else if (!string.IsNullOrEmpty(child.CurrentProcess))
+                    {
+                        var match = System.Text.RegularExpressions.Regex.Match(child.CurrentProcess, @"(\d+)/(\d+)");
+                        if (match.Success && int.TryParse(match.Groups[1].Value, out int comp) && int.TryParse(match.Groups[2].Value, out int tot))
+                        {
+                            completedPagesSum += comp;
+                            totalPagesSum += tot;
+                            hasPageInfo = true;
+                        }
+                    }
+                }
+            }
+
+            if (hasPageInfo)
+            {
+                return hasErrors ? $"Done with errors ({completedPagesSum}/{totalPagesSum})" : $"Done ({completedPagesSum}/{totalPagesSum})";
+            }
+            return hasErrors ? "Done with errors" : "Done";
+        }
 
         private void UpdateTotalDownloadSpeedHeader()
         {
@@ -236,7 +305,7 @@ namespace get_link_manga
             mergedItem.TotalChapters = group.Sum(item => Math.Max(0, item.TotalChapters));
             mergedItem.CompletedChapters = group.Sum(item => Math.Max(0, item.CompletedChapters));
             mergedItem.Status = hasErrors ? "Error" : "Completed";
-            mergedItem.CurrentProcess = hasErrors ? "Done with errors" : "Done";
+            mergedItem.CurrentProcess = GetDoneProcessTextForGroup(group, hasErrors);
             mergedItem.DownloadingChapter = string.Empty;
             mergedItem.DownloadingPageProgress = string.Empty;
             mergedItem.DownloadPath = group.Select(item => item.DownloadPath).FirstOrDefault(path => !string.IsNullOrWhiteSpace(path)) ?? seed.DownloadPath;
@@ -2618,7 +2687,7 @@ namespace get_link_manga
                         {
                             bool hasErrors = item.HasAnyErrors();
                             item.Status = hasErrors ? "Error" : "Completed";
-                            item.CurrentProcess = hasErrors ? "Done with errors" : "Done";
+                            item.CurrentProcess = GetDoneProcessText(item, hasErrors);
                             item.IsChecked = hasErrors ? item.IsChecked : false;
                         });
                         QueueParallelSplitCollapseIfReady(item);

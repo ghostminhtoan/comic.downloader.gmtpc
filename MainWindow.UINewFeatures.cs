@@ -511,7 +511,7 @@ UpdateRetryProgress:
                 else
                 {
                     queueItem.Status = queueItem.HasAnyErrors() ? "Error" : "Completed";
-                    queueItem.CurrentProcess = queueItem.HasAnyErrors() ? "Done with errors" : "Done";
+                    queueItem.CurrentProcess = MainWindow.GetDoneProcessText(queueItem, queueItem.HasAnyErrors());
                 }
             });
 

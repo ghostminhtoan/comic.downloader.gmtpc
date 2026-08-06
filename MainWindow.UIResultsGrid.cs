@@ -2638,7 +2638,7 @@ namespace get_link_manga
             parent.TotalChapters = parent.ParallelSplitChildren.Sum(item => Math.Max(0, item.TotalChapters));
             parent.CompletedChapters = parent.ParallelSplitChildren.Sum(item => Math.Max(0, item.CompletedChapters));
             parent.Status = hasErrors ? "Error" : "Completed";
-            parent.CurrentProcess = hasErrors ? "Done with errors" : "Done";
+            parent.CurrentProcess = MainWindow.GetDoneProcessTextForGroup(parent.ParallelSplitChildren, hasErrors);
             parent.ProgressPercent = 100d;
             parent.DownloadProgressPercent = 100d;
             parent.HasMissingChapterIssue = parent.ParallelSplitChildren.Any(item => item.HasMissingChapterIssue);
