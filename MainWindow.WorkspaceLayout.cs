@@ -205,14 +205,26 @@ namespace get_link_manga
             bool isNovelTab = IsNovelDownloadTabSelected();
             bool showDownloadActions = !isNovelTab && !IsSplitMergeFolderTabSelected();
 
+            if (grdClearCookieAndRetryToggle != null)
+            {
+                RemoveFromParent(grdClearCookieAndRetryToggle);
+                grdClearCookieAndRetryToggle.Visibility = showDownloadActions ? Visibility.Visible : Visibility.Collapsed;
+                grdClearCookieAndRetryToggle.Margin = new Thickness(0, 0, 12, 0);
+                if (showDownloadActions && !_globalDownloadActionPanel.Children.Contains(grdClearCookieAndRetryToggle))
+                {
+                    _globalDownloadActionPanel.Children.Insert(0, grdClearCookieAndRetryToggle);
+                }
+            }
+
             if (grdStartDownloadToggle != null)
             {
                 RemoveFromParent(grdStartDownloadToggle);
                 grdStartDownloadToggle.Visibility = showDownloadActions ? Visibility.Visible : Visibility.Collapsed;
                 grdStartDownloadToggle.Margin = new Thickness(0, 0, 12, 0);
+                int insertIndex = _globalDownloadActionPanel.Children.Contains(grdClearCookieAndRetryToggle) ? 1 : 0;
                 if (showDownloadActions && !_globalDownloadActionPanel.Children.Contains(grdStartDownloadToggle))
                 {
-                    _globalDownloadActionPanel.Children.Insert(0, grdStartDownloadToggle);
+                    _globalDownloadActionPanel.Children.Insert(insertIndex, grdStartDownloadToggle);
                 }
             }
 
@@ -221,7 +233,9 @@ namespace get_link_manga
                 RemoveFromParent(grdAutoRetryErrorsToggle);
                 grdAutoRetryErrorsToggle.Visibility = showDownloadActions ? Visibility.Visible : Visibility.Collapsed;
                 grdAutoRetryErrorsToggle.Margin = new Thickness(0, 0, 12, 0);
-                int insertIndex = _globalDownloadActionPanel.Children.Contains(grdStartDownloadToggle) ? 1 : 0;
+                int insertIndex = 0;
+                if (_globalDownloadActionPanel.Children.Contains(grdClearCookieAndRetryToggle)) insertIndex++;
+                if (_globalDownloadActionPanel.Children.Contains(grdStartDownloadToggle)) insertIndex++;
                 if (showDownloadActions && !_globalDownloadActionPanel.Children.Contains(grdAutoRetryErrorsToggle))
                 {
                     _globalDownloadActionPanel.Children.Insert(insertIndex, grdAutoRetryErrorsToggle);
@@ -259,6 +273,7 @@ namespace get_link_manga
                     }
                     else if (showDownloadActions)
                     {
+                        if (_globalDownloadActionPanel.Children.Contains(grdClearCookieAndRetryToggle)) insertIndex++;
                         if (_globalDownloadActionPanel.Children.Contains(grdStartDownloadToggle)) insertIndex++;
                         if (_globalDownloadActionPanel.Children.Contains(grdAutoRetryErrorsToggle)) insertIndex++;
                     }
