@@ -3511,60 +3511,44 @@ namespace get_link_manga
         {
             try
             {
-                // Kiểm tra xem đã có mediaId trong HoverPreviewThumbnailUrl / Tag của item chưa
-                string cachedCoverUrl = item?.HoverPreviewThumbnailUrl ?? (item?.Tag as string);
-                string mediaId = null;
-                if (!string.IsNullOrWhiteSpace(cachedCoverUrl))
-                {
-                    var mediaIdMatchCached = Regex.Match(cachedCoverUrl, @"[it]\d*\.nhentai\.net/galleries/(\d+)/", RegexOptions.IgnoreCase);
-                    if (mediaIdMatchCached.Success)
-                    {
-                        mediaId = mediaIdMatchCached.Groups[1].Value;
-                    }
-                }
-
                 string html = null;
-                if (string.IsNullOrEmpty(mediaId))
+                try
                 {
-                    try
+                    html = await FetchStringAsync(bookUrl, token);
+                }
+                catch (Exception fetchEx)
+                {
+                    if (fetchEx.Message.Contains("403") || fetchEx.Message.Contains("503") || fetchEx.Message.Contains("Forbidden"))
                     {
+                        bool ok = await SolveNhentaiCaptchaIfNeededAsync(bookUrl);
+                        if (!ok)
+                        {
+                            Log($"[nhentai.net] ExtractNhentaiNetImageUrlsAsync: Cloudflare block — fallback về reader page fetch");
+                            return null;
+                        }
                         html = await FetchStringAsync(bookUrl, token);
                     }
-                    catch (Exception fetchEx)
+                    else
                     {
-                        if (fetchEx.Message.Contains("403") || fetchEx.Message.Contains("503") || fetchEx.Message.Contains("Forbidden"))
-                        {
-                            bool ok = await SolveNhentaiCaptchaIfNeededAsync(bookUrl);
-                            if (!ok)
-                            {
-                                Log($"[nhentai.net] ExtractNhentaiNetImageUrlsAsync: Cloudflare block — fallback về reader page fetch");
-                                return null;
-                            }
-                            html = await FetchStringAsync(bookUrl, token);
-                        }
-                        else
-                        {
-                            throw;
-                        }
+                        throw;
                     }
-
-                    if (string.IsNullOrWhiteSpace(html)) return null;
                 }
 
-                string unescaped = html != null ? html.Replace("\\\"", "\"").Replace("\\/", "/") : string.Empty;
+                if (string.IsNullOrWhiteSpace(html)) return null;
 
-                if (string.IsNullOrEmpty(mediaId))
+                // Unescape JSON backslash escapes embedded in SvelteKit script
+                string unescaped = html.Replace("\\\"", "\"").Replace("\\/", "/");
+
+                // Extract mediaId from gallery CDN thumbnail (e.g. t1.nhentai.net/galleries/4089909/...)
+                var mediaIdMatch = Regex.Match(unescaped,
+                    @"[it]\d*\.nhentai\.net/galleries/(\d+)/",
+                    RegexOptions.IgnoreCase);
+                if (!mediaIdMatch.Success)
                 {
-                    var mediaIdMatch = Regex.Match(unescaped,
-                        @"[it]\d*\.nhentai\.net/galleries/(\d+)/",
-                        RegexOptions.IgnoreCase);
-                    if (!mediaIdMatch.Success)
-                    {
-                        Log($"[nhentai.net] Không tìm thấy mediaId trong HTML — fallback về reader page fetch");
-                        return null;
-                    }
-                    mediaId = mediaIdMatch.Groups[1].Value;
+                    Log($"[nhentai.net] Không tìm thấy mediaId trong HTML — fallback về reader page fetch");
+                    return null;
                 }
+                string mediaId = mediaIdMatch.Groups[1].Value;
 
                 // Derive image subdomain: t1→i1, t2→i2... If "i" subdomain exists, use directly
                 string subdomain = "i1";
@@ -3619,8 +3603,8 @@ namespace get_link_manga
                 if (pagesMatch.Success)
                 {
                     string pagesJson = pagesMatch.Groups[1].Value;
-                    var typeMatches = Regex.Matches(pagesJson, @"""t""\s*:\s*""([a-z])""", RegexOptions.IgnoreCase);
-                    if (typeMatches.Count == totalPages)
+                    var typeMatches = Regex.Matches(pagesJson, @"\\?""t\\?""\s*:\s*\\?""([a-z]+)\\?""", RegexOptions.IgnoreCase);
+                    if (typeMatches.Count >= totalPages)
                     {
                         for (int i = 0; i < totalPages; i++)
                         {
