@@ -3403,14 +3403,14 @@ namespace get_link_manga
                                     string ext = Path.GetExtension(preResolvedUrl);
                                     string baseCdnUrl = preResolvedUrl.Substring(0, preResolvedUrl.Length - ext.Length);
                                     var extList = new System.Collections.Generic.List<string> { ext };
-                                     foreach (var e in new[] { ".webp", ".jpg", ".png", ".gif", ".jpeg", ".bmp" })
-                                     {
-                                         if (!extList.Contains(e, StringComparer.OrdinalIgnoreCase))
-                                         {
-                                             extList.Add(e);
-                                         }
-                                     }
-                                     string[] extensionsToTry = extList.ToArray();
+                                    foreach (var e in new[] { ".webp", ".jpg", ".png" })
+                                    {
+                                        if (!extList.Contains(e, StringComparer.OrdinalIgnoreCase))
+                                        {
+                                            extList.Add(e);
+                                        }
+                                    }
+                                    string[] extensionsToTry = extList.ToArray();
                                     
                                     bool downloadSuccess = false;
                                     Exception lastEx = null;
@@ -3420,7 +3420,6 @@ namespace get_link_manga
                                     foreach (var currentExt in extensionsToTry)
                                     {
                                         activeUrl = baseCdnUrl + currentExt;
-                                        // Build filename matching the active extension we are downloading
                                         string actualFileName = BuildOrderedImageFilename(pageNum, activeUrl);
                                         directPath = Path.Combine(tempFolder, actualFileName);
                                         
@@ -3429,14 +3428,18 @@ namespace get_link_manga
                                             await DownloadUrlToFileWithRefererAsync(activeUrl, normalizedBookUrl, directPath, token);
                                             downloadSuccess = true;
                                             downloadedPath = directPath;
-                                            break; // Tải thành công thì thoát loop thử đuôi file
+                                            break;
                                         }
                                         catch (Exception cdnEx)
                                         {
                                             lastEx = cdnEx;
-                                            // Xóa file rác size 0 nếu có
                                             try { if (File.Exists(directPath)) File.Delete(directPath); } catch {}
-                                            continue;
+
+                                            // Nếu gặp lỗi 403/503 Cloudflare, dừng thử extension thêm để không treo luồng
+                                            if (cdnEx.Message.Contains("403") || cdnEx.Message.Contains("503") || cdnEx.Message.Contains("Forbidden"))
+                                            {
+                                                break;
+                                            }
                                         }
                                     }
 
