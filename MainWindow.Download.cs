@@ -3391,8 +3391,9 @@ namespace get_link_manga
                                         lblStatus.Text = $"[{completedPages}/{totalPages}] Tải {safeTitle} ({nhentaiSiteKey})";
                                     }));
                                 }
-                                return;
                             }
+                            else
+                            {
 
                             try
                             {
@@ -3447,6 +3448,7 @@ namespace get_link_manga
                                         lblStatus.Text = $"[{completedPages}/{totalPages}] Tải {safeTitle} ({nhentaiSiteKey})";
                                     }));
                                 }
+                            }
                             }
                         }
                         finally
