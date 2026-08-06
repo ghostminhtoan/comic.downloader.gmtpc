@@ -4789,15 +4789,18 @@ namespace get_link_manga
                         }
 
                         var httpClient = GetSharedHttpClient(url);
-                        using (var request = new HttpRequestMessage(HttpMethod.Get, url))
+                        using (var sendCts = CancellationTokenSource.CreateLinkedTokenSource(token))
                         {
-                            if (!string.IsNullOrEmpty(referer))
+                            sendCts.CancelAfter(20000); // 20 giây timeout cho HTTP response headers
+                            using (var request = new HttpRequestMessage(HttpMethod.Get, url))
                             {
-                                request.Headers.Referrer = new Uri(referer);
-                            }
+                                if (!string.IsNullOrEmpty(referer))
+                                {
+                                    request.Headers.Referrer = new Uri(referer);
+                                }
 
-                            using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token))
-                            {
+                                using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, sendCts.Token))
+                                {
                                 if (isViHentai && (int)response.StatusCode == 429 && attempt < maxAttempts)
                                 {
                                     int retryDelay = GetRetryDelayMilliseconds(response, attempt, delayMs);
@@ -4845,6 +4848,7 @@ namespace get_link_manga
                                 return; // Success!
                             }
                         }
+                    }
                     }
                     catch (HttpRequestException ex) when (attempt < maxAttempts)
                     {
