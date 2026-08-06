@@ -1201,7 +1201,7 @@ namespace get_link_manga
                         {
                             Dispatcher.InvokeAsync(async () =>
                             {
-                                await StartPictureDownloadFromFloatingAsync();
+                                await StartPictureDownloadFromFloatingAsync(suppressWarning: true);
                             });
                         }
                     }

@@ -1840,13 +1840,16 @@ namespace get_link_manga
             BtnStopDownload_Click(sender, e);
         }
 
-        private async Task HandleStartDownloadToggleCheckedAsync()
+        private async Task HandleStartDownloadToggleCheckedAsync(bool suppressWarning = false)
         {
             string downloadRoot = txtDownloadPath.Text.Trim();
             if (string.IsNullOrEmpty(downloadRoot))
             {
                 SetDownloadToggleState(false);
-                MessageBox.Show("Vui lòng chọn thư mục lưu (Please select a download folder).", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (!suppressWarning)
+                {
+                    MessageBox.Show("Vui lòng chọn thư mục lưu (Please select a download folder).", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
                 return;
             }
 
@@ -1854,7 +1857,10 @@ namespace get_link_manga
             if (!itemsToDownload.Any())
             {
                 SetDownloadToggleState(false);
-                MessageBox.Show("Vui lòng tích chọn ít nhất 1 truyện để tải (Please check at least one gallery to download).", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (!suppressWarning)
+                {
+                    MessageBox.Show("Vui lòng tích chọn ít nhất 1 truyện để tải (Please check at least one gallery to download).", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
                 return;
             }
 

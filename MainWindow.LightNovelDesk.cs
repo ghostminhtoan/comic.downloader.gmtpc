@@ -1940,7 +1940,7 @@ namespace get_link_manga
             }
         }
 
-        private async Task StartPictureDownloadFromFloatingAsync()
+        private async Task StartPictureDownloadFromFloatingAsync(bool suppressWarning = false)
         {
             if (btnStartDownload?.IsChecked == true || _downloadCts != null)
             {
@@ -1950,7 +1950,7 @@ namespace get_link_manga
             }
 
             SetDownloadToggleState(true);
-            await HandleStartDownloadToggleCheckedAsync();
+            await HandleStartDownloadToggleCheckedAsync(suppressWarning);
             UpdateLightNovelFloatingControlState();
         }
 
