@@ -556,7 +556,7 @@ namespace get_link_manga
             {
                 Point pos = e.GetPosition(element);
                 double tolerance = 35;
-                ScrollViewer scrollViewer = GetVisualChild<ScrollViewer>(dgResults);
+                ScrollViewer scrollViewer = FindVisualChild<ScrollViewer>(dgResults);
                 if (scrollViewer != null)
                 {
                     if (pos.Y < tolerance)
@@ -1317,7 +1317,7 @@ namespace get_link_manga
             {
                 Point pos = e.GetPosition(element);
                 double tolerance = 35;
-                ScrollViewer scrollViewer = GetVisualChild<ScrollViewer>(lbResultsThumbnail);
+                ScrollViewer scrollViewer = FindVisualChild<ScrollViewer>(lbResultsThumbnail);
                 if (scrollViewer != null)
                 {
                     if (pos.Y < tolerance)
