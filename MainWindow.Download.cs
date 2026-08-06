@@ -3400,54 +3400,11 @@ namespace get_link_manga
                                 {
                                     // nhentai.net: download CDN URL directly (no reader page fetch)
                                     // With intelligent fallback for extension (webp -> jpg -> png) if one fails
-                                    string ext = Path.GetExtension(preResolvedUrl);
-                                    string baseCdnUrl = preResolvedUrl.Substring(0, preResolvedUrl.Length - ext.Length);
-                                    var extList = new System.Collections.Generic.List<string> { ext };
-                                    foreach (var e in new[] { ".webp", ".jpg", ".png" })
-                                    {
-                                        if (!extList.Contains(e, StringComparer.OrdinalIgnoreCase))
-                                        {
-                                            extList.Add(e);
-                                        }
-                                    }
-                                    string[] extensionsToTry = extList.ToArray();
-                                    
-                                    bool downloadSuccess = false;
-                                    Exception lastEx = null;
-                                    string directPath = null;
-                                    string activeUrl = null;
-
-                                    foreach (var currentExt in extensionsToTry)
-                                    {
-                                        activeUrl = baseCdnUrl + currentExt;
-                                        string actualFileName = BuildOrderedImageFilename(pageNum, activeUrl);
-                                        directPath = Path.Combine(tempFolder, actualFileName);
-                                        
-                                        try
-                                        {
-                                            await DownloadUrlToFileWithRefererAsync(activeUrl, normalizedBookUrl, directPath, token);
-                                            downloadSuccess = true;
-                                            downloadedPath = directPath;
-                                            break;
-                                        }
-                                        catch (Exception cdnEx)
-                                        {
-                                            lastEx = cdnEx;
-                                            try { if (File.Exists(directPath)) File.Delete(directPath); } catch {}
-
-                                            // Nếu gặp lỗi 403/503 Cloudflare, dừng thử extension thêm để không treo luồng
-                                            if (cdnEx.Message.Contains("403") || cdnEx.Message.Contains("503") || cdnEx.Message.Contains("Forbidden"))
-                                            {
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if (!downloadSuccess)
-                                    {
-                                        throw lastEx ?? new Exception($"Không thể tải được ảnh từ CDN với bất kỳ định dạng nào.");
-                                    }
-                                    Log($"[nhentai.net] Trang {pageNum} -> {activeUrl}");
+                                    string actualFileName = BuildOrderedImageFilename(pageNum, preResolvedUrl);
+                                    string directPath = Path.Combine(tempFolder, actualFileName);
+                                    await DownloadUrlToFileWithRefererAsync(preResolvedUrl, normalizedBookUrl, directPath, token);
+                                    downloadedPath = directPath;
+                                    Log($"[nhentai.net] Trang {pageNum} -> {preResolvedUrl}");
                                 }
                                 else
                                 {
