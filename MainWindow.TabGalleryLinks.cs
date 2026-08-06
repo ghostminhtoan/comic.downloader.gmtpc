@@ -4313,6 +4313,39 @@ namespace get_link_manga
                     _downloadChapterItemCache[url] = new List<ReaderChapterItem>();
                     return new List<ReaderChapterItem>();
                 }
+                else if (url.IndexOf("hentai2read.com", StringComparison.OrdinalIgnoreCase) >= 0 || url.IndexOf("hentai2read", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    string normalized = NormalizeHentai2readUrl(url);
+                    string html = await FetchStringAsync(normalized, token);
+                    List<string> chapterLinks = ExtractHentai2readChapterLinks(html, normalized);
+                    if (chapterLinks.Count > 0)
+                    {
+                        List<ReaderChapterItem> result = chapterLinks
+                            .Select(link => new ReaderChapterItem
+                            {
+                                Name = BuildDownloadChapterLabel(link),
+                                FolderPath = link,
+                                Pages = new List<ReaderPageItem>()
+                            })
+                            .ToList();
+                        _downloadChapterItemCache[url] = CloneReaderChapterItems(result);
+                        return result;
+                    }
+                    else
+                    {
+                        var singleItems = new List<ReaderChapterItem>
+                        {
+                            new ReaderChapterItem
+                            {
+                                Name = "chap 01",
+                                FolderPath = normalized,
+                                Pages = new List<ReaderPageItem>()
+                            }
+                        };
+                        _downloadChapterItemCache[url] = CloneReaderChapterItems(singleItems);
+                        return singleItems;
+                    }
+                }
                 else if (url.IndexOf("mangadex.org", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     List<ReaderChapterItem> result = await GetMangadexReaderChapterItemsAsync(item, url, token);
