@@ -45,6 +45,7 @@ namespace get_link_manga
             dgDuplicates.ItemsSource = _duplicatesView;
             dgDuplicates.Loaded += DgDuplicates_Loaded;
             dgDuplicates.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(DgDuplicates_ScrollChanged));
+            lbDuplicatesThumbnail.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(DgDuplicates_ScrollChanged));
             UpdateStatus();
 
             // Sync sorting and subscribe to sort changes of the main window's view
@@ -477,24 +478,38 @@ namespace get_link_manga
             PrefetchVisibleDuplicatePreviews();
         }
 
-        private void PrefetchVisibleDuplicatePreviews()
-        {
-            var visibleItems = dgDuplicates.Items
-                .Cast<GalleryItem>()
-                .Where(item => dgDuplicates.ItemContainerGenerator.ContainerFromItem(item) is DataGridRow)
-                .Take(20)
-                .ToList();
+         private void PrefetchVisibleDuplicatePreviews()
+         {
+             bool isThumbnail = chkResultsPresentation?.IsChecked == true;
+             System.Collections.Generic.List<GalleryItem> visibleItems;
+             if (isThumbnail)
+             {
+                 visibleItems = lbDuplicatesThumbnail.Items
+                     .Cast<GalleryItem>()
+                     .Where(item => lbDuplicatesThumbnail.ItemContainerGenerator.ContainerFromItem(item) is ListBoxItem)
+                     .Take(20)
+                     .ToList();
+             }
+             else
+             {
+                 visibleItems = dgDuplicates.Items
+                     .Cast<GalleryItem>()
+                     .Where(item => dgDuplicates.ItemContainerGenerator.ContainerFromItem(item) is DataGridRow)
+                     .Take(20)
+                     .ToList();
+             }
 
-            _mainWindow?.PrefetchGalleryHoverPreview(visibleItems);
-        }
+             _mainWindow?.PrefetchGalleryHoverPreview(visibleItems);
+         }
 
-        private void ChkResultsPresentation_Click(object sender, RoutedEventArgs e)
-        {
-            if (chkResultsPresentation == null) return;
-            bool isThumbnail = chkResultsPresentation.IsChecked == true;
-            dgDuplicates.Visibility = isThumbnail ? Visibility.Collapsed : Visibility.Visible;
-            lbDuplicatesThumbnail.Visibility = isThumbnail ? Visibility.Visible : Visibility.Collapsed;
-        }
+         private void ChkResultsPresentation_Click(object sender, RoutedEventArgs e)
+         {
+             if (chkResultsPresentation == null) return;
+             bool isThumbnail = chkResultsPresentation.IsChecked == true;
+             dgDuplicates.Visibility = isThumbnail ? Visibility.Collapsed : Visibility.Visible;
+             lbDuplicatesThumbnail.Visibility = isThumbnail ? Visibility.Visible : Visibility.Collapsed;
+             ScheduleDuplicatePreviewPrefetch();
+         }
 
         private bool _isSyncingSelection = false;
         private void DgDuplicates_SelectionChanged(object sender, SelectionChangedEventArgs e)

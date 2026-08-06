@@ -322,15 +322,30 @@ namespace get_link_manga
             bool isDetailsGrid = false;
             if (_activeGalleryHoverPreviewHost != null)
             {
-                DependencyObject p = _activeGalleryHoverPreviewHost;
-                while (p != null)
+                bool isInsideDuplicateWindow = false;
+                DependencyObject checkParent = _activeGalleryHoverPreviewHost;
+                while (checkParent != null)
                 {
-                    if (p is DataGrid)
+                    if (checkParent is Window w && w.GetType().Name == "DuplicateWindow")
                     {
-                        isDetailsGrid = true;
+                        isInsideDuplicateWindow = true;
                         break;
                     }
-                    p = VisualTreeHelper.GetParent(p);
+                    checkParent = VisualTreeHelper.GetParent(checkParent);
+                }
+
+                if (!isInsideDuplicateWindow)
+                {
+                    DependencyObject p = _activeGalleryHoverPreviewHost;
+                    while (p != null)
+                    {
+                        if (p is DataGrid)
+                        {
+                            isDetailsGrid = true;
+                            break;
+                        }
+                        p = VisualTreeHelper.GetParent(p);
+                    }
                 }
             }
 
