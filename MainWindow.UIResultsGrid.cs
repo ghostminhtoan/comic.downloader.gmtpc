@@ -441,6 +441,12 @@ namespace get_link_manga
             {
                 _resultsDragStartPoint = e.GetPosition(null);
                 _resultsDragItem = item;
+
+                // Nếu item đang kéo nằm trong danh sách bôi đen nhiều hàng (SelectedItems), giữ nguyên lựa chọn
+                if (dgResults != null && dgResults.SelectedItems.Contains(item) && dgResults.SelectedItems.Count > 1)
+                {
+                    e.Handled = true;
+                }
             }
         }
 
@@ -1259,6 +1265,11 @@ namespace get_link_manga
 
             _resultsDragStartPoint = e.GetPosition(null);
             _resultsDragItem = itemContainer.DataContext as GalleryItem;
+
+            if (lbResultsThumbnail != null && lbResultsThumbnail.SelectedItems.Contains(_resultsDragItem) && lbResultsThumbnail.SelectedItems.Count > 1)
+            {
+                e.Handled = true;
+            }
         }
 
         private void ResultsThumbnailItem_PreviewMouseMove(object sender, MouseEventArgs e)
