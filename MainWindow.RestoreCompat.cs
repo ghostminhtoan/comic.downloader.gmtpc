@@ -638,6 +638,13 @@ namespace get_link_manga
 
         private void MainWindow_PreviewDragOver(object sender, DragEventArgs e)
         {
+            if (e.Data.GetDataPresent(typeof(GalleryItem)))
+            {
+                e.Effects = DragDropEffects.Move;
+                e.Handled = false;
+                return;
+            }
+
             e.Effects = TryGetDroppedText(e.Data, out _) ? DragDropEffects.Copy : DragDropEffects.None;
             e.Handled = true;
         }
