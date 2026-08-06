@@ -412,7 +412,14 @@ namespace get_link_manga
             }
 
             RenumberResultOrder();
-            RestoreResultsOrder(logMessage);
+            if (_isFreeArrangementActive)
+            {
+                ApplyResultsSort("OriginalIndex", ListSortDirection.Ascending, logMessage);
+            }
+            else
+            {
+                RestoreResultsOrder(logMessage);
+            }
         }
 
         private static bool IsDragCandidate(DependencyObject source)
@@ -423,7 +430,16 @@ namespace get_link_manga
                 {
                     return true;
                 }
-                source = VisualTreeHelper.GetParent(source);
+                DependencyObject parent = null;
+                if (source is Visual || source is System.Windows.Media.Media3D.Visual3D)
+                {
+                    parent = VisualTreeHelper.GetParent(source);
+                }
+                if (parent == null && source is FrameworkContentElement fce)
+                {
+                    parent = fce.Parent;
+                }
+                source = parent;
             }
             return false;
         }
