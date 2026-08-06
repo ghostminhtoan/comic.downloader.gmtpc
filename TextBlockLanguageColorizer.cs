@@ -35,8 +35,8 @@ namespace get_link_manga
                 if (string.IsNullOrEmpty(text)) return;
 
                 // Regex khớp với các tag ngôn ngữ như [English], [Japanese], [Korean], [Chinese], [日本語], [中文], [한국어], [Italiano], [French], v.v.
-                // Khớp bất kỳ từ nào viết trong dấu ngoặc vuông chứa ký tự chữ/số
-                var regex = new Regex(@"(\[[a-zA-Z\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f\uac00-\ud7af\u1100-\u11ff\u3130-\u318f]+\])", RegexOptions.IgnoreCase);
+                // Khớp bất kỳ từ nào viết trong dấu ngoặc vuông chứa ký tự chữ/số, kể cả ký tự unicode có dấu và ký tự Cyrillic, Greek, Hebrew, Arabic, Burmese, Thai...
+                var regex = new Regex(@"(\[[a-zA-Z0-9\s\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f\uac00-\ud7af\u1100-\u11ff\u3130-\u318f\u00C0-\u00FF\u0100-\u017F\u0400-\u04FF\u0370-\u03FF\u0590-\u05FF\u0600-\u06FF\u0e00-\u0e7f\u1000-\u109f*]+\])", RegexOptions.IgnoreCase);
                 
                 var matches = regex.Matches(text);
                 int lastIndex = 0;
@@ -44,9 +44,21 @@ namespace get_link_manga
                 // Tập hợp các ngôn ngữ cần highlight (để tránh highlight các tag không phải ngôn ngữ)
                 var langKeywords = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    "english", "japanese", "korean", "chinese", "日本語", "中文", "한국어", "italiano", "french", "spanish", "russian", "portuguese", "thai", "vietnamese", "tiếng việt",
-                    "german", "italian", "tagalog", "polish", "swedish", "turkish", "finnish", "indonesian", "arabic", "hebrew", "hindi", "greek", "dutch", "romanian", "hungarian",
-                    "czech", "croatian", "slovak", "danish", "norwegian", "ukrainian", "latin", "esperanto", "japanese*"
+                    // Bản dịch tiếng Anh và ngôn ngữ gốc từ Hitomi.la
+                    "english", "japanese", "korean", "chinese", "日本語", "中文", "한국어", 
+                    "vietnamese", "tiếng việt", "french", "français", "spanish", "español", 
+                    "portuguese", "português", "german", "deutsch", "italian", "italiano", 
+                    "russian", "русский", "swedish", "svenska", "turkish", "türkçe", 
+                    "polish", "polski", "dutch", "nederlands", "thai", "ไทย", "indonesian", 
+                    "bahasa indonesia", "tagalog", "basa jawa", "javanese", "catalan", "català", 
+                    "cebuano", "czech", "čeština", "danish", "dansk", "estonian", "eesti", 
+                    "esperanto", "hindi", "íslenska", "icelandic", "khmer", "latin", "latina", 
+                    "hungarian", "magyar", "norwegian", "norsk", "romanian", "română", 
+                    "albanian", "shqip", "slovak", "slovenčina", "serbian", "srpski", 
+                    "finnish", "suomi", "textless", "narrative", "greek", "ελληνικά", 
+                    "bulgarian", "български", "mongolian", "монгол", "ukrainian", "українська", 
+                    "hebrew", "עברית", "arabic", "العربية", "persian", "farsi", "فارسی", 
+                    "burmese", "myanmar", "မြန်မာဘာသာ", "japanese*"
                 };
 
                 foreach (Match match in matches)
