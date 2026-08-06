@@ -865,6 +865,41 @@ namespace get_link_manga
             }
         }
 
+        private void LbDuplicatesThumbnail_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isSyncingSelection || dgDuplicates == null || lbDuplicatesThumbnail == null) return;
+            _isSyncingSelection = true;
+            try
+            {
+                dgDuplicates.SelectedItems.Clear();
+                foreach (var item in lbDuplicatesThumbnail.SelectedItems)
+                {
+                    dgDuplicates.SelectedItems.Add(item);
+                }
+            }
+            finally
+            {
+                _isSyncingSelection = false;
+            }
+
+            // Tự động load thumbnail khi click/chọn item trong duplicate thumbnail view
+            if (lbDuplicatesThumbnail.SelectedItems.Count > 0 && _mainWindow != null)
+            {
+                var itemsToPrefetch = new System.Collections.Generic.List<GalleryItem>();
+                foreach (var item in lbDuplicatesThumbnail.SelectedItems.OfType<GalleryItem>())
+                {
+                    if (_mainWindow.SupportsHoverPreview(item) && !item.HasHoverPreviewThumbnailFile)
+                    {
+                        itemsToPrefetch.Add(item);
+                    }
+                }
+                if (itemsToPrefetch.Count > 0)
+                {
+                    _mainWindow.PrefetchGalleryHoverPreview(itemsToPrefetch);
+                }
+            }
+        }
+
         private void MoveMasterItems(System.Collections.Generic.List<GalleryItem> items, int targetIndex, string logMessage)
         {
             if (items == null || items.Count == 0 || _mainWindow == null) return;
