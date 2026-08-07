@@ -2019,7 +2019,7 @@ document.addEventListener('click', function (event) {
                                 val.Contains("banner") ||
                                 val.Contains("advertisement") ||
                                 val.Contains("nettruyenviet.webp") ||
-                                Regex.IsMatch(val, @"/0{1,3}\.(jpg|jpeg|png|webp|gif|bmp)$", RegexOptions.IgnoreCase))
+                                Regex.IsMatch(val, @"/(?:logo|favicon|loader|loading|spacer|transparent|bg|background)\d*\.(jpg|jpeg|png|webp|gif|bmp)$", RegexOptions.IgnoreCase))
                             {
                                 return;
                             }
