@@ -1017,6 +1017,12 @@ document.addEventListener('click', function (event) {
                 url = "https://" + url;
             }
 
+            if (isTech)
+            {
+                await EnsureNettruyenTechRedirectDomainAsync();
+                url = ApplyNettruyenTechRedirectDomain(url);
+            }
+
             if (fetchButton != null) fetchButton.IsEnabled = false;
             lblStatus.Text = "Đang phân tích trang Nettruyen...";
             progressBar.IsIndeterminate = true;
@@ -1244,6 +1250,12 @@ document.addEventListener('click', function (event) {
                 !baseUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
             {
                 baseUrl = "https://" + baseUrl;
+            }
+
+            if (isTech)
+            {
+                await EnsureNettruyenTechRedirectDomainAsync();
+                baseUrl = ApplyNettruyenTechRedirectDomain(baseUrl);
             }
 
             if (!int.TryParse(pageFromBox.Text, out int pageFrom) || pageFrom < 1)
