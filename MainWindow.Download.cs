@@ -2060,6 +2060,11 @@ namespace get_link_manga
                 return;
             }
 
+            if (btnAutoRetryErrors != null && btnAutoRetryErrors.IsChecked == true)
+            {
+                btnAutoRetryErrors.IsChecked = false;
+            }
+
             _isDownloadPaused = false;
             if (_downloadCts != null)
             {
