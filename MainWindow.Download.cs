@@ -3503,9 +3503,46 @@ namespace get_link_manga
                                     // With intelligent fallback for extension (webp -> jpg -> png) if one fails
                                     string actualFileName = BuildOrderedImageFilename(pageNum, preResolvedUrl);
                                     string directPath = Path.Combine(tempFolder, actualFileName);
-                                    await DownloadUrlToFileWithRefererAsync(preResolvedUrl, normalizedBookUrl, directPath, token);
-                                    downloadedPath = directPath;
-                                    Log($"[nhentai.net] Trang {pageNum} -> {preResolvedUrl}");
+                                    try
+                                    {
+                                        await DownloadUrlToFileWithRefererAsync(preResolvedUrl, normalizedBookUrl, directPath, token);
+                                        downloadedPath = directPath;
+                                        Log($"[nhentai.net] Trang {pageNum} -> {preResolvedUrl}");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log($"[nhentai.net] Lỗi tải direct link trang {pageNum}: {ex.Message}. Đang thử fallback...");
+                                        var mMatch = Regex.Match(preResolvedUrl, @"/galleries/(\d+)/");
+                                        if (mMatch.Success)
+                                        {
+                                            string mediaId = mMatch.Groups[1].Value;
+                                            string extFound = await FindValidExtensionAsync(mediaId, pageNum, "webp", null, normalizedBookUrl);
+                                            if (extFound != null)
+                                            {
+                                                string fallbackUrl = $"https://i{(pageNum % 4) + 1}.nhentai.net/galleries/{mediaId}/{pageNum}.{extFound}";
+                                                string fallbackFileName = BuildOrderedImageFilename(pageNum, fallbackUrl, $".{extFound}");
+                                                string fallbackPath = Path.Combine(tempFolder, fallbackFileName);
+                                                await DownloadUrlToFileWithRefererAsync(fallbackUrl, normalizedBookUrl, fallbackPath, token);
+                                                downloadedPath = fallbackPath;
+                                                Log($"[nhentai.net] Trang {pageNum} (Fallback thành công) -> {fallbackUrl}");
+                                            }
+                                            else
+                                            {
+                                                string readerPageUrl = normalizedBookUrl.TrimEnd('/') + "/" + pageNum + "/";
+                                                Log($"[nhentai.net] Dò tìm extension thất bại. Thử tải qua reader page: {readerPageUrl}");
+                                                string readerImgUrl = await ResolveNhentaiReaderImageUrlAsync(readerPageUrl, pageNum, token);
+                                                string readerFileName = BuildOrderedImageFilename(pageNum, readerImgUrl);
+                                                string readerPath = Path.Combine(tempFolder, readerFileName);
+                                                await DownloadUrlToFileWithRefererAsync(readerImgUrl, readerPageUrl, readerPath, token);
+                                                downloadedPath = readerPath;
+                                                Log($"[nhentai.net] Trang {pageNum} (Reader page fallback thành công) -> {readerImgUrl}");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            throw;
+                                        }
+                                    }
                                 }
                                 else
                                 {
