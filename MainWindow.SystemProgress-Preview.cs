@@ -875,7 +875,7 @@ namespace get_link_manga
 
                 if (IsMangadexBrowserFetchUrl(imageUrl))
                 {
-                    string originalExtension = GetGalleryHoverPreviewFileExtension(imageUrl, null);
+                    string originalExtension = ".webp";
                     originalPath = cacheBasePath + originalExtension;
 
                     byte[] browserBytes = await FetchMangadexBytesViaBrowserAsync(imageUrl, item?.Link, token);
@@ -907,7 +907,7 @@ namespace get_link_manga
                     using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token))
                     {
                         response.EnsureSuccessStatusCode();
-                        string originalExtension = GetGalleryHoverPreviewFileExtension(imageUrl, response.Content.Headers.ContentType?.MediaType);
+                        string originalExtension = ".webp";
                         originalPath = cacheBasePath + originalExtension;
 
                         using (Stream sourceStream = await response.Content.ReadAsStreamAsync())
@@ -1021,33 +1021,15 @@ namespace get_link_manga
                 return false;
             }
 
-            originalPath = Directory.EnumerateFiles(directory, fileBaseName + ".*")
-                .FirstOrDefault(path => !path.EndsWith(".thumb.jpg", StringComparison.OrdinalIgnoreCase));
+            originalPath = Path.Combine(directory, fileBaseName + ".webp");
 
-            if (string.IsNullOrWhiteSpace(originalPath) || !File.Exists(originalPath))
+            if (!File.Exists(originalPath))
             {
                 originalPath = null;
                 return false;
             }
 
-            thumbnailPath = cacheBasePath + ".thumb.jpg";
-            if (!File.Exists(thumbnailPath))
-            {
-                try
-                {
-                    CreateGalleryHoverPreviewThumbnail(originalPath, thumbnailPath);
-                }
-                catch
-                {
-                    thumbnailPath = originalPath;
-                }
-            }
-
-            if (string.IsNullOrWhiteSpace(thumbnailPath) || !File.Exists(thumbnailPath))
-            {
-                thumbnailPath = originalPath;
-            }
-
+            thumbnailPath = originalPath;
             return true;
         }
 
