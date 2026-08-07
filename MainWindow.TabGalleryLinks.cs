@@ -4317,12 +4317,17 @@ namespace get_link_manga
                 {
                     await Task.Delay(1000, token);
                     string normalized = NormalizeHentai2readUrl(url);
-                    string html = await FetchStringAsync(normalized, token);
+                    string fetchUrl = normalized;
+                    if (url.EndsWith("/") && !fetchUrl.EndsWith("/"))
+                    {
+                        fetchUrl += "/";
+                    }
+                    string html = await FetchStringAsync(fetchUrl, token);
                     if (html.Contains("<title>Hentai2Read - Free Online Manga") || html.Contains("hentai2read.com/hentai-list"))
                     {
                         throw new Exception("Bị redirect về trang chủ Hentai2read");
                     }
-                    List<string> chapterLinks = ExtractHentai2readChapterLinks(html, normalized);
+                    List<string> chapterLinks = ExtractHentai2readChapterLinks(html, fetchUrl);
                     if (chapterLinks.Count > 0)
                     {
                         List<ReaderChapterItem> result = chapterLinks
@@ -4343,7 +4348,7 @@ namespace get_link_manga
                             new ReaderChapterItem
                             {
                                 Name = "chap 01",
-                                FolderPath = normalized,
+                                FolderPath = normalized.EndsWith("/") ? normalized : normalized + "/",
                                 Pages = new List<ReaderPageItem>()
                             }
                         };
