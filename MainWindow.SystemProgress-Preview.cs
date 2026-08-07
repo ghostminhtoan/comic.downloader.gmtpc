@@ -443,7 +443,6 @@ namespace get_link_manga
                 {
                     Padding = new Thickness(4),
                     MaxWidth = 250,
-                    MaxHeight = 480,
                     Child = panel
                 }
             };
