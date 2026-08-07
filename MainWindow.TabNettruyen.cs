@@ -997,9 +997,14 @@ document.addEventListener('click', function (event) {
             }
         }
 
-        private async Task NettruyenFetchInfoAsync()
+        private async Task NettruyenFetchInfoAsync(bool isTech = false)
         {
-            string url = txtNettruyenTagUrl.Text.Trim();
+            TextBox tagUrlBox = isTech ? txtNettruyenTechTagUrl : txtNettruyenTagUrl;
+            TextBox totalPagesBox = isTech ? txtNettruyenTechTotalPages : txtNettruyenTotalPages;
+            TextBox pageToBox = isTech ? txtNettruyenTechPageTo : txtNettruyenPageTo;
+            Button fetchButton = isTech ? btnNettruyenTechFetchInfo : btnNettruyenFetchInfo;
+
+            string url = tagUrlBox.Text.Trim();
             if (string.IsNullOrEmpty(url))
             {
                 MessageBox.Show("Vui lòng nhập URL hợp lệ.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1012,7 +1017,7 @@ document.addEventListener('click', function (event) {
                 url = "https://" + url;
             }
 
-            btnNettruyenFetchInfo.IsEnabled = false;
+            if (fetchButton != null) fetchButton.IsEnabled = false;
             lblStatus.Text = "Đang phân tích trang Nettruyen...";
             progressBar.IsIndeterminate = true;
             NettruyenLog($"Đang phân tích URL: {url}");
@@ -1048,8 +1053,8 @@ document.addEventListener('click', function (event) {
                     }
                 }
 
-                txtNettruyenTotalPages.Text = maxPage.ToString();
-                txtNettruyenPageTo.Text = maxPage.ToString();
+                if (totalPagesBox != null) totalPagesBox.Text = maxPage.ToString();
+                if (pageToBox != null) pageToBox.Text = maxPage.ToString();
                 
                 NettruyenLog($"Phân tích hoàn tất. Phát hiện tối đa {maxPage} trang.");
                 lblStatus.Text = $"Analysis complete. Found {maxPage} pages.";
@@ -1057,12 +1062,12 @@ document.addEventListener('click', function (event) {
             catch (Exception ex)
             {
                 NettruyenLog($"Lỗi khi phân tích: {ex.Message}");
-                txtNettruyenTotalPages.Text = "1";
+                if (totalPagesBox != null) totalPagesBox.Text = "1";
                 lblStatus.Text = "Analysis failed.";
             }
             finally
             {
-                btnNettruyenFetchInfo.IsEnabled = true;
+                if (fetchButton != null) fetchButton.IsEnabled = true;
                 progressBar.IsIndeterminate = false;
             }
         }
@@ -1147,19 +1152,16 @@ document.addEventListener('click', function (event) {
 
         private async void BtnNettruyenTechFetchInfo_Click(object sender, RoutedEventArgs e)
         {
-            await EnsureNettruyenTechRedirectDomainAsync();
-            CopyNettruyenTechInputsToPrimary();
             SetNettruyenTechButtonsEnabled(false);
             var oldLogTarget = _nettruyenLogOverride;
             _nettruyenLogOverride = txtNettruyenTechLog;
             try
             {
-                await NettruyenFetchInfoAsync();
+                await NettruyenFetchInfoAsync(isTech: true);
             }
             finally
             {
                 _nettruyenLogOverride = oldLogTarget;
-                CopyNettruyenPrimaryOutputsToTech();
                 SetNettruyenTechButtonsEnabled(true);
             }
         }
@@ -1178,20 +1180,17 @@ document.addEventListener('click', function (event) {
                 return;
             }
 
-            await EnsureNettruyenTechRedirectDomainAsync();
-            CopyNettruyenTechInputsToPrimary();
             SetNettruyenTechButtonsEnabled(false);
             var oldLogTarget = _nettruyenLogOverride;
             _nettruyenLogOverride = txtNettruyenTechLog;
             try
             {
                 SelectDownloadMangaTab();
-                await ScrapeNettruyenAsync(clearExisting: true);
+                await ScrapeNettruyenAsync(clearExisting: true, isTech: true);
             }
             finally
             {
                 _nettruyenLogOverride = oldLogTarget;
-                CopyNettruyenPrimaryOutputsToTech();
                 SetNettruyenTechButtonsEnabled(true);
             }
         }
@@ -1210,27 +1209,31 @@ document.addEventListener('click', function (event) {
                 return;
             }
 
-            await EnsureNettruyenTechRedirectDomainAsync();
-            CopyNettruyenTechInputsToPrimary();
             SetNettruyenTechButtonsEnabled(false);
             var oldLogTarget = _nettruyenLogOverride;
             _nettruyenLogOverride = txtNettruyenTechLog;
             try
             {
                 SelectDownloadMangaTab();
-                await ScrapeNettruyenAsync(clearExisting: false);
+                await ScrapeNettruyenAsync(clearExisting: false, isTech: true);
             }
             finally
             {
                 _nettruyenLogOverride = oldLogTarget;
-                CopyNettruyenPrimaryOutputsToTech();
                 SetNettruyenTechButtonsEnabled(true);
             }
         }
 
-        private async Task ScrapeNettruyenAsync(bool clearExisting)
+        private async Task ScrapeNettruyenAsync(bool clearExisting, bool isTech = false)
         {
-            string baseUrl = txtNettruyenTagUrl.Text.Trim();
+            TextBox tagUrlBox = isTech ? txtNettruyenTechTagUrl : txtNettruyenTagUrl;
+            TextBox pageFromBox = isTech ? txtNettruyenTechPageFrom : txtNettruyenPageFrom;
+            TextBox pageToBox = isTech ? txtNettruyenTechPageTo : txtNettruyenPageTo;
+            Button scrapeButton = isTech ? btnNettruyenTechScrape : btnNettruyenScrape;
+            Button crawlMoreButton = isTech ? btnNettruyenTechCrawlMore : btnNettruyenCrawlMore;
+            Button fetchButton = isTech ? btnNettruyenTechFetchInfo : btnNettruyenFetchInfo;
+
+            string baseUrl = tagUrlBox.Text.Trim();
             if (string.IsNullOrEmpty(baseUrl))
             {
                 MessageBox.Show("Vui lòng nhập URL hợp lệ.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1243,13 +1246,13 @@ document.addEventListener('click', function (event) {
                 baseUrl = "https://" + baseUrl;
             }
 
-            if (!int.TryParse(txtNettruyenPageFrom.Text, out int pageFrom) || pageFrom < 1)
+            if (!int.TryParse(pageFromBox.Text, out int pageFrom) || pageFrom < 1)
             {
                 MessageBox.Show("Trang bắt đầu không hợp lệ.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            if (!int.TryParse(txtNettruyenPageTo.Text, out int pageTo) || pageTo < pageFrom)
+            if (!int.TryParse(pageToBox.Text, out int pageTo) || pageTo < pageFrom)
             {
                 MessageBox.Show("Trang kết thúc không hợp lệ.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -1258,12 +1261,9 @@ document.addEventListener('click', function (event) {
             _cts = new CancellationTokenSource();
             CancellationToken token = _cts.Token;
 
-            btnNettruyenScrape.Content = "STOP CRAWLER";
-            if (btnNettruyenCrawlMore != null)
-            {
-                btnNettruyenCrawlMore.Content = "STOP CRAWLER";
-            }
-            btnNettruyenFetchInfo.IsEnabled = false;
+            if (scrapeButton != null) scrapeButton.Content = "STOP CRAWLER";
+            if (crawlMoreButton != null) crawlMoreButton.Content = "STOP CRAWLER";
+            if (fetchButton != null) fetchButton.IsEnabled = false;
             lblStatus.Text = "Đang cào Nettruyen...";
             progressBar.Value = 0;
 
@@ -1454,14 +1454,17 @@ document.addEventListener('click', function (event) {
             {
                 _cts.Dispose();
                 _cts = null;
-                btnNettruyenScrape.Content = "GET LINK";
-                btnNettruyenScrape.IsEnabled = true;
-                if (btnNettruyenCrawlMore != null)
+                if (scrapeButton != null)
                 {
-                    btnNettruyenCrawlMore.Content = "GET MORE";
-                    btnNettruyenCrawlMore.IsEnabled = true;
+                    scrapeButton.Content = "GET LINK";
+                    scrapeButton.IsEnabled = true;
                 }
-                btnNettruyenFetchInfo.IsEnabled = true;
+                if (crawlMoreButton != null)
+                {
+                    crawlMoreButton.Content = "GET MORE";
+                    crawlMoreButton.IsEnabled = true;
+                }
+                if (fetchButton != null) fetchButton.IsEnabled = true;
                 HideTransientResultsImportingStatus();
             }
         }
@@ -1506,7 +1509,7 @@ document.addEventListener('click', function (event) {
             try
             {
                 await ImportNettruyenDirectLinksAsync(
-                    (links ?? new List<string>()).Select(ApplyNettruyenTechRedirectDomain).ToList(),
+                    links ?? new List<string>(),
                     showMessageBox);
             }
             finally
