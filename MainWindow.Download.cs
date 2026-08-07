@@ -3188,8 +3188,8 @@ namespace get_link_manga
                             var pageWatch = Stopwatch.StartNew();
 
                             // Skip if file already exists in either temp or final folder
-                            if ((File.Exists(localFilePath) && new FileInfo(localFilePath).Length > 1024) ||
-                                (File.Exists(finalFilePath) && new FileInfo(finalFilePath).Length > 1024))
+                            if ((File.Exists(localFilePath) && new FileInfo(localFilePath).Length > 40960) ||
+                                (File.Exists(finalFilePath) && new FileInfo(finalFilePath).Length > 40960))
                             {
                                 pageWatch.Stop();
                                 lock (lockObj)
@@ -3464,13 +3464,13 @@ namespace get_link_manga
                             {
                                 string testPathTemp = Path.ChangeExtension(localFilePath, checkExt);
                                 string testPathFinal = Path.ChangeExtension(finalFilePath, checkExt);
-                                if (File.Exists(testPathTemp) && new FileInfo(testPathTemp).Length > 0)
+                                if (File.Exists(testPathTemp) && new FileInfo(testPathTemp).Length > 40960)
                                 {
                                     alreadyExists = true;
                                     existingFile = testPathTemp;
                                     break;
                                 }
-                                if (File.Exists(testPathFinal) && new FileInfo(testPathFinal).Length > 0)
+                                if (File.Exists(testPathFinal) && new FileInfo(testPathFinal).Length > 40960)
                                 {
                                     alreadyExists = true;
                                     existingFile = testPathFinal;
@@ -4871,7 +4871,7 @@ namespace get_link_manga
 
         private async Task DownloadUrlToFileWithRefererAsync(string url, string referer, string filePath, CancellationToken token, bool isViHentai = false, bool isTruyenqq = false)
         {
-            long minSize = (isTruyenqq || (url != null && (url.Contains("nhentai.net") || url.Contains("nhentaimg.com")))) ? 0 : 2048; // Smart Resume: >2KB mới skip, tránh skip ảnh hỏng/trống
+            long minSize = 40960; // Smart Resume: >40KB mới skip, tránh skip ảnh lỗi/ảnh hỏng/kích thước quá bé
             if (File.Exists(filePath) && new FileInfo(filePath).Length > minSize)
             {
                 return; // skip duplicate
@@ -5808,7 +5808,7 @@ namespace get_link_manga
                                         foreach (string existingPath in Directory.GetFiles(folder, pattern))
                                         {
                                             if (extensions.Contains(Path.GetExtension(existingPath), StringComparer.OrdinalIgnoreCase) &&
-                                                new FileInfo(existingPath).Length > 1024)
+                                                new FileInfo(existingPath).Length > 40960)
                                             {
                                                 exists = true;
                                                 downloadedPath = existingPath;
@@ -6191,12 +6191,12 @@ namespace get_link_manga
                             {
                                 string testPathTemp = Path.ChangeExtension(localFilePath, checkExt);
                                 string testPathFinal = Path.ChangeExtension(finalFilePath, checkExt);
-                                if (File.Exists(testPathTemp) && new FileInfo(testPathTemp).Length > 0)
+                                if (File.Exists(testPathTemp) && new FileInfo(testPathTemp).Length > 40960)
                                 {
                                     alreadyExists = true;
                                     break;
                                 }
-                                if (File.Exists(testPathFinal) && new FileInfo(testPathFinal).Length > 0)
+                                if (File.Exists(testPathFinal) && new FileInfo(testPathFinal).Length > 40960)
                                 {
                                     alreadyExists = true;
                                     break;
