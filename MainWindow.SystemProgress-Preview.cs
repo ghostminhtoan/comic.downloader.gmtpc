@@ -435,11 +435,50 @@ namespace get_link_manga
             };
         }
 
+        private async Task EnsureHitomiLaTagAsync(GalleryItem item, CancellationToken token)
+        {
+            if (item == null || !string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) || item.Tag != null)
+            {
+                return;
+            }
+
+            try
+            {
+                string url = item.Link;
+                if (string.IsNullOrWhiteSpace(url)) return;
+
+                var idMatch = Regex.Match(url, @"(\d+)(?:\.html)?(?:#.*)?$");
+                if (!idMatch.Success) return;
+
+                string id = idMatch.Groups[1].Value;
+                string apiJsonUrl = $"https://ltn.gold-usergeneratedcontent.net/galleries/{id}.js";
+
+                string jsContent = await FetchStringAsync(apiJsonUrl, token);
+                if (string.IsNullOrEmpty(jsContent)) return;
+
+                string json = jsContent.Replace("var galleryinfo = ", "").Trim();
+                if (json.EndsWith(";"))
+                {
+                    json = json.Substring(0, json.Length - 1).Trim();
+                }
+
+                item.Tag = json;
+            }
+            catch
+            {
+            }
+        }
+
         private async Task EnsureGalleryHoverPreviewFileAsync(GalleryItem item, CancellationToken token)
         {
             if (item == null)
             {
                 return;
+            }
+
+            if (string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) && item.Tag == null)
+            {
+                await EnsureHitomiLaTagAsync(item, token);
             }
 
             await EnsureTruyenqqHoverPreviewUrlAsync(item, token);
