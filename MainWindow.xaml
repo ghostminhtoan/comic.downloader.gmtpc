@@ -3237,6 +3237,8 @@
                                 </ComboBox>
                                 <TextBlock Name="txtWordWrapLabel" Text="WORD WRAP" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <ToggleButton Name="chkWordWrap" Style="{StaticResource ToggleButtonSwitch}" Height="16" Width="32"/>
+                                <TextBlock Name="txtAutoZipCbzLabel" Text="AUTO ZIP CBZ" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="12,0,4,0"/>
+                                <ToggleButton Name="chkAutoZipCbz" Style="{StaticResource ToggleButtonSwitch}" Height="16" Width="32" IsChecked="False"/>
                             </StackPanel>
                         </StackPanel>
                     </Grid>

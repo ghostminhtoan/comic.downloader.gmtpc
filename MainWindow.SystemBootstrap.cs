@@ -886,6 +886,16 @@ namespace get_link_manga
             _userAgentsByHost[host] = userAgent;
         }
 
+        private static readonly string[] _rotatedUserAgents = new[]
+        {
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 OPR/105.0.0.0",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        };
+
         private string GetScopedUserAgent(string urlOrHost)
         {
             string host = NormalizeCookieHostKey(urlOrHost);
@@ -894,6 +904,13 @@ namespace get_link_manga
                 !string.IsNullOrWhiteSpace(userAgent))
             {
                 return userAgent;
+            }
+
+            // Xoay vòng User-Agent ngẫu nhiên theo host để tránh bị nhận diện spam
+            if (!string.IsNullOrWhiteSpace(host))
+            {
+                int hash = Math.Abs(host.GetHashCode());
+                return _rotatedUserAgents[hash % _rotatedUserAgents.Length];
             }
 
             return _defaultUserAgent;
@@ -983,6 +1000,22 @@ namespace get_link_manga
                         AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                         UseCookies = useCookies
                     };
+
+                    // Auto Proxy Logic
+                    try
+                    {
+                        string proxyFile = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".portable", "proxy.txt");
+                        if (System.IO.File.Exists(proxyFile))
+                        {
+                            string proxyAddr = System.IO.File.ReadAllText(proxyFile).Trim();
+                            if (!string.IsNullOrWhiteSpace(proxyAddr))
+                            {
+                                newHandler.Proxy = new WebProxy(proxyAddr);
+                                newHandler.UseProxy = true;
+                            }
+                        }
+                    }
+                    catch {}
 
                     if (useCookies)
                     {

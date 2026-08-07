@@ -959,6 +959,37 @@ namespace get_link_manga
                 {
                     Directory.Move(tempFolder, targetFolder);
                 }
+
+                // Auto Zip CBZ Logic
+                bool autoZip = false;
+                Dispatcher.Invoke(() => {
+                    autoZip = chkAutoZipCbz != null && chkAutoZipCbz.IsChecked == true;
+                });
+                if (autoZip && Directory.Exists(targetFolder))
+                {
+                    try
+                    {
+                        string cbzPath = targetFolder.TrimEnd('\\', '/') + ".cbz";
+                        if (File.Exists(cbzPath))
+                        {
+                            try { File.Delete(cbzPath); } catch {}
+                        }
+                        System.IO.Compression.ZipFile.CreateFromDirectory(targetFolder, cbzPath);
+                        Log($"[AutoZip] Đã nén thành công file CBZ: {cbzPath}");
+                        try
+                        {
+                            Directory.Delete(targetFolder, true);
+                        }
+                        catch (Exception delEx)
+                        {
+                            Log($"[AutoZip Warning] Không thể xóa thư mục gốc sau khi nén: {delEx.Message}");
+                        }
+                    }
+                    catch (Exception zipEx)
+                    {
+                        Log($"[AutoZip Error] Lỗi khi tạo file CBZ: {zipEx.Message}");
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -4741,6 +4772,22 @@ namespace get_link_manga
                     UseCookies = useCookies
                 };
 
+                // Auto Proxy Logic
+                try
+                {
+                    string proxyFile = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".portable", "proxy.txt");
+                    if (System.IO.File.Exists(proxyFile))
+                    {
+                        string proxyAddr = System.IO.File.ReadAllText(proxyFile).Trim();
+                        if (!string.IsNullOrWhiteSpace(proxyAddr))
+                        {
+                            handler.Proxy = new WebProxy(proxyAddr);
+                            handler.UseProxy = true;
+                        }
+                    }
+                }
+                catch {}
+
                 if (useCookies)
                 {
                     handler.CookieContainer = GetScopedCookieContainer(h);
@@ -4824,7 +4871,7 @@ namespace get_link_manga
 
         private async Task DownloadUrlToFileWithRefererAsync(string url, string referer, string filePath, CancellationToken token, bool isViHentai = false, bool isTruyenqq = false)
         {
-            long minSize = (isTruyenqq || (url != null && (url.Contains("nhentai.net") || url.Contains("nhentaimg.com")))) ? 0 : 1024;
+            long minSize = (isTruyenqq || (url != null && (url.Contains("nhentai.net") || url.Contains("nhentaimg.com")))) ? 0 : 2048; // Smart Resume: >2KB mới skip, tránh skip ảnh hỏng/trống
             if (File.Exists(filePath) && new FileInfo(filePath).Length > minSize)
             {
                 return; // skip duplicate

@@ -180,6 +180,9 @@ namespace get_link_manga
 
             [DataMember(Order = 7)]
             public bool IsDownloadRunning { get; set; }
+
+            [DataMember(Order = 8)]
+            public bool AutoZipCbz { get; set; }
         }
 
         [DataContract]
@@ -739,7 +742,8 @@ namespace get_link_manga
                 DownloadFolderType = cmbDownloadFolderType != null ? cmbDownloadFolderType.SelectedIndex : 0,
                 DownloadPath = txtDownloadPath != null ? txtDownloadPath.Text : string.Empty,
                 AutoSplitChapters = cmbAutoSplitChapters != null ? (int.TryParse((cmbAutoSplitChapters.SelectedItem as ComboBoxItem)?.Content?.ToString(), out int val) ? val : 0) : 0,
-                IsDownloadRunning = (btnStartDownload?.IsChecked == true || _downloadCts != null)
+                IsDownloadRunning = (btnStartDownload?.IsChecked == true || _downloadCts != null),
+                AutoZipCbz = chkAutoZipCbz != null && chkAutoZipCbz.IsChecked == true
             };
 
             var serializer = new DataContractJsonSerializer(typeof(GalleryMarkdownSettingsState));
@@ -1206,6 +1210,13 @@ namespace get_link_manga
                                         break;
                                     }
                                 }
+                            }
+                        });
+
+                        Dispatcher.Invoke(() => {
+                            if (chkAutoZipCbz != null)
+                            {
+                                chkAutoZipCbz.IsChecked = settings.AutoZipCbz;
                             }
                         });
 

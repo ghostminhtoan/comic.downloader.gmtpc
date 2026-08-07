@@ -43,6 +43,7 @@ namespace get_link_manga
             ApplyUiTextMappings(true);
             ApplyRenameTabLanguage(true);
             ApplyResultsGridHeaderLanguage("CHI TIẾT TRUYỆN", "TRẠNG THÁI", "TIẾN TRÌNH", "XEM");
+            if (txtAutoZipCbzLabel != null) txtAutoZipCbzLabel.Text = "TỰ ZIP CBZ";
 
             if (btnSaveList != null) btnSaveList.Content = "Lưu mặc định";
             if (btnLoadList != null) btnLoadList.Content = "Mở file mặc định";

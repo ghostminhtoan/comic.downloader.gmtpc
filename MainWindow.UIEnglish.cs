@@ -103,6 +103,7 @@ namespace get_link_manga
             ["OPEN CACHE JSON"] = "MỞ CACHE JSON",
             ["CLEAR CACHE JSON"] = "XÓA CACHE JSON",
             ["WORD WRAP"] = "Xuống dòng",
+            ["AUTO ZIP CBZ"] = "Tự ZIP CBZ",
             ["SEARCH"] = "Tìm kiếm",
             ["FOLDER ACTIONS"] = "Công cụ thư mục",
             ["CHAPTER SELECTION"] = "Chỉ tải chapter",
@@ -908,6 +909,7 @@ namespace get_link_manga
             ApplyUiTextMappings(false);
             ApplyRenameTabLanguage(false);
             ApplyResultsGridHeaderLanguage("GALLERY DETAILS", "STATUS", "PROCESS", "VIEW");
+            if (txtAutoZipCbzLabel != null) txtAutoZipCbzLabel.Text = "AUTO ZIP CBZ";
 
             if (btnSaveList != null) btnSaveList.Content = "Save default";
             if (btnLoadList != null) btnLoadList.Content = "Open default";
