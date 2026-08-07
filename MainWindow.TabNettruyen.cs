@@ -353,10 +353,6 @@ document.addEventListener('click', function (event) {
 
         internal async Task<bool> CheckIfNettruyenBlockedAsync(string testUrl)
         {
-            if (IsNettruyenTechUrl(testUrl))
-            {
-                return false;
-            }
 
             try
             {
@@ -399,10 +395,6 @@ document.addEventListener('click', function (event) {
         internal async Task<bool> SolveNettruyenCaptchaIfNeededAsync(string testUrl)
         {
             if (IsCaptchaCooldownActive(testUrl)) return true;
-            if (IsNettruyenTechUrl(testUrl))
-            {
-                return true;
-            }
 
             BrowserSessionSnapshot cachedSession = GetCachedBrowserSession(testUrl);
             if (cachedSession != null)
@@ -745,6 +737,17 @@ document.addEventListener('click', function (event) {
                     !link.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                 {
                     link = activeDomain + (link.StartsWith("/") ? string.Empty : "/") + link;
+                }
+                else
+                {
+                    var activeUri = new Uri(activeDomain);
+                    if (Uri.TryCreate(link, UriKind.Absolute, out Uri tempLinkUri) &&
+                        tempLinkUri.Host.IndexOf("nettruyen", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                        !string.Equals(tempLinkUri.Host, activeUri.Host, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var builder = new UriBuilder(tempLinkUri) { Host = activeUri.Host };
+                        link = builder.Uri.ToString();
+                    }
                 }
 
                 link = link.TrimEnd('/');
@@ -1315,6 +1318,18 @@ document.addEventListener('click', function (event) {
                         {
                             string activeDomain = ExtractNettruyenBaseUrl(pageUrl);
                             fullLink = activeDomain + (fullLink.StartsWith("/") ? "" : "/") + fullLink;
+                        }
+                        else
+                        {
+                            string activeDomain = ExtractNettruyenBaseUrl(pageUrl);
+                            var activeUri = new Uri(activeDomain);
+                            if (Uri.TryCreate(fullLink, UriKind.Absolute, out Uri linkUri) &&
+                                linkUri.Host.IndexOf("nettruyen", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                                !string.Equals(linkUri.Host, activeUri.Host, StringComparison.OrdinalIgnoreCase))
+                            {
+                                var builder = new UriBuilder(linkUri) { Host = activeUri.Host };
+                                fullLink = builder.Uri.ToString();
+                            }
                         }
                         fullLink = fullLink.TrimEnd('/');
 
