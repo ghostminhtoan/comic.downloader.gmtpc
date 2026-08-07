@@ -6122,6 +6122,7 @@ namespace get_link_manga
                         token.ThrowIfCancellationRequested();
 
                         await semaphore.WaitAsync(token);
+                        string imgUrl = null;
                         try
                         {
                             while (_isDownloadPaused)
@@ -6168,7 +6169,7 @@ namespace get_link_manga
                                 return;
                             }
 
-                            string imgUrl = await ResolveHitomiImageUrlAsync(this, hash, name, isThumbnail: false);
+                            imgUrl = await ResolveHitomiImageUrlAsync(this, hash, name, isThumbnail: false);
                             string fileExt = Path.GetExtension(imgUrl) ?? ".webp";
                             string directPath = Path.ChangeExtension(localFilePath, fileExt);
 
@@ -6204,10 +6205,11 @@ namespace get_link_manga
                             if (queueItem != null)
                             {
                                 string traceMessage = $"Book: {item.Link}{Environment.NewLine}Page: {pageNum}{Environment.NewLine}Error: {ex.Message}";
+                                string errorImgUrl = imgUrl ?? item.Link;
                                 Dispatcher.Invoke(new Action(() =>
                                 {
-                                    queueItem.AddError(string.Empty, pageNum, traceMessage, item.Link, item.Link, pageNum.ToString());
-                                    RecordCheckError("hitomi.la", item.Name, string.Empty, pageNum, traceMessage, item.Link, pageNum.ToString());
+                                    queueItem.AddError(string.Empty, pageNum, traceMessage, errorImgUrl, item.Link, pageNum.ToString());
+                                    RecordCheckError("hitomi.la", item.Name, string.Empty, pageNum, traceMessage, errorImgUrl, pageNum.ToString());
                                 }));
                             }
                         }
