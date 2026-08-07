@@ -343,7 +343,7 @@ namespace get_link_manga
                 record.SavedRelativePath = Path.GetFileName(file);
                 record.FileSize = new FileInfo(file).Length;
                 record.ActualExtension = Path.GetExtension(file);
-                record.Verified = record.FileSize > 1024;
+                record.Verified = record.FileSize > 100;
                 record.State = record.Verified ? DownloadPageState.Verified : DownloadPageState.Failed;
                 record.UpdatedUtc = DateTime.UtcNow;
             }
@@ -763,7 +763,7 @@ namespace get_link_manga
 
         private async Task<DownloadFileResult> DownloadUrlToFileWithMetadataAsync(string url, string referer, string filePath, CancellationToken token, SiteDownloadProfile profile)
         {
-            if (File.Exists(filePath) && new FileInfo(filePath).Length > 1024)
+            if (File.Exists(filePath) && new FileInfo(filePath).Length > 100)
             {
                 long localLength = new FileInfo(filePath).Length;
                 bool isSizeMatched = false;
@@ -872,7 +872,7 @@ namespace get_link_manga
                             }
 
                             var fileInfo = new FileInfo(filePath);
-                            if (fileInfo.Length <= 1024)
+                            if (fileInfo.Length <= 100)
                             {
                                 throw new IOException("Downloaded file too small.");
                             }
