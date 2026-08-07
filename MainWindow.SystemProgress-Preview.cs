@@ -314,56 +314,70 @@ namespace get_link_manga
                 });
             }
 
-            if (item != null && string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) && item.Tag != null)
+            bool isHitomi = false;
+            if (item != null)
+            {
+                if (string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase))
+                {
+                    isHitomi = true;
+                }
+                else if (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    isHitomi = true;
+                }
+            }
+
+            if (isHitomi && item.Tag != null)
             {
                 try
                 {
-                    string tagJson = null;
+                    Newtonsoft.Json.Linq.JObject galleryInfo = null;
                     if (item.Tag is string tagStr)
                     {
-                        tagJson = tagStr;
-                    }
-                    else
-                    {
-                        tagJson = Newtonsoft.Json.JsonConvert.SerializeObject(item.Tag);
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(tagJson))
-                    {
-                        dynamic galleryInfo = Newtonsoft.Json.JsonConvert.DeserializeObject(tagJson);
-                        if (galleryInfo != null && galleryInfo.tags != null)
+                        if (!string.IsNullOrWhiteSpace(tagStr))
                         {
-                            var tagsList = new List<string>();
-                            foreach (var t in galleryInfo.tags)
-                            {
-                                string tagName = (string)t.tag;
-                                if (!string.IsNullOrWhiteSpace(tagName))
-                                {
-                                    tagName = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(tagName);
-                                    if (t.female != null && ((string)t.female == "1" || (int?)t.female == 1))
-                                    {
-                                        tagName += " ♀";
-                                    }
-                                    else if (t.male != null && ((string)t.male == "1" || (int?)t.male == 1))
-                                    {
-                                        tagName += " ♂";
-                                    }
-                                    tagsList.Add(tagName);
-                                }
-                            }
+                            galleryInfo = Newtonsoft.Json.Linq.JObject.Parse(tagStr);
+                        }
+                    }
+                    else if (item.Tag is Newtonsoft.Json.Linq.JObject jObj)
+                    {
+                        galleryInfo = jObj;
+                    }
 
-                            if (tagsList.Count > 0)
+                    if (galleryInfo != null && galleryInfo["tags"] is Newtonsoft.Json.Linq.JArray tagsArray)
+                    {
+                        var tagsList = new List<string>();
+                        foreach (var t in tagsArray)
+                        {
+                            string tagName = t["tag"]?.ToString();
+                            if (!string.IsNullOrWhiteSpace(tagName))
                             {
-                                panel.Children.Add(new TextBlock
+                                tagName = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(tagName);
+                                var femaleProp = t["female"];
+                                var maleProp = t["male"];
+                                if (femaleProp != null && (femaleProp.ToString() == "1" || femaleProp.ToString().ToLower() == "true"))
                                 {
-                                    Text = "Tags: " + string.Join(", ", tagsList),
-                                    Foreground = TryFindResource("CyberpunkMutedTextBrush") as Brush ?? Brushes.Gray,
-                                    FontWeight = FontWeights.Normal,
-                                    FontSize = 11,
-                                    TextWrapping = TextWrapping.Wrap,
-                                    Margin = new Thickness(2, 2, 2, 0)
-                                });
+                                    tagName += " ♀";
+                                }
+                                else if (maleProp != null && (maleProp.ToString() == "1" || maleProp.ToString().ToLower() == "true"))
+                                {
+                                    tagName += " ♂";
+                                }
+                                tagsList.Add(tagName);
                             }
+                        }
+
+                        if (tagsList.Count > 0)
+                        {
+                            panel.Children.Add(new TextBlock
+                            {
+                                Text = "Tags: " + string.Join(", ", tagsList),
+                                Foreground = TryFindResource("CyberpunkMutedTextBrush") as Brush ?? Brushes.Gray,
+                                FontWeight = FontWeights.Normal,
+                                FontSize = 11,
+                                TextWrapping = TextWrapping.Wrap,
+                                Margin = new Thickness(2, 2, 2, 0)
+                            });
                         }
                     }
                 }
@@ -437,7 +451,14 @@ namespace get_link_manga
 
         private async Task EnsureHitomiLaTagAsync(GalleryItem item, CancellationToken token)
         {
-            if (item == null || !string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) || item.Tag != null)
+            if (item == null || item.Tag != null)
+            {
+                return;
+            }
+
+            bool isHitomi = string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) ||
+                            (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
+            if (!isHitomi)
             {
                 return;
             }
@@ -476,7 +497,9 @@ namespace get_link_manga
                 return;
             }
 
-            if (string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) && item.Tag == null)
+            bool isHitomi = string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) ||
+                            (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
+            if (isHitomi && item.Tag == null)
             {
                 await EnsureHitomiLaTagAsync(item, token);
             }
