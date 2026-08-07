@@ -133,6 +133,9 @@ namespace get_link_manga
 
             [DataMember(Order = 38)]
             public string HoverPreviewThumbnailUrl { get; set; }
+
+            [DataMember(Order = 39)]
+            public string Tag { get; set; }
         }
 
         [DataContract]
@@ -797,6 +800,7 @@ namespace get_link_manga
                 MangadexLangPrimary = item.MangadexLangPrimary,
                 MangadexLangFallback = item.MangadexLangFallback,
                 HoverPreviewThumbnailUrl = item.HoverPreviewThumbnailUrl,
+                Tag = item.Tag as string,
                 Errors = item.GetUniqueErrors().Select(error => new ErrorState
                 {
                     ChapterName = error.ChapterName,
@@ -931,6 +935,7 @@ namespace get_link_manga
                 MangadexLangPrimary = state.MangadexLangPrimary ?? "vi",
                 MangadexLangFallback = state.MangadexLangFallback,
                 HoverPreviewThumbnailUrl = state.HoverPreviewThumbnailUrl,
+                Tag = state.Tag,
                 Errors = state.Errors == null
                     ? new List<ErrorDetail>()
                     : state.Errors.Select(error => new ErrorDetail
