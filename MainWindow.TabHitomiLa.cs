@@ -435,6 +435,10 @@ namespace get_link_manga
                             if (string.IsNullOrEmpty(jsContent)) return null;
 
                             string json = jsContent.Replace("var galleryinfo = ", "").Trim();
+                            if (json.EndsWith(";"))
+                            {
+                                json = json.Substring(0, json.Length - 1).Trim();
+                            }
                             dynamic galleryInfo = JsonConvert.DeserializeObject(json);
 
                             string title = galleryInfo.title;

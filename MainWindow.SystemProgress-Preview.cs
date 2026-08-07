@@ -314,43 +314,56 @@ namespace get_link_manga
                 });
             }
 
-            if (item != null && string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(item.Tag as string))
+            if (item != null && string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) && item.Tag != null)
             {
                 try
                 {
-                    dynamic galleryInfo = Newtonsoft.Json.JsonConvert.DeserializeObject(item.Tag as string);
-                    if (galleryInfo != null && galleryInfo.tags != null)
+                    string tagJson = null;
+                    if (item.Tag is string tagStr)
                     {
-                        var tagsList = new List<string>();
-                        foreach (var t in galleryInfo.tags)
-                        {
-                            string tagName = (string)t.tag;
-                            if (!string.IsNullOrWhiteSpace(tagName))
-                            {
-                                tagName = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(tagName);
-                                if (t.female != null && ((string)t.female == "1" || (int?)t.female == 1))
-                                {
-                                    tagName += " ♀";
-                                }
-                                else if (t.male != null && ((string)t.male == "1" || (int?)t.male == 1))
-                                {
-                                    tagName += " ♂";
-                                }
-                                tagsList.Add(tagName);
-                            }
-                        }
+                        tagJson = tagStr;
+                    }
+                    else
+                    {
+                        tagJson = Newtonsoft.Json.JsonConvert.SerializeObject(item.Tag);
+                    }
 
-                        if (tagsList.Count > 0)
+                    if (!string.IsNullOrWhiteSpace(tagJson))
+                    {
+                        dynamic galleryInfo = Newtonsoft.Json.JsonConvert.DeserializeObject(tagJson);
+                        if (galleryInfo != null && galleryInfo.tags != null)
                         {
-                            panel.Children.Add(new TextBlock
+                            var tagsList = new List<string>();
+                            foreach (var t in galleryInfo.tags)
                             {
-                                Text = "Tags: " + string.Join(", ", tagsList),
-                                Foreground = TryFindResource("CyberpunkMutedTextBrush") as Brush ?? Brushes.Gray,
-                                FontWeight = FontWeights.Normal,
-                                FontSize = 11,
-                                TextWrapping = TextWrapping.Wrap,
-                                Margin = new Thickness(2, 2, 2, 0)
-                            });
+                                string tagName = (string)t.tag;
+                                if (!string.IsNullOrWhiteSpace(tagName))
+                                {
+                                    tagName = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(tagName);
+                                    if (t.female != null && ((string)t.female == "1" || (int?)t.female == 1))
+                                    {
+                                        tagName += " ♀";
+                                    }
+                                    else if (t.male != null && ((string)t.male == "1" || (int?)t.male == 1))
+                                    {
+                                        tagName += " ♂";
+                                    }
+                                    tagsList.Add(tagName);
+                                }
+                            }
+
+                            if (tagsList.Count > 0)
+                            {
+                                panel.Children.Add(new TextBlock
+                                {
+                                    Text = "Tags: " + string.Join(", ", tagsList),
+                                    Foreground = TryFindResource("CyberpunkMutedTextBrush") as Brush ?? Brushes.Gray,
+                                    FontWeight = FontWeights.Normal,
+                                    FontSize = 11,
+                                    TextWrapping = TextWrapping.Wrap,
+                                    Margin = new Thickness(2, 2, 2, 0)
+                                });
+                            }
                         }
                     }
                 }
