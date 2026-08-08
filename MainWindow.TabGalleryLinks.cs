@@ -4735,19 +4735,28 @@ namespace get_link_manga
                     // 1. Xóa cookie (không báo gì)
                     BtnExtractClearCookie_Click(null, null);
 
-                    // Chờ nửa giây
-                    await Task.Delay(500);
+                    // 2. Nếu nút download đang bật, tắt nút download và chờ 1 giây
+                    bool wasDownloading = btnStartDownload != null && btnStartDownload.IsChecked == true;
+                    if (wasDownloading)
+                    {
+                        BtnStopDownload_Click(null, null);
+                        await Task.Delay(1000);
+                    }
+                    else
+                    {
+                        await Task.Delay(500);
+                    }
 
-                    // 2. Làm mới trạng thái của những truyện lỗi
+                    // 3. Làm mới trạng thái của những truyện lỗi
                     RefreshErrorBooksOnly();
 
-                    // 3. Xóa temp
+                    // 4. Xóa temp
                     ClearTempRootFolder(PortablePaths.PortableTempRoot);
 
                     // Chờ nửa giây
                     await Task.Delay(500);
 
-                    // 4. Retry tải (bật cả 2 nút download và retry và gọi start queue)
+                    // 5. Bật lại cả 2 nút download và nút retry tiếp
                     if (btnAutoRetryErrors != null)
                     {
                         btnAutoRetryErrors.IsChecked = true;
