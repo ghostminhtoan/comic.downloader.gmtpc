@@ -450,6 +450,21 @@ namespace get_link_manga
                             string title = ExtractNhentaiNetGalleryTitle(galleryHtml, page.ToString());
                             string thumbUrl = ExtractNhentaiNetGalleryCover(galleryHtml);
 
+                            var nhentaiTags = ExtractNhentaiNetTags(galleryHtml);
+                            Newtonsoft.Json.Linq.JObject jTagsObj = null;
+                            if (nhentaiTags.Count > 0)
+                            {
+                                var jArr = new Newtonsoft.Json.Linq.JArray();
+                                foreach (var tag in nhentaiTags)
+                                {
+                                    var tObj = new Newtonsoft.Json.Linq.JObject();
+                                    tObj["tag"] = tag;
+                                    jArr.Add(tObj);
+                                }
+                                jTagsObj = new Newtonsoft.Json.Linq.JObject();
+                                jTagsObj["tags"] = jArr;
+                            }
+
                             string fullLink = galleryUrl;
                             if (!_scrapedItems.Any(item => item.Link == fullLink || item.Name.Equals(title, StringComparison.OrdinalIgnoreCase)))
                             {
@@ -460,7 +475,8 @@ namespace get_link_manga
                                     OriginalIndex = _scrapedItems.Count,
                                     IsChecked = false,
                                     HoverPreviewThumbnailUrl = thumbUrl,
-                                    SourceDomain = "nhentai.net"
+                                    SourceDomain = "nhentai.net",
+                                    Tag = jTagsObj
                                 });
                                 pageCount++;
                             }
@@ -625,6 +641,21 @@ namespace get_link_manga
 
                         string thumbUrl = ExtractNhentaiNetGalleryCover(html);
 
+                        var nhentaiTags = ExtractNhentaiNetTags(html);
+                        Newtonsoft.Json.Linq.JObject jTagsObj = null;
+                        if (nhentaiTags.Count > 0)
+                        {
+                            var jArr = new Newtonsoft.Json.Linq.JArray();
+                            foreach (var tag in nhentaiTags)
+                            {
+                                var tObj = new Newtonsoft.Json.Linq.JObject();
+                                tObj["tag"] = tag;
+                                jArr.Add(tObj);
+                            }
+                            jTagsObj = new Newtonsoft.Json.Linq.JObject();
+                            jTagsObj["tags"] = jArr;
+                        }
+
                         Dispatcher.Invoke(() =>
                         {
                             _scrapedItems.Add(new GalleryItem
@@ -635,7 +666,7 @@ namespace get_link_manga
                                 IsChecked = true,
                                 HoverPreviewThumbnailUrl = thumbUrl,
                                 SourceDomain = "nhentai.net",
-                                Tag = thumbUrl
+                                Tag = jTagsObj
                             });
                         });
 
