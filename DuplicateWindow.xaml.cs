@@ -48,6 +48,8 @@ namespace get_link_manga
             lbDuplicatesThumbnail.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(DgDuplicates_ScrollChanged));
             UpdateStatus();
 
+            InitLocalTab();
+
             // Sync sorting and subscribe to sort changes of the main window's view
             var mainView = CollectionViewSource.GetDefaultView(_mainWindow._scrapedItems);
             if (mainView != null)
@@ -402,7 +404,11 @@ namespace get_link_manga
             if (mainView != null)
             {
                 ((System.Collections.Specialized.INotifyCollectionChanged)mainView.SortDescriptions).CollectionChanged -= MainSortDescriptions_CollectionChanged;
+                ((System.Collections.Specialized.INotifyCollectionChanged)mainView.SortDescriptions).CollectionChanged -= LocalSortDescriptions_CollectionChanged;
             }
+
+            dgLocalDuplicates.RemoveHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(DgLocalDuplicates_ScrollChanged));
+            lbLocalDuplicatesThumbnail.RemoveHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(DgLocalDuplicates_ScrollChanged));
 
             base.OnClosed(e);
         }

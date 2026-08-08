@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:get_link_manga"
         mc:Ignorable="d"
-        Title="DUPLICATE NAME MANAGER" Height="600" Width="850"
+        Title="DUPLICATE NAME MANAGER" Height="700" Width="950"
         Background="{DynamicResource CyberpunkDarkBrush}"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False">
@@ -65,6 +65,12 @@
             <EventSetter Event="MouseLeave" Handler="DuplicatePreviewRow_MouseLeave"/>
         </Style>
 
+        <Style x:Key="LocalDuplicatePreviewRowStyle" TargetType="DataGridRow" BasedOn="{StaticResource CyberpunkDataGridRow}">
+            <EventSetter Event="MouseEnter" Handler="LocalPreviewRow_MouseEnter"/>
+            <EventSetter Event="MouseMove" Handler="LocalPreviewRow_MouseMove"/>
+            <EventSetter Event="MouseLeave" Handler="LocalPreviewRow_MouseLeave"/>
+        </Style>
+
         <!-- Cell Style -->
         <Style x:Key="CyberpunkDataGridCell" TargetType="DataGridCell">
             <Setter Property="Padding" Value="10,6"/>
@@ -93,9 +99,7 @@
         <Grid.RowDefinitions>
             <!-- Header -->
             <RowDefinition Height="Auto"/>
-            <!-- Toolbar -->
-            <RowDefinition Height="Auto"/>
-            <!-- DataGrid -->
+            <!-- Tab Control -->
             <RowDefinition Height="*"/>
             <!-- Footer -->
             <RowDefinition Height="Auto"/>
@@ -106,6 +110,8 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="20"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
@@ -123,270 +129,445 @@
 
                 <Border Grid.Column="1" Background="#1c1122" BorderBrush="{StaticResource CyberpunkPinkBrush}" BorderThickness="1" CornerRadius="3" Padding="10,4" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Duplicate Items: " Foreground="{StaticResource CyberpunkTextBrush}" FontSize="11" FontWeight="Bold"/>
+                        <TextBlock Text="Download list dups: " Foreground="{StaticResource CyberpunkTextBrush}" FontSize="11" FontWeight="Bold"/>
                         <TextBlock Name="lblDupCount" Text="0" Foreground="{StaticResource CyberpunkPinkBrush}" FontSize="11" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="3" Background="#1c1122" BorderBrush="{StaticResource CyberpunkCyanBrush}" BorderThickness="1" CornerRadius="3" Padding="10,4" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Local list dups: " Foreground="{StaticResource CyberpunkTextBrush}" FontSize="11" FontWeight="Bold"/>
+                        <TextBlock Name="lblLocalDupCount" Text="0" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="11" FontWeight="Bold"/>
                     </StackPanel>
                 </Border>
             </Grid>
         </Border>
 
-        <!-- Toolbar -->
-        <Grid Grid.Row="1" Margin="0,0,0,12">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <!-- Tab Control -->
+        <TabControl Grid.Row="1" Style="{StaticResource TabControlInLine}" Background="Transparent" BorderThickness="0" Margin="0,0,0,15">
+            <!-- TAB 1: Download list - duplicate name -->
+            <TabItem Header="Download list - duplicate name" Style="{StaticResource CyberpunkTabItem}">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-            <TextBox Name="txtFilter" 
-                        TextChanged="TxtFilter_TextChanged"
-                        Background="#0e121a" 
-                        BorderBrush="{StaticResource CyberpunkBorderBrush}" 
-                        Foreground="{StaticResource CyberpunkTextBrush}" 
-                        CaretBrush="{StaticResource CyberpunkCyanBrush}"
-                        Height="30"
-                        VerticalContentAlignment="Center"/>
+                    <!-- Toolbar -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="2" Name="btnCheckAll" Content="CHECK ALL" Click="BtnCheckAll_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="30" Width="100" FontSize="11"/>
-            <Button Grid.Column="4" Name="btnUncheckAll" Content="UNCHECK ALL" Click="BtnUncheckAll_Click" Style="{StaticResource CyberpunkButtonPink}" Height="30" Width="100" FontSize="11"/>
-            <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Name="lblResultsPresentation" Text="&#xE8A9;" FontFamily="Segoe MDL2 Assets" Foreground="#00FF87" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                <ToggleButton Name="chkResultsPresentation" Click="ChkResultsPresentation_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="LIST / THUMBNAIL"/>
-            </StackPanel>
-        </Grid>
+                        <TextBox Name="txtFilter" 
+                                 TextChanged="TxtFilter_TextChanged"
+                                 Background="#0e121a" 
+                                 BorderBrush="{StaticResource CyberpunkBorderBrush}" 
+                                 Foreground="{StaticResource CyberpunkTextBrush}" 
+                                 CaretBrush="{StaticResource CyberpunkCyanBrush}"
+                                 Height="30"
+                                 VerticalContentAlignment="Center"/>
 
-        <DataGrid Grid.Row="2"
-                  Name="dgDuplicates"
-                  Margin="0,0,0,15"
-                  Style="{StaticResource CyberpunkDataGrid}"
-                  ColumnHeaderStyle="{StaticResource CyberpunkDataGridColumnHeader}"
-                  RowStyle="{StaticResource DuplicatePreviewRowStyle}"
-                  CellStyle="{StaticResource CyberpunkDataGridCell}"
-                  SelectionChanged="DgDuplicates_SelectionChanged"
-                  AutoGenerateColumns="False"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  SelectionMode="Extended"
-                  SelectionUnit="FullRow"
-                  PreviewKeyDown="DgDuplicates_PreviewKeyDown"
-                  PreviewTextInput="DgDuplicates_PreviewTextInput"
-                  MouseDoubleClick="DgDuplicates_MouseDoubleClick">
-            <DataGrid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Tích chọn dòng đang bôi đen (Check Selected)" Click="MenuCheckSelected_Click"/>
-                    <MenuItem Header="Bỏ tích dòng đang bôi đen (Uncheck Selected)" Click="MenuUncheckSelected_Click"/>
-                    <MenuItem Header="Đảo ngược trạng thái tích (Invert Checked)" Click="MenuInvertChecked_Click"/>
-                    <Separator/>
-                    <MenuItem Header="Copy link các dòng đang chọn (Copy Selected Links)" Click="MenuCopySelectedLinks_Click"/>
-                    <Separator/>
-                    <MenuItem Header="Xóa các dòng đang bôi đen (Delete Selected)" Click="MenuDeleteSelected_Click"/>
-                    <MenuItem Header="Xóa các dòng đã tích (Delete Checked)" Click="MenuDeleteChecked_Click"/>
-                    <Separator/>
-                    <MenuItem Header="Tải các dòng đang bôi đen (Download highlighted lines)" Click="MenuDownloadSelected_Click"/>
-                    <MenuItem Header="Tải các dòng đã tích (Download selected lines)" Click="MenuDownloadChecked_Click"/>
-                </ContextMenu>
-            </DataGrid.ContextMenu>
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Width="45">
-                    <DataGridTemplateColumn.Header>
-                        <Grid HorizontalAlignment="Center">
-                            <CheckBox Name="chkSelectAll" Click="ChkSelectAll_Click"/>
-                        </Grid>
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}"
-                                      HorizontalAlignment="Center"
-                                      VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="DUPLICATE DETAILS" Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <StackPanel Margin="5,4"
-                                        Orientation="Vertical">
-                                <TextBlock local:TextBlockLanguageColorizer.HighlightedText="{Binding Name}"
-                                           FontWeight="Bold"
-                                           FontSize="12"
-                                           Margin="0,0,0,4"
-                                           TextWrapping="NoWrap">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsNumberedVariantDuplicate}" Value="True">
-                                                    <Setter Property="Foreground" Value="#FFFFA347"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsCensorshipUncensoredVariant}" Value="True">
-                                                    <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsCensorshipFullColorVariant}" Value="True">
-                                                    <Setter Property="Foreground" Value="#FFD78BFF"/>
-                                                </DataTrigger>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
-                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
-                                                </MultiDataTrigger>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
-                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
-                                                </MultiDataTrigger>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
-                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
-                                                </MultiDataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                                <TextBlock Text="{Binding HoverPreviewIndicatorText}"
-                                           Foreground="White"
-                                           FontSize="9"
-                                           FontWeight="SemiBold"
-                                           Margin="0,0,0,2"/>
-                                <TextBlock Text="{Binding Link}"
-                                           Foreground="{StaticResource CyberpunkMutedTextBrush}"
-                                           FontSize="11"
-                                           TextWrapping="NoWrap"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+                        <Button Grid.Column="2" Name="btnCheckAll" Content="CHECK ALL" Click="BtnCheckAll_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="30" Width="100" FontSize="11"/>
+                        <Button Grid.Column="4" Name="btnUncheckAll" Content="UNCHECK ALL" Click="BtnUncheckAll_Click" Style="{StaticResource CyberpunkButtonPink}" Height="30" Width="100" FontSize="11"/>
+                        <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Name="lblResultsPresentation" Text="&#xE8A9;" FontFamily="Segoe MDL2 Assets" Foreground="#00FF87" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <ToggleButton Name="chkResultsPresentation" Click="ChkResultsPresentation_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="LIST / THUMBNAIL"/>
+                        </StackPanel>
+                    </Grid>
 
-        <ListBox Grid.Row="2"
-                 Name="lbDuplicatesThumbnail"
-                 Margin="0,0,0,15"
-                 Visibility="Collapsed"
-                 Background="Transparent"
-                 BorderThickness="0"
-                 SelectionMode="Extended"
-                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 ItemsSource="{Binding ElementName=dgDuplicates, Path=ItemsSource}"
-                 SelectionChanged="LbDuplicatesThumbnail_SelectionChanged"
-                 PreviewKeyDown="DgDuplicates_PreviewKeyDown"
-                 PreviewTextInput="DgDuplicates_PreviewTextInput"
-                 MouseDoubleClick="DgDuplicates_MouseDoubleClick">
-            <ListBox.ContextMenu>
-                <Binding ElementName="dgDuplicates" Path="ContextMenu"/>
-            </ListBox.ContextMenu>
-            <ListBox.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Horizontal"/>
-                </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                    <Setter Property="Padding" Value="0"/>
-                    <Setter Property="Margin" Value="0,0,8,8"/>
-                    <Setter Property="Width" Value="150"/>
-                    <Setter Property="Height" Value="220"/>
-                    <Setter Property="Background" Value="#09101C"/>
-                    <Setter Property="BorderBrush" Value="Transparent"/>
-                    <Setter Property="BorderThickness" Value="1"/>
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
-                    <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="#3A3200"/>
-                            <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
-                            <Setter Property="BorderThickness" Value="2"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </ListBox.ItemContainerStyle>
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Border Padding="4" 
-                            Background="#111827" 
-                            BorderBrush="{StaticResource CyberpunkCyanBrush}" 
-                            BorderThickness="1" 
-                            CornerRadius="6"
-                            MouseEnter="DuplicatePreviewRow_MouseEnter"
-                            MouseMove="DuplicatePreviewRow_MouseMove"
-                            MouseLeave="DuplicatePreviewRow_MouseLeave">
-                        <Grid SnapsToDevicePixels="True">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="140"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            
-                            <Grid Grid.Row="0">
-                                <Image Source="{Binding HoverPreviewThumbnailImageSource}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4"/>
-                            </Grid>
-                            
-                            <StackPanel Grid.Row="1" Margin="2,4,2,2">
-                                <TextBlock local:TextBlockLanguageColorizer.HighlightedText="{Binding Name}"
-                                           FontWeight="Bold" 
-                                           FontSize="10" 
-                                           TextTrimming="CharacterEllipsis" 
-                                           TextWrapping="Wrap" 
-                                           Height="30">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsNumberedVariantDuplicate}" Value="True">
-                                                    <Setter Property="Foreground" Value="#FFFFA347"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsCensorshipUncensoredVariant}" Value="True">
-                                                    <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsCensorshipFullColorVariant}" Value="True">
-                                                    <Setter Property="Foreground" Value="#FFD78BFF"/>
-                                                </DataTrigger>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
-                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
-                                                </MultiDataTrigger>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
-                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
-                                                </MultiDataTrigger>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
-                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
-                                                </MultiDataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                                <TextBlock Text="{Binding HoverPreviewIndicatorText}" FontSize="8" Foreground="{StaticResource CyberpunkMutedTextBrush}"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                    <!-- Main lists (Grid & ListBox) -->
+                    <Grid Grid.Row="1">
+                        <DataGrid Name="dgDuplicates"
+                                  Style="{StaticResource CyberpunkDataGrid}"
+                                  ColumnHeaderStyle="{StaticResource CyberpunkDataGridColumnHeader}"
+                                  RowStyle="{StaticResource DuplicatePreviewRowStyle}"
+                                  CellStyle="{StaticResource CyberpunkDataGridCell}"
+                                  SelectionChanged="DgDuplicates_SelectionChanged"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  SelectionMode="Extended"
+                                  SelectionUnit="FullRow"
+                                  PreviewKeyDown="DgDuplicates_PreviewKeyDown"
+                                  PreviewTextInput="DgDuplicates_PreviewTextInput"
+                                  MouseDoubleClick="DgDuplicates_MouseDoubleClick">
+                            <DataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Tích chọn dòng đang bôi đen (Check Selected)" Click="MenuCheckSelected_Click"/>
+                                    <MenuItem Header="Bỏ tích dòng đang bôi đen (Uncheck Selected)" Click="MenuUncheckSelected_Click"/>
+                                    <MenuItem Header="Đảo ngược trạng thái tích (Invert Checked)" Click="MenuInvertChecked_Click"/>
+                                    <Separator/>
+                                    <MenuItem Header="Copy link các dòng đang chọn (Copy Selected Links)" Click="MenuCopySelectedLinks_Click"/>
+                                    <Separator/>
+                                    <MenuItem Header="Xóa các dòng đang bôi đen (Delete Selected)" Click="MenuDeleteSelected_Click"/>
+                                    <MenuItem Header="Xóa các dòng đã tích (Delete Checked)" Click="MenuDeleteChecked_Click"/>
+                                    <Separator/>
+                                    <MenuItem Header="Tải các dòng đang bôi đen (Download highlighted lines)" Click="MenuDownloadSelected_Click"/>
+                                    <MenuItem Header="Tải các dòng đã tích (Download selected lines)" Click="MenuDownloadChecked_Click"/>
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Width="45">
+                                    <DataGridTemplateColumn.Header>
+                                        <Grid HorizontalAlignment="Center">
+                                            <CheckBox Name="chkSelectAll" Click="ChkSelectAll_Click"/>
+                                        </Grid>
+                                    </DataGridTemplateColumn.Header>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="DUPLICATE DETAILS" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="5,4" Orientation="Vertical">
+                                                <TextBlock local:TextBlockLanguageColorizer.HighlightedText="{Binding Name}"
+                                                           FontWeight="Bold" FontSize="12" Margin="0,0,0,4" TextWrapping="NoWrap">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkTextBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsParallelSplitParent}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                </DataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding IsParallelSplitTask}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsParallelSplitParent}" Value="False"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Foreground" Value="#C77DFF"/>
+                                                                    <Setter Property="Margin" Value="18,0,0,4"/>
+                                                                </MultiDataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding HoverPreviewIndicatorText}" Foreground="White" FontSize="9" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                                                <TextBlock Text="{Binding Link}" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="11" TextWrapping="NoWrap">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsParallelSplitTask}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#C77DFF"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <ListBox Name="lbDuplicatesThumbnail"
+                                 Visibility="Collapsed"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 SelectionMode="Extended"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 SelectionChanged="LbDuplicatesThumbnail_SelectionChanged"
+                                 PreviewKeyDown="DgDuplicates_PreviewKeyDown"
+                                 PreviewTextInput="DgDuplicates_PreviewTextInput"
+                                 MouseDoubleClick="DgDuplicates_MouseDoubleClick">
+                            <ListBox.ContextMenu>
+                                <Binding ElementName="dgDuplicates" Path="ContextMenu"/>
+                            </ListBox.ContextMenu>
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="Margin" Value="0,0,8,8"/>
+                                    <Setter Property="Width" Value="150"/>
+                                    <Setter Property="Height" Value="220"/>
+                                    <Setter Property="Background" Value="#09101C"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#3A3200"/>
+                                            <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                            <Setter Property="BorderThickness" Value="2"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="4" Background="#111827" BorderBrush="{StaticResource CyberpunkCyanBrush}" BorderThickness="1" CornerRadius="6"
+                                            MouseEnter="DuplicatePreviewRow_MouseEnter" MouseMove="DuplicatePreviewRow_MouseMove" MouseLeave="DuplicatePreviewRow_MouseLeave">
+                                        <Grid SnapsToDevicePixels="True">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="140"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid Grid.Row="0">
+                                                <Image Source="{Binding HoverPreviewThumbnailImageSource}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4"/>
+                                            </Grid>
+                                            <StackPanel Grid.Row="1" Margin="2,4,2,2">
+                                                <TextBlock local:TextBlockLanguageColorizer.HighlightedText="{Binding Name}"
+                                                           FontWeight="Bold" FontSize="10" TextTrimming="CharacterEllipsis" TextWrapping="Wrap" Height="30">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkTextBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsParallelSplitParent}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                </DataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding IsParallelSplitTask}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsParallelSplitParent}" Value="False"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Foreground" Value="#C77DFF"/>
+                                                                    <Setter Property="Margin" Value="12,0,0,4"/>
+                                                                </MultiDataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding HoverPreviewIndicatorText}" FontSize="8" Foreground="{StaticResource CyberpunkMutedTextBrush}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- TAB 2: Local list - duplicate name -->
+            <TabItem Header="Local list - duplicate name" Style="{StaticResource CyberpunkTabItem}">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/> <!-- Browse Folder Bar -->
+                        <RowDefinition Height="Auto"/> <!-- Toolbar -->
+                        <RowDefinition Height="*"/>    <!-- Content List -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Browse Folder Bar -->
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="Đường dẫn thư mục:" Foreground="{StaticResource CyberpunkTextBrush}" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="2" Name="txtLocalPath" IsReadOnly="True" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkCyanBrush}" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+                        <Button Grid.Column="4" Name="btnBrowseLocal" Content="DUYỆT THƯ MỤC..." Click="BtnBrowseLocal_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="30" Width="130" FontWeight="Bold"/>
+                    </Grid>
+
+                    <!-- Toolbar -->
+                    <Grid Grid.Row="1" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox Name="txtLocalFilter" 
+                                 TextChanged="TxtLocalFilter_TextChanged"
+                                 Background="#0e121a" 
+                                 BorderBrush="{StaticResource CyberpunkBorderBrush}" 
+                                 Foreground="{StaticResource CyberpunkTextBrush}" 
+                                 CaretBrush="{StaticResource CyberpunkCyanBrush}"
+                                 Height="30"
+                                 VerticalContentAlignment="Center"/>
+
+                        <Button Grid.Column="2" Name="btnLocalCheckAll" Content="CHECK ALL" Click="BtnLocalCheckAll_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="30" Width="100" FontSize="11"/>
+                        <Button Grid.Column="4" Name="btnLocalUncheckAll" Content="UNCHECK ALL" Click="BtnLocalUncheckAll_Click" Style="{StaticResource CyberpunkButtonPink}" Height="30" Width="100" FontSize="11"/>
+                    </Grid>
+
+                    <!-- Content List -->
+                    <Grid Grid.Row="2">
+                        <DataGrid Name="dgLocalDuplicates"
+                                  Style="{StaticResource CyberpunkDataGrid}"
+                                  ColumnHeaderStyle="{StaticResource CyberpunkDataGridColumnHeader}"
+                                  RowStyle="{StaticResource LocalDuplicatePreviewRowStyle}"
+                                  CellStyle="{StaticResource CyberpunkDataGridCell}"
+                                  SelectionChanged="DgLocalDuplicates_SelectionChanged"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  SelectionMode="Extended"
+                                  SelectionUnit="FullRow"
+                                  PreviewKeyDown="DgDuplicates_PreviewKeyDown"
+                                  PreviewTextInput="DgDuplicates_PreviewTextInput"
+                                  MouseDoubleClick="DgDuplicates_MouseDoubleClick">
+                            <DataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Tích chọn dòng đang bôi đen (Check Selected)" Click="MenuCheckSelected_Click"/>
+                                    <MenuItem Header="Bỏ tích dòng đang bôi đen (Uncheck Selected)" Click="MenuUncheckSelected_Click"/>
+                                    <MenuItem Header="Đảo ngược trạng thái tích (Invert Checked)" Click="MenuInvertChecked_Click"/>
+                                    <Separator/>
+                                    <MenuItem Header="Xóa các thư mục đang bôi đen trên ổ đĩa (Delete Selected Folders)" Click="MenuDeleteSelected_Click"/>
+                                    <MenuItem Header="Xóa các thư mục đã tích chọn trên ổ đĩa (Delete Checked Folders)" Click="MenuDeleteChecked_Click"/>
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Width="45">
+                                    <DataGridTemplateColumn.Header>
+                                        <Grid HorizontalAlignment="Center">
+                                            <CheckBox Name="chkLocalSelectAll" Click="ChkLocalSelectAll_Click"/>
+                                        </Grid>
+                                    </DataGridTemplateColumn.Header>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="LOCAL DUPLICATE DETAILS (FOLDER PATH)" Width="*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="5,4" Orientation="Vertical">
+                                                <TextBlock local:TextBlockLanguageColorizer.HighlightedText="{Binding Name}"
+                                                           FontWeight="Bold" FontSize="12" Margin="0,0,0,4" TextWrapping="NoWrap">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkTextBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsParallelSplitParent}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                </DataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding IsParallelSplitTask}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsParallelSplitParent}" Value="False"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Foreground" Value="#C77DFF"/>
+                                                                    <Setter Property="Margin" Value="18,0,0,4"/>
+                                                                </MultiDataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding HoverPreviewIndicatorText}" Foreground="White" FontSize="9" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                                                <TextBlock Text="{Binding Link}" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="11" TextWrapping="NoWrap"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <ListBox Name="lbLocalDuplicatesThumbnail"
+                                 Visibility="Collapsed"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 SelectionMode="Extended"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 SelectionChanged="LbLocalDuplicatesThumbnail_SelectionChanged"
+                                 PreviewKeyDown="DgDuplicates_PreviewKeyDown"
+                                 PreviewTextInput="DgDuplicates_PreviewTextInput"
+                                 MouseDoubleClick="DgDuplicates_MouseDoubleClick">
+                            <ListBox.ContextMenu>
+                                <Binding ElementName="dgLocalDuplicates" Path="ContextMenu"/>
+                            </ListBox.ContextMenu>
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="Margin" Value="0,0,8,8"/>
+                                    <Setter Property="Width" Value="150"/>
+                                    <Setter Property="Height" Value="220"/>
+                                    <Setter Property="Background" Value="#09101C"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#3A3200"/>
+                                            <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                            <Setter Property="BorderThickness" Value="2"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="4" Background="#111827" BorderBrush="{StaticResource CyberpunkCyanBrush}" BorderThickness="1" CornerRadius="6"
+                                            MouseEnter="LocalPreviewRow_MouseEnter" MouseMove="LocalPreviewRow_MouseMove" MouseLeave="LocalPreviewRow_MouseLeave">
+                                        <Grid SnapsToDevicePixels="True">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="140"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid Grid.Row="0">
+                                                <Image Source="{Binding HoverPreviewThumbnailImageSource}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <CheckBox IsChecked="{Binding IsChecked, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4"/>
+                                            </Grid>
+                                            <StackPanel Grid.Row="1" Margin="2,4,2,2">
+                                                <TextBlock local:TextBlockLanguageColorizer.HighlightedText="{Binding Name}"
+                                                           FontWeight="Bold" FontSize="10" TextTrimming="CharacterEllipsis" TextWrapping="Wrap" Height="30">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkTextBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsParallelSplitParent}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                </DataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding IsParallelSplitTask}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsParallelSplitParent}" Value="False"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Foreground" Value="#C77DFF"/>
+                                                                    <Setter Property="Margin" Value="12,0,0,4"/>
+                                                                </MultiDataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding HoverPreviewIndicatorText}" FontSize="8" Foreground="{StaticResource CyberpunkMutedTextBrush}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
 
         <!-- Footer -->
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -394,12 +575,9 @@
 
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="Rule màu:" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" Margin="0,0,8,0"/>
-                <TextBlock Text="Thường" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="11" Margin="0,0,10,0"/>
-                <TextBlock Text="Decensored" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="11" Margin="0,0,10,0"/>
-                <TextBlock Text="Full color" Foreground="#FFD78BFF" FontSize="11" Margin="0,0,10,0"/>
-                <TextBlock Text="Số chap/book" Foreground="#FFFFA347" FontSize="11" Margin="0,0,10,0"/>
-                <TextBlock Text="Màu+Số" Foreground="#FF9DFF00" FontSize="11" Margin="0,0,10,0"/>
-                <TextBlock Text="Decensored+Color" Foreground="#FFFFFFFF" FontSize="11" Margin="0,0,12,0"/>
+                <TextBlock Text="Thường" Foreground="{StaticResource CyberpunkTextBrush}" FontSize="11" Margin="0,0,10,0"/>
+                <TextBlock Text="Split Parent" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="11" Margin="0,0,10,0"/>
+                <TextBlock Text="Split Task" Foreground="#C77DFF" FontSize="11" Margin="0,0,12,0"/>
                 <TextBlock Name="lblStatus" Text="Ready to analyze." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" VerticalAlignment="Center"/>
             </StackPanel>
 
