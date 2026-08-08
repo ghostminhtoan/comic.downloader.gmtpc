@@ -4752,7 +4752,7 @@ namespace get_link_manga
                     {
                         btnAutoRetryErrors.IsChecked = true;
                     }
-                    if (btnStartDownload != null)
+                    if (btnStartDownload != null && btnStartDownload.IsChecked != true)
                     {
                         btnStartDownload.IsChecked = true;
                         await HandleStartDownloadToggleCheckedAsync();
