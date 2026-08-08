@@ -3193,8 +3193,8 @@ namespace get_link_manga
                             var pageWatch = Stopwatch.StartNew();
 
                             // Skip if file already exists in either temp or final folder
-                            if ((File.Exists(localFilePath) && new FileInfo(localFilePath).Length > 15360) ||
-                                (File.Exists(finalFilePath) && new FileInfo(finalFilePath).Length > 15360))
+                            if ((File.Exists(localFilePath) && new FileInfo(localFilePath).Length > 1024) ||
+                                (File.Exists(finalFilePath) && new FileInfo(finalFilePath).Length > 1024))
                             {
                                 pageWatch.Stop();
                                 lock (lockObj)
@@ -3469,13 +3469,13 @@ namespace get_link_manga
                             {
                                 string testPathTemp = Path.ChangeExtension(localFilePath, checkExt);
                                 string testPathFinal = Path.ChangeExtension(finalFilePath, checkExt);
-                                if (File.Exists(testPathTemp) && new FileInfo(testPathTemp).Length > 15360)
+                                if (File.Exists(testPathTemp) && new FileInfo(testPathTemp).Length > 1024)
                                 {
                                     alreadyExists = true;
                                     existingFile = testPathTemp;
                                     break;
                                 }
-                                if (File.Exists(testPathFinal) && new FileInfo(testPathFinal).Length > 15360)
+                                if (File.Exists(testPathFinal) && new FileInfo(testPathFinal).Length > 1024)
                                 {
                                     alreadyExists = true;
                                     existingFile = testPathFinal;
@@ -4940,7 +4940,7 @@ namespace get_link_manga
 
         private async Task DownloadUrlToFileWithRefererAsync(string url, string referer, string filePath, CancellationToken token, bool isViHentai = false, bool isTruyenqq = false)
         {
-            long minSize = 15360; // Smart Resume: >15KB mới skip, tránh skip ảnh thật dung lượng thấp
+            long minSize = 1024; // Smart Resume: >1KB mới skip, tránh skip ảnh thật dung lượng thấp
             if (File.Exists(filePath) && new FileInfo(filePath).Length > minSize)
             {
                 return; // skip duplicate
@@ -5277,7 +5277,7 @@ namespace get_link_manga
             {
                 var imageExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif" };
                 var files = Directory.GetFiles(folderPath)
-                                     .Where(f => imageExtensions.Contains(Path.GetExtension(f)) && new FileInfo(f).Length > 15360)
+                                     .Where(f => imageExtensions.Contains(Path.GetExtension(f)) && new FileInfo(f).Length > 1024)
                                      .ToArray();
 
                 if (expectedCount > 0 && files.Length >= expectedCount)
@@ -5873,11 +5873,10 @@ namespace get_link_manga
                                 foreach (string pattern in searchPatterns)
                                 {
                                     foreach (string folder in new[] { tempFolder, targetFolder })
-                                    {
-                                        foreach (string existingPath in Directory.GetFiles(folder, pattern))
+                                    {                                        foreach (string existingPath in Directory.GetFiles(folder, pattern))
                                         {
                                             if (extensions.Contains(Path.GetExtension(existingPath), StringComparer.OrdinalIgnoreCase) &&
-                                                new FileInfo(existingPath).Length > 15360)
+                                                new FileInfo(existingPath).Length > 1024)
                                             {
                                                 exists = true;
                                                 downloadedPath = existingPath;
@@ -6260,12 +6259,12 @@ namespace get_link_manga
                             {
                                 string testPathTemp = Path.ChangeExtension(localFilePath, checkExt);
                                 string testPathFinal = Path.ChangeExtension(finalFilePath, checkExt);
-                                if (File.Exists(testPathTemp) && new FileInfo(testPathTemp).Length > 15360)
+                                if (File.Exists(testPathTemp) && new FileInfo(testPathTemp).Length > 1024)
                                 {
                                     alreadyExists = true;
                                     break;
                                 }
-                                if (File.Exists(testPathFinal) && new FileInfo(testPathFinal).Length > 15360)
+                                if (File.Exists(testPathFinal) && new FileInfo(testPathFinal).Length > 1024)
                                 {
                                     alreadyExists = true;
                                     break;
