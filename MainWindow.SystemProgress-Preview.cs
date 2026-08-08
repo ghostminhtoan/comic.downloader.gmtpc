@@ -240,9 +240,9 @@ namespace get_link_manga
             var image = new Image
             {
                 Stretch = Stretch.Uniform,
-                MaxWidth = 240,
-                MaxHeight = 320,
-                Source = CreatePreviewImageSource(item?.HoverPreviewLocalPath, 240)
+                MaxWidth = 450,
+                MaxHeight = 600,
+                Source = CreatePreviewImageSource(item?.HoverPreviewLocalPath, 450)
             };
 
             var panel = new StackPanel();
