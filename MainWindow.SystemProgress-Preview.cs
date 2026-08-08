@@ -106,8 +106,11 @@ namespace get_link_manga
                     return;
                 }
 
-                await EnsureGalleryHoverPreviewAsync(item);
-                await EnsureGalleryHoverPreviewFileAsync(item, token);
+                if (!item.HasHoverPreviewThumbnailFile)
+                {
+                    await EnsureGalleryHoverPreviewAsync(item);
+                    await EnsureGalleryHoverPreviewFileAsync(item, token);
+                }
                 if (token.IsCancellationRequested ||
                     !host.IsMouseOver ||
                     !ReferenceEquals(_activeGalleryHoverPreviewHost, host) ||
@@ -240,9 +243,9 @@ namespace get_link_manga
             var image = new Image
             {
                 Stretch = Stretch.Uniform,
-                MaxWidth = 450,
-                MaxHeight = 600,
-                Source = CreatePreviewImageSource(item?.HoverPreviewLocalPath, 450)
+                MaxWidth = 800,
+                MaxHeight = 1000,
+                Source = CreatePreviewImageSource(item?.HoverPreviewLocalPath, 0)
             };
 
             var panel = new StackPanel();
@@ -1116,7 +1119,10 @@ namespace get_link_manga
             bitmap.BeginInit();
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
             bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
-            bitmap.DecodePixelWidth = decodePixelWidth;
+            if (decodePixelWidth > 0)
+            {
+                bitmap.DecodePixelWidth = decodePixelWidth;
+            }
             bitmap.UriSource = new Uri(localPath, UriKind.Absolute);
             bitmap.EndInit();
             bitmap.Freeze();
