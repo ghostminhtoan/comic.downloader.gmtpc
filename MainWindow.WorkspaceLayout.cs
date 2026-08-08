@@ -219,7 +219,7 @@ namespace get_link_manga
             if (grdStartDownloadToggle != null)
             {
                 RemoveFromParent(grdStartDownloadToggle);
-                grdStartDownloadToggle.Visibility = showDownloadActions ? Visibility.Visible : Visibility.Collapsed;
+                grdStartDownloadToggle.Visibility = Visibility.Collapsed;
                 grdStartDownloadToggle.Margin = new Thickness(0, 0, 12, 0);
                 int insertIndex = _globalDownloadActionPanel.Children.Contains(grdClearCookieAndRetryToggle) ? 1 : 0;
                 if (showDownloadActions && !_globalDownloadActionPanel.Children.Contains(grdStartDownloadToggle))
@@ -231,7 +231,7 @@ namespace get_link_manga
             if (grdAutoRetryErrorsToggle != null)
             {
                 RemoveFromParent(grdAutoRetryErrorsToggle);
-                grdAutoRetryErrorsToggle.Visibility = showDownloadActions ? Visibility.Visible : Visibility.Collapsed;
+                grdAutoRetryErrorsToggle.Visibility = Visibility.Collapsed;
                 grdAutoRetryErrorsToggle.Margin = new Thickness(0, 0, 12, 0);
                 int insertIndex = 0;
                 if (_globalDownloadActionPanel.Children.Contains(grdClearCookieAndRetryToggle)) insertIndex++;
