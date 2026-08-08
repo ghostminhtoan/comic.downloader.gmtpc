@@ -318,15 +318,18 @@ namespace get_link_manga
             }
 
             bool isHitomi = false;
+            bool isNhentai = false;
             if (item != null)
             {
-                if (string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) ||
+                    (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0))
                 {
                     isHitomi = true;
                 }
-                else if (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0)
+                else if (string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase) ||
+                         (item.Link != null && item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0))
                 {
-                    isHitomi = true;
+                    isNhentai = true;
                 }
             }
 
@@ -370,6 +373,34 @@ namespace get_link_manga
                             }
                         }
 
+                        if (tagsList.Count > 0)
+                        {
+                            panel.Children.Add(new TextBlock
+                            {
+                                Text = "Tags: " + string.Join(", ", tagsList),
+                                Foreground = TryFindResource("CyberpunkMutedTextBrush") as Brush ?? Brushes.Gray,
+                                FontWeight = FontWeights.Normal,
+                                FontSize = 11,
+                                TextWrapping = TextWrapping.Wrap,
+                                Margin = new Thickness(2, 2, 2, 0)
+                            });
+                        }
+                    }
+                }
+                catch
+                {
+                }
+            }
+            else if (isNhentai && item.Tag != null)
+            {
+                try
+                {
+                    string tagStr = item.Tag as string;
+                    if (!string.IsNullOrWhiteSpace(tagStr))
+                    {
+                        var tagsList = tagStr.Split(',')
+                            .Select(t => System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(t.Trim()))
+                            .ToList();
                         if (tagsList.Count > 0)
                         {
                             panel.Children.Add(new TextBlock
@@ -492,6 +523,42 @@ namespace get_link_manga
             }
         }
 
+        private async Task EnsureNhentaiTagsAsync(GalleryItem item, CancellationToken token)
+        {
+            if (item == null || item.Tag != null) return;
+            string url = item.Link;
+            if (string.IsNullOrWhiteSpace(url)) return;
+
+            try
+            {
+                string html = await FetchStringAsync(url, token);
+                if (string.IsNullOrWhiteSpace(html)) return;
+
+                var match = Regex.Match(html, @"tag-container[^>]*>[^<]*Tags:.*?<span class=""tags[^>]*"">(.*?)</span>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    string tagsHtml = match.Groups[1].Value;
+                    var tagMatches = Regex.Matches(tagsHtml, @"<a[^>]*href=""/tag/[^""]*""[^>]*>([^<]+?)(?:<span class=""count"">.*?</span>)?</a>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                    var tagsList = new List<string>();
+                    foreach (Match tm in tagMatches)
+                    {
+                        string tag = tm.Groups[1].Value.Trim();
+                        if (!string.IsNullOrWhiteSpace(tag))
+                        {
+                            tagsList.Add(tag);
+                        }
+                    }
+
+                    if (tagsList.Count > 0)
+                    {
+                        item.Tag = string.Join(",", tagsList);
+                        RecalculateDuplicates();
+                    }
+                }
+            }
+            catch { }
+        }
+
         private async Task EnsureGalleryHoverPreviewFileAsync(GalleryItem item, CancellationToken token)
         {
             if (item == null)
@@ -508,6 +575,13 @@ namespace get_link_manga
                 {
                     RecalculateDuplicates();
                 }
+            }
+
+            bool isNhentai = string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase) ||
+                             (item.Link != null && item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0);
+            if (isNhentai && item.Tag == null)
+            {
+                await EnsureNhentaiTagsAsync(item, token);
             }
 
             await EnsureTruyenqqHoverPreviewUrlAsync(item, token);

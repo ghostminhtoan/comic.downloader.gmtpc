@@ -1910,6 +1910,19 @@ namespace get_link_manga
             var tagSet = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (item?.Tag == null) return tagSet;
 
+            // Nếu là nhentai (lưu tag dạng chuỗi phân tách bởi dấu phẩy, không bắt đầu bằng JSON '{')
+            if (item.Tag is string tagRaw && !tagRaw.Trim().StartsWith("{"))
+            {
+                foreach (var t in tagRaw.Split(','))
+                {
+                    if (!string.IsNullOrWhiteSpace(t))
+                    {
+                        tagSet.Add(t.Trim());
+                    }
+                }
+                return tagSet;
+            }
+
             try
             {
                 Newtonsoft.Json.Linq.JObject galleryInfo = null;
@@ -1980,12 +1993,14 @@ namespace get_link_manga
             if (items == null) return;
             var itemList = items.ToList();
 
-            // 1. Tự động chèn metadata vào tên truyện dựa trên tag Hitomi trước
+            // 1. Tự động chèn metadata vào tên truyện dựa trên tag Hitomi/Nhentai trước
             foreach (var item in itemList)
             {
                 bool isHitomi = string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) ||
                                 (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
-                if (isHitomi)
+                bool isNhentai = string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase) ||
+                                 (item.Link != null && item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0);
+                if (isHitomi || isNhentai)
                 {
                     if (HasUncensoredInTags(item) && !HasUncensoredVariant(item.Name))
                     {
