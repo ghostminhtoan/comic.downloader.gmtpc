@@ -2595,6 +2595,11 @@ namespace get_link_manga
                     btnStartDownload.ToolTip = _isVietnameseUi
                         ? (isRunning ? "DỪNG TẢI" : "TẢI TẤT CẢ")
                         : (isRunning ? "STOP DOWNLOAD" : "DOWNLOAD ALL");
+
+                    if (!isRunning && tglClearCookieAndRetry != null && tglClearCookieAndRetry.IsChecked == true)
+                    {
+                        tglClearCookieAndRetry.IsChecked = false;
+                    }
                 }
                 finally
                 {
