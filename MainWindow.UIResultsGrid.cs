@@ -1905,20 +1905,17 @@ namespace get_link_manga
             return core.Trim();
         }
 
-        public void RecalculateDuplicates()
+        public static void RunDuplicateDetection(IEnumerable<GalleryItem> items)
         {
-            if (!Dispatcher.CheckAccess())
-            {
-                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(RecalculateDuplicates));
-                return;
-            }
+            if (items == null) return;
+            var itemList = items.ToList();
 
-            var groups = _scrapedItems
+            var groups = itemList
                 .GroupBy(item => GetSimilarityCore(item.Name, false))
                 .Where(g => !string.IsNullOrEmpty(g.Key))
                 .ToList();
 
-            foreach (var item in _scrapedItems)
+            foreach (var item in itemList)
             {
                 item.IsDuplicate = false;
                 item.IsCensorshipColorDuplicate = false;
@@ -1940,7 +1937,7 @@ namespace get_link_manga
                 }
             }
 
-            var censorshipColorGroups = _scrapedItems
+            var censorshipColorGroups = itemList
                 .Where(IsHentaiDuplicateCandidate)
                 .GroupBy(item => GetSimilarityCore(item.Name, true))
                 .Where(group => !string.IsNullOrWhiteSpace(group.Key))
@@ -1962,7 +1959,18 @@ namespace get_link_manga
             }
         }
 
-        private static bool IsHentaiDuplicateCandidate(GalleryItem item)
+        public void RecalculateDuplicates()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(RecalculateDuplicates));
+                return;
+            }
+
+            RunDuplicateDetection(_scrapedItems);
+        }
+
+        public static bool IsHentaiDuplicateCandidate(GalleryItem item)
         {
             string source = (item?.SourceDomain ?? string.Empty).Trim();
             string link = (item?.Link ?? string.Empty).Trim();
@@ -1988,7 +1996,7 @@ namespace get_link_manga
                    IsSuffixVariantBaseTitle(name, suffixVariantCore);
         }
 
-        private static string GetSharedSuffixVariantCore(IEnumerable<string> names)
+        public static string GetSharedSuffixVariantCore(IEnumerable<string> names)
         {
             var suffixCores = (names ?? Enumerable.Empty<string>())
                 .Where(HasSuffixNumberVariantPattern)
