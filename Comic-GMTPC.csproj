@@ -372,10 +372,6 @@
       <DependentUpon>DuplicateWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DuplicateWindow.Local.cs">
-      <DependentUpon>DuplicateWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="DirectDownloadWindow.xaml.cs">
       <DependentUpon>DirectDownloadWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

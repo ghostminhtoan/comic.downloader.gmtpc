@@ -1,6 +1,9 @@
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -10,9 +13,6 @@ using System.Windows.Threading;
 
 namespace get_link_manga
 {
-    /// <summary>
-    /// Interaction logic for DuplicateWindow.xaml
-    /// </summary>
     public partial class DuplicateWindow : Window
     {
         private readonly MainWindow _mainWindow;
@@ -20,6 +20,12 @@ namespace get_link_manga
         private string _searchBuffer = "";
         private DateTime _lastKeyPressTime = DateTime.MinValue;
         private readonly DispatcherTimer _previewPrefetchTimer;
+
+        // Local duplicate variables
+        private readonly ObservableCollection<GalleryItem> _localItems = new ObservableCollection<GalleryItem>();
+        private readonly ListCollectionView _localView;
+        private string _localSearchBuffer = "";
+        private DateTime _localLastKeyPressTime = DateTime.MinValue;
 
         public DuplicateWindow(MainWindow mainWindow)
         {
@@ -46,9 +52,20 @@ namespace get_link_manga
             dgDuplicates.Loaded += DgDuplicates_Loaded;
             dgDuplicates.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(DgDuplicates_ScrollChanged));
             lbDuplicatesThumbnail.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(DgDuplicates_ScrollChanged));
-            UpdateStatus();
 
-            InitLocalTab();
+            // Local items binding
+            _localView = new ListCollectionView(_localItems);
+            _localView.Filter = item =>
+            {
+                if (item is GalleryItem galleryItem)
+                {
+                    return (galleryItem.IsDuplicate || galleryItem.IsCensorshipColorDuplicate) && MatchesLocalFilter(galleryItem);
+                }
+                return false;
+            };
+            dgDuplicatesLocal.ItemsSource = _localView;
+
+            UpdateStatus();
 
             // Sync sorting and subscribe to sort changes of the main window's view
             var mainView = CollectionViewSource.GetDefaultView(_mainWindow._scrapedItems);
@@ -86,6 +103,14 @@ namespace get_link_manga
                    galleryItem.Link.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
+        private bool MatchesLocalFilter(GalleryItem galleryItem)
+        {
+            string filterText = txtFilterLocal.Text.Trim();
+            return string.IsNullOrEmpty(filterText) ||
+                   galleryItem.Name.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   galleryItem.Link.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
         private void ScrapedItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems != null)
@@ -107,13 +132,36 @@ namespace get_link_manga
 
         private void UpdateStatus()
         {
-            int totalDups = _duplicatesView.Cast<GalleryItem>().Count();
-            int checkedDups = _duplicatesView.Cast<GalleryItem>().Count(item => item.IsChecked);
+            // Update status based on current active tab
+            bool isLocalTabActive = false;
+            DependencyObject parent = dgDuplicatesLocal;
+            while (parent != null)
+            {
+                if (parent is TabItem tabItem)
+                {
+                    if (tabItem.Header.ToString().Contains("Local"))
+                        isLocalTabActive = true;
+                    break;
+                }
+                parent = VisualTreeHelper.GetParent(parent);
+            }
 
-            lblDupCount.Text = $"{checkedDups}/{totalDups}";
-            lblStatus.Text = $"Duplicate groups active. {checkedDups} of {totalDups} duplicate items selected.";
-
-            SetSelectAllState(chkSelectAll, totalDups, checkedDups);
+            if (isLocalTabActive)
+            {
+                int totalDups = _localView.Cast<GalleryItem>().Count();
+                int checkedDups = _localView.Cast<GalleryItem>().Count(item => item.IsChecked);
+                lblDupCount.Text = $"{checkedDups}/{totalDups}";
+                lblStatus.Text = $"[Local] Duplicate groups active. {checkedDups} of {totalDups} items selected.";
+                SetSelectAllState(chkSelectAllLocal, totalDups, checkedDups);
+            }
+            else
+            {
+                int totalDups = _duplicatesView.Cast<GalleryItem>().Count();
+                int checkedDups = _duplicatesView.Cast<GalleryItem>().Count(item => item.IsChecked);
+                lblDupCount.Text = $"{checkedDups}/{totalDups}";
+                lblStatus.Text = $"Duplicate groups active. {checkedDups} of {totalDups} duplicate items selected.";
+                SetSelectAllState(chkSelectAll, totalDups, checkedDups);
+            }
         }
 
         private void TxtFilter_TextChanged(object sender, TextChangedEventArgs e)
@@ -121,6 +169,12 @@ namespace get_link_manga
             _duplicatesView.Refresh();
             UpdateStatus();
             ScheduleDuplicatePreviewPrefetch();
+        }
+
+        private void TxtFilterLocal_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            _localView.Refresh();
+            UpdateStatus();
         }
 
         private void BtnCheckAll_Click(object sender, RoutedEventArgs e)
@@ -214,7 +268,7 @@ namespace get_link_manga
             }
         }
 
-        private void DeleteSelectedItems(DataGrid grid = null)
+        private void DeleteSelectedItems()
         {
             bool isThumbnail = chkResultsPresentation?.IsChecked == true;
             int selectedIndex = isThumbnail ? lbDuplicatesThumbnail.SelectedIndex : dgDuplicates.SelectedIndex;
@@ -404,11 +458,7 @@ namespace get_link_manga
             if (mainView != null)
             {
                 ((System.Collections.Specialized.INotifyCollectionChanged)mainView.SortDescriptions).CollectionChanged -= MainSortDescriptions_CollectionChanged;
-                ((System.Collections.Specialized.INotifyCollectionChanged)mainView.SortDescriptions).CollectionChanged -= LocalSortDescriptions_CollectionChanged;
             }
-
-            dgLocalDuplicates.RemoveHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(DgLocalDuplicates_ScrollChanged));
-            lbLocalDuplicatesThumbnail.RemoveHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(DgLocalDuplicates_ScrollChanged));
 
             base.OnClosed(e);
         }
@@ -641,6 +691,521 @@ namespace get_link_manga
                     _mainWindow.PrefetchGalleryHoverPreview(itemsToPrefetch);
                 }
             }
+        }
+
+
+        // ==========================================
+        // LOCAL DUPLICATES LOGIC & EVENT HANDLERS
+        // ==========================================
+
+        private void BtnBrowseLocal_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new VistaFolderBrowser
+            {
+                Title = "Chọn thư mục chứa truyện để quét trùng lặp",
+                InitialFolder = txtLocalPath.Text.Trim()
+            };
+            if (string.IsNullOrEmpty(dialog.InitialFolder))
+            {
+                dialog.InitialFolder = PortablePaths.DefaultDownloadRoot;
+            }
+
+            IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            if (dialog.ShowDialog(hwnd))
+            {
+                txtLocalPath.Text = dialog.SelectedPath;
+                LoadLocalFolders(dialog.SelectedPath);
+            }
+        }
+
+        private void LoadLocalFolders(string path)
+        {
+            if (!Directory.Exists(path)) return;
+
+            _localItems.Clear();
+            try
+            {
+                string[] subfolders = Directory.GetDirectories(path);
+                int index = 0;
+                foreach (string folderPath in subfolders)
+                {
+                    string folderName = Path.GetFileName(folderPath);
+                    var item = new GalleryItem
+                    {
+                        Name = folderName,
+                        Link = folderPath,
+                        OriginalIndex = index++
+                    };
+                    item.PropertyChanged += GalleryItem_PropertyChanged;
+                    _localItems.Add(item);
+                }
+                RecalculateLocalDuplicates();
+                UpdateStatus();
+                _mainWindow.Log($"Loaded {subfolders.Length} folders from {path} to check duplicates.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi đọc thư mục: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void RecalculateLocalDuplicates()
+        {
+            // Tách nhóm duplicate y hệt như MainWindow.RecalculateDuplicates
+            var groups = _localItems
+                .GroupBy(item => MainWindow.GetSimilarityCore(item.Name, false))
+                .Where(g => !string.IsNullOrEmpty(g.Key))
+                .ToList();
+
+            foreach (var item in _localItems)
+            {
+                item.IsDuplicate = false;
+                item.IsCensorshipColorDuplicate = false;
+                item.IsCensorshipUncensoredVariant = false;
+                item.IsCensorshipFullColorVariant = false;
+                item.IsNumberedVariantDuplicate = false;
+            }
+
+            foreach (var group in groups)
+            {
+                if (group.Count() > 1)
+                {
+                    string suffixVariantCore = GetSharedSuffixVariantCore(group.Select(item => item.Name));
+                    foreach (var item in group)
+                    {
+                        item.IsDuplicate = true;
+                        item.IsNumberedVariantDuplicate = MainWindow.IsNumberedTitleVariant(item.Name, suffixVariantCore);
+                    }
+                }
+            }
+
+            var censorshipColorGroups = _localItems
+                .Where(IsLocalHentaiDuplicateCandidate)
+                .GroupBy(item => MainWindow.GetSimilarityCore(item.Name, true))
+                .Where(group => !string.IsNullOrWhiteSpace(group.Key))
+                .ToList();
+
+            foreach (var group in censorshipColorGroups)
+            {
+                if (group.Count() <= 1 || !group.Any(item => MainWindow.HasCensorshipColorVariant(item.Name)))
+                {
+                    continue;
+                }
+
+                foreach (var item in group)
+                {
+                    item.IsCensorshipColorDuplicate = true;
+                    item.IsCensorshipFullColorVariant = MainWindow.HasFullColorVariant(item.Name);
+                    item.IsCensorshipUncensoredVariant = MainWindow.HasUncensoredVariant(item.Name);
+                }
+            }
+        }
+
+        private static string GetSharedSuffixVariantCore(System.Collections.Generic.IEnumerable<string> names)
+        {
+            var suffixCores = (names ?? Enumerable.Empty<string>())
+                .Where(HasSuffixNumberVariantPattern)
+                .Select(GetNumberedVariantCore)
+                .Where(core => !string.IsNullOrWhiteSpace(core))
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+
+            if (suffixCores.Count != 1)
+            {
+                return string.Empty;
+            }
+
+            return suffixCores[0];
+        }
+
+        private static bool HasSuffixNumberVariantPattern(string name)
+        {
+            return Regex.IsMatch(
+                StripDuplicateMetadata(name),
+                @"(?:^|[\s_-])\d+(?:[.,]\d+)?\s*$",
+                RegexOptions.IgnoreCase);
+        }
+
+        private static string StripDuplicateMetadata(string name)
+        {
+            string core = (name ?? string.Empty).ToLowerInvariant();
+            core = Regex.Replace(core, @"\[[^\]]*\]", " ");
+            core = Regex.Replace(core, @"\{[^\}]*\}", " ");
+            core = Regex.Replace(core, @"\([^\)]*\)", " ");
+            return core;
+        }
+
+        private static string GetNumberedVariantCore(string name)
+        {
+            string core = StripDuplicateMetadata(name);
+            core = Regex.Replace(core, @"\b(?:chapter|chap|ch|book|vol|volume|part|pt)\s*\d+(?:[.,]\d+)?\b", " ");
+            core = Regex.Replace(core, @"\b\d+(?:[.,]\d+)?\s*$", " ");
+            core = Regex.Replace(core, @"[^a-z0-9]", string.Empty);
+            return core.Trim();
+        }
+
+        private static bool IsLocalHentaiDuplicateCandidate(GalleryItem item)
+        {
+            // Hentai candidate based on folder path name
+            string haystack = (item?.Link ?? string.Empty).ToLowerInvariant();
+            string[] hentaiDomains =
+            {
+                "hentaiforce", "nhentai", "hentai2read", "hentaiera",
+                "vi-hentai", "daomeoden", "damconuong", "truyengg", "sayhentai", "hitomi"
+            };
+            return hentaiDomains.Any(domain => haystack.Contains(domain));
+        }
+
+        private void BtnCheckAllLocal_Click(object sender, RoutedEventArgs e)
+        {
+            var visibleItems = _localView.Cast<GalleryItem>().ToList();
+            foreach (var item in visibleItems)
+            {
+                item.IsChecked = true;
+            }
+            UpdateStatus();
+        }
+
+        private void BtnUncheckAllLocal_Click(object sender, RoutedEventArgs e)
+        {
+            var visibleItems = _localView.Cast<GalleryItem>().ToList();
+            foreach (var item in visibleItems)
+            {
+                item.IsChecked = false;
+            }
+            UpdateStatus();
+        }
+
+        private void ChkSelectAllLocal_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox chk)
+            {
+                bool isChecked = chk.IsChecked ?? false;
+                var visibleItems = _localView.Cast<GalleryItem>().ToList();
+                foreach (var item in visibleItems)
+                {
+                    item.IsChecked = isChecked;
+                }
+                UpdateStatus();
+            }
+        }
+
+        private void ChkResultsPresentationLocal_Click(object sender, RoutedEventArgs e)
+        {
+            if (chkResultsPresentationLocal == null) return;
+            bool isThumbnail = chkResultsPresentationLocal.IsChecked == true;
+            dgDuplicatesLocal.Visibility = isThumbnail ? Visibility.Collapsed : Visibility.Visible;
+            lbDuplicatesThumbnailLocal.Visibility = isThumbnail ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void DgDuplicatesLocal_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isSyncingSelection || dgDuplicatesLocal == null || lbDuplicatesThumbnailLocal == null) return;
+            _isSyncingSelection = true;
+            try
+            {
+                lbDuplicatesThumbnailLocal.SelectedItems.Clear();
+                foreach (var item in dgDuplicatesLocal.SelectedItems)
+                {
+                    lbDuplicatesThumbnailLocal.SelectedItems.Add(item);
+                }
+            }
+            finally
+            {
+                _isSyncingSelection = false;
+            }
+        }
+
+        private void LbDuplicatesThumbnailLocal_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isSyncingSelection || dgDuplicatesLocal == null || lbDuplicatesThumbnailLocal == null) return;
+            _isSyncingSelection = true;
+            try
+            {
+                dgDuplicatesLocal.SelectedItems.Clear();
+                foreach (var item in lbDuplicatesThumbnailLocal.SelectedItems)
+                {
+                    dgDuplicatesLocal.SelectedItems.Add(item);
+                }
+            }
+            finally
+            {
+                _isSyncingSelection = false;
+            }
+        }
+
+        private void DgDuplicatesLocal_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            var isThumbnail = chkResultsPresentationLocal?.IsChecked == true;
+            var itemsCount = isThumbnail ? lbDuplicatesThumbnailLocal.Items.Count : dgDuplicatesLocal.Items.Count;
+            if (itemsCount == 0) return;
+
+            if (e.Key == Key.Home)
+            {
+                if (isThumbnail)
+                {
+                    lbDuplicatesThumbnailLocal.SelectedIndex = 0;
+                    lbDuplicatesThumbnailLocal.ScrollIntoView(lbDuplicatesThumbnailLocal.SelectedItem);
+                }
+                else
+                {
+                    dgDuplicatesLocal.SelectedIndex = 0;
+                    dgDuplicatesLocal.ScrollIntoView(dgDuplicatesLocal.SelectedItem);
+                }
+                e.Handled = true;
+            }
+            else if (e.Key == Key.End)
+            {
+                if (isThumbnail)
+                {
+                    lbDuplicatesThumbnailLocal.SelectedIndex = lbDuplicatesThumbnailLocal.Items.Count - 1;
+                    lbDuplicatesThumbnailLocal.ScrollIntoView(lbDuplicatesThumbnailLocal.SelectedItem);
+                }
+                else
+                {
+                    dgDuplicatesLocal.SelectedIndex = dgDuplicatesLocal.Items.Count - 1;
+                    dgDuplicatesLocal.ScrollIntoView(dgDuplicatesLocal.SelectedItem);
+                }
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Delete)
+            {
+                DeleteSelectedItemsLocal();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Space)
+            {
+                var selected = isThumbnail 
+                    ? lbDuplicatesThumbnailLocal.SelectedItems.Cast<GalleryItem>().ToList()
+                    : dgDuplicatesLocal.SelectedItems.Cast<GalleryItem>().ToList();
+
+                if (selected.Count > 0)
+                {
+                    bool targetState = !selected[0].IsChecked;
+                    foreach (var item in selected)
+                    {
+                        item.IsChecked = targetState;
+                    }
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void DgDuplicatesLocal_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (string.IsNullOrEmpty(e.Text)) return;
+            if (!(sender is DataGrid grid)) return;
+
+            DateTime now = DateTime.Now;
+            if ((now - _localLastKeyPressTime).TotalMilliseconds > 1000)
+            {
+                _localSearchBuffer = "";
+            }
+            _localLastKeyPressTime = now;
+            _localSearchBuffer += e.Text;
+
+            var items = grid.Items.Cast<GalleryItem>().ToList();
+            var match = items.FirstOrDefault(item => item.Name.StartsWith(_localSearchBuffer, StringComparison.OrdinalIgnoreCase));
+            if (match == null)
+            {
+                match = items.FirstOrDefault(item => item.Name.IndexOf(_localSearchBuffer, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+
+            if (match != null)
+            {
+                grid.SelectedItem = match;
+                grid.ScrollIntoView(match);
+
+                var row = (DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(match);
+                if (row != null)
+                {
+                    row.Focus();
+                }
+            }
+
+            e.Handled = true;
+        }
+
+        private void DgDuplicatesLocal_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var element = e.OriginalSource as DependencyObject;
+            while (element != null && !(element is DataGridRow))
+            {
+                element = VisualTreeHelper.GetParent(element);
+            }
+
+            if (element is DataGridRow row && row.Item is GalleryItem item)
+            {
+                if (!string.IsNullOrEmpty(item.Link) && Directory.Exists(item.Link))
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = item.Link,
+                            UseShellExecute = true
+                        });
+                        _mainWindow.Log($"Opened duplicate local folder: {item.Link}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _mainWindow.Log($"Failed to open local folder: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+        private void MenuCheckSelectedLocal_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in dgDuplicatesLocal.SelectedItems.Cast<GalleryItem>())
+            {
+                item.IsChecked = true;
+            }
+            UpdateStatus();
+        }
+
+        private void MenuUncheckSelectedLocal_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in dgDuplicatesLocal.SelectedItems.Cast<GalleryItem>())
+            {
+                item.IsChecked = false;
+            }
+            UpdateStatus();
+        }
+
+        private void MenuInvertCheckedLocal_Click(object sender, RoutedEventArgs e)
+        {
+            var visibleItems = _localView.Cast<GalleryItem>().ToList();
+            foreach (var item in visibleItems)
+            {
+                item.IsChecked = !item.IsChecked;
+            }
+            UpdateStatus();
+        }
+
+        private void MenuCopySelectedPathsLocal_Click(object sender, RoutedEventArgs e)
+        {
+            if (dgDuplicatesLocal.SelectedItems.Count == 0) return;
+            var items = dgDuplicatesLocal.SelectedItems.Cast<GalleryItem>().ToList();
+            string text = string.Join("\r\n", items.Select(item => item.Link));
+            Clipboard.SetText(text);
+            _mainWindow.Log($"Copied {items.Count} selected local path(s) to clipboard.");
+        }
+
+        private void MenuDeleteSelectedLocal_Click(object sender, RoutedEventArgs e)
+        {
+            DeleteSelectedItemsLocal();
+        }
+
+        private void MenuDeleteCheckedLocal_Click(object sender, RoutedEventArgs e)
+        {
+            DeleteCheckedItemsLocal();
+        }
+
+        private void DeleteSelectedItemsLocal()
+        {
+            bool isThumbnail = chkResultsPresentationLocal?.IsChecked == true;
+            int selectedIndex = isThumbnail ? lbDuplicatesThumbnailLocal.SelectedIndex : dgDuplicatesLocal.SelectedIndex;
+
+            var itemsToRemove = isThumbnail
+                ? lbDuplicatesThumbnailLocal.SelectedItems.Cast<GalleryItem>().ToList()
+                : dgDuplicatesLocal.SelectedItems.Cast<GalleryItem>().ToList();
+
+            if (itemsToRemove.Count == 0) return;
+
+            var confirm = MessageBox.Show(
+                $"Bạn có chắc chắn muốn xóa {itemsToRemove.Count} thư mục này khỏi đĩa vĩnh viễn không?",
+                "Xác nhận xóa thư mục",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (confirm != MessageBoxResult.Yes) return;
+
+            int successCount = 0;
+            foreach (var item in itemsToRemove)
+            {
+                try
+                {
+                    if (Directory.Exists(item.Link))
+                    {
+                        Directory.Delete(item.Link, true);
+                    }
+                    _localItems.Remove(item);
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    _mainWindow.Log($"Lỗi khi xóa thư mục {item.Link}: {ex.Message}");
+                }
+            }
+
+            RecalculateLocalDuplicates();
+            UpdateStatus();
+            
+            _mainWindow.Log($"Deleted {successCount} local duplicate folder(s) from disk.");
+            lblStatus.Text = $"Deleted {successCount} local folder(s).";
+
+            if (isThumbnail)
+            {
+                if (lbDuplicatesThumbnailLocal.Items.Count > 0)
+                {
+                    int newIndex = Math.Min(selectedIndex, lbDuplicatesThumbnailLocal.Items.Count - 1);
+                    if (newIndex >= 0)
+                    {
+                        lbDuplicatesThumbnailLocal.SelectedIndex = newIndex;
+                    }
+                }
+            }
+            else
+            {
+                if (dgDuplicatesLocal.Items.Count > 0)
+                {
+                    int newIndex = Math.Min(selectedIndex, dgDuplicatesLocal.Items.Count - 1);
+                    if (newIndex >= 0)
+                    {
+                        dgDuplicatesLocal.SelectedIndex = newIndex;
+                    }
+                }
+            }
+        }
+
+        private void DeleteCheckedItemsLocal()
+        {
+            var visibleSet = _localView.Cast<GalleryItem>().ToHashSet();
+            var itemsToRemove = _localItems.Where(item => item.IsChecked && visibleSet.Contains(item)).ToList();
+            if (!itemsToRemove.Any()) return;
+
+            var confirm = MessageBox.Show(
+                $"Bạn có chắc chắn muốn xóa {itemsToRemove.Count} thư mục đã tích chọn khỏi đĩa vĩnh viễn không?",
+                "Xác nhận xóa thư mục",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (confirm != MessageBoxResult.Yes) return;
+
+            int successCount = 0;
+            foreach (var item in itemsToRemove)
+            {
+                try
+                {
+                    if (Directory.Exists(item.Link))
+                    {
+                        Directory.Delete(item.Link, true);
+                    }
+                    _localItems.Remove(item);
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    _mainWindow.Log($"Lỗi khi xóa thư mục {item.Link}: {ex.Message}");
+                }
+            }
+
+            RecalculateLocalDuplicates();
+            UpdateStatus();
+            
+            _mainWindow.Log($"Deleted {successCount} checked local duplicate folder(s) from disk.");
+            lblStatus.Text = $"Deleted {successCount} checked local folder(s).";
         }
     }
 }
