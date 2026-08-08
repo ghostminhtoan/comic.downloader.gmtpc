@@ -28,6 +28,8 @@ namespace get_link_manga
         private Point _resultsDragStartPoint;
         private GalleryItem _resultsDragItem;
         private bool _isResultsThumbnailViewEnabled;
+        private DateTime _lastResultsRefreshTime = DateTime.MinValue;
+        private bool _isResultsRefreshPending = false;
         private bool _isFreeArrangementActive = true;
         private bool _isSyncingResultsThumbnailSelection;
         private readonly ObservableCollection<GalleryItem> _thumbnailVisibleItems = new ObservableCollection<GalleryItem>();
@@ -2771,6 +2773,28 @@ namespace get_link_manga
             }
 
             if (dgResults == null) return;
+
+            var now = DateTime.Now;
+            double elapsed = (now - _lastResultsRefreshTime).TotalMilliseconds;
+            if (elapsed < 333)
+            {
+                if (!_isResultsRefreshPending)
+                {
+                    _isResultsRefreshPending = true;
+                    int delay = 333 - (int)elapsed;
+                    System.Threading.Tasks.Task.Delay(delay).ContinueWith(t =>
+                    {
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            _isResultsRefreshPending = false;
+                            SafeRefreshResultsView();
+                        }));
+                    });
+                }
+                return;
+            }
+
+            _lastResultsRefreshTime = now;
 
             try
             {
