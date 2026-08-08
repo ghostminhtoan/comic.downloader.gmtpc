@@ -11,8 +11,13 @@
         ShowInTaskbar="False">
 
     <Window.Resources>
-        <!-- DataGrid Style -->
-        <Style x:Key="CyberpunkDataGrid" TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/MainWindowStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- DataGrid Style -->
+            <Style x:Key="CyberpunkDataGrid" TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
             <Setter Property="Background" Value="{DynamicResource CyberpunkSurfaceAltBrush}"/>
             <Setter Property="RowBackground" Value="{DynamicResource CyberpunkSurfaceAltBrush}"/>
             <Setter Property="AlternatingRowBackground" Value="{DynamicResource CyberpunkCardBrush}"/>
@@ -93,6 +98,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        </ResourceDictionary>
     </Window.Resources>
 
     <Grid Margin="15">
@@ -236,36 +242,44 @@
                                                            FontWeight="Bold" FontSize="12" Margin="0,0,0,4" TextWrapping="NoWrap">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
-                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkTextBrush}"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsParallelSplitParent}" Value="True">
+                                                                <DataTrigger Binding="{Binding IsNumberedVariantDuplicate}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#FFFFA347"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsCensorshipUncensoredVariant}" Value="True">
                                                                     <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsCensorshipFullColorVariant}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#FFD78BFF"/>
                                                                 </DataTrigger>
                                                                 <MultiDataTrigger>
                                                                     <MultiDataTrigger.Conditions>
-                                                                        <Condition Binding="{Binding IsParallelSplitTask}" Value="True"/>
-                                                                        <Condition Binding="{Binding IsParallelSplitParent}" Value="False"/>
+                                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
                                                                     </MultiDataTrigger.Conditions>
-                                                                    <Setter Property="Foreground" Value="#C77DFF"/>
-                                                                    <Setter Property="Margin" Value="18,0,0,4"/>
+                                                                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                                                </MultiDataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
+                                                                </MultiDataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
                                                                 </MultiDataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
                                                     </TextBlock.Style>
                                                 </TextBlock>
                                                 <TextBlock Text="{Binding HoverPreviewIndicatorText}" Foreground="White" FontSize="9" FontWeight="SemiBold" Margin="0,0,0,2"/>
-                                                <TextBlock Text="{Binding Link}" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="11" TextWrapping="NoWrap">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsParallelSplitTask}" Value="True">
-                                                                    <Setter Property="Foreground" Value="#C77DFF"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
+                                                <TextBlock Text="{Binding Link}" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="NoWrap"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -330,18 +344,37 @@
                                                            FontWeight="Bold" FontSize="10" TextTrimming="CharacterEllipsis" TextWrapping="Wrap" Height="30">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
-                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkTextBrush}"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsParallelSplitParent}" Value="True">
+                                                                <DataTrigger Binding="{Binding IsNumberedVariantDuplicate}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#FFFFA347"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsCensorshipUncensoredVariant}" Value="True">
                                                                     <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsCensorshipFullColorVariant}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#FFD78BFF"/>
                                                                 </DataTrigger>
                                                                 <MultiDataTrigger>
                                                                     <MultiDataTrigger.Conditions>
-                                                                        <Condition Binding="{Binding IsParallelSplitTask}" Value="True"/>
-                                                                        <Condition Binding="{Binding IsParallelSplitParent}" Value="False"/>
+                                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
                                                                     </MultiDataTrigger.Conditions>
-                                                                    <Setter Property="Foreground" Value="#C77DFF"/>
-                                                                    <Setter Property="Margin" Value="12,0,0,4"/>
+                                                                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                                                </MultiDataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
+                                                                </MultiDataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
                                                                 </MultiDataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
@@ -454,25 +487,44 @@
                                                            FontWeight="Bold" FontSize="12" Margin="0,0,0,4" TextWrapping="NoWrap">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
-                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkTextBrush}"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsParallelSplitParent}" Value="True">
+                                                                <DataTrigger Binding="{Binding IsNumberedVariantDuplicate}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#FFFFA347"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsCensorshipUncensoredVariant}" Value="True">
                                                                     <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsCensorshipFullColorVariant}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#FFD78BFF"/>
                                                                 </DataTrigger>
                                                                 <MultiDataTrigger>
                                                                     <MultiDataTrigger.Conditions>
-                                                                        <Condition Binding="{Binding IsParallelSplitTask}" Value="True"/>
-                                                                        <Condition Binding="{Binding IsParallelSplitParent}" Value="False"/>
+                                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
                                                                     </MultiDataTrigger.Conditions>
-                                                                    <Setter Property="Foreground" Value="#C77DFF"/>
-                                                                    <Setter Property="Margin" Value="18,0,0,4"/>
+                                                                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                                                </MultiDataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
+                                                                </MultiDataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
                                                                 </MultiDataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
                                                     </TextBlock.Style>
                                                 </TextBlock>
                                                 <TextBlock Text="{Binding HoverPreviewIndicatorText}" Foreground="White" FontSize="9" FontWeight="SemiBold" Margin="0,0,0,2"/>
-                                                <TextBlock Text="{Binding Link}" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="11" TextWrapping="NoWrap"/>
+                                                <TextBlock Text="{Binding Link}" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="NoWrap"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -537,18 +589,37 @@
                                                            FontWeight="Bold" FontSize="10" TextTrimming="CharacterEllipsis" TextWrapping="Wrap" Height="30">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
-                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkTextBrush}"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsParallelSplitParent}" Value="True">
+                                                                <DataTrigger Binding="{Binding IsNumberedVariantDuplicate}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#FFFFA347"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsCensorshipUncensoredVariant}" Value="True">
                                                                     <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsCensorshipFullColorVariant}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#FFD78BFF"/>
                                                                 </DataTrigger>
                                                                 <MultiDataTrigger>
                                                                     <MultiDataTrigger.Conditions>
-                                                                        <Condition Binding="{Binding IsParallelSplitTask}" Value="True"/>
-                                                                        <Condition Binding="{Binding IsParallelSplitParent}" Value="False"/>
+                                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
                                                                     </MultiDataTrigger.Conditions>
-                                                                    <Setter Property="Foreground" Value="#C77DFF"/>
-                                                                    <Setter Property="Margin" Value="12,0,0,4"/>
+                                                                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                                                </MultiDataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
+                                                                </MultiDataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                                        <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Foreground" Value="#FF9DFF00"/>
                                                                 </MultiDataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
