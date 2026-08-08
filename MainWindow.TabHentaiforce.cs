@@ -711,14 +711,37 @@ namespace get_link_manga
                         }
                     }
 
-                    if (item.Name != currentName)
+                    var nhentaiTags = ExtractNhentaiNetTags(html);
+                    Newtonsoft.Json.Linq.JObject jTagsObj = null;
+                    if (nhentaiTags.Count > 0)
                     {
-                        Dispatcher.Invoke(() => item.Name = currentName);
+                        var jArr = new Newtonsoft.Json.Linq.JArray();
+                        foreach (var tag in nhentaiTags)
+                        {
+                            var tObj = new Newtonsoft.Json.Linq.JObject();
+                            tObj["tag"] = tag;
+                            jArr.Add(tObj);
+                        }
+                        jTagsObj = new Newtonsoft.Json.Linq.JObject();
+                        jTagsObj["tags"] = jArr;
                     }
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        if (item.Name != currentName)
+                        {
+                            item.Name = currentName;
+                        }
+                        if (jTagsObj != null)
+                        {
+                            item.Tag = jTagsObj;
+                            RecalculateDuplicates();
+                        }
+                    });
                 }
                 catch (Exception ex)
                 {
-                    Log($"[nhentai Preview] Lỗi cập nhật tên và ngôn ngữ: {ex.Message}");
+                    Log($"[nhentai Preview] Lỗi cập nhật tên, ngôn ngữ và tags: {ex.Message}");
                 }
             }
         }
@@ -935,6 +958,35 @@ namespace get_link_manga
                     closer = '\0';
                     return false;
             }
+        }
+
+        private List<string> ExtractNhentaiNetTags(string html)
+        {
+            var tagsList = new List<string>();
+            if (string.IsNullOrWhiteSpace(html)) return tagsList;
+
+            var matchContainer = Regex.Match(html, @"class=""tag-container[^""]*""[^>]*>\s*Tags:\s*<span class=""tags[^""]*""[^>]*>(.*?)</span>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+            if (matchContainer.Success)
+            {
+                string tagsHtml = matchContainer.Groups[1].Value;
+                var matches = Regex.Matches(tagsHtml, @"<a[^>]*>(.*?)</a>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                foreach (Match m in matches)
+                {
+                    string content = m.Groups[1].Value;
+                    var nameMatch = Regex.Match(content, @"class=""name[^""]*""[^>]*>([^<]+)</span>", RegexOptions.IgnoreCase);
+                    string tag = nameMatch.Success ? nameMatch.Groups[1].Value : content;
+
+                    tag = Regex.Replace(tag, @"<[^>]*>", "");
+                    tag = Regex.Replace(tag, @"\s+\d+(\.\d+)?[km]?$", "").Trim();
+
+                    if (!string.IsNullOrWhiteSpace(tag))
+                    {
+                        tagsList.Add(tag.Trim());
+                    }
+                }
+            }
+
+            return tagsList;
         }
     }
 }

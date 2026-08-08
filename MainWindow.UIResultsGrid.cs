@@ -1910,19 +1910,6 @@ namespace get_link_manga
             var tagSet = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (item?.Tag == null) return tagSet;
 
-            // Nếu là nhentai (lưu tag dạng chuỗi phân tách bởi dấu phẩy, không bắt đầu bằng JSON '{')
-            if (item.Tag is string tagRaw && !tagRaw.Trim().StartsWith("{"))
-            {
-                foreach (var t in tagRaw.Split(','))
-                {
-                    if (!string.IsNullOrWhiteSpace(t))
-                    {
-                        tagSet.Add(t.Trim());
-                    }
-                }
-                return tagSet;
-            }
-
             try
             {
                 Newtonsoft.Json.Linq.JObject galleryInfo = null;
