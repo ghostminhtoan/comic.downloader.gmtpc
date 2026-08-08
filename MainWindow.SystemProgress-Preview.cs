@@ -494,6 +494,55 @@ namespace get_link_manga
             }
         }
 
+        private async Task EnsureNhentaiNetTagAsync(GalleryItem item, CancellationToken token)
+        {
+            if (item == null || item.Tag != null) return;
+            try
+            {
+                string html = await FetchStringAsync(item.Link, token);
+                if (string.IsNullOrEmpty(html)) return;
+
+                var nhentaiTags = ExtractNhentaiNetTags(html);
+                if (nhentaiTags.Count > 0)
+                {
+                    var jArr = new Newtonsoft.Json.Linq.JArray();
+                    foreach (var tag in nhentaiTags)
+                    {
+                        var tObj = new Newtonsoft.Json.Linq.JObject();
+                        tObj["tag"] = tag;
+                        jArr.Add(tObj);
+                    }
+                    var jTagsObj = new Newtonsoft.Json.Linq.JObject();
+                    jTagsObj["tags"] = jArr;
+
+                    var langs = ExtractNhentaiNetLanguages(html);
+                    var displayLangs = langs.Where(l => l != "translated").ToList();
+                    string currentName = CleanTranslatedTagFromTitle(item.Name);
+
+                    if (displayLangs.Count > 0)
+                    {
+                        string langStr = string.Join(", ", displayLangs.Select(l => System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(l)));
+                        string suffix = $"[{langStr}]";
+                        if (!currentName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                        {
+                            currentName = $"{currentName} {suffix}";
+                        }
+                    }
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        if (item.Name != currentName)
+                        {
+                            item.Name = currentName;
+                        }
+                        item.Tag = jTagsObj;
+                        RecalculateDuplicates();
+                    });
+                }
+            }
+            catch { }
+        }
+
         private async Task EnsureGalleryHoverPreviewFileAsync(GalleryItem item, CancellationToken token)
         {
             if (item == null)
@@ -510,6 +559,13 @@ namespace get_link_manga
                 {
                     RecalculateDuplicates();
                 }
+            }
+
+            bool isNhentai = string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase) ||
+                             (item.Link != null && item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0);
+            if (isNhentai && item.Tag == null)
+            {
+                await EnsureNhentaiNetTagAsync(item, token);
             }
 
             await EnsureTruyenqqHoverPreviewUrlAsync(item, token);
