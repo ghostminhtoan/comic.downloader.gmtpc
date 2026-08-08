@@ -717,6 +717,24 @@ namespace get_link_manga
 
         private static string GetFirstImagePath(string folderPath)
         {
+            if (string.IsNullOrEmpty(folderPath)) return null;
+            
+            string searchPath = folderPath;
+            if (!searchPath.StartsWith(@"\\?\"))
+            {
+                searchPath = @"\\?\" + searchPath;
+            }
+
+            string result = GetFirstImagePathInternal(searchPath);
+            if (result != null && result.StartsWith(@"\\?\"))
+            {
+                result = result.Substring(4);
+            }
+            return result;
+        }
+
+        private static string GetFirstImagePathInternal(string folderPath)
+        {
             if (!Directory.Exists(folderPath)) return null;
 
             string[] imageExtensions = { "*.jpg", "*.jpeg", "*.png", "*.webp", "*.gif", "*.bmp" };
@@ -740,8 +758,8 @@ namespace get_link_manga
                 Array.Sort(subdirs, StringComparer.OrdinalIgnoreCase);
                 foreach (var subdir in subdirs)
                 {
-                    string path = GetFirstImagePath(subdir);
-                    if (path != null) return path;
+                    string res = GetFirstImagePathInternal(subdir);
+                    if (res != null) return res;
                 }
             }
             catch { }
@@ -762,6 +780,8 @@ namespace get_link_manga
                 {
                     string folderName = Path.GetFileName(folderPath);
                     string firstImage = GetFirstImagePath(folderPath);
+                    _mainWindow.Log($"[Local Dup Scan] Folder: {folderName} -> Image: {firstImage ?? "NONE"}");
+                    
                     var item = new GalleryItem
                     {
                         Name = folderName,
