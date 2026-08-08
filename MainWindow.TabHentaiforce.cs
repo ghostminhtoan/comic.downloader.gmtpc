@@ -593,7 +593,10 @@ namespace get_link_manga
 
         internal bool SupportsHoverPreview(GalleryItem item)
         {
-            string link = item?.Link?.Trim();
+            if (item == null) return false;
+            if (item.HasHoverPreviewThumbnailFile) return true;
+
+            string link = item.Link?.Trim();
             return !string.IsNullOrWhiteSpace(link) &&
                    (link.IndexOf("hentaiforce.net/view/", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     IsTruyenqqUrl(link) ||
