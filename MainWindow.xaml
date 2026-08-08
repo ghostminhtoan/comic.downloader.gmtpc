@@ -1,4 +1,4 @@
-<Window x:Class="get_link_manga.MainWindow"
+﻿<Window x:Class="get_link_manga.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -3579,6 +3579,42 @@
                                                                      <Setter Property="Foreground" Value="#C77DFF"/>
                                                                      <Setter Property="Margin" Value="18,0,0,4"/>
                                                                  </MultiDataTrigger>
+                                                                  <DataTrigger Binding="{Binding IsDuplicate}" Value="True">
+                                                                      <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
+                                                                  </DataTrigger>
+                                                                  <DataTrigger Binding="{Binding IsCensorshipColorDuplicate}" Value="True">
+                                                                      <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
+                                                                  </DataTrigger>
+                                                                  <DataTrigger Binding="{Binding IsNumberedVariantDuplicate}" Value="True">
+                                                                      <Setter Property="Foreground" Value="#FFFFA347"/>
+                                                                  </DataTrigger>
+                                                                  <DataTrigger Binding="{Binding IsCensorshipUncensoredVariant}" Value="True">
+                                                                      <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                  </DataTrigger>
+                                                                  <DataTrigger Binding="{Binding IsCensorshipFullColorVariant}" Value="True">
+                                                                      <Setter Property="Foreground" Value="#FFD78BFF"/>
+                                                                  </DataTrigger>
+                                                                  <MultiDataTrigger>
+                                                                      <MultiDataTrigger.Conditions>
+                                                                          <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                                          <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
+                                                                      </MultiDataTrigger.Conditions>
+                                                                      <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                                                  </MultiDataTrigger>
+                                                                  <MultiDataTrigger>
+                                                                      <MultiDataTrigger.Conditions>
+                                                                          <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                                          <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                                      </MultiDataTrigger.Conditions>
+                                                                      <Setter Property="Foreground" Value="#FF9DFF00"/>
+                                                                  </MultiDataTrigger>
+                                                                  <MultiDataTrigger>
+                                                                      <MultiDataTrigger.Conditions>
+                                                                          <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                                          <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
+                                                                      </MultiDataTrigger.Conditions>
+                                                                      <Setter Property="Foreground" Value="#FF9DFF00"/>
+                                                                  </MultiDataTrigger>
                                                              </Style.Triggers>
                                                          </Style>
                                                      </TextBlock.Style>
@@ -4323,6 +4359,42 @@
                                                                      <Setter Property="Foreground" Value="#C77DFF"/>
                                                                      <Setter Property="Margin" Value="12,0,0,4"/>
                                                                  </MultiDataTrigger>
+                                                                  <DataTrigger Binding="{Binding IsDuplicate}" Value="True">
+                                                                      <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
+                                                                  </DataTrigger>
+                                                                  <DataTrigger Binding="{Binding IsCensorshipColorDuplicate}" Value="True">
+                                                                      <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
+                                                                  </DataTrigger>
+                                                                  <DataTrigger Binding="{Binding IsNumberedVariantDuplicate}" Value="True">
+                                                                      <Setter Property="Foreground" Value="#FFFFA347"/>
+                                                                  </DataTrigger>
+                                                                  <DataTrigger Binding="{Binding IsCensorshipUncensoredVariant}" Value="True">
+                                                                      <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                  </DataTrigger>
+                                                                  <DataTrigger Binding="{Binding IsCensorshipFullColorVariant}" Value="True">
+                                                                      <Setter Property="Foreground" Value="#FFD78BFF"/>
+                                                                  </DataTrigger>
+                                                                  <MultiDataTrigger>
+                                                                      <MultiDataTrigger.Conditions>
+                                                                          <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                                          <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
+                                                                      </MultiDataTrigger.Conditions>
+                                                                      <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                                                  </MultiDataTrigger>
+                                                                  <MultiDataTrigger>
+                                                                      <MultiDataTrigger.Conditions>
+                                                                          <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                                          <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
+                                                                      </MultiDataTrigger.Conditions>
+                                                                      <Setter Property="Foreground" Value="#FF9DFF00"/>
+                                                                  </MultiDataTrigger>
+                                                                  <MultiDataTrigger>
+                                                                      <MultiDataTrigger.Conditions>
+                                                                          <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
+                                                                          <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
+                                                                      </MultiDataTrigger.Conditions>
+                                                                      <Setter Property="Foreground" Value="#FF9DFF00"/>
+                                                                  </MultiDataTrigger>
                                                              </Style.Triggers>
                                                          </Style>
                                                      </TextBlock.Style>
