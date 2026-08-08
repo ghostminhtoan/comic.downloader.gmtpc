@@ -3599,7 +3599,7 @@
                                                                           <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
                                                                           <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
                                                                       </MultiDataTrigger.Conditions>
-                                                                      <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                                                      <Setter Property="Foreground" Value="{StaticResource CyberpunkPinkBrush}"/>
                                                                   </MultiDataTrigger>
                                                                   <MultiDataTrigger>
                                                                       <MultiDataTrigger.Conditions>
@@ -4379,7 +4379,7 @@
                                                                           <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
                                                                           <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
                                                                       </MultiDataTrigger.Conditions>
-                                                                      <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                                                      <Setter Property="Foreground" Value="{StaticResource CyberpunkPinkBrush}"/>
                                                                   </MultiDataTrigger>
                                                                   <MultiDataTrigger>
                                                                       <MultiDataTrigger.Conditions>

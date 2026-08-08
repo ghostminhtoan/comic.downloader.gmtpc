@@ -1,4 +1,4 @@
-<Window x:Class="get_link_manga.DuplicateWindow"
+﻿<Window x:Class="get_link_manga.DuplicateWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -271,7 +271,7 @@
                                                                     <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
                                                                     <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
                                                                 </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                                                <Setter Property="Foreground" Value="{StaticResource CyberpunkPinkBrush}"/>
                                                             </MultiDataTrigger>
                                                             <MultiDataTrigger>
                                                                 <MultiDataTrigger.Conditions>
@@ -396,7 +396,7 @@
                                                                     <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
                                                                     <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
                                                                 </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                                                <Setter Property="Foreground" Value="{StaticResource CyberpunkPinkBrush}"/>
                                                             </MultiDataTrigger>
                                                             <MultiDataTrigger>
                                                                 <MultiDataTrigger.Conditions>
@@ -553,7 +553,7 @@
                                                                     <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
                                                                     <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
                                                                 </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                                                <Setter Property="Foreground" Value="{StaticResource CyberpunkPinkBrush}"/>
                                                             </MultiDataTrigger>
                                                             <MultiDataTrigger>
                                                                 <MultiDataTrigger.Conditions>
@@ -672,7 +672,7 @@
                                                                     <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
                                                                     <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
                                                                 </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                                                <Setter Property="Foreground" Value="{StaticResource CyberpunkPinkBrush}"/>
                                                             </MultiDataTrigger>
                                                             <MultiDataTrigger>
                                                                 <MultiDataTrigger.Conditions>
@@ -716,7 +716,7 @@
                 <TextBlock Text="Full color" Foreground="#FFD78BFF" FontSize="11" Margin="0,0,10,0"/>
                 <TextBlock Text="Số chap/book" Foreground="#FFFFA347" FontSize="11" Margin="0,0,10,0"/>
                 <TextBlock Text="Màu+Số" Foreground="#FF9DFF00" FontSize="11" Margin="0,0,10,0"/>
-                <TextBlock Text="Decensored+Color" Foreground="#FFFFFFFF" FontSize="11" Margin="0,0,12,0"/>
+                <TextBlock Text="Decensored+Color" Foreground="{StaticResource CyberpunkPinkBrush}" FontSize="11" Margin="0,0,12,0"/>
                 <TextBlock Name="lblStatus" Text="Ready to analyze." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" VerticalAlignment="Center"/>
             </StackPanel>
 
