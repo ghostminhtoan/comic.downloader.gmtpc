@@ -504,6 +504,10 @@ namespace get_link_manga
             if (isHitomi && item.Tag == null)
             {
                 await EnsureHitomiLaTagAsync(item, token);
+                if (item.Tag != null)
+                {
+                    RecalculateDuplicates();
+                }
             }
 
             await EnsureTruyenqqHoverPreviewUrlAsync(item, token);

@@ -1905,6 +1905,61 @@ namespace get_link_manga
             return core.Trim();
         }
 
+        private static System.Collections.Generic.HashSet<string> GetHitomiTags(GalleryItem item)
+        {
+            var tagSet = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (item?.Tag == null) return tagSet;
+
+            try
+            {
+                Newtonsoft.Json.Linq.JObject galleryInfo = null;
+                if (item.Tag is string tagStr)
+                {
+                    if (!string.IsNullOrWhiteSpace(tagStr))
+                    {
+                        galleryInfo = Newtonsoft.Json.Linq.JObject.Parse(tagStr);
+                    }
+                }
+                else if (item.Tag is Newtonsoft.Json.Linq.JObject jObj)
+                {
+                    galleryInfo = jObj;
+                }
+
+                if (galleryInfo != null && galleryInfo["tags"] is Newtonsoft.Json.Linq.JArray tagsArray)
+                {
+                    foreach (var t in tagsArray)
+                    {
+                        string tagName = t["tag"]?.ToString();
+                        if (!string.IsNullOrWhiteSpace(tagName))
+                        {
+                            tagSet.Add(tagName.Trim());
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            return tagSet;
+        }
+
+        public static bool HasCensorshipColorInTags(GalleryItem item)
+        {
+            var tags = GetHitomiTags(item);
+            return tags.Contains("uncensored") || tags.Contains("full color");
+        }
+
+        public static bool HasUncensoredInTags(GalleryItem item)
+        {
+            var tags = GetHitomiTags(item);
+            return tags.Contains("uncensored");
+        }
+
+        public static bool HasFullColorInTags(GalleryItem item)
+        {
+            var tags = GetHitomiTags(item);
+            return tags.Contains("full color");
+        }
+
         public static void RunDuplicateDetection(IEnumerable<GalleryItem> items)
         {
             if (items == null) return;
@@ -1945,7 +2000,7 @@ namespace get_link_manga
 
             foreach (var group in censorshipColorGroups)
             {
-                if (group.Count() <= 1 || !group.Any(item => HasCensorshipColorVariant(item.Name)))
+                if (group.Count() <= 1 || !group.Any(item => HasCensorshipColorVariant(item.Name) || HasCensorshipColorInTags(item)))
                 {
                     continue;
                 }
@@ -1953,8 +2008,8 @@ namespace get_link_manga
                 foreach (var item in group)
                 {
                     item.IsCensorshipColorDuplicate = true;
-                    item.IsCensorshipFullColorVariant = HasFullColorVariant(item.Name);
-                    item.IsCensorshipUncensoredVariant = HasUncensoredVariant(item.Name);
+                    item.IsCensorshipFullColorVariant = HasFullColorVariant(item.Name) || HasFullColorInTags(item);
+                    item.IsCensorshipUncensoredVariant = HasUncensoredVariant(item.Name) || HasUncensoredInTags(item);
                 }
             }
         }
