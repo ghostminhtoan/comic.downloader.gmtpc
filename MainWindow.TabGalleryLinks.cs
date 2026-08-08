@@ -4784,6 +4784,10 @@ namespace get_link_manga
                     {
                         btnAutoRetryErrors.IsChecked = false;
                     }
+                    if (btnStartDownload != null)
+                    {
+                        btnStartDownload.IsChecked = false;
+                    }
                     BtnStopDownload_Click(null, null);
                 }
                 catch (Exception ex)
