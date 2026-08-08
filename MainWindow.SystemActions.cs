@@ -742,7 +742,7 @@ namespace get_link_manga
                 DownloadFolderType = cmbDownloadFolderType != null ? cmbDownloadFolderType.SelectedIndex : 0,
                 DownloadPath = txtDownloadPath != null ? txtDownloadPath.Text : string.Empty,
                 AutoSplitChapters = cmbAutoSplitChapters != null ? (int.TryParse((cmbAutoSplitChapters.SelectedItem as ComboBoxItem)?.Content?.ToString(), out int val) ? val : 0) : 0,
-                IsDownloadRunning = (btnStartDownload?.IsChecked == true || _downloadCts != null),
+                IsDownloadRunning = (tglClearCookieAndRetry?.IsChecked == true),
                 AutoZipCbz = chkAutoZipCbz != null && chkAutoZipCbz.IsChecked == true
             };
 
@@ -1222,9 +1222,13 @@ namespace get_link_manga
 
                         if (settings.IsDownloadRunning)
                         {
-                            Dispatcher.InvokeAsync(async () =>
+                            Dispatcher.InvokeAsync(() =>
                             {
-                                await StartPictureDownloadFromFloatingAsync(suppressWarning: true);
+                                if (tglClearCookieAndRetry != null)
+                                {
+                                    tglClearCookieAndRetry.IsChecked = true;
+                                    TglClearCookieAndRetry_Click(null, null);
+                                }
                             });
                         }
                     }
