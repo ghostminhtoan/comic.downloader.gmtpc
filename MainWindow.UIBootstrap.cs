@@ -508,7 +508,15 @@ namespace get_link_manga
                 _scrapedItems.Remove(item);
             }
 
-            // 3. Khôi phục lại binding
+            // 3. Khôi phục lại list _scrapedItems theo thứ tự hiện tại của ResultsView để tránh loạn thứ tự
+            var currentOrderedItems = ResultsView.Cast<GalleryItem>().ToList();
+            _scrapedItems.Clear();
+            foreach (var item in currentOrderedItems)
+            {
+                _scrapedItems.Add(item);
+            }
+
+            // 4. Khôi phục lại binding
             dgResults.ItemsSource = _scrapedItems;
             if (lbResultsThumbnail != null)
             {

@@ -53,6 +53,15 @@ namespace get_link_manga
 
         private void BtnClearTemp_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                BtnExtractClearCookie_Click(null, null);
+            }
+            catch (Exception ex)
+            {
+                Log($"[Clear Temp] Lỗi tự động xóa cookie: {ex.Message}");
+            }
+
             string downloadRoot = txtDownloadPath?.Text?.Trim() ?? string.Empty;
             ClearTempRootFolder(PortablePaths.PortableTempRoot);
             if (string.IsNullOrWhiteSpace(downloadRoot))
