@@ -965,23 +965,18 @@ namespace get_link_manga
             var tagsList = new List<string>();
             if (string.IsNullOrWhiteSpace(html)) return tagsList;
 
-            var matchContainer = Regex.Match(html, @"class=""tag-container[^""]*""[^>]*>\s*Tags:\s*<span class=""tags[^""]*""[^>]*>(.*?)</span>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
-            if (matchContainer.Success)
+            var matchSection = Regex.Match(html, @"<section\s+id=""tags""[^>]*>(.*?)</section>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+            if (matchSection.Success)
             {
-                string tagsHtml = matchContainer.Groups[1].Value;
-                var matches = Regex.Matches(tagsHtml, @"<a[^>]*>(.*?)</a>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                string sectionHtml = matchSection.Groups[1].Value;
+                var matches = Regex.Matches(sectionHtml, @"href=""/tag/([^/""\s>]+)/?""", RegexOptions.IgnoreCase);
                 foreach (Match m in matches)
                 {
-                    string content = m.Groups[1].Value;
-                    var nameMatch = Regex.Match(content, @"class=""name[^""]*""[^>]*>([^<]+)</span>", RegexOptions.IgnoreCase);
-                    string tag = nameMatch.Success ? nameMatch.Groups[1].Value : content;
-
-                    tag = Regex.Replace(tag, @"<[^>]*>", "");
-                    tag = Regex.Replace(tag, @"\s+\d+(\.\d+)?[km]?$", "").Trim();
-
-                    if (!string.IsNullOrWhiteSpace(tag))
+                    string rawTag = m.Groups[1].Value;
+                    string cleanTag = rawTag.Replace("-", " ").Trim();
+                    if (!string.IsNullOrWhiteSpace(cleanTag) && !tagsList.Contains(cleanTag, StringComparer.OrdinalIgnoreCase))
                     {
-                        tagsList.Add(tag.Trim());
+                        tagsList.Add(cleanTag);
                     }
                 }
             }
