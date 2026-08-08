@@ -4726,10 +4726,13 @@ namespace get_link_manga
             Log(_isVietnameseUi ? $"Đã làm mới trạng thái cho {count} truyện lỗi." : $"Refreshed status for {count} errored books.");
         }
 
+        private bool _isClearingCookieAndRetry = false;
+
         private async void TglClearCookieAndRetry_Click(object sender, RoutedEventArgs e)
         {
             if (tglClearCookieAndRetry.IsChecked == true)
             {
+                _isClearingCookieAndRetry = true;
                 try
                 {
                     // 1. Xóa cookie (không báo gì)
@@ -4773,11 +4776,15 @@ namespace get_link_manga
                 }
                 finally
                 {
-                    tglClearCookieAndRetry.IsChecked = true;
+                    if (_isClearingCookieAndRetry)
+                    {
+                        tglClearCookieAndRetry.IsChecked = true;
+                    }
                 }
             }
             else
             {
+                _isClearingCookieAndRetry = false;
                 try
                 {
                     if (btnAutoRetryErrors != null)
@@ -4793,6 +4800,10 @@ namespace get_link_manga
                 catch (Exception ex)
                 {
                     Log($"[System] Turn off download error: {ex.Message}");
+                }
+                finally
+                {
+                    tglClearCookieAndRetry.IsChecked = false;
                 }
             }
         }
