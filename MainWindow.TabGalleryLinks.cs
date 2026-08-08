@@ -4752,10 +4752,10 @@ namespace get_link_manga
                     {
                         btnAutoRetryErrors.IsChecked = true;
                     }
-                    if (btnStartDownload != null && btnStartDownload.IsChecked != true)
+                    if (btnStartDownload != null)
                     {
                         btnStartDownload.IsChecked = true;
-                        await HandleStartDownloadToggleCheckedAsync();
+                        await HandleStartDownloadToggleCheckedAsync(suppressWarning: true);
                     }
                 }
                 catch (Exception ex)

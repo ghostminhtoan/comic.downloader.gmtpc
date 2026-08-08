@@ -1992,7 +1992,10 @@ namespace get_link_manga
                 int addedCount = QueueDownloadsForCurrentSession(itemsToDownload, preserveExistingState: true);
                 if (addedCount <= 0)
                 {
-                    MessageBox.Show("Không có truyện mới nào để thêm vào hàng tải hiện tại.\nThere are no new checked books to add to the current queue.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    if (!suppressWarning)
+                    {
+                        MessageBox.Show("Không có truyện mới nào để thêm vào hàng tải hiện tại.\nThere are no new checked books to add to the current queue.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                     return;
                 }
 
