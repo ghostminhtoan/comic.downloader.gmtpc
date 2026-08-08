@@ -130,21 +130,18 @@ namespace get_link_manga
             Dispatcher.InvokeAsync(UpdateStatus);
         }
 
+        private void TabMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.Source is TabControl)
+            {
+                UpdateStatus();
+            }
+        }
+
         private void UpdateStatus()
         {
-            // Update status based on current active tab
-            bool isLocalTabActive = false;
-            DependencyObject parent = dgDuplicatesLocal;
-            while (parent != null)
-            {
-                if (parent is TabItem tabItem)
-                {
-                    if (tabItem.Header.ToString().Contains("Local"))
-                        isLocalTabActive = true;
-                    break;
-                }
-                parent = VisualTreeHelper.GetParent(parent);
-            }
+            if (tabMain == null) return;
+            bool isLocalTabActive = tabMain.SelectedIndex == 1;
 
             if (isLocalTabActive)
             {
@@ -740,6 +737,7 @@ namespace get_link_manga
                     _localItems.Add(item);
                 }
                 RecalculateLocalDuplicates();
+                _localView.Refresh();
                 UpdateStatus();
                 _mainWindow.Log($"Loaded {subfolders.Length} folders from {path} to check duplicates.");
             }

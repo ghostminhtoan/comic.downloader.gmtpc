@@ -1,4 +1,4 @@
-﻿<Window x:Class="get_link_manga.DuplicateWindow"
+<Window x:Class="get_link_manga.DuplicateWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -159,7 +159,7 @@
         </Border>
 
         <!-- TabControl -->
-        <TabControl Grid.Row="1" Margin="0,0,0,10">
+        <TabControl Name="tabMain" SelectionChanged="TabMain_SelectionChanged" Grid.Row="1" Margin="0,0,0,10">
             <!-- Tab 1: Download list - duplicate name -->
             <TabItem Header="Download list - duplicate name">
                 <Grid Margin="0,10,0,0">
