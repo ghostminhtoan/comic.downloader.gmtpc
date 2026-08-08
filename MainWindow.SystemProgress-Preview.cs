@@ -499,24 +499,39 @@ namespace get_link_manga
             if (item == null || item.Tag != null) return;
             try
             {
-                string html = await FetchStringAsync(item.Link, token);
-                if (string.IsNullOrEmpty(html)) return;
+                string galleryId = GetNhentaiGalleryIdFromLink(item.Link);
+                if (string.IsNullOrEmpty(galleryId)) return;
 
-                var nhentaiTags = ExtractNhentaiNetTags(html);
-                if (nhentaiTags.Count > 0)
+                string apiUrl = $"https://nhentai.net/api/gallery/{galleryId}";
+                string jsonContent = await FetchStringAsync(apiUrl, token);
+                if (string.IsNullOrEmpty(jsonContent)) return;
+
+                var galleryInfo = Newtonsoft.Json.Linq.JObject.Parse(jsonContent);
+                if (galleryInfo != null && galleryInfo["tags"] is Newtonsoft.Json.Linq.JArray tagsArray)
                 {
                     var jArr = new Newtonsoft.Json.Linq.JArray();
-                    foreach (var tag in nhentaiTags)
+                    var langsList = new List<string>();
+
+                    foreach (var t in tagsArray)
                     {
-                        var tObj = new Newtonsoft.Json.Linq.JObject();
-                        tObj["tag"] = tag;
-                        jArr.Add(tObj);
+                        string type = t["type"]?.ToString();
+                        string name = t["name"]?.ToString();
+                        if (!string.IsNullOrWhiteSpace(name))
+                        {
+                            if (string.Equals(type, "language", StringComparison.OrdinalIgnoreCase))
+                            {
+                                langsList.Add(name);
+                            }
+                            var tObj = new Newtonsoft.Json.Linq.JObject();
+                            tObj["tag"] = name;
+                            jArr.Add(tObj);
+                        }
                     }
+
                     var jTagsObj = new Newtonsoft.Json.Linq.JObject();
                     jTagsObj["tags"] = jArr;
 
-                    var langs = ExtractNhentaiNetLanguages(html);
-                    var displayLangs = langs.Where(l => l != "translated").ToList();
+                    var displayLangs = langsList.Where(l => l != "translated").ToList();
                     string currentName = CleanTranslatedTagFromTitle(item.Name);
 
                     if (displayLangs.Count > 0)
