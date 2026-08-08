@@ -715,6 +715,40 @@ namespace get_link_manga
             }
         }
 
+        private static string GetFirstImagePath(string folderPath)
+        {
+            if (!Directory.Exists(folderPath)) return null;
+
+            string[] imageExtensions = { "*.jpg", "*.jpeg", "*.png", "*.webp", "*.gif", "*.bmp" };
+            foreach (var ext in imageExtensions)
+            {
+                try
+                {
+                    var files = Directory.GetFiles(folderPath, ext);
+                    if (files.Length > 0)
+                    {
+                        Array.Sort(files, StringComparer.OrdinalIgnoreCase);
+                        return files[0];
+                    }
+                }
+                catch { }
+            }
+
+            try
+            {
+                var subdirs = Directory.GetDirectories(folderPath);
+                Array.Sort(subdirs, StringComparer.OrdinalIgnoreCase);
+                foreach (var subdir in subdirs)
+                {
+                    string path = GetFirstImagePath(subdir);
+                    if (path != null) return path;
+                }
+            }
+            catch { }
+
+            return null;
+        }
+
         private void LoadLocalFolders(string path)
         {
             if (!Directory.Exists(path)) return;
@@ -727,12 +761,16 @@ namespace get_link_manga
                 foreach (string folderPath in subfolders)
                 {
                     string folderName = Path.GetFileName(folderPath);
+                    string firstImage = GetFirstImagePath(folderPath);
                     var item = new GalleryItem
                     {
                         Name = folderName,
                         Link = folderPath,
-                        OriginalIndex = index++
+                        OriginalIndex = index++,
+                        HoverPreviewLocalPath = firstImage,
+                        HoverPreviewThumbnailLocalPath = firstImage
                     };
+                    item.RefreshHoverPreviewBindings();
                     item.PropertyChanged += GalleryItem_PropertyChanged;
                     _localItems.Add(item);
                 }
