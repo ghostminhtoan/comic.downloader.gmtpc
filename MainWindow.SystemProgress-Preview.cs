@@ -447,7 +447,7 @@ namespace get_link_manga
                 Content = new Border
                 {
                     Padding = new Thickness(4),
-                    MaxWidth = 250,
+                    MaxWidth = hasTagsSupport ? 450 : 250,
                     Child = panel
                 }
             };
@@ -494,6 +494,38 @@ namespace get_link_manga
             }
         }
 
+        private async Task EnsureNhentaiTagsAsync(GalleryItem item, CancellationToken token)
+        {
+            if (item == null || item.Tag != null) return;
+            if (string.IsNullOrWhiteSpace(item.Link)) return;
+
+            bool isNhentai = string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase) ||
+                             item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0;
+            if (!isNhentai) return;
+
+            try
+            {
+                string html = await FetchStringAsync(item.Link, token);
+                if (string.IsNullOrEmpty(html)) return;
+
+                var nhentaiTags = ExtractNhentaiNetTags(html);
+                if (nhentaiTags.Count > 0)
+                {
+                    var jArr = new Newtonsoft.Json.Linq.JArray();
+                    foreach (var tag in nhentaiTags)
+                    {
+                        var tObj = new Newtonsoft.Json.Linq.JObject();
+                        tObj["tag"] = tag;
+                        jArr.Add(tObj);
+                    }
+                    var jObj = new Newtonsoft.Json.Linq.JObject();
+                    jObj["tags"] = jArr;
+                    item.Tag = jObj;
+                }
+            }
+            catch { }
+        }
+
         private async Task EnsureGalleryHoverPreviewFileAsync(GalleryItem item, CancellationToken token)
         {
             if (item == null)
@@ -506,6 +538,17 @@ namespace get_link_manga
             if (isHitomi && item.Tag == null)
             {
                 await EnsureHitomiLaTagAsync(item, token);
+                if (item.Tag != null)
+                {
+                    RecalculateDuplicates();
+                }
+            }
+
+            bool isNhentai = string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase) ||
+                             (item.Link != null && item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0);
+            if (isNhentai && item.Tag == null)
+            {
+                await EnsureNhentaiTagsAsync(item, token);
                 if (item.Tag != null)
                 {
                     RecalculateDuplicates();
