@@ -558,6 +558,45 @@ namespace get_link_manga
             _mainWindow?.ForwardGalleryPreviewMouseLeave(sender as FrameworkElement);
         }
 
+        private void DuplicatePreviewRow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Middle && sender is DataGridRow row && row.DataContext is GalleryItem clickedItem)
+            {
+                e.Handled = true;
+
+                DataGrid parentGrid = null;
+                DependencyObject parent = VisualTreeHelper.GetParent(row);
+                while (parent != null)
+                {
+                    if (parent is DataGrid dg)
+                    {
+                        parentGrid = dg;
+                        break;
+                    }
+                    parent = VisualTreeHelper.GetParent(parent);
+                }
+
+                if (parentGrid == null) return;
+
+                var itemsSource = parentGrid.ItemsSource;
+                if (itemsSource == null) return;
+
+                string clickedCore = MainWindow.GetSimilarityCore(clickedItem.Name, false);
+                if (string.IsNullOrEmpty(clickedCore)) return;
+
+                var listItems = itemsSource.Cast<GalleryItem>().ToList();
+                var matchingItems = listItems
+                    .Where(item => MainWindow.GetSimilarityCore(item.Name, false) == clickedCore)
+                    .ToList();
+
+                parentGrid.SelectedItems.Clear();
+                foreach (var item in matchingItems)
+                {
+                    parentGrid.SelectedItems.Add(item);
+                }
+            }
+        }
+
         private void DgDuplicates_Loaded(object sender, RoutedEventArgs e)
         {
             ScheduleDuplicatePreviewPrefetch();

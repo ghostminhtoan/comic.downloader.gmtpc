@@ -63,6 +63,7 @@
             <EventSetter Event="MouseEnter" Handler="DuplicatePreviewRow_MouseEnter"/>
             <EventSetter Event="MouseMove" Handler="DuplicatePreviewRow_MouseMove"/>
             <EventSetter Event="MouseLeave" Handler="DuplicatePreviewRow_MouseLeave"/>
+            <EventSetter Event="PreviewMouseDown" Handler="DuplicatePreviewRow_PreviewMouseDown"/>
         </Style>
 
         <!-- Cell Style -->
@@ -201,6 +202,7 @@
                     <DataGrid Grid.Row="1"
                               Name="dgDuplicates"
                               Margin="0,0,0,15"
+                              MinRowHeight="60"
                               Style="{StaticResource CyberpunkDataGrid}"
                               ColumnHeaderStyle="{StaticResource CyberpunkDataGridColumnHeader}"
                               RowStyle="{StaticResource DuplicatePreviewRowStyle}"
@@ -244,13 +246,13 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="THUMB" Width="55">
+                            <DataGridTemplateColumn Header="THUMB" Width="80">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Height="36" Width="48" Margin="2" Background="#0A1321" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="2">
+                                        <Border Height="54" Width="72" Margin="3" Background="#0A1321" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="2">
                                             <Grid>
                                                 <Image Source="{Binding HoverPreviewThumbnailImageSource}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                <TextBlock Text="📁" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="📁" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -509,6 +511,7 @@
                     <DataGrid Grid.Row="2"
                               Name="dgDuplicatesLocal"
                               Margin="0,0,0,15"
+                              MinRowHeight="60"
                               Style="{StaticResource CyberpunkDataGrid}"
                               ColumnHeaderStyle="{StaticResource CyberpunkDataGridColumnHeader}"
                               RowStyle="{StaticResource DuplicatePreviewRowStyle}"
@@ -549,13 +552,13 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="THUMB" Width="55">
+                            <DataGridTemplateColumn Header="THUMB" Width="80">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Height="36" Width="48" Margin="2" Background="#0A1321" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="2">
+                                        <Border Height="54" Width="72" Margin="3" Background="#0A1321" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="2">
                                             <Grid>
                                                 <Image Source="{Binding HoverPreviewThumbnailImageSource}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                <TextBlock Text="📁" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="📁" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
