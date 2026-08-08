@@ -1,4 +1,4 @@
-﻿<Window x:Class="get_link_manga.MainWindow"
+<Window x:Class="get_link_manga.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -4831,12 +4831,12 @@
                                          <ScaleTransform ScaleX="0.7" ScaleY="0.7"/>
                                      </Grid.LayoutTransform>
                                      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                         <TextBlock Name="lblClearCookieAndRetry" Text="XÓA COOKIE &amp; THỬ LẠI" Foreground="White" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                         <ToggleButton Name="tglClearCookieAndRetry" Click="TglClearCookieAndRetry_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="CLEAR COOKIE &amp; RETRY"/>
+                                         <TextBlock Name="lblClearCookieAndRetry" Text="TỰ ĐỘNG TẢI" Foreground="White" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                         <ToggleButton Name="tglClearCookieAndRetry" Click="TglClearCookieAndRetry_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="AUTO DOWNLOAD"/>
                                      </StackPanel>
                                  </Grid>
 
-                                <Grid Name="grdStartDownloadToggle" Margin="0,0,6,0" VerticalAlignment="Center">
+                                <Grid Name="grdStartDownloadToggle" Margin="0,0,6,0" VerticalAlignment="Center" Visibility="Collapsed">
                                     <Grid.LayoutTransform>
                                         <ScaleTransform ScaleX="0.7" ScaleY="0.7"/>
                                     </Grid.LayoutTransform>
@@ -4845,7 +4845,7 @@
                                         <ToggleButton Name="btnStartDownload" Click="BtnStartDownloadToggle_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="DOWNLOAD ALL"/>
                                     </StackPanel>
                                 </Grid>
-                                <Grid Name="grdAutoRetryErrorsToggle" Margin="0,0,6,0" VerticalAlignment="Center">
+                                <Grid Name="grdAutoRetryErrorsToggle" Margin="0,0,6,0" VerticalAlignment="Center" Visibility="Collapsed">
                                     <Grid.LayoutTransform>
                                         <ScaleTransform ScaleX="0.7" ScaleY="0.7"/>
                                     </Grid.LayoutTransform>

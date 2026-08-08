@@ -919,7 +919,8 @@ namespace get_link_manga
             if (btnToolbarSortByName != null) btnToolbarSortByName.Content = "Sort by name";
             if (btnPopupPreviewToggle != null) btnPopupPreviewToggle.ToolTip = "POPUP PREVIEW";
             if (chkCompactRows != null) chkCompactRows.ToolTip = "COMPACT ROW";
-            if (tglClearCookieAndRetry != null) tglClearCookieAndRetry.ToolTip = "CLEAR COOKIE & RETRY";
+            if (tglClearCookieAndRetry != null) tglClearCookieAndRetry.ToolTip = "AUTO DOWNLOAD";
+            if (lblClearCookieAndRetry != null) lblClearCookieAndRetry.Text = "AUTO DOWNLOAD";
             if (chkHideSettings != null) chkHideSettings.ToolTip = "HIDE SETTINGS";
             if (chkResultsPresentation != null) chkResultsPresentation.ToolTip = "LIST / THUMBNAIL";
             if (btnDuplicateName != null) btnDuplicateName.Content = "Duplicate names";
