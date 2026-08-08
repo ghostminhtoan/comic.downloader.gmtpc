@@ -183,6 +183,7 @@ namespace get_link_manga
 
                 // Tăng giới hạn kết nối mạng đồng thời tối đa đến 1 host để tránh nghẽn luồng socket
                 System.Net.ServicePointManager.DefaultConnectionLimit = 512;
+                System.Net.ServicePointManager.MaxServicePointIdleTime = 10000; // Đóng socket idle sau 10s
             }
             catch { }
 
@@ -255,6 +256,27 @@ namespace get_link_manga
                 }
 
                 UpdateLightNovelFloatingControlState();
+
+                try
+                {
+                    string configPath = Path.Combine(PortablePaths.PortableDataRoot, "connection_limit.txt");
+                    if (File.Exists(configPath))
+                    {
+                        string valStr = File.ReadAllText(configPath).Trim();
+                        if (int.TryParse(valStr, out int savedLimit))
+                        {
+                            foreach (ComboBoxItem item in cmbConnections.Items)
+                            {
+                                if (item.Content.ToString() == savedLimit.ToString())
+                                {
+                                    cmbConnections.SelectedItem = item;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch { }
 
                 GetCurrentConnectionLimit();
                 GetCurrentMultiDownloadLimit();

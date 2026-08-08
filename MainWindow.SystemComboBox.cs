@@ -25,6 +25,14 @@ namespace get_link_manga
 
                 RefreshActiveDownloadConcurrency();
                 Log($"[Connection] Đã cập nhật số trang song song mỗi book thành {newLimit}.");
+                
+                try
+                {
+                    string configPath = System.IO.Path.Combine(PortablePaths.PortableDataRoot, "connection_limit.txt");
+                    System.IO.File.WriteAllText(configPath, newLimit.ToString());
+                }
+                catch { }
+
                 RequestGalleryListAutosave(500);
             }
             catch
