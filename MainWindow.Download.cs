@@ -4575,14 +4575,19 @@ namespace get_link_manga
             if (Dispatcher.CheckAccess())
             {
                 int selected = GetComboBoxSelectedInt(cmbConnections, 4);
-                if (selected >= 16)
-                {
-                    selected = 4;
-                }
                 _cachedConnectionLimit = selected;
                 return selected;
             }
-            return _cachedConnectionLimit;
+            else
+            {
+                int selected = 4;
+                Dispatcher.Invoke(() =>
+                {
+                    selected = GetComboBoxSelectedInt(cmbConnections, 4);
+                });
+                _cachedConnectionLimit = selected;
+                return selected;
+            }
         }
 
         private int GetCurrentMultiDownloadLimit()
@@ -4607,7 +4612,29 @@ namespace get_link_manga
                 _cachedMultiDownloadLimit = limit;
                 return limit;
             }
-            return _cachedMultiDownloadLimit;
+            else
+            {
+                int limit = 2;
+                Dispatcher.Invoke(() =>
+                {
+                    int selectedMulti = GetComboBoxSelectedInt(cmbMultiDownload, 2);
+                    int selectedConn = GetComboBoxSelectedInt(cmbConnections, 4);
+                    if (selectedConn == 16)
+                    {
+                        limit = Math.Max(selectedMulti, 4);
+                    }
+                    else if (selectedConn == 32)
+                    {
+                        limit = Math.Max(selectedMulti, 8);
+                    }
+                    else
+                    {
+                        limit = selectedMulti;
+                    }
+                });
+                _cachedMultiDownloadLimit = limit;
+                return limit;
+            }
         }
 
         private int GetBookConnectionLimit(GalleryItem item)
