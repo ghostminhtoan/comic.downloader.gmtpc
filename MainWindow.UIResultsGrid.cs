@@ -1960,10 +1960,43 @@ namespace get_link_manga
             return tags.Contains("full color");
         }
 
+        public static string AppendMetadataToName(string name, string metadata)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return name;
+            if (name.IndexOf(metadata, StringComparison.OrdinalIgnoreCase) >= 0) return name;
+
+            int squareBracketIndex = name.IndexOf('[');
+            if (squareBracketIndex >= 0)
+            {
+                string prefix = name.Substring(0, squareBracketIndex).Trim();
+                string suffix = name.Substring(squareBracketIndex);
+                return $"{prefix} ({metadata}) {suffix}";
+            }
+            return $"{name.Trim()} ({metadata})";
+        }
+
         public static void RunDuplicateDetection(IEnumerable<GalleryItem> items)
         {
             if (items == null) return;
             var itemList = items.ToList();
+
+            // 1. Tự động chèn metadata vào tên truyện dựa trên tag Hitomi trước
+            foreach (var item in itemList)
+            {
+                bool isHitomi = string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) ||
+                                (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
+                if (isHitomi)
+                {
+                    if (HasUncensoredInTags(item) && !HasUncensoredVariant(item.Name))
+                    {
+                        item.Name = AppendMetadataToName(item.Name, "uncensored");
+                    }
+                    if (HasFullColorInTags(item) && !HasFullColorVariant(item.Name))
+                    {
+                        item.Name = AppendMetadataToName(item.Name, "full color");
+                    }
+                }
+            }
 
             var groups = itemList
                 .GroupBy(item => GetSimilarityCore(item.Name, false))
