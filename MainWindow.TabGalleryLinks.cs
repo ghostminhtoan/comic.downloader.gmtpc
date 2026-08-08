@@ -4773,7 +4773,7 @@ namespace get_link_manga
                 }
                 finally
                 {
-                    tglClearCookieAndRetry.IsChecked = false;
+                    tglClearCookieAndRetry.IsChecked = true;
                 }
             }
         }
