@@ -4849,6 +4849,14 @@ namespace get_link_manga
                     UseCookies = useCookies
                 };
 
+                // Limit active connection per server (host) to match user setting
+                try
+                {
+                    int limit = GetCurrentConnectionLimit();
+                    handler.MaxConnectionsPerServer = Math.Max(1, limit);
+                }
+                catch {}
+
                 // Auto Proxy Logic
                 try
                 {
@@ -4946,6 +4954,8 @@ namespace get_link_manga
             }, token);
         }
 
+        private static readonly Random _delayRandom = new Random();
+
         private async Task DownloadUrlToFileWithRefererAsync(string url, string referer, string filePath, CancellationToken token, bool isViHentai = false, bool isTruyenqq = false)
         {
             long minSize = 1024; // Smart Resume: >1KB mới skip, tránh skip ảnh thật dung lượng thấp
@@ -4953,6 +4963,14 @@ namespace get_link_manga
             {
                 return; // skip duplicate
             }
+
+            // Introduce a short jittered delay to avoid hitting the server with multiple requests simultaneously
+            try
+            {
+                int jitter = _delayRandom.Next(150, 450);
+                await Task.Delay(jitter, token);
+            }
+            catch {}
 
             int delayMs = isViHentai ? 800 : (isTruyenqq ? 600 : 500);
             int maxAttempts = 3;
