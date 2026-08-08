@@ -4776,6 +4776,21 @@ namespace get_link_manga
                     tglClearCookieAndRetry.IsChecked = true;
                 }
             }
+            else
+            {
+                try
+                {
+                    if (btnAutoRetryErrors != null)
+                    {
+                        btnAutoRetryErrors.IsChecked = false;
+                    }
+                    BtnStopDownload_Click(null, null);
+                }
+                catch (Exception ex)
+                {
+                    Log($"[System] Turn off download error: {ex.Message}");
+                }
+            }
         }
     }
 }
