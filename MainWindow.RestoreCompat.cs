@@ -537,7 +537,7 @@ namespace get_link_manga
                 case "hako":
                     return "https://ln.hako.vn/the-loai/action";
                 case "hitomi.la":
-                    return "https://hitomi.la/artist/yamamoto-all.html";
+                    return "https://hitomi.la/search.html?female%3Abig_breasts%20artist%3Ayamamoto%20language%3Aenglish";
                 default:
                     return null;
             }
@@ -583,6 +583,8 @@ namespace get_link_manga
                     return txtHentaieraTagUrl;
                 case "hako":
                     return txtHakoTagUrl;
+                case "hitomi.la":
+                    return txtHitomiLaTagUrl;
                 default:
                     return null;
             }

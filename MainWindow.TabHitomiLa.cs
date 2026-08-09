@@ -239,13 +239,15 @@ namespace get_link_manga
                     }
                     else if (prefix == "female" || prefix == "male")
                     {
-                        category = "tag";
-                        value = cleanPart;
+                        category = prefix;   // /n/female/ hoặc /n/male/
+                        value = val;         // phần sau dấu ':'
                     }
                 }
 
-                string encodedValue = Uri.EscapeDataString(value);
+                // Dùng Replace space → %20, không EscapeDataString toàn bộ (tránh encode dấu gạch ngang)
+                string encodedValue = value.Replace(" ", "%20");
                 string nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/n/{category}/{encodedValue}.nozomi";
+                HitomiLaLog($"[Search] Nozomi: {nozomiUrl}");
                 nozomiUrls.Add(nozomiUrl);
             }
 
