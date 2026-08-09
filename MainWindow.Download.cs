@@ -2735,6 +2735,14 @@ namespace get_link_manga
                             item.IsChecked = hasErrors ? item.IsChecked : false;
                         });
                         QueueParallelSplitCollapseIfReady(item);
+                        
+                        // ponytail: Tự động đếm lại số lượng ảnh thực tế trên đĩa
+                        try
+                        {
+                            await RefreshDiskImageCountAsync(item);
+                        }
+                        catch {}
+
                         await Dispatcher.InvokeAsync(async () =>
                         {
                             await RefreshReaderLibraryAsync(forceRefresh: true);

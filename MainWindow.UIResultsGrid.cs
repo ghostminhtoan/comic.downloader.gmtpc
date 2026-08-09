@@ -3216,5 +3216,84 @@ namespace get_link_manga
                     MessageBoxImage.Error);
             }
         }
+
+        private int CountDiskImagesForGalleryItem(GalleryItem item)
+        {
+            if (item == null) return 0;
+            string dlRoot = string.IsNullOrWhiteSpace(item.DownloadPath) ? (txtDownloadPath?.Text ?? string.Empty) : item.DownloadPath;
+            if (string.IsNullOrWhiteSpace(dlRoot)) return 0;
+
+            try
+            {
+                string siteFolder = GetDownloadSiteKey(item);
+                string siteRoot = GetConfiguredDownloadRoot(dlRoot, siteFolder);
+                string safeBook = GetCanonicalBookFolderName(item, string.Empty);
+                string bookFolder = System.IO.Path.Combine(siteRoot, safeBook);
+
+                if (!System.IO.Directory.Exists(bookFolder)) return 0;
+
+                string[] searchPatterns = { "*.jpg", "*.jpeg", "*.png", "*.webp", "*.gif", "*.bmp" };
+                int count = 0;
+                
+                // Đếm tất cả file ảnh trong thư mục book (bao gồm cả thư mục con như chapter)
+                foreach (var pattern in searchPatterns)
+                {
+                    try
+                    {
+                        count += System.IO.Directory.GetFiles(bookFolder, pattern, System.IO.SearchOption.AllDirectories).Length;
+                    }
+                    catch {}
+                }
+
+                return count;
+            }
+            catch (Exception ex)
+            {
+                Log($"[CountDiskImages Error] {item.Name}: {ex.Message}");
+                return 0;
+            }
+        }
+
+        private async Task RefreshDiskImageCountAsync(GalleryItem item)
+        {
+            if (item == null) return;
+            await Task.Run(() =>
+            {
+                int count = CountDiskImagesForGalleryItem(item);
+                Dispatcher.Invoke(() =>
+                {
+                    item.ActualDiskImageCount = count > 0 ? (int?)count : null;
+                });
+            });
+        }
+
+        private async void MenuRefreshDiskImageCount_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedItems = new List<GalleryItem>();
+            if (_isResultsThumbnailViewEnabled && lbResultsThumbnail != null)
+            {
+                selectedItems = lbResultsThumbnail.SelectedItems.Cast<GalleryItem>().Where(x => x != null).ToList();
+            }
+            else if (dgResults != null)
+            {
+                selectedItems = dgResults.SelectedItems.Cast<GalleryItem>().Where(x => x != null).ToList();
+            }
+
+            if (selectedItems.Count == 0) return;
+
+            lblStatus.Text = _isVietnameseUi ? $"Đang đếm số lượng ảnh cho {selectedItems.Count} truyện..." : $"Counting disk images for {selectedItems.Count} book(s)...";
+            int successCount = 0;
+
+            foreach (var item in selectedItems)
+            {
+                await RefreshDiskImageCountAsync(item);
+                successCount++;
+            }
+
+            lblStatus.Text = _isVietnameseUi 
+                ? $"Đã đếm xong số lượng ảnh cho {successCount} truyện." 
+                : $"Finished counting disk images for {successCount} book(s).";
+            Log(lblStatus.Text);
+        }
     }
 }

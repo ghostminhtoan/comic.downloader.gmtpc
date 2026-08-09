@@ -256,6 +256,21 @@ namespace get_link_manga
             }
         }
 
+        private int? _actualDiskImageCount;
+        public int? ActualDiskImageCount
+        {
+            get => _actualDiskImageCount;
+            set
+            {
+                if (_actualDiskImageCount != value)
+                {
+                    _actualDiskImageCount = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(DisplayStatusText));
+                }
+            }
+        }
+
         public bool IsChecked
         {
             get => _isChecked;
@@ -1168,25 +1183,48 @@ namespace get_link_manga
                     return string.Empty;
                 }
 
+                string baseStatus = string.Empty;
                 switch (_status)
                 {
                     case "Queued":
-                        return IsVietnameseUiEnabled() ? "Chờ tải" : "Waiting";
+                        baseStatus = IsVietnameseUiEnabled() ? "Chờ tải" : "Waiting";
+                        break;
                     case "Downloading":
-                        return IsVietnameseUiEnabled() ? "Đang tải" : "Downloading";
+                        baseStatus = IsVietnameseUiEnabled() ? "Đang tải" : "Downloading";
+                        break;
                     case "Completed":
-                        return IsVietnameseUiEnabled() ? "Hoàn tất" : "Done";
+                        baseStatus = IsVietnameseUiEnabled() ? "Hoàn tất" : "Done";
+                        break;
                     case "Error":
-                        return IsVietnameseUiEnabled() ? "Lỗi" : "Error";
+                        baseStatus = IsVietnameseUiEnabled() ? "Lỗi" : "Error";
+                        break;
                     case "Paused":
-                        return IsVietnameseUiEnabled() ? "Tạm dừng" : "Paused";
+                        baseStatus = IsVietnameseUiEnabled() ? "Tạm dừng" : "Paused";
+                        break;
                     case "Stopping":
-                        return IsVietnameseUiEnabled() ? "Đang dừng" : "Stopping";
+                        baseStatus = IsVietnameseUiEnabled() ? "Đang dừng" : "Stopping";
+                        break;
                     case "Cancelled":
-                        return IsVietnameseUiEnabled() ? "Đã dừng" : "Stopped";
+                        baseStatus = IsVietnameseUiEnabled() ? "Đã dừng" : "Stopped";
+                        break;
                     default:
-                        return string.IsNullOrWhiteSpace(_status) ? string.Empty : _status;
+                        baseStatus = string.IsNullOrWhiteSpace(_status) ? string.Empty : _status;
+                        break;
                 }
+
+                if (_actualDiskImageCount.HasValue && 
+                    (string.Equals(_status, "Completed", StringComparison.OrdinalIgnoreCase) || 
+                     string.Equals(_status, "Error", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(_status, "Cancelled", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(_status, "Stopped", StringComparison.OrdinalIgnoreCase)))
+                {
+                    string diskSuffix = IsVietnameseUiEnabled() 
+                        ? $" ({_actualDiskImageCount} ảnh)" 
+                        : $" ({_actualDiskImageCount} imgs)";
+                    return baseStatus + diskSuffix;
+                }
+
+                return baseStatus;
             }
         }
 
