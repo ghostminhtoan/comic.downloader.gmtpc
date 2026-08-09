@@ -1059,9 +1059,27 @@ namespace get_link_manga
                     originalPath = cacheBasePath + originalExtension;
 
                     byte[] browserBytes = await FetchMangadexBytesViaBrowserAsync(imageUrl, item?.Link, token);
-                    using (FileStream fileStream = new FileStream(originalPath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    bool isWebp = browserBytes.Length >= 12 &&
+                                  browserBytes[0] == 0x52 && browserBytes[1] == 0x49 && browserBytes[2] == 0x46 && browserBytes[3] == 0x46 &&
+                                  browserBytes[8] == 0x57 && browserBytes[9] == 0x45 && browserBytes[10] == 0x42 && browserBytes[11] == 0x50;
+
+                    if (isWebp)
                     {
-                        await fileStream.WriteAsync(browserBytes, 0, browserBytes.Length, token);
+                        string tempDownloadedFile = originalPath + ".tmp";
+                        using (FileStream fileStream = new FileStream(tempDownloadedFile, FileMode.Create, FileAccess.Write, FileShare.Read))
+                        {
+                            await fileStream.WriteAsync(browserBytes, 0, browserBytes.Length, token);
+                        }
+                        bool converted = await ConvertWebpToJpgAsync(tempDownloadedFile, originalPath);
+                        try { File.Delete(tempDownloadedFile); } catch {}
+                        if (!converted) return false;
+                    }
+                    else
+                    {
+                        using (FileStream fileStream = new FileStream(originalPath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                        {
+                            await fileStream.WriteAsync(browserBytes, 0, browserBytes.Length, token);
+                        }
                     }
 
                     item.HoverPreviewLocalPath = originalPath;
@@ -1094,10 +1112,39 @@ namespace get_link_manga
                         string originalExtension = ".jpg";
                         originalPath = cacheBasePath + originalExtension;
 
+                        string tempDownloadedFile = originalPath + ".tmp";
                         using (Stream sourceStream = await response.Content.ReadAsStreamAsync())
-                        using (FileStream fileStream = new FileStream(originalPath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                        using (FileStream fileStream = new FileStream(tempDownloadedFile, FileMode.Create, FileAccess.Write, FileShare.Read))
                         {
                             await sourceStream.CopyToAsync(fileStream, 81920, token);
+                        }
+
+                        bool isWebp = false;
+                        try
+                        {
+                            byte[] header = new byte[12];
+                            using (var fs = new FileStream(tempDownloadedFile, FileMode.Open, FileAccess.Read))
+                            {
+                                int read = await fs.ReadAsync(header, 0, 12, token);
+                                if (read == 12 && header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46 &&
+                                    header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50)
+                                {
+                                    isWebp = true;
+                                }
+                            }
+                        }
+                        catch {}
+
+                        if (isWebp)
+                        {
+                            bool converted = await ConvertWebpToJpgAsync(tempDownloadedFile, originalPath);
+                            try { File.Delete(tempDownloadedFile); } catch {}
+                            if (!converted) return false;
+                        }
+                        else
+                        {
+                            if (File.Exists(originalPath)) File.Delete(originalPath);
+                            File.Move(tempDownloadedFile, originalPath);
                         }
 
                         item.HoverPreviewLocalPath = originalPath;
@@ -1343,6 +1390,95 @@ namespace get_link_manga
             bitmap.EndInit();
             bitmap.Freeze();
             return bitmap;
+        }
+
+        private static async Task<string> EnsureDwebpExeAsync()
+        {
+            string binDir = Path.Combine(PortablePaths.PortableTempRoot, "bin");
+            string dwebpPath = Path.Combine(binDir, "dwebp.exe");
+            if (File.Exists(dwebpPath))
+            {
+                return dwebpPath;
+            }
+
+            try
+            {
+                Directory.CreateDirectory(binDir);
+                string downloadUrl = "https://github.com/StunlockStudios/libwebp-binaries/raw/master/bin/dwebp.exe";
+                using (var client = new System.Net.Http.HttpClient())
+                using (var response = await client.GetAsync(downloadUrl))
+                {
+                    response.EnsureSuccessStatusCode();
+                    using (var fs = new FileStream(dwebpPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        await response.Content.CopyToAsync(fs);
+                    }
+                }
+                return dwebpPath;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static async Task<bool> ConvertWebpToJpgAsync(string webpPath, string jpgPath)
+        {
+            string dwebpExe = await EnsureDwebpExeAsync();
+            if (string.IsNullOrEmpty(dwebpExe) || !File.Exists(dwebpExe))
+            {
+                return false;
+            }
+
+            string tempPng = webpPath + ".png";
+            try
+            {
+                var startInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = dwebpExe,
+                    Arguments = $"\"{webpPath}\" -o \"{tempPng}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
+
+                using (var process = System.Diagnostics.Process.Start(startInfo))
+                {
+                    await Task.Run(() => process.WaitForExit());
+                    if (process.ExitCode != 0) return false;
+                }
+
+                if (File.Exists(tempPng))
+                {
+                    using (var stream = new FileStream(tempPng, FileMode.Open, FileAccess.Read))
+                    {
+                        var decoder = System.Windows.Media.Imaging.BitmapDecoder.Create(
+                            stream,
+                            System.Windows.Media.Imaging.BitmapCreateOptions.None,
+                            System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
+
+                        var frame = decoder.Frames[0];
+                        var encoder = new System.Windows.Media.Imaging.JpegBitmapEncoder();
+                        encoder.Frames.Add(frame);
+
+                        using (var outStream = new FileStream(jpgPath, FileMode.Create, FileAccess.Write))
+                        {
+                            encoder.Save(outStream);
+                        }
+                    }
+                    return true;
+                }
+            }
+            catch
+            {
+                // Fallback
+            }
+            finally
+            {
+                try { if (File.Exists(tempPng)) File.Delete(tempPng); } catch {}
+            }
+            return false;
         }
     }
 }
