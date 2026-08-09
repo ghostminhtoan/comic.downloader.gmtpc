@@ -223,8 +223,18 @@ namespace get_link_manga
                 string cleanPart = part.Trim();
                 if (string.IsNullOrEmpty(cleanPart)) continue;
 
-                string category = "tag";
-                string value = cleanPart;
+                // Hitomi.la nozomi API category mapping:
+                // artist:xxx       => /n/artist/xxx.nozomi
+                // character:xxx    => /n/character/xxx.nozomi
+                // series:xxx       => /n/series/xxx.nozomi  (parody/series)
+                // group:xxx        => /n/group/xxx.nozomi
+                // language:xxx     => /n/language/xxx.nozomi
+                // type:xxx         => /n/type/xxx.nozomi
+                // female:xxx       => /n/tag/female:xxx.nozomi
+                // male:xxx         => /n/tag/male:xxx.nozomi
+                // (no prefix/other)=> /n/tag/xxx.nozomi
+                string category;
+                string value;
 
                 int colonIdx = cleanPart.IndexOf(':');
                 if (colonIdx > 0)
@@ -232,22 +242,36 @@ namespace get_link_manga
                     string prefix = cleanPart.Substring(0, colonIdx).ToLowerInvariant();
                     string val = cleanPart.Substring(colonIdx + 1);
 
-                    if (prefix == "artist" || prefix == "character" || prefix == "series" || prefix == "group" || prefix == "language")
+                    switch (prefix)
                     {
-                        category = prefix;
-                        value = val;
-                    }
-                    else if (prefix == "female" || prefix == "male")
-                    {
-                        category = prefix;   // /n/female/ hoặc /n/male/
-                        value = val;         // phần sau dấu ':'
+                        case "artist":
+                        case "character":
+                        case "series":
+                        case "group":
+                        case "language":
+                        case "type":
+                            category = prefix;
+                            value = val;
+                            break;
+                        case "female":
+                        case "male":
+                        default:
+                            category = "tag";
+                            value = cleanPart;
+                            break;
                     }
                 }
+                else
+                {
+                    category = "tag";
+                    value = cleanPart;
+                }
 
-                // Dùng Replace space → %20, không EscapeDataString toàn bộ (tránh encode dấu gạch ngang)
-                string encodedValue = value.Replace(" ", "%20");
+                // Hitomi nozomi standard: lowercase, spaces to underscores
+                value = value.ToLowerInvariant().Replace(' ', '_');
+                string encodedValue = Uri.EscapeDataString(value);
                 string nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/n/{category}/{encodedValue}.nozomi";
-                HitomiLaLog($"[Search] Nozomi: {nozomiUrl}");
+                HitomiLaLog($"[Search] '{cleanPart}' => {nozomiUrl}");
                 nozomiUrls.Add(nozomiUrl);
             }
 
