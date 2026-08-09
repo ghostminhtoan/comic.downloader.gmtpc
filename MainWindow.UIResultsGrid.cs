@@ -3119,12 +3119,14 @@ namespace get_link_manga
 
             if (!selectedItems.Any()) return;
 
-            string previewRoot = System.IO.Path.Combine(PortablePaths.PortableTempRoot, "preview-cache");
-
             foreach (var item in selectedItems)
             {
                 item.HoverPreviewLocalPath = null;
                 item.HoverPreviewThumbnailLocalPath = null;
+
+                string domainFolder = GetDomainFolderName(item, item.HoverPreviewThumbnailUrl);
+                string previewRoot = System.IO.Path.Combine(PortablePaths.PortableTempRoot, "preview-cache", domainFolder);
+
                 item.HoverPreviewThumbnailUrl = null;
 
                 string sanitizedBook = GetSanitizedFileName(item.Name);

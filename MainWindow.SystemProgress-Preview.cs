@@ -1009,7 +1009,8 @@ namespace get_link_manga
                     return true;
                 }
 
-                string previewRoot = Path.Combine(PortablePaths.PortableTempRoot, "preview-cache");
+                string domainFolder = GetDomainFolderName(item, imageUrl);
+                string previewRoot = Path.Combine(PortablePaths.PortableTempRoot, "preview-cache", domainFolder);
                 Directory.CreateDirectory(previewRoot);
                 ServicePoint previewServicePoint = ServicePointManager.FindServicePoint(new Uri(imageUrl));
                 previewServicePoint.ConnectionLimit = Math.Max(previewServicePoint.ConnectionLimit, 8);
@@ -1099,7 +1100,7 @@ namespace get_link_manga
                 }
 
                 DirectoryInfo dir = new DirectoryInfo(previewRoot);
-                FileInfo[] files = dir.GetFiles();
+                FileInfo[] files = dir.GetFiles("*", SearchOption.AllDirectories);
                 long totalSize = files.Sum(f => f.Length);
                 if (totalSize > 209715200) // 200 MB
                 {
@@ -1127,9 +1128,44 @@ namespace get_link_manga
             }
         }
 
+        public static string GetDomainFolderName(GalleryItem item, string imageUrl)
+        {
+            string domain = item?.SourceDomain;
+            if (string.IsNullOrWhiteSpace(domain) && !string.IsNullOrWhiteSpace(item?.Link))
+            {
+                try
+                {
+                    var uri = new Uri(item.Link);
+                    domain = uri.Host;
+                }
+                catch {}
+            }
+            if (string.IsNullOrWhiteSpace(domain) && !string.IsNullOrWhiteSpace(imageUrl))
+            {
+                try
+                {
+                    var uri = new Uri(imageUrl);
+                    domain = uri.Host;
+                }
+                catch {}
+            }
+            if (string.IsNullOrWhiteSpace(domain))
+            {
+                domain = "unknown";
+            }
+            
+            domain = domain.ToLowerInvariant().Replace("www.", "");
+            foreach (char c in Path.GetInvalidFileNameChars())
+            {
+                domain = domain.Replace(c, '_');
+            }
+            return domain;
+        }
+
         private static string GetGalleryHoverPreviewCacheBasePath(GalleryItem item, string imageUrl)
         {
-            string previewRoot = Path.Combine(PortablePaths.PortableTempRoot, "preview-cache");
+            string domainFolder = GetDomainFolderName(item, imageUrl);
+            string previewRoot = Path.Combine(PortablePaths.PortableTempRoot, "preview-cache", domainFolder);
             string bookName = item?.Name;
             string sanitizedBook = GetSanitizedFileName(bookName);
             if (!string.IsNullOrWhiteSpace(sanitizedBook))

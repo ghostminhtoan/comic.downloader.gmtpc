@@ -62,6 +62,19 @@ namespace get_link_manga
                 Log($"[Clear Temp] Lỗi tự động xóa cookie: {ex.Message}");
             }
 
+            if (_scrapedItems != null)
+            {
+                foreach (var item in _scrapedItems)
+                {
+                    item.HoverPreviewLocalPath = null;
+                    item.HoverPreviewThumbnailLocalPath = null;
+                    item.HoverPreviewThumbnailUrl = null;
+                }
+            }
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
             string downloadRoot = txtDownloadPath?.Text?.Trim() ?? string.Empty;
             ClearTempRootFolder(PortablePaths.PortableTempRoot);
             if (string.IsNullOrWhiteSpace(downloadRoot))
