@@ -268,8 +268,9 @@ namespace get_link_manga
                 }
 
                 // Hitomi nozomi standard: lowercase, spaces to underscores
+                // Colon must NOT be encoded (%3A breaks the nozomi API lookup)
                 value = value.ToLowerInvariant().Replace(' ', '_');
-                string encodedValue = Uri.EscapeDataString(value);
+                string encodedValue = Uri.EscapeDataString(value).Replace("%3A", ":");
                 string nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/n/{category}/{encodedValue}.nozomi";
                 HitomiLaLog($"[Search] '{cleanPart}' => {nozomiUrl}");
                 nozomiUrls.Add(nozomiUrl);
