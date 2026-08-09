@@ -1091,8 +1091,7 @@ namespace get_link_manga
                     using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token))
                     {
                         response.EnsureSuccessStatusCode();
-                        
-                        string originalExtension = imageUrl.Contains(".webp") || imageUrl.Contains("hitomi.la") || imageUrl.Contains("gold-usergeneratedcontent") ? ".webp" : ".jpg";
+                        string originalExtension = ".webp";
                         originalPath = cacheBasePath + originalExtension;
 
                         using (Stream sourceStream = await response.Content.ReadAsStreamAsync())
@@ -1224,36 +1223,6 @@ namespace get_link_manga
             }
         }
 
-        private static bool _checkedWebpCodec = false;
-        private static bool _hasWebpCodec = false;
-
-        private static bool HasWebpCodec()
-        {
-            if (_checkedWebpCodec) return _hasWebpCodec;
-            try
-            {
-                byte[] tinyWebp = new byte[] {
-                    0x52, 0x49, 0x46, 0x46, 0x1a, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
-                    0x56, 0x50, 0x38, 0x4c, 0x0d, 0x00, 0x00, 0x00, 0x2f, 0x00, 0x00, 0x00,
-                    0x10, 0x07, 0x10, 0x11, 0x11, 0x88, 0x88, 0xff, 0x07, 0x00
-                };
-                using (var ms = new MemoryStream(tinyWebp))
-                {
-                    System.Windows.Media.Imaging.BitmapDecoder.Create(
-                        ms,
-                        System.Windows.Media.Imaging.BitmapCreateOptions.None,
-                        System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
-                }
-                _hasWebpCodec = true;
-            }
-            catch
-            {
-                _hasWebpCodec = false;
-            }
-            _checkedWebpCodec = true;
-            return _hasWebpCodec;
-        }
-
         private static bool TryGetGalleryHoverPreviewCacheFiles(string cacheBasePath, out string originalPath, out string thumbnailPath)
         {
             originalPath = null;
@@ -1271,45 +1240,16 @@ namespace get_link_manga
                 return false;
             }
 
-            string webpPath = Path.Combine(directory, fileBaseName + ".webp");
-            string jpgPath = Path.Combine(directory, fileBaseName + ".jpg");
+            originalPath = Path.Combine(directory, fileBaseName + ".webp");
 
-            if (HasWebpCodec())
+            if (!File.Exists(originalPath))
             {
-                if (File.Exists(webpPath))
-                {
-                    originalPath = webpPath;
-                    thumbnailPath = webpPath;
-                    return true;
-                }
-                if (File.Exists(jpgPath))
-                {
-                    originalPath = jpgPath;
-                    thumbnailPath = jpgPath;
-                    return true;
-                }
+                originalPath = null;
                 return false;
             }
 
-            if (File.Exists(jpgPath))
-            {
-                originalPath = jpgPath;
-                thumbnailPath = jpgPath;
-                return true;
-            }
-
-            if (File.Exists(webpPath))
-            {
-                bool converted = Task.Run(() => ConvertWebpToJpgAsync(webpPath, jpgPath)).GetAwaiter().GetResult();
-                if (converted && File.Exists(jpgPath))
-                {
-                    originalPath = jpgPath;
-                    thumbnailPath = jpgPath;
-                    return true;
-                }
-            }
-
-            return false;
+            thumbnailPath = originalPath;
+            return true;
         }
 
         private static string GetGalleryHoverPreviewFileExtension(string imageUrl, string contentType)
@@ -1403,95 +1343,6 @@ namespace get_link_manga
             bitmap.EndInit();
             bitmap.Freeze();
             return bitmap;
-        }
-
-        private static async Task<string> EnsureDwebpExeAsync()
-        {
-            string binDir = Path.Combine(PortablePaths.PortableTempRoot, "bin");
-            string dwebpPath = Path.Combine(binDir, "dwebp.exe");
-            if (File.Exists(dwebpPath))
-            {
-                return dwebpPath;
-            }
-
-            try
-            {
-                Directory.CreateDirectory(binDir);
-                string downloadUrl = "https://github.com/StunlockStudios/libwebp-binaries/raw/master/bin/dwebp.exe";
-                using (var client = new System.Net.Http.HttpClient())
-                using (var response = await client.GetAsync(downloadUrl))
-                {
-                    response.EnsureSuccessStatusCode();
-                    using (var fs = new FileStream(dwebpPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        await response.Content.CopyToAsync(fs);
-                    }
-                }
-                return dwebpPath;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static async Task<bool> ConvertWebpToJpgAsync(string webpPath, string jpgPath)
-        {
-            string dwebpExe = await EnsureDwebpExeAsync();
-            if (string.IsNullOrEmpty(dwebpExe) || !File.Exists(dwebpExe))
-            {
-                return false;
-            }
-
-            string tempPng = webpPath + ".png";
-            try
-            {
-                var startInfo = new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = dwebpExe,
-                    Arguments = $"\"{webpPath}\" -o \"{tempPng}\"",
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                };
-
-                using (var process = System.Diagnostics.Process.Start(startInfo))
-                {
-                    await Task.Run(() => process.WaitForExit());
-                    if (process.ExitCode != 0) return false;
-                }
-
-                if (File.Exists(tempPng))
-                {
-                    using (var stream = new FileStream(tempPng, FileMode.Open, FileAccess.Read))
-                    {
-                        var decoder = System.Windows.Media.Imaging.BitmapDecoder.Create(
-                            stream,
-                            System.Windows.Media.Imaging.BitmapCreateOptions.None,
-                            System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
-
-                        var frame = decoder.Frames[0];
-                        var encoder = new System.Windows.Media.Imaging.JpegBitmapEncoder();
-                        encoder.Frames.Add(frame);
-
-                        using (var outStream = new FileStream(jpgPath, FileMode.Create, FileAccess.Write))
-                        {
-                            encoder.Save(outStream);
-                        }
-                    }
-                    return true;
-                }
-            }
-            catch
-            {
-                // Fallback
-            }
-            finally
-            {
-                try { if (File.Exists(tempPng)) File.Delete(tempPng); } catch {}
-            }
-            return false;
         }
     }
 }

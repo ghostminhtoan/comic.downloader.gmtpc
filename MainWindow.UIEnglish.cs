@@ -133,7 +133,15 @@ namespace get_link_manga
             ["LOG"] = "Nhật ký",
             ["CLEAR QUEUE"] = "XÓA HÀNG ĐỢI",
             ["RESCAN THUMBNAIL"] = "QUÉT LẠI THUMBNAIL",
+            ["COPY..."] = "SAO CHÉP...",
+            ["MERGE BOOKS..."] = "GỘP TRUYỆN...",
             ["SCAN MISSING..."] = "QUÉT CHƯƠNG THIẾU...",
+            ["Copy Selected Links"] = "Copy link các dòng đang chọn (Copy Selected Links)",
+            ["Copy Book Links"] = "Copy link các truyện đã tích (Copy Book Links)",
+            ["Copy Name + Link"] = "Copy tên + link truyện (Copy Name + Link)",
+            ["Copy Chapters Link"] = "Copy chapters link",
+            ["Merge Novel Book"] = "Gộp Light Novel (Merge Novel Book)",
+            ["Auto Merge Split Chapters"] = "Gộp chương Split (Auto Merge Split Chapters)",
             ["Rescan Missing Chapter"] = "Quét lại chương thiếu (Rescan Missing Chapter)",
             ["Pause Scan"] = "Tạm dừng quét chương thiếu (Pause Scan)",
             ["Open Cache JSON"] = "Mở cache JSON (Open Cache JSON)",
@@ -209,6 +217,11 @@ namespace get_link_manga
             ["Đảo ngược trạng thái tích (Invert Checked)"] = "Đảo ngược trạng thái tích",
             ["📌 Bookmark dòng đang chọn"] = "📌 Đánh dấu dòng đang chọn",
             ["Copy link các dòng đang chọn (Copy Selected Links)"] = "Copy link các dòng đang chọn",
+            ["Copy link các truyện đã tích (Copy Book Links)"] = "Copy link các truyện đã tích",
+            ["Copy tên + link truyện (Copy Name + Link)"] = "Copy tên + link truyện",
+            ["Copy chapters link"] = "Copy link các chapter",
+            ["Gộp Light Novel (Merge Novel Book)"] = "Gộp Light Novel",
+            ["Gộp chương Split (Auto Merge Split Chapters)"] = "Gộp chương Split",
             ["Xóa các dòng đang bôi đen (Delete Selected)"] = "Xóa các dòng đang bôi đen",
             ["Xóa các dòng đã tích (Delete Checked)"] = "Xóa các dòng đã tích",
             ["Xóa các dòng không tích (Delete Unchecked)"] = "Xóa các dòng không tích",
@@ -970,6 +983,21 @@ namespace get_link_manga
             if (dgResults?.ContextMenu != null)
             {
                 ApplyUiTextMappingsRecursive(dgResults.ContextMenu, vietnamese);
+            }
+
+            if (btnCopyGroup?.ContextMenu != null)
+            {
+                ApplyUiTextMappingsRecursive(btnCopyGroup.ContextMenu, vietnamese);
+            }
+
+            if (btnMergeGroup?.ContextMenu != null)
+            {
+                ApplyUiTextMappingsRecursive(btnMergeGroup.ContextMenu, vietnamese);
+            }
+
+            if (btnScanGroup?.ContextMenu != null)
+            {
+                ApplyUiTextMappingsRecursive(btnScanGroup.ContextMenu, vietnamese);
             }
 
             if (_watchSection != null)
