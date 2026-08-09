@@ -6,9 +6,9 @@ namespace get_link_manga
 {
     public partial class MainWindow : Window
     {
-        public CaptchaWindow CreateWatchMoreCaptcha(string url, bool autoDeleteCookiesOnLoad = true, bool headlessAutomation = false)
+        public CaptchaWindow CreateWatchMoreCaptcha(string url, bool autoDeleteCookiesOnLoad = true, bool headlessAutomation = false, int profileIndex = 1)
         {
-            return new CaptchaWindow(url, CaptchaType.WatchMore, autoDeleteCookiesOnLoad, headlessAutomation);
+            return new CaptchaWindow(url, CaptchaType.WatchMore, autoDeleteCookiesOnLoad, headlessAutomation, profileIndex);
         }
 
         public bool IsWatchMoreDomain(string url)

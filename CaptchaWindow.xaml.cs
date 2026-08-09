@@ -47,8 +47,11 @@ namespace get_link_manga
         private DateTime _lastIncompatibleRefreshAt = DateTime.MinValue;
         private DateTime _verifySolveCooldownUntil = DateTime.MinValue;
 
-        public CaptchaWindow(string targetUrl, CaptchaType captchaType, bool autoDeleteCookiesOnLoad = false, bool headlessAutomation = false)
+        private readonly int _profileIndex = 1;
+
+        public CaptchaWindow(string targetUrl, CaptchaType captchaType, bool autoDeleteCookiesOnLoad = false, bool headlessAutomation = false, int profileIndex = 1)
         {
+            _profileIndex = profileIndex > 0 ? profileIndex : 1;
             InitializeComponent();
             if (webViewHost != null)
             {
@@ -70,7 +73,7 @@ namespace get_link_manga
             try
             {
                 var uri = new Uri(targetUrl);
-                this.Title = $"{GetCaptchaWindowTitlePrefix()} - {uri.Host.ToUpper()}";
+                this.Title = $"{GetCaptchaWindowTitlePrefix()} (Profile {_profileIndex}) - {uri.Host.ToUpper()}";
             }
             catch
             {
@@ -667,43 +670,11 @@ namespace get_link_manga
 
         private string GetWebView2UserDataFolder()
         {
-            string domain = "general";
-            try
+            if (string.IsNullOrWhiteSpace(_targetUrl))
             {
-                if (!string.IsNullOrEmpty(_targetUrl))
-                {
-                    if (_targetUrl.StartsWith("chrome-extension://", StringComparison.OrdinalIgnoreCase))
-                    {
-                        domain = "linkgrabber";
-                    }
-                    else
-                    {
-                        var uri = new Uri(_targetUrl);
-                        string host = uri.Host.ToLower();
-                        if (host.Contains("truyenqq")) domain = "truyenqq";
-                        else if (host.Contains("nettruyenviet10.com")) domain = "nettruyenviet10.com";
-                        else if (host.Contains("nettruyen")) domain = "nettruyen";
-                        else if (host.Contains("vi-hentai") || host.Contains("hentaivn")) domain = "hentaivn";
-                        else if (host.Contains("hentai2read")) domain = "hentai2read";
-                        else if (host.Contains("daomeoden")) domain = "daomeoden";
-                        else
-                        {
-                            var parts = host.Split('.');
-                            if (parts.Length >= 2)
-                            {
-                                domain = parts[parts.Length - 2];
-                            }
-                            else
-                            {
-                                domain = host;
-                            }
-                        }
-                    }
-                }
+                return CookiePoolManager.GetProfileUserDataFolder("general", _profileIndex);
             }
-            catch {}
-
-            return System.IO.Path.Combine(PortablePaths.WebView2CaptchaUserDataFolder, domain);
+            return CookiePoolManager.GetProfileUserDataFolder(_targetUrl, _profileIndex);
         }
 
         private async void CaptchaWindow_Loaded(object sender, RoutedEventArgs e)

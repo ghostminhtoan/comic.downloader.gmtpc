@@ -35,7 +35,8 @@ namespace get_link_manga
 
             if (!string.IsNullOrWhiteSpace(targetDomain))
             {
-                // Thực hiện xóa cookie cho domain này
+                // Thực hiện xóa cookie cho domain này trong CookiePoolManager và legacy container
+                CookiePoolManager.ClearDomainPool(targetDomain);
                 _cookieContainersByHost.TryRemove(targetDomain, out _);
                 string wildCardKey = "." + targetDomain;
                 var subKeys = _cookieContainersByHost.Keys.Where(k => k.EndsWith(wildCardKey, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -50,26 +51,10 @@ namespace get_link_manga
                     _truyenqqPreferredBaseUrl = null;
                 }
 
-                // Xóa và tạo lại folder captcha WebView2
-                string captchaFolderName = GetCaptchaFolderNameFromDomain(targetDomain);
-                string captchaPath = System.IO.Path.Combine(PortablePaths.WebView2CaptchaUserDataFolder, captchaFolderName);
-                try
-                {
-                    if (System.IO.Directory.Exists(captchaPath))
-                    {
-                        System.IO.Directory.Delete(captchaPath, true);
-                        Log($"[Captcha] Đã xóa folder captcha: {captchaFolderName}");
-                    }
-                    System.IO.Directory.CreateDirectory(captchaPath);
-                }
-                catch (Exception ex)
-                {
-                    Log($"[Captcha] Không thể reset folder captcha {captchaFolderName}: {ex.Message}");
-                }
                 // Xóa cooldown captcha cho domain
                 _captchaSolvedAtUtc.TryRemove(NormalizeCookieHostKey(targetDomain), out _);
                 
-                Log($"[Captcha] Đã xóa cookie cache của tên miền: {targetDomain}");
+                Log($"[Captcha] Đã xóa toàn bộ cookie profile pool của tên miền: {targetDomain}");
             }
 
             if (string.IsNullOrWhiteSpace(url))
@@ -228,17 +213,17 @@ namespace get_link_manga
             }
         }
 
-        public CaptchaWindow CreateCaptchaWindow(string url, bool autoDeleteCookiesOnLoad = true, bool headlessAutomation = false)
+        public CaptchaWindow CreateCaptchaWindow(string url, bool autoDeleteCookiesOnLoad = true, bool headlessAutomation = false, int profileIndex = 1)
         {
             if (IsWatchMoreDomain(url))
             {
-                return CreateWatchMoreCaptcha(url, autoDeleteCookiesOnLoad, headlessAutomation);
+                return CreateWatchMoreCaptcha(url, autoDeleteCookiesOnLoad, headlessAutomation, profileIndex);
             }
             if (IsSpecialDomain(url))
             {
-                return CreateSpecialCaptcha(url, autoDeleteCookiesOnLoad, headlessAutomation);
+                return CreateSpecialCaptcha(url, autoDeleteCookiesOnLoad, headlessAutomation, profileIndex);
             }
-            return CreateGeneralCaptcha(url, autoDeleteCookiesOnLoad, headlessAutomation);
+            return CreateGeneralCaptcha(url, autoDeleteCookiesOnLoad, headlessAutomation, profileIndex);
         }
 
         private async Task<bool> ShowCaptchaWindowWithFocusHandlingAsync(CaptchaWindow captchaWin, bool useNovelFocusStealth)
