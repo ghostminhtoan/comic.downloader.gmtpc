@@ -743,6 +743,7 @@ namespace get_link_manga
             UpdateTruyenqqSpecificActions();
             BuildGlobalDownloadToolbar();
             HandleDownloadMissingChapterTabSelection();
+            ApplyUiTextMappings(_isVietnameseUi);
         }
 
         private void ApplyCurrentUiLanguage()
