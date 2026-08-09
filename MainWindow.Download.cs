@@ -5303,7 +5303,7 @@ namespace get_link_manga
             {
                 var imageExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif" };
                 var files = Directory.GetFiles(folderPath)
-                                     .Where(f => imageExtensions.Contains(Path.GetExtension(f)) && new FileInfo(f).Length > 1024)
+                                     .Where(f => imageExtensions.Contains(Path.GetExtension(f)) && new FileInfo(f).Length > 0)
                                      .ToArray();
 
                 if (expectedCount > 0 && files.Length >= expectedCount)
