@@ -3449,6 +3449,9 @@
                                     <MenuItem Header="Xóa các dòng đã tích (Delete Checked)" Click="MenuDeleteChecked_Click">
                                         <MenuItem.Icon><TextBlock Text="❌" Foreground="#CC0033" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                     </MenuItem>
+                                    <MenuItem Header="Xóa các dòng không tích (Delete Unchecked)" Click="MenuDeleteUnchecked_Click">
+                                        <MenuItem.Icon><TextBlock Text="🗑" Foreground="#CC0033" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                    </MenuItem>
                                     <Separator/>
                                      <MenuItem Header="Tải lại các dòng lỗi (Retry error lines)" Click="MenuRetryErrors_Click">
                                          <MenuItem.Icon><TextBlock Text="🔄" Foreground="#CC0033" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
@@ -4152,6 +4155,9 @@
                                 <MenuItem Header="Xóa các dòng đã tích (Delete Checked)" Click="MenuDeleteChecked_Click">
                                     <MenuItem.Icon><TextBlock Text="❌" Foreground="#CC0033" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
                                 </MenuItem>
+                                 <MenuItem Header="XÃ³a cÃ¡c dÃ²ng khÃ´ng tÃ­ch (Delete Unchecked)" Click="MenuDeleteUnchecked_Click">
+                                     <MenuItem.Icon><TextBlock Text="ðŸ—‘" Foreground="#CC0033" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>
+                                 </MenuItem>
                                 <Separator/>
                                 <MenuItem Header="Tải các dòng đang bôi đen (Download highlighted lines)" Click="MenuDownloadSelected_Click">
                                     <MenuItem.Icon><TextBlock Text="📥" Foreground="#008844" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/></MenuItem.Icon>

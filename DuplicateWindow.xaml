@@ -226,6 +226,7 @@
                                 <Separator/>
                                 <MenuItem Header="Xóa các dòng đang bôi đen (Delete Selected)" Click="MenuDeleteSelected_Click"/>
                                 <MenuItem Header="Xóa các dòng đã tích (Delete Checked)" Click="MenuDeleteChecked_Click"/>
+                                <MenuItem Header="Xóa các dòng không tích (Delete Unchecked)" Click="MenuDeleteUnchecked_Click"/>
                                 <Separator/>
                                 <MenuItem Header="Tải các dòng đang bôi đen (Download highlighted lines)" Click="MenuDownloadSelected_Click"/>
                                 <MenuItem Header="Tải các dòng đã tích (Download selected lines)" Click="MenuDownloadChecked_Click"/>

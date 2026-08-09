@@ -502,6 +502,29 @@ namespace get_link_manga
             lblStatus.Text = $"Deleted {itemsToRemove.Count} checked item(s).";
         }
 
+        private void MenuDeleteUnchecked_Click(object sender, RoutedEventArgs e)
+        {
+            DeleteUncheckedItems();
+        }
+
+        private void DeleteUncheckedItems()
+        {
+            var visibleSet = _duplicatesView.Cast<GalleryItem>().ToHashSet();
+            var itemsToRemove = _mainWindow._scrapedItems.Where(item => !item.IsChecked && visibleSet.Contains(item)).ToList();
+            if (!itemsToRemove.Any()) return;
+
+            foreach (var item in itemsToRemove)
+            {
+                _mainWindow._scrapedItems.Remove(item);
+            }
+
+            _mainWindow.RecalculateDuplicates();
+            _mainWindow.UpdateLinkCount();
+            
+            _mainWindow.Log($"Deleted {itemsToRemove.Count} unchecked duplicate item(s) from duplicates review.");
+            lblStatus.Text = $"Deleted {itemsToRemove.Count} unchecked item(s).";
+        }
+
         private async void MenuDownloadSelected_Click(object sender, RoutedEventArgs e)
         {
             var items = dgDuplicates.SelectedItems.Cast<GalleryItem>().ToList();

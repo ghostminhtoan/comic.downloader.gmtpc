@@ -2221,6 +2221,33 @@ namespace get_link_manga
             RecalculateDuplicates();
         }
 
+        private void MenuDeleteUnchecked_Click(object sender, RoutedEventArgs e)
+        {
+            DeleteUncheckedItems();
+        }
+
+        private void DeleteUncheckedItems()
+        {
+            var itemsToRemove = _scrapedItems.Where(item => !item.IsChecked).ToList();
+            if (!itemsToRemove.Any()) return;
+
+            // Push to Undo Stack
+            _undoDeleteStack.Push(itemsToRemove);
+            _redoDeleteStack.Clear();
+
+            RemoveDownloadMissingChapterRows(itemsToRemove);
+            foreach (var item in itemsToRemove)
+            {
+                _scrapedItems.Remove(item);
+            }
+
+            lblLinkCount.Text = _scrapedItems.Count.ToString();
+            Log($"Deleted {itemsToRemove.Count} unchecked item(s).");
+            lblStatus.Text = $"Deleted {itemsToRemove.Count} unchecked item(s).";
+
+            RecalculateDuplicates();
+        }
+
         private async void MenuDownloadSelected_Click(object sender, RoutedEventArgs e)
         {
             var items = dgResults.SelectedItems.Cast<GalleryItem>().ToList();

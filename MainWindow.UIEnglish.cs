@@ -156,6 +156,7 @@ namespace get_link_manga
             ["Chapter / Image"] = "Chapter / Ảnh",
             ["Delete selected rows"] = "Xóa các dòng đang bôi đen",
             ["Delete checked rows"] = "Xóa các dòng đã tích",
+            ["Delete unchecked rows"] = "Xóa các dòng không tích",
             ["Download selected rows"] = "Tải các dòng đang bôi đen",
             ["Download checked rows"] = "Tải các dòng đã tích",
             ["Download novel"] = "Tải novel",
@@ -203,6 +204,7 @@ namespace get_link_manga
             ["Copy link các dòng đang chọn (Copy Selected Links)"] = "Copy link các dòng đang chọn",
             ["Xóa các dòng đang bôi đen (Delete Selected)"] = "Xóa các dòng đang bôi đen",
             ["Xóa các dòng đã tích (Delete Checked)"] = "Xóa các dòng đã tích",
+            ["Xóa các dòng không tích (Delete Unchecked)"] = "Xóa các dòng không tích",
             ["Tải các dòng đang bôi đen (Download highlighted lines)"] = "Tải các dòng đang bôi đen",
             ["Tải các dòng đã tích (Download selected lines)"] = "Tải các dòng đã tích"
         };
