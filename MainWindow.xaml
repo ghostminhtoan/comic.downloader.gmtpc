@@ -4652,6 +4652,7 @@
                                 </Button>
                                 <Button Name="btnRefreshStatus" Content="LÀM MỚI TRẠNG THÁI" Click="BtnRefreshStatus_Click" Style="{StaticResource CompactCyanButton}" MinWidth="140" FontWeight="Bold" Margin="6,0,0,0" Visibility="Collapsed"/>
                                 <Button Name="btnClearResults" Content="XÓA HÀNG ĐỢI" Click="BtnClear_Click" Style="{StaticResource CompactPinkButton}" MinWidth="100" FontWeight="Bold" Margin="6,0,0,0"/>
+                                <Button Name="btnRescanThumbnail" Content="QUÉT LẠI THUMBNAIL" Click="BtnRescanThumbnail_Click" Style="{StaticResource CompactCyanButton}" MinWidth="140" FontWeight="Bold" Margin="6,0,0,0"/>
                             </WrapPanel>
 
                             <TextBlock Grid.Row="2"

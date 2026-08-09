@@ -3099,5 +3099,52 @@ namespace get_link_manga
                 }
             }
         }
+
+        private void BtnRescanThumbnail_Click(object sender, RoutedEventArgs e)
+        {
+            List<GalleryItem> selectedItems;
+            if (_isResultsThumbnailViewEnabled)
+            {
+                selectedItems = lbResultsThumbnail.SelectedItems.Cast<GalleryItem>().ToList();
+            }
+            else
+            {
+                selectedItems = dgResults.SelectedItems.Cast<GalleryItem>().ToList();
+            }
+
+            if (!selectedItems.Any())
+            {
+                selectedItems = _scrapedItems.ToList();
+            }
+
+            if (!selectedItems.Any()) return;
+
+            string previewRoot = System.IO.Path.Combine(PortablePaths.PortableTempRoot, "preview-cache");
+
+            foreach (var item in selectedItems)
+            {
+                item.HoverPreviewLocalPath = null;
+                item.HoverPreviewThumbnailLocalPath = null;
+                item.HoverPreviewThumbnailUrl = null;
+
+                string sanitizedBook = GetSanitizedFileName(item.Name);
+                if (!string.IsNullOrWhiteSpace(sanitizedBook) && System.IO.Directory.Exists(previewRoot))
+                {
+                    try
+                    {
+                        foreach (var file in System.IO.Directory.GetFiles(previewRoot, sanitizedBook + "*"))
+                        {
+                            System.IO.File.Delete(file);
+                        }
+                    }
+                    catch { }
+                }
+
+                _ = PrefetchGalleryHoverPreviewAsync(item);
+            }
+
+            Log($"Rescanned thumbnail for {selectedItems.Count} book(s).");
+            lblStatus.Text = $"Rescanned thumbnail for {selectedItems.Count} book(s).";
+        }
     }
 }
