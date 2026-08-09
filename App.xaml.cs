@@ -282,23 +282,65 @@ namespace get_link_manga
         {
             try
             {
-                // Kiểm tra CLSID WebP WIC Decoder trong Registry trước (Google WebP Codec)
-                using (var key = Registry.ClassesRoot.OpenSubKey(@"CLSID\{76c69830-e080-49a1-881a-69752cfd9072}"))
+                // 1. Kiểm tra CLSID WebP WIC Decoder trong Registry ở cả 64-bit và 32-bit views
+                using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry64))
+                using (var key = baseKey.OpenSubKey(@"CLSID\{76c69830-e080-49a1-881a-69752cfd9072}"))
+                {
+                    if (key != null) return true;
+                }
+                using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32))
+                using (var key = baseKey.OpenSubKey(@"CLSID\{76c69830-e080-49a1-881a-69752cfd9072}"))
                 {
                     if (key != null) return true;
                 }
 
-                // Kiểm tra các key uninstall tương ứng
-                using (var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\WebpCodec_is1"))
+                // 2. Quét đệ quy qua các Uninstall key để tìm tên "WebP Codec" hoặc "WebP for Windows"
+                string[] paths = new string[] {
+                    @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+                    @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+                };
+
+                foreach (var path in paths)
                 {
-                    if (key != null) return true;
-                }
-                using (var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\WebpCodec_is1"))
-                {
-                    if (key != null) return true;
+                    using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                    using (var key = baseKey.OpenSubKey(path))
+                    {
+                        if (key != null)
+                        {
+                            foreach (var subKeyName in key.GetSubKeyNames())
+                            {
+                                using (var subKey = key.OpenSubKey(subKeyName))
+                                {
+                                    var displayName = subKey?.GetValue("DisplayName")?.ToString();
+                                    if (displayName != null && (displayName.IndexOf("WebP Codec", StringComparison.OrdinalIgnoreCase) >= 0 || displayName.IndexOf("WebP for Windows", StringComparison.OrdinalIgnoreCase) >= 0))
+                                    {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
+                    using (var key = baseKey.OpenSubKey(path))
+                    {
+                        if (key != null)
+                        {
+                            foreach (var subKeyName in key.GetSubKeyNames())
+                            {
+                                using (var subKey = key.OpenSubKey(subKeyName))
+                                {
+                                    var displayName = subKey?.GetValue("DisplayName")?.ToString();
+                                    if (displayName != null && (displayName.IndexOf("WebP Codec", StringComparison.OrdinalIgnoreCase) >= 0 || displayName.IndexOf("WebP for Windows", StringComparison.OrdinalIgnoreCase) >= 0))
+                                    {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
-                // Fallback: Kiểm tra thông qua bộ giải mã Bitmap của .NET/WPF
+                // 3. Fallback: Thử giải mã bitmap WPF
                 byte[] webpBytes = new byte[] {
                     0x52, 0x49, 0x46, 0x46, 0x1e, 0x00, 0x00, 0x00,
                     0x57, 0x45, 0x42, 0x50, 0x56, 0x50, 0x38, 0x20,
