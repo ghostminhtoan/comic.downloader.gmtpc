@@ -713,6 +713,44 @@ namespace get_link_manga
                 {
                 }
             }
+            else if (!string.IsNullOrWhiteSpace(item.Link) && (string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) || item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0))
+            {
+                try
+                {
+                    if (item.Tag == null)
+                    {
+                        await EnsureHitomiLaTagAsync(item, token);
+                    }
+                    if (item.Tag != null)
+                    {
+                        Newtonsoft.Json.Linq.JObject galleryInfo = null;
+                        if (item.Tag is string tagStr)
+                        {
+                            galleryInfo = Newtonsoft.Json.Linq.JObject.Parse(tagStr);
+                        }
+                        else
+                        {
+                            galleryInfo = Newtonsoft.Json.Linq.JToken.FromObject(item.Tag) as Newtonsoft.Json.Linq.JObject;
+                        }
+
+                        if (galleryInfo != null && galleryInfo["files"] is Newtonsoft.Json.Linq.JArray files && files.Count > 0)
+                        {
+                            string firstHash = files[0]["hash"]?.ToString();
+                            string firstName = files[0]["name"]?.ToString();
+                            if (!string.IsNullOrEmpty(firstHash) && !string.IsNullOrEmpty(firstName))
+                            {
+                                string thumbUrl = await ResolveHitomiImageUrlAsync(this, firstHash, firstName, isThumbnail: true);
+                                if (!string.IsNullOrEmpty(thumbUrl))
+                                {
+                                    item.HoverPreviewThumbnailUrl = thumbUrl;
+                                    AddGalleryHoverPreviewCandidate(imageUrls, thumbUrl);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch {}
+            }
             else if (!string.IsNullOrWhiteSpace(item.Link) && IsNhentaiUrl(item.Link))
             {
                 try
@@ -1041,6 +1079,10 @@ namespace get_link_manga
                     else if (imageUrl.Contains("thuviensach.vn"))
                     {
                         request.Headers.Referrer = new Uri("https://thuviensach.vn/");
+                    }
+                    else if (imageUrl.Contains("gold-usergeneratedcontent.net") || imageUrl.Contains("hitomi.la"))
+                    {
+                        request.Headers.Referrer = new Uri("https://hitomi.la/");
                     }
 
                     // Tối ưu hóa Keep-Alive để đẩy tốc độ tải ảnh bìa thuviensach

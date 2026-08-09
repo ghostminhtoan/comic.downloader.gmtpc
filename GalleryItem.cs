@@ -652,7 +652,10 @@ namespace get_link_manga
                     bitmap.UriSource = new Uri(path, UriKind.Absolute);
                     bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
                     bitmap.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.DelayCreation;
-                    bitmap.DecodePixelHeight = 100; // Tiết kiệm RAM/CPU giải mã
+                    if (!path.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
+                    {
+                        bitmap.DecodePixelHeight = 100; // Tiết kiệm RAM/CPU giải mã
+                    }
                     bitmap.EndInit();
                     bitmap.Freeze(); // Cho phép luồng giao diện truy cập cực nhanh
                     _hoverPreviewThumbnailImageSource = bitmap;
