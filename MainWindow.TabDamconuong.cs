@@ -596,6 +596,7 @@ namespace get_link_manga
                 return;
             }
 
+            if (!ConfirmScrapeDuringDownloadIfNeeded(true)) return;
             SelectDownloadMangaTab();
             await ScrapeDamconuongAsync(clearExisting: true);
         }

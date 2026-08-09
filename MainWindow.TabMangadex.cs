@@ -660,6 +660,7 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
                 return;
             }
 
+            if (!ConfirmScrapeDuringDownloadIfNeeded(true)) return;
             SelectDownloadMangaTab();
             await ScrapeMangadexAsync(clearExisting: true);
         }

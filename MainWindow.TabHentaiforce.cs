@@ -200,6 +200,7 @@ namespace get_link_manga
                 if (btnCrawlMore != null) btnCrawlMore.IsEnabled = false;
                 return;
             }
+            if (!ConfirmScrapeDuringDownloadIfNeeded(true)) return;
             SelectDownloadMangaTab();
             await ScrapeHentaiforceAsync(clearExisting: true);
         }

@@ -225,6 +225,21 @@ namespace get_link_manga
             ShowInfo($"Đã thêm {imported} {label}. Thất bại: {failed}", "Kết quả");
         }
 
+        public bool ConfirmScrapeDuringDownloadIfNeeded(bool clearExisting)
+        {
+            // ponytail: Kiểm tra nếu đang có tiến trình download chạy thực tế và người dùng chọn Get Link (clear list cũ)
+            if (_downloadCts != null && clearExisting)
+            {
+                string message = _isVietnameseUi 
+                    ? "Hệ thống đang tải truyện! Việc lấy link mới (Get Link) sẽ xóa hết danh sách đang tải hiện tại.\n\nNếu muốn tải thêm truyện, vui lòng bấm nút 'Get More'. Bạn có chắc chắn muốn tiếp tục lấy link mới và xóa danh sách hiện tại không?" 
+                    : "The system is currently downloading comics! Getting new links (Get Link) will clear the current download list.\n\nIf you want to add more comics, please use the 'Get More' button instead. Are you sure you want to proceed and clear the list?";
+                
+                string title = _isVietnameseUi ? "Cảnh báo đang tải truyện" : "Downloading Warning";
+                return ShowConfirm(message, title);
+            }
+            return true;
+        }
+
         private void ShowResultsMissingChapterScanningIndicator()
         {
             _resultsMissingChapterScanningIndicatorDepth++;

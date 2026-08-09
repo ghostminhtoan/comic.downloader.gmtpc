@@ -177,7 +177,7 @@ namespace get_link_manga
                 btnLoppyCrawlMore.IsEnabled = false;
                 return;
             }
-
+            if (!ConfirmScrapeDuringDownloadIfNeeded(true)) return;
             SelectDownloadMangaTab();
             await ScrapeLoppyAsync(clearExisting: true);
         }

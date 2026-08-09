@@ -271,6 +271,7 @@ namespace get_link_manga
                 if (btnNhentaiNetCrawlMore != null) btnNhentaiNetCrawlMore.IsEnabled = false;
                 return;
             }
+            if (!ConfirmScrapeDuringDownloadIfNeeded(true)) return;
             SelectDownloadMangaTab();
             await ScrapeNhentaiNetAsync(clearExisting: true);
         }

@@ -206,7 +206,7 @@ namespace get_link_manga
                 btnHaibabaCrawlMore.IsEnabled = false;
                 return;
             }
-
+            if (!ConfirmScrapeDuringDownloadIfNeeded(true)) return;
             SelectDownloadMangaTab();
             await ScrapeHaibabaAsync(clearExisting: true);
         }

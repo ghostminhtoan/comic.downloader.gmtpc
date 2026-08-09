@@ -305,7 +305,7 @@ namespace get_link_manga
                 btnDilibCrawlMore.IsEnabled = false;
                 return;
             }
-
+            if (!ConfirmScrapeDuringDownloadIfNeeded(true)) return;
             SelectDownloadMangaTab();
             await ScrapeDilibAsync(clearExisting: true);
         }

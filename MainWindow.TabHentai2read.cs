@@ -592,7 +592,7 @@ namespace get_link_manga
                 btnHentai2readCrawlMore.IsEnabled = false;
                 return;
             }
-
+            if (!ConfirmScrapeDuringDownloadIfNeeded(true)) return;
             SelectDownloadMangaTab();
             await ScrapeHentai2readAsync(clearExisting: true);
         }

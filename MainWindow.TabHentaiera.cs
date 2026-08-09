@@ -137,6 +137,7 @@ namespace get_link_manga
                 if (btnHentaieraCrawlMore != null) btnHentaieraCrawlMore.IsEnabled = false;
                 return;
             }
+            if (!ConfirmScrapeDuringDownloadIfNeeded(true)) return;
             SelectDownloadMangaTab();
             await ScrapeHentaieraAsync(clearExisting: true);
         }

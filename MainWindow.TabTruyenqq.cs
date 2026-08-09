@@ -420,6 +420,7 @@ namespace get_link_manga
                 if (btnTruyenqqCrawlMore != null) btnTruyenqqCrawlMore.IsEnabled = false;
                 return;
             }
+            if (!ConfirmScrapeDuringDownloadIfNeeded(true)) return;
             SelectDownloadMangaTab();
             await ScrapeTruyenqqAsync(clearExisting: true);
         }

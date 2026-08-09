@@ -1111,6 +1111,7 @@ document.addEventListener('click', function (event) {
                 if (btnNettruyenCrawlMore != null) btnNettruyenCrawlMore.IsEnabled = false;
                 return;
             }
+            if (!ConfirmScrapeDuringDownloadIfNeeded(true)) return;
             SelectDownloadMangaTab();
             await ScrapeNettruyenAsync(clearExisting: true);
         }
@@ -1186,6 +1187,7 @@ document.addEventListener('click', function (event) {
                 return;
             }
 
+            if (!ConfirmScrapeDuringDownloadIfNeeded(true)) return;
             SetNettruyenTechButtonsEnabled(false);
             var oldLogTarget = _nettruyenLogOverride;
             _nettruyenLogOverride = txtNettruyenTechLog;

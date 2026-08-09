@@ -2182,18 +2182,19 @@ namespace get_link_manga
             SetDownloadToggleState(true);
 
             btnBrowseFolder.IsEnabled = false;
-            btnScrape.IsEnabled = false;
-            btnFetchInfo.IsEnabled = false;
-            if (btnNhentaiNetScrape != null) btnNhentaiNetScrape.IsEnabled = false;
-            if (btnNhentaiNetFetchInfo != null) btnNhentaiNetFetchInfo.IsEnabled = false;
-            if (btnViHentaiScrape != null) btnViHentaiScrape.IsEnabled = false;
-            if (btnViHentaiFetchInfo != null) btnViHentaiFetchInfo.IsEnabled = false;
-            if (btnTruyenqqScrape != null) btnTruyenqqScrape.IsEnabled = false;
-            if (btnTruyenqqFetchInfo != null) btnTruyenqqFetchInfo.IsEnabled = false;
-            if (btnNettruyenScrape != null) btnNettruyenScrape.IsEnabled = false;
-            if (btnNettruyenFetchInfo != null) btnNettruyenFetchInfo.IsEnabled = false;
-            if (btnHentaieraScrape != null) btnHentaieraScrape.IsEnabled = false;
-            if (btnHentaieraFetchInfo != null) btnHentaieraFetchInfo.IsEnabled = false;
+            // Cho phép Get Link / Fetch Info trong khi download
+            btnScrape.IsEnabled = true;
+            btnFetchInfo.IsEnabled = true;
+            if (btnNhentaiNetScrape != null) btnNhentaiNetScrape.IsEnabled = true;
+            if (btnNhentaiNetFetchInfo != null) btnNhentaiNetFetchInfo.IsEnabled = true;
+            if (btnViHentaiScrape != null) btnViHentaiScrape.IsEnabled = true;
+            if (btnViHentaiFetchInfo != null) btnViHentaiFetchInfo.IsEnabled = true;
+            if (btnTruyenqqScrape != null) btnTruyenqqScrape.IsEnabled = true;
+            if (btnTruyenqqFetchInfo != null) btnTruyenqqFetchInfo.IsEnabled = true;
+            if (btnNettruyenScrape != null) btnNettruyenScrape.IsEnabled = true;
+            if (btnNettruyenFetchInfo != null) btnNettruyenFetchInfo.IsEnabled = true;
+            if (btnHentaieraScrape != null) btnHentaieraScrape.IsEnabled = true;
+            if (btnHentaieraFetchInfo != null) btnHentaieraFetchInfo.IsEnabled = true;
             // cmbConnections.IsEnabled = false;
             int maxParallelBooks = GetCurrentMultiDownloadLimit();
             _currentMaxParallelBooks = maxParallelBooks;

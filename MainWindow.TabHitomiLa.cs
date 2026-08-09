@@ -562,6 +562,7 @@ namespace get_link_manga
 
         private async void BtnHitomiLaScrape_Click(object sender, RoutedEventArgs e)
         {
+            if (!ConfirmScrapeDuringDownloadIfNeeded(true)) return;
             await ScrapeHitomiLaAsync(false);
         }
 
@@ -712,7 +713,7 @@ namespace get_link_manga
             {
                 btnHitomiLaScrape.IsEnabled = false;
                 btnHitomiLaFetchInfo.IsEnabled = false;
-                if (btnStartDownload != null) btnStartDownload.IsEnabled = false;
+                // btnStartDownload luôn bật để cho phép bấm download
             }
 
             try
