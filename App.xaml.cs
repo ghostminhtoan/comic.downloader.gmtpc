@@ -282,6 +282,23 @@ namespace get_link_manga
         {
             try
             {
+                // Kiểm tra CLSID WebP WIC Decoder trong Registry trước (Google WebP Codec)
+                using (var key = Registry.ClassesRoot.OpenSubKey(@"CLSID\{76c69830-e080-49a1-881a-69752cfd9072}"))
+                {
+                    if (key != null) return true;
+                }
+
+                // Kiểm tra các key uninstall tương ứng
+                using (var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\WebpCodec_is1"))
+                {
+                    if (key != null) return true;
+                }
+                using (var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\WebpCodec_is1"))
+                {
+                    if (key != null) return true;
+                }
+
+                // Fallback: Kiểm tra thông qua bộ giải mã Bitmap của .NET/WPF
                 byte[] webpBytes = new byte[] {
                     0x52, 0x49, 0x46, 0x46, 0x1e, 0x00, 0x00, 0x00,
                     0x57, 0x45, 0x42, 0x50, 0x56, 0x50, 0x38, 0x20,
@@ -333,13 +350,22 @@ namespace get_link_manga
                     client.DownloadFile(new Uri(url), destFile);
                 }
 
-                Process.Start(destFile);
+                var proc = Process.Start(destFile);
+                if (proc != null)
+                {
+                    proc.WaitForExit();
+                }
 
                 MessageBox.Show(
-                    "Đã khởi chạy bộ cài đặt WebP Codec của Google. Vui lòng hoàn tất quá trình cài đặt trên màn hình để kích hoạt xem trước ảnh WebP.",
+                    "Đã cài đặt xong WebP Codec. Ứng dụng sẽ tự động khởi động lại để áp dụng thay đổi.",
                     "Thông báo / Information",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
+
+                // Khởi động lại ứng dụng để WIC Codec được cập nhật trong WPF
+                string currentExe = Process.GetCurrentProcess().MainModule.FileName;
+                Process.Start(currentExe);
+                Environment.Exit(0);
             }
             catch (Exception ex)
             {

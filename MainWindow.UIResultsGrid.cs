@@ -3186,15 +3186,23 @@ namespace get_link_manga
                 Log($"[WebP Codec] Running WebpCodecSetup.exe");
                 lblStatus.Text = _isVietnameseUi ? "Đang chạy bộ cài đặt WebP..." : "Running WebP installer...";
 
-                System.Diagnostics.Process.Start(destFile);
+                var proc = System.Diagnostics.Process.Start(destFile);
+                if (proc != null)
+                {
+                    await Task.Run(() => proc.WaitForExit());
+                }
 
                 MessageBox.Show(
                     _isVietnameseUi 
-                        ? "Đã khởi chạy bộ cài đặt WebP Codec của Google. Vui lòng hoàn tất quá trình cài đặt trên màn hình để kích hoạt xem trước ảnh WebP." 
-                        : "Google WebP Codec installer started. Please complete the setup on your screen to enable WebP previews.",
+                        ? "Đã cài đặt xong WebP Codec! Ứng dụng sẽ tự động khởi động lại để kích hoạt giải mã ảnh WebP." 
+                        : "WebP Codec installation completed! The application will restart to apply changes.",
                     "Information",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
+
+                string currentExe = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                System.Diagnostics.Process.Start(currentExe);
+                Environment.Exit(0);
             }
             catch (Exception ex)
             {
