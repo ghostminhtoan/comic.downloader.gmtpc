@@ -421,8 +421,8 @@ namespace get_link_manga
                 ShowResultsImportingIndicator();
                 UpdateResultsImportingProgress(imported, cleanIds.Count);
 
-                // Tải song song thông tin các gallery trong trang với batch size 8
-                int batchSize = 8;
+                // Tải song song thông tin các gallery trong trang với batch size 25
+                int batchSize = 25;
                 for (int b = 0; b < cleanIds.Count; b += batchSize)
                 {
                     var batch = cleanIds.Skip(b).Take(batchSize).ToList();
