@@ -223,55 +223,52 @@ namespace get_link_manga
                 string cleanPart = part.Trim();
                 if (string.IsNullOrEmpty(cleanPart)) continue;
 
-                // Hitomi.la nozomi API category mapping:
-                // artist:xxx       => /n/artist/xxx.nozomi
-                // character:xxx    => /n/character/xxx.nozomi
-                // series:xxx       => /n/series/xxx.nozomi  (parody/series)
-                // group:xxx        => /n/group/xxx.nozomi
-                // language:xxx     => /n/language/xxx.nozomi
-                // type:xxx         => /n/type/xxx.nozomi
-                // female:xxx       => /n/tag/female:xxx.nozomi
-                // male:xxx         => /n/tag/male:xxx.nozomi
-                // (no prefix/other)=> /n/tag/xxx.nozomi
-                string category;
-                string value;
+                // Hitomi.la nozomi API (verified empirically):
+                // - Underscores MUST be spaces:  "big_breasts" => "big breasts"
+                // - ALL categories need "-all" suffix
+                // - language uses special root path: /index-{lang}.nozomi
+                // - artist/character/series/group/type: /n/{cat}/{val}-all.nozomi
+                // - female:xxx / male:xxx / plain tags:  /n/tag/{term}-all.nozomi
+                string nozomiUrl;
 
                 int colonIdx = cleanPart.IndexOf(':');
                 if (colonIdx > 0)
                 {
                     string prefix = cleanPart.Substring(0, colonIdx).ToLowerInvariant();
-                    string val = cleanPart.Substring(colonIdx + 1);
+                    string val = cleanPart.Substring(colonIdx + 1)
+                                          .ToLowerInvariant()
+                                          .Replace('_', ' ');
 
                     switch (prefix)
                     {
+                        case "language":
+                            // Special: /index-english.nozomi (root path, no /n/)
+                            nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/index-{val}.nozomi";
+                            break;
                         case "artist":
                         case "character":
                         case "series":
                         case "group":
-                        case "language":
                         case "type":
-                            category = prefix;
-                            value = val;
+                            // Standard: /n/{category}/{value}-all.nozomi
+                            nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/n/{prefix}/{val}-all.nozomi";
                             break;
                         case "female":
                         case "male":
                         default:
-                            category = "tag";
-                            value = cleanPart;
+                            // Tags: /n/tag/{prefix}:{value}-all.nozomi (keep colon)
+                            string tagValue = (prefix + ":" + val);
+                            nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/n/tag/{tagValue}-all.nozomi";
                             break;
                     }
                 }
                 else
                 {
-                    category = "tag";
-                    value = cleanPart;
+                    // Plain tag without prefix
+                    string tagValue = cleanPart.ToLowerInvariant().Replace('_', ' ');
+                    nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/n/tag/{tagValue}-all.nozomi";
                 }
 
-                // Hitomi nozomi standard: lowercase, spaces to underscores
-                // Colon must NOT be encoded (%3A breaks the nozomi API lookup)
-                value = value.ToLowerInvariant().Replace(' ', '_');
-                string encodedValue = Uri.EscapeDataString(value).Replace("%3A", ":");
-                string nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/n/{category}/{encodedValue}.nozomi";
                 HitomiLaLog($"[Search] '{cleanPart}' => {nozomiUrl}");
                 nozomiUrls.Add(nozomiUrl);
             }
