@@ -3148,5 +3148,57 @@ namespace get_link_manga
             Log($"Rescanned thumbnail for {selectedItems.Count} book(s).");
             lblStatus.Text = $"Rescanned thumbnail for {selectedItems.Count} book(s).";
         }
+
+        private async void BtnWebpCodec_Click(object sender, RoutedEventArgs e)
+        {
+            string url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/WebpCodecSetup.exe";
+            string tempDir = System.IO.Path.Combine(PortablePaths.PortableTempRoot, "installers");
+            string destFile = System.IO.Path.Combine(tempDir, "WebpCodecSetup.exe");
+
+            try
+            {
+                if (!System.IO.Directory.Exists(tempDir))
+                {
+                    System.IO.Directory.CreateDirectory(tempDir);
+                }
+
+                lblStatus.Text = _isVietnameseUi ? "Đang tải bộ cài WebP Codec..." : "Downloading WebP Codec installer...";
+                Log($"[WebP Codec] Downloading installer from {url} to {destFile}");
+
+                using (var client = CreateScopedHttpClient(url))
+                using (var response = await client.GetAsync(url, System.Net.Http.HttpCompletionOption.ResponseHeadersRead))
+                {
+                    response.EnsureSuccessStatusCode();
+                    using (var fs = new System.IO.FileStream(destFile, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None))
+                    {
+                        await response.Content.CopyToAsync(fs);
+                    }
+                }
+
+                Log($"[WebP Codec] Running WebpCodecSetup.exe");
+                lblStatus.Text = _isVietnameseUi ? "Đang chạy bộ cài đặt WebP..." : "Running WebP installer...";
+
+                System.Diagnostics.Process.Start(destFile);
+
+                MessageBox.Show(
+                    _isVietnameseUi 
+                        ? "Đã khởi chạy bộ cài đặt WebP Codec của Google. Vui lòng hoàn tất quá trình cài đặt trên màn hình để kích hoạt xem trước ảnh WebP." 
+                        : "Google WebP Codec installer started. Please complete the setup on your screen to enable WebP previews.",
+                    "Information",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                Log($"[WebP Codec] Lỗi cài đặt: {ex.Message}");
+                MessageBox.Show(
+                    _isVietnameseUi 
+                        ? $"Không thể tải bộ cài đặt: {ex.Message}" 
+                        : $"Failed to download installer: {ex.Message}",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
     }
 }

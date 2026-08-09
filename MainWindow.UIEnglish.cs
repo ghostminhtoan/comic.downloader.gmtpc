@@ -929,6 +929,7 @@ namespace get_link_manga
             if (btnNewList != null) btnNewList.Content = "New list";
             if (btnSaveCustomList != null) btnSaveCustomList.Content = "Save as";
             if (btnLoadCustomList != null) btnLoadCustomList.Content = "Open file";
+            if (btnWebpCodec != null) btnWebpCodec.Content = "WebP Codec";
             if (btnToolbarSortByName != null) btnToolbarSortByName.Content = "Sort by name";
             if (btnPopupPreviewToggle != null) btnPopupPreviewToggle.ToolTip = "POPUP PREVIEW";
             if (chkCompactRows != null) chkCompactRows.ToolTip = "COMPACT ROW";

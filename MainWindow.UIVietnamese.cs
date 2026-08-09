@@ -50,6 +50,7 @@ namespace get_link_manga
             if (btnNewList != null) btnNewList.Content = "Danh sách mới";
             if (btnSaveCustomList != null) btnSaveCustomList.Content = "Lưu file khác";
             if (btnLoadCustomList != null) btnLoadCustomList.Content = "Mở file khác";
+            if (btnWebpCodec != null) btnWebpCodec.Content = "Cài WebP Codec";
             if (btnToolbarSortByName != null) btnToolbarSortByName.Content = "Sắp xếp theo tên";
             if (btnPopupPreviewToggle != null) btnPopupPreviewToggle.ToolTip = "XEM TRƯỚC POPUP";
             if (chkCompactRows != null) chkCompactRows.ToolTip = "NÉN DÒNG";

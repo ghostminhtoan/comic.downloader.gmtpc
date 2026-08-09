@@ -3279,6 +3279,7 @@
                                 <TextBlock Name="lblResultsPresentation" Text="&#xE8A9;" FontFamily="Segoe MDL2 Assets" Foreground="#00FF87" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <ToggleButton Name="chkResultsPresentation" Click="ChkResultsPresentation_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="LIST / THUMBNAIL"/>
                             </StackPanel>
+                            <Button Name="btnWebpCodec" Content="WEBP CODEC" Click="BtnWebpCodec_Click" Style="{StaticResource CompactCyanButton}" MinWidth="90" Width="Auto" Padding="10,2" Margin="0,0,6,0"/>
                             <Button Name="btnToolbarSortByName" Content="SORT BY NAME" Click="BtnSortByName_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
                             <Button Name="btnDuplicateName" Content="DUPLICATE NAME" Click="BtnDuplicateName_Click" Style="{StaticResource CompactPinkButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
                             <Button Name="btnReverseOrder" Content="REVERSE ORDER" Click="BtnReverseOrder_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
