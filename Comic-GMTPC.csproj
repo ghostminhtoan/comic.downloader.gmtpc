@@ -137,9 +137,6 @@
     <Compile Include="DownloadPipelineModels.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="CookiePoolManager.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="ThrottledObservableCollection.cs">
       <SubType>Code</SubType>
     </Compile>

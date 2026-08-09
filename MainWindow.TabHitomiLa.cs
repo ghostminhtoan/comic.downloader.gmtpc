@@ -215,102 +215,117 @@ namespace get_link_manga
                 }
             }
 
-            var parts = queryString.Split(new[] { ' ', '+' }, StringSplitOptions.RemoveEmptyEntries);
-            var nozomiUrls = new List<string>();
+            var rawTokens = queryString.Split(new[] { ' ', '+' }, StringSplitOptions.RemoveEmptyEntries);
+            var parsedTokens = new List<string>();
+            var currentFreeText = new List<string>();
 
-            foreach (var part in parts)
+            foreach (var t in rawTokens)
             {
-                string cleanPart = part.Trim();
-                if (string.IsNullOrEmpty(cleanPart)) continue;
-
-                // Hitomi.la nozomi API (verified empirically):
-                // - Underscores MUST be spaces:  "big_breasts" => "big breasts"
-                // - ALL categories need "-all" suffix
-                // - language uses special root path: /index-{lang}.nozomi
-                // - artist/character/series/group/type: /n/{cat}/{val}-all.nozomi
-                // - female:xxx / male:xxx / plain tags:  /n/tag/{term}-all.nozomi
-                string nozomiUrl;
-
-                int colonIdx = cleanPart.IndexOf(':');
-                if (colonIdx > 0)
+                if (System.Text.RegularExpressions.Regex.IsMatch(t, @"^[a-zA-Z0-9_-]+:"))
                 {
-                    string prefix = cleanPart.Substring(0, colonIdx).ToLowerInvariant();
-                    string val = cleanPart.Substring(colonIdx + 1)
-                                          .ToLowerInvariant()
-                                          .Replace('_', ' ');
+                    if (currentFreeText.Count > 0)
+                    {
+                        parsedTokens.Add(string.Join(" ", currentFreeText));
+                        currentFreeText.Clear();
+                    }
+                    parsedTokens.Add(t);
+                }
+                else
+                {
+                    currentFreeText.Add(t);
+                }
+            }
+            if (currentFreeText.Count > 0)
+            {
+                parsedTokens.Add(string.Join(" ", currentFreeText));
+            }
+
+            var nozomiCandidateGroups = new List<List<string>>();
+
+            foreach (var token in parsedTokens)
+            {
+                var candidateUrls = new List<string>();
+                int colonIdx = token.IndexOf(':');
+
+                if (colonIdx > 0 && System.Text.RegularExpressions.Regex.IsMatch(token.Substring(0, colonIdx), @"^[a-zA-Z0-9_-]+$"))
+                {
+                    string prefix = token.Substring(0, colonIdx).ToLowerInvariant();
+                    string val = token.Substring(colonIdx + 1).ToLowerInvariant().Replace('_', ' ');
 
                     switch (prefix)
                     {
                         case "language":
-                            // Special: /index-english.nozomi (root path, no /n/)
-                            nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/index-{val}.nozomi";
+                            candidateUrls.Add($"https://ltn.gold-usergeneratedcontent.net/index-{val}.nozomi");
                             break;
                         case "artist":
                         case "character":
                         case "series":
                         case "group":
                         case "type":
-                            // Standard: /n/{category}/{value}-all.nozomi
-                            nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/n/{prefix}/{val}-all.nozomi";
+                            candidateUrls.Add($"https://ltn.gold-usergeneratedcontent.net/n/{prefix}/{val}-all.nozomi");
                             break;
                         case "female":
                         case "male":
                         default:
-                            // Tags: /n/tag/{prefix}:{value}-all.nozomi (keep colon)
                             string tagValue = (prefix + ":" + val);
-                            nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/n/tag/{tagValue}-all.nozomi";
+                            candidateUrls.Add($"https://ltn.gold-usergeneratedcontent.net/n/tag/{tagValue}-all.nozomi");
                             break;
                     }
                 }
                 else
                 {
-                    // Plain tag without prefix
-                    string tagValue = cleanPart.ToLowerInvariant().Replace('_', ' ');
-                    nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/n/tag/{tagValue}-all.nozomi";
+                    // Free-text token (e.g. "dragon ball super"): Try union candidates across series, tag, character, artist, group, type
+                    string val = token.ToLowerInvariant().Replace('_', ' ');
+                    string[] categories = new[] { "series", "tag", "character", "artist", "group", "type" };
+                    foreach (var cat in categories)
+                    {
+                        candidateUrls.Add($"https://ltn.gold-usergeneratedcontent.net/n/{cat}/{val}-all.nozomi");
+                    }
                 }
-
-                HitomiLaLog($"[Search] '{cleanPart}' => {nozomiUrl}");
-                nozomiUrls.Add(nozomiUrl);
-            }
-
-            if (nozomiUrls.Count == 0)
-            {
-                string fallbackUrl = "https://ltn.gold-usergeneratedcontent.net/index-all.nozomi";
-                using (var httpClient = CreateScopedHttpClient(fallbackUrl))
-                {
-                    return await httpClient.GetByteArrayAsync(fallbackUrl);
-                }
+                nozomiCandidateGroups.Add(candidateUrls);
             }
 
             var allIds = new List<HashSet<int>>();
-            using (var semaphore = new SemaphoreSlim(4))
+
+            using (var semaphore = new SemaphoreSlim(6))
             {
-                var tasks = nozomiUrls.Select(async nUrl =>
+                var tasks = nozomiCandidateGroups.Select(async group =>
                 {
                     await semaphore.WaitAsync();
                     try
                     {
-                        using (var httpClient = CreateScopedHttpClient(nUrl))
+                        var tokenIds = new HashSet<int>();
+                        foreach (var nUrl in group)
                         {
-                            byte[] bytes = await httpClient.GetByteArrayAsync(nUrl);
-                            if (bytes != null && bytes.Length > 0)
+                            try
                             {
-                                var ids = new HashSet<int>();
-                                int count = bytes.Length / 4;
-                                for (int i = 0; i < count; i++)
+                                using (var httpClient = CreateScopedHttpClient(nUrl))
                                 {
-                                    ids.Add(BigEndianToInt32(bytes, i * 4));
-                                }
-                                lock (allIds)
-                                {
-                                    allIds.Add(ids);
+                                    byte[] bytes = await httpClient.GetByteArrayAsync(nUrl);
+                                    if (bytes != null && bytes.Length > 0)
+                                    {
+                                        int count = bytes.Length / 4;
+                                        for (int i = 0; i < count; i++)
+                                        {
+                                            tokenIds.Add(BigEndianToInt32(bytes, i * 4));
+                                        }
+                                        HitomiLaLog($"[Search] Loaded candidate {nUrl} ({bytes.Length / 4} IDs)");
+                                    }
                                 }
                             }
+                            catch
+                            {
+                                // Candidate 404 is normal for free-text union sweep
+                            }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        HitomiLaLog($"[Search] Không thể tải nozomi {nUrl}: {ex.Message}");
+
+                        if (tokenIds.Count > 0)
+                        {
+                            lock (allIds)
+                            {
+                                allIds.Add(tokenIds);
+                            }
+                        }
                     }
                     finally
                     {

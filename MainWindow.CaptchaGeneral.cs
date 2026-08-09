@@ -6,9 +6,9 @@ namespace get_link_manga
 {
     public partial class MainWindow : Window
     {
-        public CaptchaWindow CreateGeneralCaptcha(string url, bool autoDeleteCookiesOnLoad = true, bool headlessAutomation = false, int profileIndex = 1)
+        public CaptchaWindow CreateGeneralCaptcha(string url, bool autoDeleteCookiesOnLoad = true, bool headlessAutomation = false)
         {
-            return new CaptchaWindow(url, CaptchaType.General, autoDeleteCookiesOnLoad, headlessAutomation, profileIndex);
+            return new CaptchaWindow(url, CaptchaType.General, autoDeleteCookiesOnLoad, headlessAutomation);
         }
     }
 }

@@ -13,9 +13,9 @@ namespace get_link_manga
             "truyenqq", "truyenqqko", "hako", "truyenggvn", "sayhentai"
         };
 
-        public CaptchaWindow CreateSpecialCaptcha(string url, bool autoDeleteCookiesOnLoad = true, bool headlessAutomation = false, int profileIndex = 1)
+        public CaptchaWindow CreateSpecialCaptcha(string url, bool autoDeleteCookiesOnLoad = true, bool headlessAutomation = false)
         {
-            return new CaptchaWindow(url, CaptchaType.Special, autoDeleteCookiesOnLoad, headlessAutomation, profileIndex);
+            return new CaptchaWindow(url, CaptchaType.Special, autoDeleteCookiesOnLoad, headlessAutomation);
         }
 
         public bool IsSpecialDomain(string url)

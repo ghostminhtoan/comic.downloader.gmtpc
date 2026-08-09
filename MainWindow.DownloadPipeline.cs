@@ -519,12 +519,9 @@ namespace get_link_manga
         private async Task<BrowserSessionSnapshot> AcquireWebView2SessionAsync(string url)
         {
             BrowserSessionSnapshot snapshot = null;
-            int profileIndex = CookiePoolManager.GetNextProfileIndex(url);
-            Log($"[Cookie Pool] Lấy session qua Profile {profileIndex} cho {ExtractHostOrRaw(url)}");
-
             await await Dispatcher.InvokeAsync(async () =>
             {
-                var captchaWin = CreateCaptchaWindow(url, autoDeleteCookiesOnLoad: true, headlessAutomation: _lightNovelAutoFocusEnabled, profileIndex: profileIndex);
+                var captchaWin = CreateCaptchaWindow(url, autoDeleteCookiesOnLoad: true, headlessAutomation: _lightNovelAutoFocusEnabled);
                 captchaWin.Owner = this;
 
                 if (await captchaWin.ShowNonBlockingAsync())
@@ -540,7 +537,6 @@ namespace get_link_manga
             if (snapshot != null)
             {
                 MarkCaptchaSolved(url);
-                CookiePoolManager.SetUserAgent(url, profileIndex, snapshot.UserAgent);
             }
 
             return snapshot;
