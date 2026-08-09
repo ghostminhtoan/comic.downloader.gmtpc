@@ -205,6 +205,11 @@ namespace get_link_manga
             }
 
             string queryString = url.Substring(qIdx + 1);
+            int hashIdx = queryString.IndexOf('#');
+            if (hashIdx >= 0)
+            {
+                queryString = queryString.Substring(0, hashIdx);
+            }
             queryString = Uri.UnescapeDataString(queryString).Trim();
             if (string.IsNullOrEmpty(queryString))
             {
@@ -215,145 +220,105 @@ namespace get_link_manga
                 }
             }
 
+            // Lay version cua galleriesindex dong
+            string galleriesIndexVer = "1786272821";
+            try
+            {
+                using (var httpClient = CreateScopedHttpClient("https://ltn.gold-usergeneratedcontent.net/galleriesindex/version"))
+                {
+                    string verStr = await httpClient.GetStringAsync("https://ltn.gold-usergeneratedcontent.net/galleriesindex/version");
+                    if (!string.IsNullOrWhiteSpace(verStr))
+                    {
+                        galleriesIndexVer = verStr.Trim();
+                    }
+                }
+            }
+            catch { }
+
             var rawTokens = queryString.Split(new[] { ' ', '+' }, StringSplitOptions.RemoveEmptyEntries);
-            var parsedTokens = new List<string>();
-            var currentFreeText = new List<string>();
+            var tokenSets = new List<HashSet<int>>();
 
             foreach (var t in rawTokens)
             {
-                if (System.Text.RegularExpressions.Regex.IsMatch(t, @"^[a-zA-Z0-9_-]+:"))
+                string cleanToken = t.Trim();
+                if (string.IsNullOrEmpty(cleanToken)) continue;
+
+                int colonIdx = cleanToken.IndexOf(':');
+                if (colonIdx > 0 && System.Text.RegularExpressions.Regex.IsMatch(cleanToken.Substring(0, colonIdx), @"^[a-zA-Z0-9_-]+$"))
                 {
-                    if (currentFreeText.Count > 0)
+                    // Token co prefix: language, artist, character, series, group, type, female, male...
+                    string prefix = cleanToken.Substring(0, colonIdx).ToLowerInvariant();
+                    string val = cleanToken.Substring(colonIdx + 1).ToLowerInvariant().Replace('_', ' ');
+
+                    string nozomiUrl;
+                    if (prefix == "language")
                     {
-                        parsedTokens.Add(string.Join(" ", currentFreeText));
-                        currentFreeText.Clear();
+                        nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/index-{val}.nozomi";
                     }
-                    parsedTokens.Add(t);
-                }
-                else
-                {
-                    currentFreeText.Add(t);
-                }
-            }
-            if (currentFreeText.Count > 0)
-            {
-                parsedTokens.Add(string.Join(" ", currentFreeText));
-            }
-
-            var nozomiCandidateGroups = new List<List<string>>();
-
-            foreach (var token in parsedTokens)
-            {
-                var candidateUrls = new List<string>();
-                int colonIdx = token.IndexOf(':');
-
-                if (colonIdx > 0 && System.Text.RegularExpressions.Regex.IsMatch(token.Substring(0, colonIdx), @"^[a-zA-Z0-9_-]+$"))
-                {
-                    string prefix = token.Substring(0, colonIdx).ToLowerInvariant();
-                    string val = token.Substring(colonIdx + 1).ToLowerInvariant().Replace('_', ' ');
-
-                    switch (prefix)
+                    else if (prefix == "artist" || prefix == "character" || prefix == "series" || prefix == "group" || prefix == "type")
                     {
-                        case "language":
-                            candidateUrls.Add($"https://ltn.gold-usergeneratedcontent.net/index-{val}.nozomi");
-                            break;
-                        case "artist":
-                        case "character":
-                        case "series":
-                        case "group":
-                        case "type":
-                            candidateUrls.Add($"https://ltn.gold-usergeneratedcontent.net/n/{prefix}/{val}-all.nozomi");
-                            break;
-                        case "female":
-                        case "male":
-                        default:
-                            string tagValue = (prefix + ":" + val);
-                            candidateUrls.Add($"https://ltn.gold-usergeneratedcontent.net/n/tag/{tagValue}-all.nozomi");
-                            break;
+                        nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/n/{prefix}/{val}-all.nozomi";
+                    }
+                    else
+                    {
+                        string tagValue = (prefix + ":" + val);
+                        nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/n/tag/{tagValue}-all.nozomi";
+                    }
+
+                    var ids = await FetchNozomiIdsAsync(nozomiUrl);
+                    if (ids != null && ids.Count > 0)
+                    {
+                        tokenSets.Add(ids);
+                        HitomiLaLog($"[Search] Token '{cleanToken}' via Nozomi => {ids.Count} IDs");
                     }
                 }
                 else
                 {
-                    // Free-text token (e.g. "dragon ball super"): Try union candidates across series, tag, character, artist, group, type
-                    string val = token.ToLowerInvariant().Replace('_', ' ');
-                    string[] categories = new[] { "series", "tag", "character", "artist", "group", "type" };
-                    foreach (var cat in categories)
+                    // Token free-text (VD: "dragon", "ball", "super"):
+                    // 1) Thu qua Hitomi B-Tree galleries.index
+                    string val = cleanToken.ToLowerInvariant().Replace('_', ' ');
+                    var ids = await FetchHitomiBTreeIdsAsync(val, galleriesIndexVer);
+
+                    // 2) Hop nhat voi cac nozomi candidate neu co (series, tag, character...)
+                    var candidateUrls = new[] {
+                        $"https://ltn.gold-usergeneratedcontent.net/n/series/{val}-all.nozomi",
+                        $"https://ltn.gold-usergeneratedcontent.net/n/tag/{val}-all.nozomi",
+                        $"https://ltn.gold-usergeneratedcontent.net/n/character/{val}-all.nozomi",
+                        $"https://ltn.gold-usergeneratedcontent.net/n/artist/{val}-all.nozomi",
+                        $"https://ltn.gold-usergeneratedcontent.net/n/group/{val}-all.nozomi"
+                    };
+
+                    foreach (var cUrl in candidateUrls)
                     {
-                        candidateUrls.Add($"https://ltn.gold-usergeneratedcontent.net/n/{cat}/{val}-all.nozomi");
+                        var cIds = await FetchNozomiIdsAsync(cUrl);
+                        if (cIds != null && cIds.Count > 0)
+                        {
+                            if (ids == null) ids = new HashSet<int>();
+                            ids.UnionWith(cIds);
+                        }
+                    }
+
+                    if (ids != null && ids.Count > 0)
+                    {
+                        tokenSets.Add(ids);
+                        HitomiLaLog($"[Search] Free-text token '{cleanToken}' => {ids.Count} IDs");
                     }
                 }
-                nozomiCandidateGroups.Add(candidateUrls);
             }
 
-            var allIds = new List<HashSet<int>>();
-
-            using (var semaphore = new SemaphoreSlim(6))
-            {
-                var tasks = nozomiCandidateGroups.Select(async group =>
-                {
-                    await semaphore.WaitAsync();
-                    try
-                    {
-                        var tokenIds = new HashSet<int>();
-                        foreach (var nUrl in group)
-                        {
-                            try
-                            {
-                                using (var httpClient = CreateScopedHttpClient(nUrl))
-                                {
-                                    byte[] bytes = await httpClient.GetByteArrayAsync(nUrl);
-                                    if (bytes != null && bytes.Length > 0)
-                                    {
-                                        int count = bytes.Length / 4;
-                                        for (int i = 0; i < count; i++)
-                                        {
-                                            tokenIds.Add(BigEndianToInt32(bytes, i * 4));
-                                        }
-                                        HitomiLaLog($"[Search] Loaded candidate {nUrl} ({bytes.Length / 4} IDs)");
-                                    }
-                                }
-                            }
-                            catch
-                            {
-                                // Candidate 404 is normal for free-text union sweep
-                            }
-                        }
-
-                        if (tokenIds.Count > 0)
-                        {
-                            lock (allIds)
-                            {
-                                allIds.Add(tokenIds);
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        semaphore.Release();
-                    }
-                });
-                await Task.WhenAll(tasks);
-            }
-
-            if (allIds.Count == 0)
+            if (tokenSets.Count == 0)
             {
                 return new byte[0];
             }
 
-            HashSet<int> resultIds = null;
-            foreach (var ids in allIds)
+            // Giao (Intersection) tat ca cac token
+            HashSet<int> resultIds = new HashSet<int>(tokenSets[0]);
+            for (int i = 1; i < tokenSets.Count; i++)
             {
-                if (resultIds == null)
-                {
-                    resultIds = new HashSet<int>(ids);
-                }
-                else
-                {
-                    resultIds.IntersectWith(ids);
-                }
+                resultIds.IntersectWith(tokenSets[i]);
             }
 
-            if (resultIds == null || resultIds.Count == 0)
+            if (resultIds.Count == 0)
             {
                 return new byte[0];
             }
@@ -371,6 +336,167 @@ namespace get_link_manga
             }
 
             return resultBytes;
+        }
+
+        private async Task<HashSet<int>> FetchNozomiIdsAsync(string url)
+        {
+            try
+            {
+                using (var httpClient = CreateScopedHttpClient(url))
+                {
+                    byte[] bytes = await httpClient.GetByteArrayAsync(url);
+                    if (bytes != null && bytes.Length > 0)
+                    {
+                        var ids = new HashSet<int>();
+                        int count = bytes.Length / 4;
+                        for (int i = 0; i < count; i++)
+                        {
+                            ids.Add(BigEndianToInt32(bytes, i * 4));
+                        }
+                        return ids;
+                    }
+                }
+            }
+            catch { }
+            return null;
+        }
+
+        private async Task<HashSet<int>> FetchHitomiBTreeIdsAsync(string term, string ver)
+        {
+            try
+            {
+                byte[] key;
+                using (var sha = System.Security.Cryptography.SHA256.Create())
+                {
+                    key = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(term)).Take(4).ToArray();
+                }
+
+                long[] matchData = await BSearchHitomiNodeAsync(key, 0, ver);
+                if (matchData == null) return null;
+
+                long off = matchData[0];
+                long len = matchData[1];
+
+                string dataUrl = $"https://ltn.gold-usergeneratedcontent.net/galleriesindex/galleries.{ver}.data";
+                byte[] inbuf = await FetchUrlAtRangeAsync(dataUrl, off, off + len - 1);
+                if (inbuf == null || inbuf.Length < 4) return null;
+
+                int numIds = BigEndianToInt32(inbuf, 0);
+                var set = new HashSet<int>();
+                for (int i = 0; i < numIds; i++)
+                {
+                    int id = BigEndianToInt32(inbuf, 4 + i * 4);
+                    set.Add(id);
+                }
+                return set;
+            }
+            catch { }
+            return null;
+        }
+
+        private async Task<long[]> BSearchHitomiNodeAsync(byte[] key, long nodeAddress, string ver)
+        {
+            string indexUrl = $"https://ltn.gold-usergeneratedcontent.net/galleriesindex/galleries.{ver}.index";
+            byte[] data = await FetchUrlAtRangeAsync(indexUrl, nodeAddress, nodeAddress + 463);
+            if (data == null || data.Length < 4) return null;
+
+            int pos = 0;
+            int numberOfKeys = BigEndianToInt32(data, pos);
+            pos += 4;
+
+            var keys = new List<byte[]>();
+            for (int i = 0; i < numberOfKeys; i++)
+            {
+                int keySize = BigEndianToInt32(data, pos);
+                pos += 4;
+                if (keySize <= 0 || keySize > 32) return null;
+                byte[] k = new byte[keySize];
+                Array.Copy(data, pos, k, 0, keySize);
+                pos += keySize;
+                keys.Add(k);
+            }
+
+            int numberOfDatas = BigEndianToInt32(data, pos);
+            pos += 4;
+            var datas = new List<long[]>();
+            for (int i = 0; i < numberOfDatas; i++)
+            {
+                long hi = (uint)BigEndianToInt32(data, pos);
+                long lo = (uint)BigEndianToInt32(data, pos + 4);
+                long offset = (hi << 32) | lo;
+                pos += 8;
+
+                int length = BigEndianToInt32(data, pos);
+                pos += 4;
+                datas.Add(new long[] { offset, length });
+            }
+
+            var subnodes = new List<long>();
+            for (int i = 0; i < 17; i++)
+            {
+                if (pos + 8 > data.Length) break;
+                long hi = (uint)BigEndianToInt32(data, pos);
+                long lo = (uint)BigEndianToInt32(data, pos + 4);
+                long subAddr = (hi << 32) | lo;
+                pos += 8;
+                subnodes.Add(subAddr);
+            }
+
+            bool there = false;
+            int where = 0;
+            for (int i = 0; i < keys.Count; i++)
+            {
+                int cmp = CompareByteArrays(key, keys[i]);
+                if (cmp <= 0)
+                {
+                    there = (cmp == 0);
+                    where = i;
+                    break;
+                }
+                where = i + 1;
+            }
+
+            if (there) return datas[where];
+
+            bool isLeaf = subnodes.All(addr => addr == 0);
+            if (isLeaf) return null;
+
+            if (where < subnodes.Count && subnodes[where] != 0)
+            {
+                return await BSearchHitomiNodeAsync(key, subnodes[where], ver);
+            }
+            return null;
+        }
+
+        private static int CompareByteArrays(byte[] dv1, byte[] dv2)
+        {
+            int top = Math.Min(dv1.Length, dv2.Length);
+            for (int i = 0; i < top; i++)
+            {
+                if (dv1[i] < dv2[i]) return -1;
+                if (dv1[i] > dv2[i]) return 1;
+            }
+            return 0;
+        }
+
+        private async Task<byte[]> FetchUrlAtRangeAsync(string url, long start, long end)
+        {
+            try
+            {
+                var req = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(url);
+                req.AddRange((int)start, (int)end);
+                using (var resp = await req.GetResponseAsync())
+                using (var stream = resp.GetResponseStream())
+                using (var ms = new System.IO.MemoryStream())
+                {
+                    await stream.CopyToAsync(ms);
+                    return ms.ToArray();
+                }
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private async void BtnHitomiLaFetchInfo_Click(object sender, RoutedEventArgs e)
