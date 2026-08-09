@@ -1129,6 +1129,14 @@ namespace get_link_manga
 
         private void ResultsThumbnailItems_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            if (_scrapedItems == null || _scrapedItems.Count == 0)
+            {
+                if (tglClearCookieAndRetry != null && tglClearCookieAndRetry.IsChecked == true)
+                {
+                    tglClearCookieAndRetry.IsChecked = false;
+                }
+            }
+
             QueueCheckedDownloadsForActiveSession();
             UpdateEmptyStateVisibility();
             UpdateGlobalProgressBar();
