@@ -1055,31 +1055,13 @@ namespace get_link_manga
 
                 if (IsMangadexBrowserFetchUrl(imageUrl))
                 {
-                    string originalExtension = ".jpg";
+                    string originalExtension = ".webp";
                     originalPath = cacheBasePath + originalExtension;
 
                     byte[] browserBytes = await FetchMangadexBytesViaBrowserAsync(imageUrl, item?.Link, token);
-                    bool isWebp = browserBytes.Length >= 12 &&
-                                  browserBytes[0] == 0x52 && browserBytes[1] == 0x49 && browserBytes[2] == 0x46 && browserBytes[3] == 0x46 &&
-                                  browserBytes[8] == 0x57 && browserBytes[9] == 0x45 && browserBytes[10] == 0x42 && browserBytes[11] == 0x50;
-
-                    if (isWebp)
+                    using (FileStream fileStream = new FileStream(originalPath, FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
-                        string tempDownloadedFile = originalPath + ".tmp";
-                        using (FileStream fileStream = new FileStream(tempDownloadedFile, FileMode.Create, FileAccess.Write, FileShare.Read))
-                        {
-                            await fileStream.WriteAsync(browserBytes, 0, browserBytes.Length, token);
-                        }
-                        bool converted = await ConvertWebpToJpgAsync(tempDownloadedFile, originalPath);
-                        try { File.Delete(tempDownloadedFile); } catch {}
-                        if (!converted) return false;
-                    }
-                    else
-                    {
-                        using (FileStream fileStream = new FileStream(originalPath, FileMode.Create, FileAccess.Write, FileShare.Read))
-                        {
-                            await fileStream.WriteAsync(browserBytes, 0, browserBytes.Length, token);
-                        }
+                        await fileStream.WriteAsync(browserBytes, 0, browserBytes.Length, token);
                     }
 
                     item.HoverPreviewLocalPath = originalPath;
@@ -1109,42 +1091,14 @@ namespace get_link_manga
                     using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token))
                     {
                         response.EnsureSuccessStatusCode();
-                        string originalExtension = ".jpg";
+                        
+                        string originalExtension = imageUrl.Contains(".webp") || imageUrl.Contains("hitomi.la") || imageUrl.Contains("gold-usergeneratedcontent") ? ".webp" : ".jpg";
                         originalPath = cacheBasePath + originalExtension;
 
-                        string tempDownloadedFile = originalPath + ".tmp";
                         using (Stream sourceStream = await response.Content.ReadAsStreamAsync())
-                        using (FileStream fileStream = new FileStream(tempDownloadedFile, FileMode.Create, FileAccess.Write, FileShare.Read))
+                        using (FileStream fileStream = new FileStream(originalPath, FileMode.Create, FileAccess.Write, FileShare.Read))
                         {
                             await sourceStream.CopyToAsync(fileStream, 81920, token);
-                        }
-
-                        bool isWebp = false;
-                        try
-                        {
-                            byte[] header = new byte[12];
-                            using (var fs = new FileStream(tempDownloadedFile, FileMode.Open, FileAccess.Read))
-                            {
-                                int read = await fs.ReadAsync(header, 0, 12, token);
-                                if (read == 12 && header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46 &&
-                                    header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50)
-                                {
-                                    isWebp = true;
-                                }
-                            }
-                        }
-                        catch {}
-
-                        if (isWebp)
-                        {
-                            bool converted = await ConvertWebpToJpgAsync(tempDownloadedFile, originalPath);
-                            try { File.Delete(tempDownloadedFile); } catch {}
-                            if (!converted) return false;
-                        }
-                        else
-                        {
-                            if (File.Exists(originalPath)) File.Delete(originalPath);
-                            File.Move(tempDownloadedFile, originalPath);
                         }
 
                         item.HoverPreviewLocalPath = originalPath;
@@ -1270,6 +1224,36 @@ namespace get_link_manga
             }
         }
 
+        private static bool _checkedWebpCodec = false;
+        private static bool _hasWebpCodec = false;
+
+        private static bool HasWebpCodec()
+        {
+            if (_checkedWebpCodec) return _hasWebpCodec;
+            try
+            {
+                byte[] tinyWebp = new byte[] {
+                    0x52, 0x49, 0x46, 0x46, 0x1a, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
+                    0x56, 0x50, 0x38, 0x4c, 0x0d, 0x00, 0x00, 0x00, 0x2f, 0x00, 0x00, 0x00,
+                    0x10, 0x07, 0x10, 0x11, 0x11, 0x88, 0x88, 0xff, 0x07, 0x00
+                };
+                using (var ms = new MemoryStream(tinyWebp))
+                {
+                    System.Windows.Media.Imaging.BitmapDecoder.Create(
+                        ms,
+                        System.Windows.Media.Imaging.BitmapCreateOptions.None,
+                        System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
+                }
+                _hasWebpCodec = true;
+            }
+            catch
+            {
+                _hasWebpCodec = false;
+            }
+            _checkedWebpCodec = true;
+            return _hasWebpCodec;
+        }
+
         private static bool TryGetGalleryHoverPreviewCacheFiles(string cacheBasePath, out string originalPath, out string thumbnailPath)
         {
             originalPath = null;
@@ -1287,16 +1271,45 @@ namespace get_link_manga
                 return false;
             }
 
-            originalPath = Path.Combine(directory, fileBaseName + ".jpg");
+            string webpPath = Path.Combine(directory, fileBaseName + ".webp");
+            string jpgPath = Path.Combine(directory, fileBaseName + ".jpg");
 
-            if (!File.Exists(originalPath))
+            if (HasWebpCodec())
             {
-                originalPath = null;
+                if (File.Exists(webpPath))
+                {
+                    originalPath = webpPath;
+                    thumbnailPath = webpPath;
+                    return true;
+                }
+                if (File.Exists(jpgPath))
+                {
+                    originalPath = jpgPath;
+                    thumbnailPath = jpgPath;
+                    return true;
+                }
                 return false;
             }
 
-            thumbnailPath = originalPath;
-            return true;
+            if (File.Exists(jpgPath))
+            {
+                originalPath = jpgPath;
+                thumbnailPath = jpgPath;
+                return true;
+            }
+
+            if (File.Exists(webpPath))
+            {
+                bool converted = Task.Run(() => ConvertWebpToJpgAsync(webpPath, jpgPath)).GetAwaiter().GetResult();
+                if (converted && File.Exists(jpgPath))
+                {
+                    originalPath = jpgPath;
+                    thumbnailPath = jpgPath;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static string GetGalleryHoverPreviewFileExtension(string imageUrl, string contentType)
