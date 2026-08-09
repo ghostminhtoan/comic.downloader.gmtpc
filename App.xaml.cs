@@ -38,6 +38,9 @@ namespace get_link_manga
             // Tự động kiểm tra và cài đặt Cloudflare Warp nếu chưa có
             EnsureCloudflareWarpInstalled();
 
+            // Tự động kiểm tra và cài đặt WebP Codec nếu chưa có
+            EnsureWebpCodecInstalled();
+
             ServicePointManager.DefaultConnectionLimit = Math.Max(ServicePointManager.DefaultConnectionLimit, 256);
             ServicePointManager.Expect100Continue = false;
             ServicePointManager.UseNagleAlgorithm = false;
@@ -402,6 +405,115 @@ namespace get_link_manga
                     if (displayName != null && displayName.ToString().IndexOf("cloudflare", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private static void EnsureWebpCodecInstalled()
+        {
+            try
+            {
+                if (IsWebpCodecInstalled())
+                {
+                    return;
+                }
+
+                // Hỏi ý kiến người dùng trước khi cài
+                string message = "Máy bạn chưa cài WebP Codec (hoặc WebP Image Extensions).\nBạn có muốn tải và cài đặt WebP Codec không? Nếu không cài thì sẽ không xem trước (preview) được ảnh WebP.";
+                string title = "Cài đặt WebP Codec / WebP Codec Installation Check";
+                var result = MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+
+                // Cài đặt WebP Codec tự động
+                string url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/WebpCodecSetup.exe";
+                string tempDir = System.IO.Path.Combine(PortablePaths.AppRoot, ".tmp");
+                System.IO.Directory.CreateDirectory(tempDir);
+                string tempFilePath = System.IO.Path.Combine(tempDir, "WebpCodecSetup.exe");
+
+                using (var client = new WebClient())
+                {
+                    client.DownloadFile(new Uri(url), tempFilePath);
+                }
+
+                var process = Process.Start(new ProcessStartInfo
+                {
+                    FileName = tempFilePath,
+                    Arguments = "/passive /norestart",
+                    UseShellExecute = true
+                });
+
+                if (process != null)
+                {
+                    process.WaitForExit();
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private static bool IsWebpCodecInstalled()
+        {
+            try
+            {
+                string[] uninstallKeys = {
+                    @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+                    @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+                };
+
+                foreach (var keyPath in uninstallKeys)
+                {
+                    using (RegistryKey localMachine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                    using (RegistryKey key = localMachine.OpenSubKey(keyPath))
+                    {
+                        if (key != null && CheckUninstallSubKeysForWebp(key)) return true;
+                    }
+
+                    using (RegistryKey localMachine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
+                    using (RegistryKey key = localMachine.OpenSubKey(keyPath))
+                    {
+                        if (key != null && CheckUninstallSubKeysForWebp(key)) return true;
+                    }
+
+                    using (RegistryKey currentUser = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64))
+                    using (RegistryKey key = currentUser.OpenSubKey(keyPath))
+                    {
+                        if (key != null && CheckUninstallSubKeysForWebp(key)) return true;
+                    }
+
+                    using (RegistryKey currentUser = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32))
+                    using (RegistryKey key = currentUser.OpenSubKey(keyPath))
+                    {
+                        if (key != null && CheckUninstallSubKeysForWebp(key)) return true;
+                    }
+                }
+            }
+            catch
+            {
+            }
+            return false;
+        }
+
+        private static bool CheckUninstallSubKeysForWebp(RegistryKey key)
+        {
+            foreach (var subkeyName in key.GetSubKeyNames())
+            {
+                using (RegistryKey subkey = key.OpenSubKey(subkeyName))
+                {
+                    if (subkey == null) continue;
+                    object displayName = subkey.GetValue("DisplayName");
+                    if (displayName != null)
+                    {
+                        string name = displayName.ToString();
+                        if (name.IndexOf("webp", StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            return true;
+                        }
                     }
                 }
             }
