@@ -17,7 +17,7 @@ namespace get_link_manga
             Dispatcher dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
             _flushTimer = new DispatcherTimer(DispatcherPriority.Background, dispatcher)
             {
-                Interval = TimeSpan.FromMilliseconds(90)
+                Interval = TimeSpan.FromMilliseconds(250)
             };
             _flushTimer.Tick += (s, e) => FlushPendingNotifications();
         }

@@ -929,13 +929,28 @@ namespace get_link_manga
         public double ProgressPercent
         {
             get => _progressPercent;
-            set { if (_progressPercent != value) { _progressPercent = value; OnPropertyChanged(); } }
+            set
+            {
+                if (Math.Abs(_progressPercent - value) >= 1.0 || value == 0 || value == 100 || (value < _progressPercent))
+                {
+                    _progressPercent = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public double DownloadProgressPercent
         {
             get => _downloadProgressPercent;
-            set { if (_downloadProgressPercent != value) { _downloadProgressPercent = value; OnPropertyChanged(); OnPropertyChanged(nameof(DownloadProgressText)); } }
+            set
+            {
+                if (Math.Abs(_downloadProgressPercent - value) >= 1.0 || value == 0 || value == 100 || (value < _downloadProgressPercent))
+                {
+                    _downloadProgressPercent = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(DownloadProgressText));
+                }
+            }
         }
 
         public long DownloadSpeedBytesPerSecond
