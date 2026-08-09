@@ -38,7 +38,7 @@ namespace get_link_manga
             // Tự động kiểm tra và cài đặt Cloudflare Warp nếu chưa có
             EnsureCloudflareWarpInstalled();
 
-            // Tự động kiểm tra và cài đặt WebP Codec nếu chưa có
+            // Tự động kiểm tra và cài đặt Codec WebP nếu chưa có
             EnsureWebpCodecInstalled();
 
             ServicePointManager.DefaultConnectionLimit = Math.Max(ServicePointManager.DefaultConnectionLimit, 256);
@@ -278,6 +278,79 @@ namespace get_link_manga
             }
         }
 
+        private static bool IsWebpCodecInstalled()
+        {
+            try
+            {
+                byte[] webpBytes = new byte[] {
+                    0x52, 0x49, 0x46, 0x46, 0x1e, 0x00, 0x00, 0x00,
+                    0x57, 0x45, 0x42, 0x50, 0x56, 0x50, 0x38, 0x20,
+                    0x12, 0x00, 0x00, 0x00, 0x50, 0x01, 0x00, 0x9d,
+                    0x01, 0x2a, 0x01, 0x00, 0x01, 0x00, 0x03, 0x00,
+                    0x34, 0x25, 0xa4, 0x00, 0x03, 0x70, 0x00, 0x00
+                };
+                
+                using (var stream = new System.IO.MemoryStream(webpBytes))
+                {
+                    var decoder = System.Windows.Media.Imaging.BitmapDecoder.Create(
+                        stream,
+                        System.Windows.Media.Imaging.BitmapCreateOptions.None,
+                        System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
+                    
+                    return decoder != null && decoder.Frames.Count > 0;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static void EnsureWebpCodecInstalled()
+        {
+            try
+            {
+                if (IsWebpCodecInstalled())
+                {
+                    return;
+                }
+
+                string message = "Máy bạn chưa cài Codec giải mã ảnh WebP (Google WebP WIC Codec).\nBạn có muốn tải và cài đặt Codec WebP ngay không? (Cần thiết để hiển thị hình ảnh xem trước và tránh lỗi tải ảnh WebP)";
+                string title = "Cài đặt WebP Codec / WebP Codec Check";
+                var result = MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+
+                string url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/WebpCodecSetup.exe";
+                string tempDir = System.IO.Path.Combine(PortablePaths.PortableTempRoot ?? System.IO.Path.Combine(PortablePaths.AppRoot, ".tmp"), "installers");
+                System.IO.Directory.CreateDirectory(tempDir);
+                string destFile = System.IO.Path.Combine(tempDir, "WebpCodecSetup.exe");
+
+                using (var client = new WebClient())
+                {
+                    client.DownloadFile(new Uri(url), destFile);
+                }
+
+                Process.Start(destFile);
+
+                MessageBox.Show(
+                    "Đã khởi chạy bộ cài đặt WebP Codec của Google. Vui lòng hoàn tất quá trình cài đặt trên màn hình để kích hoạt xem trước ảnh WebP.",
+                    "Thông báo / Information",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Không thể cài đặt WebP Codec: {ex.Message}",
+                    "Lỗi / Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
         private static void EnsureCloudflareWarpInstalled()
         {
             try
@@ -405,115 +478,6 @@ namespace get_link_manga
                     if (displayName != null && displayName.ToString().IndexOf("cloudflare", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        private static void EnsureWebpCodecInstalled()
-        {
-            try
-            {
-                if (IsWebpCodecInstalled())
-                {
-                    return;
-                }
-
-                // Hỏi ý kiến người dùng trước khi cài
-                string message = "Máy bạn chưa cài WebP Codec (hoặc WebP Image Extensions).\nBạn có muốn tải và cài đặt WebP Codec không? Nếu không cài thì sẽ không xem trước (preview) được ảnh WebP.";
-                string title = "Cài đặt WebP Codec / WebP Codec Installation Check";
-                var result = MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result != MessageBoxResult.Yes)
-                {
-                    return;
-                }
-
-                // Cài đặt WebP Codec tự động
-                string url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/WebpCodecSetup.exe";
-                string tempDir = System.IO.Path.Combine(PortablePaths.AppRoot, ".tmp");
-                System.IO.Directory.CreateDirectory(tempDir);
-                string tempFilePath = System.IO.Path.Combine(tempDir, "WebpCodecSetup.exe");
-
-                using (var client = new WebClient())
-                {
-                    client.DownloadFile(new Uri(url), tempFilePath);
-                }
-
-                var process = Process.Start(new ProcessStartInfo
-                {
-                    FileName = tempFilePath,
-                    Arguments = "/passive /norestart",
-                    UseShellExecute = true
-                });
-
-                if (process != null)
-                {
-                    process.WaitForExit();
-                }
-            }
-            catch
-            {
-            }
-        }
-
-        private static bool IsWebpCodecInstalled()
-        {
-            try
-            {
-                string[] uninstallKeys = {
-                    @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
-                    @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
-                };
-
-                foreach (var keyPath in uninstallKeys)
-                {
-                    using (RegistryKey localMachine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
-                    using (RegistryKey key = localMachine.OpenSubKey(keyPath))
-                    {
-                        if (key != null && CheckUninstallSubKeysForWebp(key)) return true;
-                    }
-
-                    using (RegistryKey localMachine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
-                    using (RegistryKey key = localMachine.OpenSubKey(keyPath))
-                    {
-                        if (key != null && CheckUninstallSubKeysForWebp(key)) return true;
-                    }
-
-                    using (RegistryKey currentUser = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64))
-                    using (RegistryKey key = currentUser.OpenSubKey(keyPath))
-                    {
-                        if (key != null && CheckUninstallSubKeysForWebp(key)) return true;
-                    }
-
-                    using (RegistryKey currentUser = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32))
-                    using (RegistryKey key = currentUser.OpenSubKey(keyPath))
-                    {
-                        if (key != null && CheckUninstallSubKeysForWebp(key)) return true;
-                    }
-                }
-            }
-            catch
-            {
-            }
-            return false;
-        }
-
-        private static bool CheckUninstallSubKeysForWebp(RegistryKey key)
-        {
-            foreach (var subkeyName in key.GetSubKeyNames())
-            {
-                using (RegistryKey subkey = key.OpenSubKey(subkeyName))
-                {
-                    if (subkey == null) continue;
-                    object displayName = subkey.GetValue("DisplayName");
-                    if (displayName != null)
-                    {
-                        string name = displayName.ToString();
-                        if (name.IndexOf("webp", StringComparison.OrdinalIgnoreCase) >= 0)
-                        {
-                            return true;
-                        }
                     }
                 }
             }
