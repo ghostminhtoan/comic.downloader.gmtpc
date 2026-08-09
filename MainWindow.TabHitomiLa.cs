@@ -176,7 +176,7 @@ namespace get_link_manga
                    lower.Contains("/character/") ||
                    lower.Contains("/series/") ||
                    lower.Contains("/group/") ||
-                   lower.Contains("/search/") ||
+                   lower.Contains("search") ||
                    lower.Contains("index-");
         }
 
@@ -190,6 +190,148 @@ namespace get_link_manga
                 return $"https://ltn.gold-usergeneratedcontent.net/n/{category}/{name}.nozomi";
             }
             return "https://ltn.gold-usergeneratedcontent.net/index-all.nozomi";
+        }
+
+        private async Task<byte[]> GetHitomiSearchDataAsync(string url)
+        {
+            int qIdx = url.IndexOf('?');
+            if (qIdx < 0)
+            {
+                string fallbackUrl = "https://ltn.gold-usergeneratedcontent.net/index-all.nozomi";
+                using (var httpClient = CreateScopedHttpClient(fallbackUrl))
+                {
+                    return await httpClient.GetByteArrayAsync(fallbackUrl);
+                }
+            }
+
+            string queryString = url.Substring(qIdx + 1);
+            queryString = Uri.UnescapeDataString(queryString).Trim();
+            if (string.IsNullOrEmpty(queryString))
+            {
+                string fallbackUrl = "https://ltn.gold-usergeneratedcontent.net/index-all.nozomi";
+                using (var httpClient = CreateScopedHttpClient(fallbackUrl))
+                {
+                    return await httpClient.GetByteArrayAsync(fallbackUrl);
+                }
+            }
+
+            var parts = queryString.Split(new[] { ' ', '+' }, StringSplitOptions.RemoveEmptyEntries);
+            var nozomiUrls = new List<string>();
+
+            foreach (var part in parts)
+            {
+                string cleanPart = part.Trim();
+                if (string.IsNullOrEmpty(cleanPart)) continue;
+
+                string category = "tag";
+                string value = cleanPart;
+
+                int colonIdx = cleanPart.IndexOf(':');
+                if (colonIdx > 0)
+                {
+                    string prefix = cleanPart.Substring(0, colonIdx).ToLowerInvariant();
+                    string val = cleanPart.Substring(colonIdx + 1);
+
+                    if (prefix == "artist" || prefix == "character" || prefix == "series" || prefix == "group" || prefix == "language")
+                    {
+                        category = prefix;
+                        value = val;
+                    }
+                    else if (prefix == "female" || prefix == "male")
+                    {
+                        category = "tag";
+                        value = cleanPart;
+                    }
+                }
+
+                string encodedValue = Uri.EscapeDataString(value);
+                string nozomiUrl = $"https://ltn.gold-usergeneratedcontent.net/n/{category}/{encodedValue}.nozomi";
+                nozomiUrls.Add(nozomiUrl);
+            }
+
+            if (nozomiUrls.Count == 0)
+            {
+                string fallbackUrl = "https://ltn.gold-usergeneratedcontent.net/index-all.nozomi";
+                using (var httpClient = CreateScopedHttpClient(fallbackUrl))
+                {
+                    return await httpClient.GetByteArrayAsync(fallbackUrl);
+                }
+            }
+
+            var allIds = new List<HashSet<int>>();
+            using (var semaphore = new SemaphoreSlim(4))
+            {
+                var tasks = nozomiUrls.Select(async nUrl =>
+                {
+                    await semaphore.WaitAsync();
+                    try
+                    {
+                        using (var httpClient = CreateScopedHttpClient(nUrl))
+                        {
+                            byte[] bytes = await httpClient.GetByteArrayAsync(nUrl);
+                            if (bytes != null && bytes.Length > 0)
+                            {
+                                var ids = new HashSet<int>();
+                                int count = bytes.Length / 4;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    ids.Add(BigEndianToInt32(bytes, i * 4));
+                                }
+                                lock (allIds)
+                                {
+                                    allIds.Add(ids);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        HitomiLaLog($"[Search] Không thể tải nozomi {nUrl}: {ex.Message}");
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
+                });
+                await Task.WhenAll(tasks);
+            }
+
+            if (allIds.Count == 0)
+            {
+                return new byte[0];
+            }
+
+            HashSet<int> resultIds = null;
+            foreach (var ids in allIds)
+            {
+                if (resultIds == null)
+                {
+                    resultIds = new HashSet<int>(ids);
+                }
+                else
+                {
+                    resultIds.IntersectWith(ids);
+                }
+            }
+
+            if (resultIds == null || resultIds.Count == 0)
+            {
+                return new byte[0];
+            }
+
+            byte[] resultBytes = new byte[resultIds.Count * 4];
+            int idx = 0;
+            var sortedIds = resultIds.OrderByDescending(id => id);
+            foreach (int id in sortedIds)
+            {
+                resultBytes[idx] = (byte)((id >> 24) & 0xFF);
+                resultBytes[idx + 1] = (byte)((id >> 16) & 0xFF);
+                resultBytes[idx + 2] = (byte)((id >> 8) & 0xFF);
+                resultBytes[idx + 3] = (byte)(id & 0xFF);
+                idx += 4;
+            }
+
+            return resultBytes;
         }
 
         private async void BtnHitomiLaFetchInfo_Click(object sender, RoutedEventArgs e)
@@ -213,11 +355,18 @@ namespace get_link_manga
                     return;
                 }
 
-                string nozomiUrl = GetHitomiNozomiUrl(url);
                 byte[] data = null;
-                using (var httpClient = CreateScopedHttpClient(nozomiUrl))
+                if (url.Contains("search"))
                 {
-                    data = await httpClient.GetByteArrayAsync(nozomiUrl);
+                    data = await GetHitomiSearchDataAsync(url);
+                }
+                else
+                {
+                    string nozomiUrl = GetHitomiNozomiUrl(url);
+                    using (var httpClient = CreateScopedHttpClient(nozomiUrl))
+                    {
+                        data = await httpClient.GetByteArrayAsync(nozomiUrl);
+                    }
                 }
 
                 if (data != null && data.Length > 0)
@@ -283,13 +432,20 @@ namespace get_link_manga
                     return;
                 }
 
-                string nozomiUrl = GetHitomiNozomiUrl(url);
-                HitomiLaLog($"Fetching nozomi list từ {nozomiUrl}...");
-
                 byte[] data = null;
-                using (var httpClient = CreateScopedHttpClient(nozomiUrl))
+                if (url.Contains("search"))
                 {
-                    data = await httpClient.GetByteArrayAsync(nozomiUrl);
+                    HitomiLaLog("Đang xử lý tìm kiếm kết hợp trên Hitomi.la...");
+                    data = await GetHitomiSearchDataAsync(url);
+                }
+                else
+                {
+                    string nozomiUrl = GetHitomiNozomiUrl(url);
+                    HitomiLaLog($"Fetching nozomi list từ {nozomiUrl}...");
+                    using (var httpClient = CreateScopedHttpClient(nozomiUrl))
+                    {
+                        data = await httpClient.GetByteArrayAsync(nozomiUrl);
+                    }
                 }
 
                 if (data == null || data.Length == 0)
