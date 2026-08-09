@@ -1055,7 +1055,7 @@ namespace get_link_manga
 
                 if (IsMangadexBrowserFetchUrl(imageUrl))
                 {
-                    string originalExtension = ".webp";
+                    string originalExtension = ".jpg";
                     originalPath = cacheBasePath + originalExtension;
 
                     byte[] browserBytes = await FetchMangadexBytesViaBrowserAsync(imageUrl, item?.Link, token);
@@ -1091,7 +1091,7 @@ namespace get_link_manga
                     using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token))
                     {
                         response.EnsureSuccessStatusCode();
-                        string originalExtension = ".webp";
+                        string originalExtension = ".jpg";
                         originalPath = cacheBasePath + originalExtension;
 
                         using (Stream sourceStream = await response.Content.ReadAsStreamAsync())
@@ -1240,7 +1240,7 @@ namespace get_link_manga
                 return false;
             }
 
-            originalPath = Path.Combine(directory, fileBaseName + ".webp");
+            originalPath = Path.Combine(directory, fileBaseName + ".jpg");
 
             if (!File.Exists(originalPath))
             {

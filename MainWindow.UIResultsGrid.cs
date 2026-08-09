@@ -3178,12 +3178,12 @@ namespace get_link_manga
                 Log($"[WebP Codec] Running WebpCodecSetup.exe");
                 lblStatus.Text = _isVietnameseUi ? "Đang chạy bộ cài đặt WebP..." : "Running WebP installer...";
 
-                System.Diagnostics.Process.Start(destFile, "/passive");
+                System.Diagnostics.Process.Start(destFile);
 
                 MessageBox.Show(
                     _isVietnameseUi 
-                        ? "Đã khởi chạy bộ cài đặt WebP Codec của Google ở chế độ tự động (Passive). Vui lòng đợi thanh tiến trình chạy hoàn tất để kích hoạt xem trước ảnh WebP." 
-                        : "Google WebP Codec installer started in automatic mode (Passive). Please wait for the progress bar to finish to enable WebP previews.",
+                        ? "Đã khởi chạy bộ cài đặt WebP Codec của Google. Vui lòng hoàn tất quá trình cài đặt trên màn hình để kích hoạt xem trước ảnh WebP." 
+                        : "Google WebP Codec installer started. Please complete the setup on your screen to enable WebP previews.",
                     "Information",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
