@@ -323,10 +323,14 @@ namespace get_link_manga
 
                 HitomiLaLog($"Đang xử lý nozomi từ trang {pageFrom} đến {pageTo}...");
 
-                var idsToFetch = new List<string>();
+                int totalPagesToScrape = pageTo - pageFrom + 1;
                 for (int page = pageFrom; page <= pageTo; page++)
                 {
+                    int processedPages = page - pageFrom;
+                    UpdateResultsCrawlProgress(processedPages, totalPagesToScrape, $"Hitomi page {page}");
+
                     int startIndex = (page - 1) * 25;
+                    var idsToFetch = new List<string>();
                     for (int i = 0; i < 25; i++)
                     {
                         int targetIndex = startIndex + i;
@@ -335,12 +339,13 @@ namespace get_link_manga
                         int id = BigEndianToInt32(data, targetIndex * 4);
                         idsToFetch.Add($"https://hitomi.la/reader/{id}.html");
                     }
-                }
 
-                if (idsToFetch.Count > 0)
-                {
-                    await ImportHitomiLaDirectLinksAsync(idsToFetch, showMessageBox: false, keepControlsEnabled: true);
+                    if (idsToFetch.Count > 0)
+                    {
+                        await ImportHitomiLaDirectLinksAsync(idsToFetch, showMessageBox: false, keepControlsEnabled: true);
+                    }
                 }
+                UpdateResultsCrawlProgress(totalPagesToScrape, totalPagesToScrape, "Done");
             }
             catch (Exception ex)
             {
