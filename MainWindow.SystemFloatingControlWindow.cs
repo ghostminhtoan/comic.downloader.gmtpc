@@ -768,16 +768,17 @@ namespace get_link_manga
             }
 
             string tweakRoot = FindFolderUpward("regedit");
-            if (!Directory.Exists(tweakRoot))
+            if (string.IsNullOrWhiteSpace(tweakRoot))
             {
-                return;
+                tweakRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "regedit");
             }
 
-            string[] regFiles = Directory.GetFiles(tweakRoot, "*.reg");
-            if (regFiles.Length == 0)
+            if (!Directory.Exists(tweakRoot))
             {
-                return;
+                try { Directory.CreateDirectory(tweakRoot); } catch { }
             }
+
+            string[] regFiles = Directory.Exists(tweakRoot) ? Directory.GetFiles(tweakRoot, "*.reg") : new string[0];
 
             var menu = new ContextMenu
             {
@@ -785,24 +786,46 @@ namespace get_link_manga
                 Placement = PlacementMode.Bottom,
                 StaysOpen = false
             };
-            foreach (string regFile in regFiles)
+
+            if (regFiles.Length == 0)
             {
-                string localPath = regFile;
-                var item = new MenuItem
+                var emptyItem = new MenuItem
                 {
-                    Header = Path.GetFileNameWithoutExtension(localPath)
+                    Header = "Open Regedit Folder...",
+                    IsEnabled = true
                 };
-                item.Click += (menuSender, menuArgs) =>
+                emptyItem.Click += (s, args) =>
                 {
-                    Process.Start(new ProcessStartInfo
+                    try { Process.Start(new ProcessStartInfo { FileName = tweakRoot, UseShellExecute = true }); } catch { }
+                };
+                menu.Items.Add(emptyItem);
+            }
+            else
+            {
+                foreach (string regFile in regFiles)
+                {
+                    string localPath = regFile;
+                    var item = new MenuItem
                     {
-                        FileName = localPath,
-                        UseShellExecute = true
-                    });
-                };
-                menu.Items.Add(item);
+                        Header = Path.GetFileNameWithoutExtension(localPath)
+                    };
+                    item.Click += (menuSender, menuArgs) =>
+                    {
+                        try
+                        {
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = localPath,
+                                UseShellExecute = true
+                            });
+                        }
+                        catch { }
+                    };
+                    menu.Items.Add(item);
+                }
             }
 
+            button.ContextMenu = menu;
             menu.IsOpen = true;
         }
 
