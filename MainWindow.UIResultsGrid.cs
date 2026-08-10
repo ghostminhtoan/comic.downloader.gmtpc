@@ -312,13 +312,6 @@ namespace get_link_manga
             ApplyResultsSort(colGalleryDetails, "Name", ref _isNameSortAscending, "comic books");
         }
 
-        private bool _isOriginalOrderAscending = true;
-
-        private void BtnSortByOriginalOrder_Click(object sender, RoutedEventArgs e)
-        {
-            ApplyResultsSort(null, "OriginalIndex", ref _isOriginalOrderAscending, "original index");
-        }
-
         private void BtnSortBySpeed_Click(object sender, RoutedEventArgs e)
         {
             ApplyResultsSort(colSpeed, "DownloadSpeedSortValue", ref _isSpeedSortAscending, "download speed");

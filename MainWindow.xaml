@@ -3287,7 +3287,9 @@
                                 <ToggleButton Name="btnShowNewWindow" Click="BtnShowNewWindow_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="SHOW ON NEW WINDOW"/>
                             </StackPanel>
                             <Button Name="btnWebpCodec" Content="WEBP CODEC" Click="BtnWebpCodec_Click" Style="{StaticResource CompactCyanButton}" MinWidth="90" Width="Auto" Padding="10,2" Margin="0,0,6,0"/>
+                            <Button Name="btnToolbarSortByName" Content="SORT BY NAME" Click="BtnSortByName_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
                             <Button Name="btnDuplicateName" Content="DUPLICATE NAME" Click="BtnDuplicateName_Click" Style="{StaticResource CompactPinkButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
+                            <Button Name="btnReverseOrder" Content="REVERSE ORDER" Click="BtnReverseOrder_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
                             <Button Name="btnClearComplete" Content="CLEAR COMPLETE BOOKS" Click="BtnClearComplete_Click" Style="{StaticResource CompactDarkBlueButton}" MinWidth="120" Width="Auto" Padding="10,2"/>
                             <Button Name="btnExtractClearCookie" Content="CLEAR COOKIE" Click="BtnExtractClearCookie_Click" Style="{StaticResource CompactPinkButton}" MinWidth="90" Width="Auto" Padding="10,2" Margin="6,0,0,0" ToolTip="Xóa cookie của các trang đang hiển thị trong danh sách" Visibility="Collapsed">
                                 <Button.LayoutTransform>
@@ -3522,18 +3524,10 @@
                             <DataGridTemplateColumn x:Name="colGalleryDetails" Width="3.1*" SortMemberPath="Name">
                                 <DataGridTemplateColumn.Header>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock x:Name="txtColGalleryDetailsHeader" Text="COMIC BOOKS" Foreground="{StaticResource CyberpunkPinkBrush}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <Button Name="btnSortByName" Content="name" Click="BtnSortByName_Click" Width="Auto" Height="18" Padding="6,0" FontSize="10" ToolTip="SORT BY NAME" Margin="0,0,4,0">
+                                        <TextBlock Text="COMIC BOOKS" Foreground="{StaticResource CyberpunkPinkBrush}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <Button Name="btnSortByName" Content="⇅" Click="BtnSortByName_Click" Width="22" Height="18" Padding="0" FontSize="10" ToolTip="SORT BY NAME">
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource CyberpunkButtonCyan}">
-                                                    <Setter Property="Margin" Value="0"/>
-                                                    <Setter Property="MinWidth" Value="0"/>
-                                                </Style>
-                                            </Button.Style>
-                                        </Button>
-                                        <Button Name="btnSortByOriginalOrder" Content="original order" Click="BtnSortByOriginalOrder_Click" Width="Auto" Height="18" Padding="6,0" FontSize="10" ToolTip="RESTORE ORIGINAL ORDER">
-                                            <Button.Style>
-                                                <Style TargetType="Button" BasedOn="{StaticResource CyberpunkButtonYellow}">
                                                     <Setter Property="Margin" Value="0"/>
                                                     <Setter Property="MinWidth" Value="0"/>
                                                 </Style>
@@ -3757,8 +3751,6 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-
-
 
                              <!-- Status Column -->
                              <DataGridTemplateColumn x:Name="colStatus" Width="1.15*" SortMemberPath="StatusSortOrder">
@@ -4208,10 +4200,6 @@
                                 <EventSetter Event="PreviewMouseMove" Handler="ResultsThumbnailItem_PreviewMouseMove"/>
                                 <EventSetter Event="PreviewMouseRightButtonDown" Handler="ResultsThumbnailItem_PreviewMouseRightButtonDown"/>
                                 <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="BorderBrush" Value="Red"/>
-                                        <Setter Property="BorderThickness" Value="2"/>
-                                    </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
                                         <Setter Property="Background" Value="#3A3200"/>
                                         <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
@@ -4249,10 +4237,6 @@
                                                         </MultiDataTrigger.Conditions>
                                                         <Setter Property="Visibility" Value="Collapsed"/>
                                                     </MultiDataTrigger>
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsMouseOver}" Value="True">
-                                                        <Setter Property="BorderBrush" Value="Red"/>
-                                                        <Setter Property="BorderThickness" Value="2"/>
-                                                    </DataTrigger>
                                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
                                                         <Setter Property="Background" Value="#3A3200"/>
                                                         <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>

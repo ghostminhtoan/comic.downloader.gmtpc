@@ -44,16 +44,7 @@ namespace get_link_manga
                         catch {}
                         finally
                         {
-                            window.Dispatcher.Invoke(new Action(() =>
-                            {
-                                window.StatusText.Text = "Hoàn tất! Đang khởi động ứng dụng...";
-                                window.ProgressBar.Value = 100;
-                            }));
-                            // Play startup sound after download completes
-                            TryPlayStartupWav(binFolder);
                             window.Dispatcher.Invoke(new Action(window.Close));
-                            // Restart app so newly-downloaded DLLs are loaded by CLR
-                            RestartApp();
                         }
                     });
                     window.ShowDialog();
@@ -199,40 +190,6 @@ namespace get_link_manga
                     window.ProgressBar.Value = (int)((double)currentCompleted / pending.Count * 100);
                 }));
             });
-        }
-
-        private static void TryPlayStartupWav(string binFolder)
-        {
-            try
-            {
-                string wavPath = Path.Combine(binFolder, "ringtones", "Startup.wav");
-                if (File.Exists(wavPath))
-                {
-                    using (var player = new System.Media.SoundPlayer(wavPath))
-                    {
-                        player.PlaySync();
-                    }
-                }
-            }
-            catch { }
-        }
-
-        private static void RestartApp()
-        {
-            try
-            {
-                string exe = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = exe,
-                    UseShellExecute = true
-                });
-            }
-            catch { }
-            finally
-            {
-                Environment.Exit(0);
-            }
         }
 
         private class DownloadItem

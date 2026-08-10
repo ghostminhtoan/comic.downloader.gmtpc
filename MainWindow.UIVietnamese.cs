@@ -51,7 +51,7 @@ namespace get_link_manga
             if (btnSaveCustomList != null) btnSaveCustomList.Content = "Lưu file khác";
             if (btnLoadCustomList != null) btnLoadCustomList.Content = "Mở file khác";
             if (btnWebpCodec != null) btnWebpCodec.Content = "Cài WebP Codec";
-            if (btnSortByName != null) btnSortByName.Content = "tên";
+            if (btnToolbarSortByName != null) btnToolbarSortByName.Content = "Sắp xếp theo tên";
             if (btnPopupPreviewToggle != null) btnPopupPreviewToggle.ToolTip = "XEM TRƯỚC POPUP";
             if (chkCompactRows != null) chkCompactRows.ToolTip = "NÉN DÒNG";
             if (tglClearCookieAndRetry != null) tglClearCookieAndRetry.ToolTip = "TỰ ĐỘNG TẢI";
@@ -62,6 +62,7 @@ namespace get_link_manga
             if (lblShowNewWindow != null) lblShowNewWindow.ToolTip = "HIỂN THỊ CỬA SỔ MỚI";
             if (btnDuplicateName != null) btnDuplicateName.Content = "Tên trùng";
             // if (btnNoLinkViHentai != null) btnNoLinkViHentai.Content = "Không có chapter";
+            if (btnReverseOrder != null) btnReverseOrder.Content = "Đảo thứ tự";
             if (btnClearComplete != null) btnClearComplete.Content = "Ẩn truyện đã xong";
             if (btnExtractClearCookie != null) btnExtractClearCookie.Content = "Xóa cookie";
             if (btnMergeParallelSplitChapters != null) btnMergeParallelSplitChapters.Content = "TỰ ĐỘNG GỘP CHAPTER";

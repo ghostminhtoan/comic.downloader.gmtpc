@@ -945,7 +945,7 @@ namespace get_link_manga
             if (btnSaveCustomList != null) btnSaveCustomList.Content = "Save as";
             if (btnLoadCustomList != null) btnLoadCustomList.Content = "Open file";
             if (btnWebpCodec != null) btnWebpCodec.Content = "WebP Codec";
-            if (btnSortByName != null) btnSortByName.Content = "name";
+            if (btnToolbarSortByName != null) btnToolbarSortByName.Content = "Sort by name";
             if (btnPopupPreviewToggle != null) btnPopupPreviewToggle.ToolTip = "POPUP PREVIEW";
             if (chkCompactRows != null) chkCompactRows.ToolTip = "COMPACT ROW";
             if (tglClearCookieAndRetry != null) tglClearCookieAndRetry.ToolTip = "AUTO DOWNLOAD";
@@ -954,6 +954,7 @@ namespace get_link_manga
             if (chkResultsPresentation != null) chkResultsPresentation.ToolTip = "LIST / THUMBNAIL";
             if (btnDuplicateName != null) btnDuplicateName.Content = "Duplicate names";
             // if (btnNoLinkViHentai != null) btnNoLinkViHentai.Content = "No chapters";
+            if (btnReverseOrder != null) btnReverseOrder.Content = "Reverse order";
             if (btnClearComplete != null) btnClearComplete.Content = "Remove completed";
             if (btnExtractClearCookie != null) btnExtractClearCookie.Content = "Clear cookie";
             if (txtWebviewCpuAffinityLabel != null) txtWebviewCpuAffinityLabel.Text = "WEBVIEW CPU LIMIT";
