@@ -35,6 +35,10 @@ namespace get_link_manga
         private ComboBox _multiDownloadComboBox;
         private bool _suppressNetworkEvents = false;
         private readonly bool _isVietnameseUi;
+        private TextBlock _folderLabel;
+        private TextBlock _connectionsLabel;
+        private TextBlock _multiDownloadLabel;
+        private TextBlock _shutdownLabel;
         private readonly TextBlock _statusText;
         private readonly TextBlock _buildInfoText;
         private readonly Button _pinToggleButton;
@@ -498,6 +502,16 @@ namespace get_link_manga
             if (_newWindowIconButton != null)
                 _newWindowIconButton.ToolTip = isVietnameseUi ? "HIỂN THỊ CỬA SỔ MỚI" : "SHOW ON NEW WINDOW";
 
+            // Cập nhật nhãn text ngôn ngữ thời gian thực
+            if (_folderLabel != null)
+                _folderLabel.Text = isVietnameseUi ? "Thư mục" : "Folder";
+            if (_connectionsLabel != null)
+                _connectionsLabel.Text = isVietnameseUi ? "Kết nối" : "CONNECTION";
+            if (_multiDownloadLabel != null)
+                _multiDownloadLabel.Text = isVietnameseUi ? "Tải cùng lúc" : "DOWNLOAD MULTIPLE BOOK";
+            if (_shutdownLabel != null)
+                _shutdownLabel.Text = isVietnameseUi ? "Tắt máy" : "Shutdown";
+
             _shellBorder.BorderBrush = new SolidColorBrush(isRunning
                 ? Color.FromRgb(0x00, 0xE5, 0xFF)
                 : Color.FromRgb(0xFF, 0x2A, 0x85));
@@ -656,9 +670,9 @@ namespace get_link_manga
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(78) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            var labelText = CreateRowLabel("Shutdown");
-            Grid.SetColumn(labelText, 0);
-            row.Children.Add(labelText);
+            _shutdownLabel = CreateRowLabel("Shutdown");
+            Grid.SetColumn(_shutdownLabel, 0);
+            row.Children.Add(_shutdownLabel);
 
             shutdownToggleButton = CreateWindowButton("⏰", Color.FromRgb(0xFF, 0x79, 0xC6), shutdownClick);
             shutdownToggleButton.Width = 70;
@@ -703,9 +717,9 @@ namespace get_link_manga
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(6) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            var labelText = CreateRowLabel("Folder");
-            Grid.SetColumn(labelText, 0);
-            row.Children.Add(labelText);
+            _folderLabel = CreateRowLabel("Folder");
+            Grid.SetColumn(_folderLabel, 0);
+            row.Children.Add(_folderLabel);
 
             var openFolderButton = CreateIconButton("\uE838", Color.FromRgb(0x00, 0xE5, 0xFF), _isVietnameseUi ? "MỞ THƯ MỤC TẢI VỀ" : "OPEN DOWNLOAD FOLDER", (sender, args) => _openFolderAction?.Invoke());
             openFolderButton.HorizontalAlignment = HorizontalAlignment.Left;
@@ -1291,10 +1305,10 @@ namespace get_link_manga
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(85) }); // MultiDownload combo
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            var labelText = CreateRowLabel(_isVietnameseUi ? "Kết nối" : "CONNECTION");
-            labelText.FontSize = 10;
-            Grid.SetColumn(labelText, 0);
-            row.Children.Add(labelText);
+            _connectionsLabel = CreateRowLabel(_isVietnameseUi ? "Kết nối" : "CONNECTION");
+            _connectionsLabel.FontSize = 10;
+            Grid.SetColumn(_connectionsLabel, 0);
+            row.Children.Add(_connectionsLabel);
 
             _connectionsComboBox = new ComboBox
             {
@@ -1321,10 +1335,10 @@ namespace get_link_manga
             Grid.SetColumn(_connectionsComboBox, 2);
             row.Children.Add(_connectionsComboBox);
 
-            var multiLabel = CreateRowLabel(_isVietnameseUi ? "Tải cùng lúc" : "DOWNLOAD MULTIPLE BOOK");
-            multiLabel.FontSize = 10;
-            Grid.SetColumn(multiLabel, 4);
-            row.Children.Add(multiLabel);
+            _multiDownloadLabel = CreateRowLabel(_isVietnameseUi ? "Tải cùng lúc" : "DOWNLOAD MULTIPLE BOOK");
+            _multiDownloadLabel.FontSize = 10;
+            Grid.SetColumn(_multiDownloadLabel, 4);
+            row.Children.Add(_multiDownloadLabel);
 
             _multiDownloadComboBox = new ComboBox
             {

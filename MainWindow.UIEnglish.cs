@@ -769,6 +769,7 @@ namespace get_link_manga
             UpdateThemeText();
             UpdateLanguageToggleVisual();
             UpdateDownloadMissingChapterLanguage();
+            UpdateLightNovelFloatingControlState();
         }
 
         private void UpdateLanguageToggleVisual()

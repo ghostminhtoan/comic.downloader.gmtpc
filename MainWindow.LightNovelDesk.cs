@@ -1773,6 +1773,12 @@ namespace get_link_manga
                     {
                         _suppressConnectionEvents = false;
                     }
+                    int newLimit = GetCurrentConnectionLimit();
+                    foreach (var item in _scrapedItems)
+                    {
+                        item.ConnectionCount = newLimit;
+                    }
+                    RefreshActiveDownloadConcurrency();
                 })),
                 index => Dispatcher.BeginInvoke(new Action(() => {
                     _suppressMultiDownloadEvents = true;
@@ -1784,6 +1790,8 @@ namespace get_link_manga
                     {
                         _suppressMultiDownloadEvents = false;
                     }
+                    _currentMaxParallelBooks = GetCurrentMultiDownloadLimit();
+                    RefreshActiveDownloadConcurrency();
                 })),
                 () => Dispatcher.BeginInvoke(new Action(() => BtnClearComplete_Click(this, new RoutedEventArgs()))));
 
