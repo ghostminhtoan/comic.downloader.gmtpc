@@ -4209,6 +4209,10 @@
                                         <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
                                         <Setter Property="BorderThickness" Value="2"/>
                                     </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="BorderBrush" Value="Red"/>
+                                        <Setter Property="BorderThickness" Value="2"/>
+                                    </Trigger>
                                 </Style.Triggers>
                             </Style>
                         </ListBox.ItemContainerStyle>
@@ -4244,6 +4248,10 @@
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsKeyboardFocusWithin}" Value="True">
                                                         <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsMouseOver}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="Red"/>
                                                         <Setter Property="BorderThickness" Value="2"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
