@@ -698,98 +698,11 @@ namespace get_link_manga
 
             if (IsNhentaiUrl(link))
             {
-                try
-                {
-                    var langs = ExtractNhentaiNetLanguages(html);
-                    var displayLangs = langs.Where(l => l != "translated").ToList();
-                    string currentName = CleanTranslatedTagFromTitle(item.Name);
-
-                    if (displayLangs.Count > 0)
-                    {
-                        string langStr = string.Join(", ", displayLangs.Select(l => System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(l)));
-                        string suffix = $"[{langStr}]";
-                        if (!currentName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
-                        {
-                            currentName = $"{currentName} {suffix}";
-                        }
-                    }
-
-                    var nhentaiTags = ExtractNhentaiNetTags(html);
-                    Newtonsoft.Json.Linq.JObject jTagsObj = null;
-                    if (nhentaiTags.Count > 0)
-                    {
-                        var jArr = new Newtonsoft.Json.Linq.JArray();
-                        foreach (var tag in nhentaiTags)
-                        {
-                            var tObj = new Newtonsoft.Json.Linq.JObject();
-                            tObj["tag"] = tag;
-                            jArr.Add(tObj);
-                        }
-                        jTagsObj = new Newtonsoft.Json.Linq.JObject();
-                        jTagsObj["tags"] = jArr;
-                    }
-
-                    Dispatcher.Invoke(() =>
-                    {
-                        if (item.Name != currentName)
-                        {
-                            item.Name = currentName;
-                        }
-                        if (jTagsObj != null)
-                        {
-                            item.Tag = jTagsObj;
-                            RecalculateDuplicates();
-                        }
-                    });
-                }
-                catch (Exception ex)
-                {
-                    Log($"[nhentai Preview] Lỗi cập nhật tên, ngôn ngữ và tags: {ex.Message}");
-                }
+                ExtractAndApplyNhentaiPreviewTags(item, html);
             }
             else if (IsTruyenqqUrl(link))
             {
-                try
-                {
-                    var truyenqqTags = new List<string>();
-                    // Lấy ul.list01 trực tiếp từ HTML để tránh lỗi phân cấp thẻ div của book_other
-                    Match list01Match = Regex.Match(html, @"<ul[^>]*class=[""'][^""']*\blist01\b[^""']*[""'][^>]*>(?<content>[\s\S]*?)</ul>", RegexOptions.IgnoreCase);
-                    if (list01Match.Success)
-                    {
-                        string listContent = list01Match.Groups["content"].Value;
-                        foreach (Match liMatch in Regex.Matches(listContent, @"<a[^>]*href=[""'][^""']*the-loai/[^""']+[""'][^>]*>(?<tag>[^<]+)</a>", RegexOptions.IgnoreCase))
-                        {
-                            string tagText = WebUtility.HtmlDecode(liMatch.Groups["tag"].Value).Trim();
-                            if (!string.IsNullOrWhiteSpace(tagText))
-                            {
-                                truyenqqTags.Add(tagText);
-                            }
-                        }
-                    }
-
-                    if (truyenqqTags.Count > 0)
-                    {
-                        var jArr = new Newtonsoft.Json.Linq.JArray();
-                        foreach (var tag in truyenqqTags)
-                        {
-                            var tObj = new Newtonsoft.Json.Linq.JObject();
-                            tObj["tag"] = tag;
-                            jArr.Add(tObj);
-                        }
-                        var jTagsObj = new Newtonsoft.Json.Linq.JObject();
-                        jTagsObj["tags"] = jArr;
-
-                        Dispatcher.Invoke(() =>
-                        {
-                            item.Tag = jTagsObj;
-                            RecalculateDuplicates();
-                        });
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log($"[Truyenqq Preview] Lỗi cập nhật tags: {ex.Message}");
-                }
+                ExtractAndApplyTruyenqqPreviewTags(item, html);
             }
         }
 
