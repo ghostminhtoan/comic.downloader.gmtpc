@@ -611,9 +611,26 @@ namespace get_link_manga
 
         private async Task EnsureGalleryHoverPreviewAsync(GalleryItem item)
         {
-            if (item == null || !SupportsHoverPreview(item) || !string.IsNullOrWhiteSpace(item.HoverPreviewThumbnailUrl))
+            if (item == null || !SupportsHoverPreview(item))
             {
                 return;
+            }
+
+            // Nếu không phải nhentai/truyenqq hoặc nếu là nhentai/truyenqq nhưng đã có sẵn tag/tiến trình hoàn thành thì thoát sớm
+            if (!IsNhentaiUrl(item.Link) && !IsTruyenqqUrl(item.Link))
+            {
+                if (!string.IsNullOrWhiteSpace(item.HoverPreviewThumbnailUrl))
+                {
+                    return;
+                }
+            }
+            else
+            {
+                // Đối với nhentai và truyenqq, nếu đã có cả ảnh bìa lẫn tag thì mới thoát sớm
+                if (!string.IsNullOrWhiteSpace(item.HoverPreviewThumbnailUrl) && item.Tag != null)
+                {
+                    return;
+                }
             }
 
             string link = item.Link?.Trim();
