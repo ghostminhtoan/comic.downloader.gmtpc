@@ -7,13 +7,35 @@ namespace get_link_manga
     {
         public MessageBoxResult ShowMessageBox(string message, string title, MessageBoxButton button = MessageBoxButton.OK, MessageBoxImage icon = MessageBoxImage.None)
         {
+            Window activeWin = null;
             if (Dispatcher.CheckAccess())
             {
-                return MessageBox.Show(this, message, title, button, icon);
+                foreach (Window win in Application.Current.Windows)
+                {
+                    if (win.IsActive || (win.Name == "_externalBookListWindow" || win.Title.Contains("Danh sách truyện chờ tải") || win.Title.Contains("Extracted Gallery Links")))
+                    {
+                        activeWin = win;
+                        break;
+                    }
+                }
+                if (activeWin == null) activeWin = this;
+                return MessageBox.Show(activeWin, message, title, button, icon);
             }
             else
             {
-                return (MessageBoxResult)Dispatcher.Invoke(() => MessageBox.Show(this, message, title, button, icon));
+                return (MessageBoxResult)Dispatcher.Invoke(() =>
+                {
+                    foreach (Window win in Application.Current.Windows)
+                    {
+                        if (win.IsActive || (win.Name == "_externalBookListWindow" || win.Title.Contains("Danh sách truyện chờ tải") || win.Title.Contains("Extracted Gallery Links")))
+                        {
+                            activeWin = win;
+                            break;
+                        }
+                    }
+                    if (activeWin == null) activeWin = this;
+                    return MessageBox.Show(activeWin, message, title, button, icon);
+                });
             }
         }
 
