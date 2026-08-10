@@ -29,6 +29,7 @@ namespace get_link_manga
         private readonly Action<int> _folderTypeChangedAction;
         private readonly Action<int> _connectionsChangedAction;
         private readonly Action<int> _multiDownloadChangedAction;
+        private readonly Action _removeCompletedAction;
         private ComboBox _folderTypeComboBox;
         private ComboBox _connectionsComboBox;
         private ComboBox _multiDownloadComboBox;
@@ -94,7 +95,8 @@ namespace get_link_manga
             Action<string> pasteDirectLinkAction,
             Action<int> folderTypeChangedAction,
             Action<int> connectionsChangedAction,
-            Action<int> multiDownloadChangedAction)
+            Action<int> multiDownloadChangedAction,
+            Action removeCompletedAction)
         {
             _startCopyAction = startCopyAction;
             _stopCopyAction = stopCopyAction;
@@ -112,6 +114,7 @@ namespace get_link_manga
             _folderTypeChangedAction = folderTypeChangedAction;
             _connectionsChangedAction = connectionsChangedAction;
             _multiDownloadChangedAction = multiDownloadChangedAction;
+            _removeCompletedAction = removeCompletedAction;
             Width = BaseWindowWidth;
             Height = BaseWindowHeight;
             MinWidth = BaseWindowMinWidth;
@@ -275,6 +278,7 @@ namespace get_link_manga
                 out _autoDownloadToggleButton,
                 out _listThumbnailIconButton,
                 out _newWindowIconButton,
+                out Button removeCompletedBtn,
                 isVietnamese);
             Grid.SetRow(middleToggleRow, 2);
             root.Children.Add(middleToggleRow);
@@ -521,7 +525,7 @@ namespace get_link_manga
             return row;
         }
 
-        private Grid CreateAutoDownloadAndIconRow(out Button autoDownloadToggle, out Button listThumbnailBtn, out Button newWindowBtn, bool isVietnamese)
+        private Grid CreateAutoDownloadAndIconRow(out Button autoDownloadToggle, out Button listThumbnailBtn, out Button newWindowBtn, out Button removeCompletedBtn, bool isVietnamese)
         {
             var row = new Grid { Margin = new Thickness(0, 0, 0, 4) };
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); // Auto Download
@@ -531,6 +535,8 @@ namespace get_link_manga
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // List/Thumb icon
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(6) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // New Window icon
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(6) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // Remove Completed icon
 
             var autoDownloadGroup = CreateToggleGroup("Auto Download", out autoDownloadToggle, (sender, args) => _toggleAutoDownloadAction?.Invoke());
             Grid.SetColumn(autoDownloadGroup, 0);
@@ -551,6 +557,12 @@ namespace get_link_manga
                 (sender, args) => _toggleNewWindowAction?.Invoke());
             Grid.SetColumn(newWindowBtn, 6);
             row.Children.Add(newWindowBtn);
+
+            // Remove Completed icon button - icon \uE74D (trash/delete completed icon)
+            removeCompletedBtn = CreateIconButton("\uE74D", Color.FromRgb(0xFF, 0x55, 0x55), isVietnamese ? "ẨN TRUYỆN ĐÃ XONG" : "REMOVE COMPLETED",
+                (sender, args) => _removeCompletedAction?.Invoke());
+            Grid.SetColumn(removeCompletedBtn, 8);
+            row.Children.Add(removeCompletedBtn);
 
             return row;
         }
@@ -844,11 +856,11 @@ namespace get_link_manga
         {
             var track = new Border
             {
-                CornerRadius = new CornerRadius(16),
-                BorderThickness = new Thickness(1.3),
-                Width = 70,
-                Height = 24,
-                Padding = new Thickness(3)
+                CornerRadius = new CornerRadius(11),
+                BorderThickness = new Thickness(1.1),
+                Width = 50,
+                Height = 17,
+                Padding = new Thickness(2)
             };
 
             var layout = new Grid();
@@ -858,7 +870,7 @@ namespace get_link_manga
             var stateText = new TextBlock
             {
                 FontWeight = FontWeights.Bold,
-                FontSize = 10,
+                FontSize = 8,
                 VerticalAlignment = VerticalAlignment.Center,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 TextDecorations = TextDecorations.Underline
@@ -867,12 +879,12 @@ namespace get_link_manga
 
             var thumb = new Border
             {
-                Width = 16,
-                Height = 16,
-                CornerRadius = new CornerRadius(8),
+                Width = 11,
+                Height = 11,
+                CornerRadius = new CornerRadius(5.5),
                 Background = new SolidColorBrush(Color.FromRgb(0xDF, 0xE5, 0xFA)),
                 BorderBrush = new SolidColorBrush(Color.FromRgb(0xC6, 0xCF, 0xF1)),
-                BorderThickness = new Thickness(1.1)
+                BorderThickness = new Thickness(0.9)
             };
             Grid.SetColumn(thumb, 1);
             layout.Children.Add(thumb);
@@ -1349,6 +1361,8 @@ namespace get_link_manga
                 {
                     _suppressNetworkEvents = false;
                 }
+                // Trigger event thực tế khi được gọi đồng bộ từ ngoài
+                _connectionsChangedAction?.Invoke(index);
             }
         }
 
@@ -1365,6 +1379,8 @@ namespace get_link_manga
                 {
                     _suppressNetworkEvents = false;
                 }
+                // Trigger event thực tế khi được gọi đồng bộ từ ngoài
+                _multiDownloadChangedAction?.Invoke(index);
             }
         }
     }

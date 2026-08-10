@@ -1784,7 +1784,8 @@ namespace get_link_manga
                     {
                         _suppressMultiDownloadEvents = false;
                     }
-                })));
+                })),
+                () => Dispatcher.BeginInvoke(new Action(() => BtnClearComplete_Click(this, new RoutedEventArgs()))));
 
             _lightNovelFloatingControlWindow.UpdateFolderType(cmbDownloadFolderType.SelectedIndex);
             _lightNovelFloatingControlWindow.UpdateConnections(cmbConnections.SelectedIndex);

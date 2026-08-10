@@ -496,30 +496,18 @@ namespace get_link_manga
                 }
             });
 
-            // 2. Tắt binding hiển thị tạm thời trước khi xóa để giảm tải render
-            dgResults.ItemsSource = null;
-            if (lbResultsThumbnail != null)
-            {
-                lbResultsThumbnail.ItemsSource = null;
-            }
-
+            // 2. Xóa trực tiếp khỏi _scrapedItems
             foreach (var item in toRemove)
             {
                 _scrapedItems.Remove(item);
             }
 
-            // 3. Khôi phục lại list _scrapedItems theo thứ tự hiện tại của ResultsView để tránh loạn thứ tự
-            var currentOrderedItems = ResultsView.Cast<GalleryItem>().ToList();
-            _scrapedItems.Clear();
-            foreach (var item in currentOrderedItems)
-            {
-                _scrapedItems.Add(item);
-            }
-
-            // 4. Khôi phục lại binding
+            // 3. Khôi phục lại binding và refresh view
+            dgResults.ItemsSource = null;
             dgResults.ItemsSource = _scrapedItems;
             if (lbResultsThumbnail != null)
             {
+                lbResultsThumbnail.ItemsSource = null;
                 lbResultsThumbnail.ItemsSource = _thumbnailVisibleItems;
             }
 
