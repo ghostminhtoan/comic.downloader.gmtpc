@@ -682,6 +682,8 @@ namespace get_link_manga
                         ? ExtractNettruyenviet10PreviewUrlFromHtml(html, link)
                     : IsNhentaiUrl(link)
                         ? ExtractNhentaiNetGalleryCover(html)
+                    : IsTruyenqqUrl(link)
+                        ? ExtractTruyenqqPreviewUrlFromHtml(html, link)
                     : link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0
                         ? ExtractHitomiLaGalleryCover(html, link)
                     : string.Empty;
