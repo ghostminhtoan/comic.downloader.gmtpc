@@ -1403,8 +1403,6 @@ namespace get_link_manga
                 {
                     _suppressNetworkEvents = false;
                 }
-                // Trigger event thực tế khi được gọi đồng bộ từ ngoài
-                _connectionsChangedAction?.Invoke(index);
             }
         }
 
@@ -1421,8 +1419,6 @@ namespace get_link_manga
                 {
                     _suppressNetworkEvents = false;
                 }
-                // Trigger event thực tế khi được gọi đồng bộ từ ngoài
-                _multiDownloadChangedAction?.Invoke(index);
             }
         }
     }
