@@ -307,19 +307,16 @@ namespace get_link_manga
             };
         }
 
-        private bool _isOriginalOrderAscending = true;
-
         private void BtnSortByName_Click(object sender, RoutedEventArgs e)
         {
             ApplyResultsSort(colGalleryDetails, "Name", ref _isNameSortAscending, "comic books");
         }
 
+        private bool _isOriginalOrderAscending = true;
+
         private void BtnSortByOriginalOrder_Click(object sender, RoutedEventArgs e)
         {
-            ListSortDirection direction = _isOriginalOrderAscending ? ListSortDirection.Ascending : ListSortDirection.Descending;
-            _isOriginalOrderAscending = !_isOriginalOrderAscending;
-            ClearResultsColumnSortDirections();
-            ApplyResultsSort("OriginalIndex", direction, $"Sorted original order {(direction == ListSortDirection.Ascending ? "ascending" : "descending")}.");
+            ApplyResultsSort(null, "OriginalIndex", ref _isOriginalOrderAscending, "original index");
         }
 
         private void BtnSortBySpeed_Click(object sender, RoutedEventArgs e)

@@ -823,12 +823,6 @@ namespace get_link_manga
                 return;
             }
 
-            if (column == colGalleryDetails && txtColGalleryDetailsHeader != null)
-            {
-                txtColGalleryDetailsHeader.Text = text;
-                return;
-            }
-
             if (column.Header is TextBlock textBlock)
             {
                 textBlock.Text = text;
@@ -850,7 +844,7 @@ namespace get_link_manga
 
         private TextBlock FindHeaderTextBlock(DependencyObject root)
         {
-            if (root == null || root is Button)
+            if (root == null)
             {
                 return null;
             }
@@ -950,8 +944,9 @@ namespace get_link_manga
             if (btnNewList != null) btnNewList.Content = "New list";
             if (btnSaveCustomList != null) btnSaveCustomList.Content = "Save as";
             if (btnLoadCustomList != null) btnLoadCustomList.Content = "Open file";
-            if (btnSortByName != null) btnSortByName.Content = "NAME";
-            if (btnSortByOriginalOrder != null) btnSortByOriginalOrder.Content = "ORIGINAL ORDER";
+            if (btnWebpCodec != null) btnWebpCodec.Content = "WebP Codec";
+            if (btnSortByName != null) btnSortByName.Content = "name";
+            if (btnSortByOriginalOrder != null) btnSortByOriginalOrder.Content = "original order";
             if (btnPopupPreviewToggle != null) btnPopupPreviewToggle.ToolTip = "POPUP PREVIEW";
             if (chkCompactRows != null) chkCompactRows.ToolTip = "COMPACT ROW";
             if (tglClearCookieAndRetry != null) tglClearCookieAndRetry.ToolTip = "AUTO DOWNLOAD";
@@ -959,6 +954,7 @@ namespace get_link_manga
             if (chkHideSettings != null) chkHideSettings.ToolTip = "HIDE SETTINGS";
             if (chkResultsPresentation != null) chkResultsPresentation.ToolTip = "LIST / THUMBNAIL";
             if (btnDuplicateName != null) btnDuplicateName.Content = "Duplicate names";
+            // if (btnNoLinkViHentai != null) btnNoLinkViHentai.Content = "No chapters";
             if (btnClearComplete != null) btnClearComplete.Content = "Remove completed";
             if (btnExtractClearCookie != null) btnExtractClearCookie.Content = "Clear cookie";
             if (txtWebviewCpuAffinityLabel != null) txtWebviewCpuAffinityLabel.Text = "WEBVIEW CPU LIMIT";
