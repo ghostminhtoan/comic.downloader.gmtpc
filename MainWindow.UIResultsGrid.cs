@@ -1581,7 +1581,15 @@ namespace get_link_manga
                 _thumbnailVisibleItems.Add(orderedItems[i]);
             }
 
-            PrefetchAllThumbnailResults();
+            // Chạy Prefetch bất đồng bộ ở background thread để tránh Task.Delay/Jitter chặn UI Thread gây Not Responding
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    PrefetchAllThumbnailResults();
+                }
+                catch { }
+            });
             EnsureThumbnailSelectionVisible();
         }
 
