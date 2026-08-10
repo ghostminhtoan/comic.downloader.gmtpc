@@ -651,12 +651,18 @@ namespace get_link_manga
             if (_galleryHoverPreviewUrlCache.TryGetValue(link, out string cachedUrl))
             {
                 item.HoverPreviewThumbnailUrl = cachedUrl;
-                return;
+                if (!hasTagsSupport || !fetchTags || item.Tag != null)
+                {
+                    return;
+                }
             }
 
             if (_galleryHoverPreviewMissingCache.Contains(link))
             {
-                return;
+                if (!hasTagsSupport || !fetchTags || item.Tag != null)
+                {
+                    return;
+                }
             }
 
             if (IsMangadexUrl(link))
@@ -721,14 +727,17 @@ namespace get_link_manga
                     : link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0
                         ? ExtractHitomiLaGalleryCover(html, link)
                     : string.Empty;
-            if (string.IsNullOrWhiteSpace(coverUrlNonMangadex))
+            if (string.IsNullOrWhiteSpace(coverUrlNonMangadex) && string.IsNullOrWhiteSpace(item.HoverPreviewThumbnailUrl))
             {
                 _galleryHoverPreviewMissingCache.Add(link);
                 return;
             }
 
-            _galleryHoverPreviewUrlCache[link] = coverUrlNonMangadex;
-            item.HoverPreviewThumbnailUrl = coverUrlNonMangadex;
+            if (!string.IsNullOrWhiteSpace(coverUrlNonMangadex))
+            {
+                _galleryHoverPreviewUrlCache[link] = coverUrlNonMangadex;
+                item.HoverPreviewThumbnailUrl = coverUrlNonMangadex;
+            }
 
             if (IsNhentaiUrl(link))
             {
