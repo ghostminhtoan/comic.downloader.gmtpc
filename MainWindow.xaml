@@ -4209,10 +4209,14 @@
                                         <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
                                         <Setter Property="BorderThickness" Value="2"/>
                                     </Trigger>
-                                    <Trigger Property="IsMouseOver" Value="True">
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsMouseOver" Value="True"/>
+                                            <Condition Property="IsSelected" Value="False"/>
+                                        </MultiTrigger.Conditions>
                                         <Setter Property="BorderBrush" Value="Red"/>
                                         <Setter Property="BorderThickness" Value="2"/>
-                                    </Trigger>
+                                    </MultiTrigger>
                                 </Style.Triggers>
                             </Style>
                         </ListBox.ItemContainerStyle>
@@ -4250,10 +4254,14 @@
                                                         <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
                                                         <Setter Property="BorderThickness" Value="2"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsMouseOver}" Value="True">
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsMouseOver}" Value="True"/>
+                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="False"/>
+                                                        </MultiDataTrigger.Conditions>
                                                         <Setter Property="BorderBrush" Value="Red"/>
                                                         <Setter Property="BorderThickness" Value="2"/>
-                                                    </DataTrigger>
+                                                    </MultiDataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
@@ -4296,6 +4304,14 @@
                                                                 <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
                                                                 <Setter Property="BorderThickness" Value="2"/>
                                                             </DataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsMouseOver}" Value="True"/>
+                                                                    <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="False"/>
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="BorderBrush" Value="Red"/>
+                                                                <Setter Property="BorderThickness" Value="2"/>
+                                                            </MultiDataTrigger>
                                                             <DataTrigger Binding="{Binding HasHoverPreviewThumbnailFile}" Value="False">
                                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                                             </DataTrigger>
