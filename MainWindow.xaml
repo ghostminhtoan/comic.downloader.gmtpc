@@ -4223,9 +4223,6 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border Padding="4"
-                                        Background="#111827"
-                                        BorderBrush="{StaticResource CyberpunkCyanBrush}"
-                                        BorderThickness="1"
                                         CornerRadius="6"
                                         MouseEnter="GalleryResultPreviewHost_MouseEnter"
                                         MouseMove="GalleryResultPreviewHost_MouseMove"
@@ -4275,8 +4272,6 @@
                                         <Border Grid.Row="0"
                                                 Margin="0,0,0,6"
                                                 Background="#0A1321"
-                                                BorderBrush="{StaticResource CyberpunkCyanBrush}"
-                                                BorderThickness="1"
                                                 CornerRadius="4">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
