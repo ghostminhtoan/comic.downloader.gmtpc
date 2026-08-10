@@ -1078,21 +1078,37 @@ namespace get_link_manga
             if (showThumbnailView)
             {
                 EnsureThumbnailResultsViewInitialized();
-                RebuildThumbnailResultsView();
-                SyncThumbnailSelectionFromResults();
-                ScrollThumbnailSelectionIntoView();
-                if (shouldPrefetch)
+                
+                // Sử dụng Dispatcher.BeginInvoke ưu tiên Background để tránh khóa/treo UI Thread 
+                // khi switch view trong cửa sổ mới lúc đang download
+                Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    PrefetchAllThumbnailResults();
-                }
-
-                lbResultsThumbnail?.Focus();
+                    try
+                    {
+                        RebuildThumbnailResultsView();
+                        SyncThumbnailSelectionFromResults();
+                        ScrollThumbnailSelectionIntoView();
+                        if (shouldPrefetch)
+                        {
+                            PrefetchAllThumbnailResults();
+                        }
+                        lbResultsThumbnail?.Focus();
+                    }
+                    catch { }
+                }), System.Windows.Threading.DispatcherPriority.Background);
             }
             else
             {
                 CancelGalleryHoverPreview();
-                ScrollResultsSelectionIntoView();
-                dgResults?.Focus();
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        ScrollResultsSelectionIntoView();
+                        dgResults?.Focus();
+                    }
+                    catch { }
+                }), System.Windows.Threading.DispatcherPriority.Background);
             }
         }
 
