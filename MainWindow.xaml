@@ -4208,6 +4208,10 @@
                                 <EventSetter Event="PreviewMouseMove" Handler="ResultsThumbnailItem_PreviewMouseMove"/>
                                 <EventSetter Event="PreviewMouseRightButtonDown" Handler="ResultsThumbnailItem_PreviewMouseRightButtonDown"/>
                                 <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="BorderBrush" Value="Red"/>
+                                        <Setter Property="BorderThickness" Value="2"/>
+                                    </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
                                         <Setter Property="Background" Value="#3A3200"/>
                                         <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
@@ -4245,6 +4249,10 @@
                                                         </MultiDataTrigger.Conditions>
                                                         <Setter Property="Visibility" Value="Collapsed"/>
                                                     </MultiDataTrigger>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsMouseOver}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="Red"/>
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                    </DataTrigger>
                                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
                                                         <Setter Property="Background" Value="#3A3200"/>
                                                         <Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>

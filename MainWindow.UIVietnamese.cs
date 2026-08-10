@@ -52,7 +52,6 @@ namespace get_link_manga
             if (btnLoadCustomList != null) btnLoadCustomList.Content = "Mở file khác";
             if (btnWebpCodec != null) btnWebpCodec.Content = "Cài WebP Codec";
             if (btnSortByName != null) btnSortByName.Content = "tên";
-            if (btnSortByOriginalOrder != null) btnSortByOriginalOrder.Content = "thứ tự gốc";
             if (btnPopupPreviewToggle != null) btnPopupPreviewToggle.ToolTip = "XEM TRƯỚC POPUP";
             if (chkCompactRows != null) chkCompactRows.ToolTip = "NÉN DÒNG";
             if (tglClearCookieAndRetry != null) tglClearCookieAndRetry.ToolTip = "TỰ ĐỘNG TẢI";
