@@ -34,6 +34,7 @@ namespace get_link_manga
         private ComboBox _connectionsComboBox;
         private ComboBox _multiDownloadComboBox;
         private bool _suppressNetworkEvents = false;
+        private readonly bool _isVietnameseUi;
         private readonly TextBlock _statusText;
         private readonly TextBlock _buildInfoText;
         private readonly Button _pinToggleButton;
@@ -115,6 +116,7 @@ namespace get_link_manga
             _connectionsChangedAction = connectionsChangedAction;
             _multiDownloadChangedAction = multiDownloadChangedAction;
             _removeCompletedAction = removeCompletedAction;
+            _isVietnameseUi = isVietnamese;
             Width = BaseWindowWidth;
             Height = BaseWindowHeight;
             MinWidth = BaseWindowMinWidth;
@@ -681,6 +683,7 @@ namespace get_link_manga
             _tweakButton.Width = 78;
             _tweakButton.MinHeight = 22;
             _tweakButton.Margin = new Thickness(0, 0, 2, 0);
+            _tweakButton.Padding = new Thickness(0);
             Grid.SetColumn(_tweakButton, 8);
             row.Children.Add(_tweakButton);
 
@@ -704,9 +707,8 @@ namespace get_link_manga
             Grid.SetColumn(labelText, 0);
             row.Children.Add(labelText);
 
-            var openFolderButton = CreateWindowButton("OPEN FOLDER", Color.FromRgb(0x00, 0xE5, 0xFF), (sender, args) => _openFolderAction?.Invoke());
-            openFolderButton.Width = 118;
-            openFolderButton.MinHeight = 22;
+            var openFolderButton = CreateIconButton("\uE838", Color.FromRgb(0x00, 0xE5, 0xFF), _isVietnameseUi ? "MỞ THƯ MỤC TẢI VỀ" : "OPEN DOWNLOAD FOLDER", (sender, args) => _openFolderAction?.Invoke());
+            openFolderButton.HorizontalAlignment = HorizontalAlignment.Left;
             Grid.SetColumn(openFolderButton, 2);
             row.Children.Add(openFolderButton);
 
@@ -787,8 +789,7 @@ namespace get_link_manga
                 menu.Items.Add(item);
             }
 
-            button.ContextMenu = menu;
-            Dispatcher.BeginInvoke(new Action(() => menu.IsOpen = true), System.Windows.Threading.DispatcherPriority.Input);
+            menu.IsOpen = true;
         }
 
         private static string FindFolderUpward(string folderName)
@@ -1219,9 +1220,9 @@ namespace get_link_manga
                 Background = new SolidColorBrush(Color.FromArgb(255, 18, 25, 40)),
                 Foreground = new SolidColorBrush(accent),
                 BorderBrush = new SolidColorBrush(accent),
-                BorderThickness = new Thickness(1.1),
+                BorderThickness = new Thickness(1),
                 Cursor = Cursors.Hand,
-                Padding = new Thickness(4, 0, 4, 0)
+                Padding = new Thickness(0)
             };
             button.Content = new TextBlock
             {
@@ -1273,26 +1274,25 @@ namespace get_link_manga
             }
 
             internal Border Track { get; }
-
             internal Border Thumb { get; }
-
             internal TextBlock StateText { get; }
-
             internal bool IsOn { get; set; }
         }
 
         private Grid CreateNetworkRow()
         {
             var row = new Grid { Margin = new Thickness(0, 0, 0, 4) };
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(75) }); // Label "Network"
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(85) }); // Nhãn Kết nối / Connection
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(6) });
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(118) }); // Connections combo
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(85) }); // Connections combo
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(8) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110) }); // Nhãn Tải cùng lúc / Download multiple book
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(6) });
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(116) }); // MultiDownload combo
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(6) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(85) }); // MultiDownload combo
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            var labelText = CreateRowLabel("Network");
+            var labelText = CreateRowLabel(_isVietnameseUi ? "Kết nối" : "CONNECTION");
+            labelText.FontSize = 10;
             Grid.SetColumn(labelText, 0);
             row.Children.Add(labelText);
 
@@ -1300,7 +1300,7 @@ namespace get_link_manga
             {
                 Style = TryFindResource("CyberpunkComboBox") as Style,
                 Height = 22,
-                Width = 118,
+                Width = 85,
                 VerticalContentAlignment = VerticalAlignment.Center,
                 HorizontalContentAlignment = HorizontalAlignment.Center,
                 ToolTip = "CONNECTION: Số luồng tải ảnh song song mỗi book"
@@ -1321,11 +1321,16 @@ namespace get_link_manga
             Grid.SetColumn(_connectionsComboBox, 2);
             row.Children.Add(_connectionsComboBox);
 
+            var multiLabel = CreateRowLabel(_isVietnameseUi ? "Tải cùng lúc" : "DOWNLOAD MULTIPLE BOOK");
+            multiLabel.FontSize = 10;
+            Grid.SetColumn(multiLabel, 4);
+            row.Children.Add(multiLabel);
+
             _multiDownloadComboBox = new ComboBox
             {
                 Style = TryFindResource("CyberpunkComboBox") as Style,
                 Height = 22,
-                Width = 116,
+                Width = 85,
                 VerticalContentAlignment = VerticalAlignment.Center,
                 HorizontalContentAlignment = HorizontalAlignment.Center,
                 ToolTip = "DOWNLOAD MULTIPLE BOOK: Số lượng book tải song song cùng lúc"
@@ -1342,7 +1347,7 @@ namespace get_link_manga
                     _multiDownloadChangedAction?.Invoke(_multiDownloadComboBox.SelectedIndex);
                 }
             };
-            Grid.SetColumn(_multiDownloadComboBox, 4);
+            Grid.SetColumn(_multiDownloadComboBox, 6);
             row.Children.Add(_multiDownloadComboBox);
 
             return row;
