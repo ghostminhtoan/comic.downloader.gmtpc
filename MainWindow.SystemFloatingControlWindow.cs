@@ -27,7 +27,12 @@ namespace get_link_manga
         private readonly Action _toggleGlobalHotkeysAction;
         private readonly Action<string> _pasteDirectLinkAction;
         private readonly Action<int> _folderTypeChangedAction;
+        private readonly Action<int> _connectionsChangedAction;
+        private readonly Action<int> _multiDownloadChangedAction;
         private ComboBox _folderTypeComboBox;
+        private ComboBox _connectionsComboBox;
+        private ComboBox _multiDownloadComboBox;
+        private bool _suppressNetworkEvents = false;
         private readonly TextBlock _statusText;
         private readonly TextBlock _buildInfoText;
         private readonly Button _pinToggleButton;
@@ -54,9 +59,9 @@ namespace get_link_manga
         private double _savedHeight;
 
         private const double BaseWindowWidth = 500;
-        private const double BaseWindowHeight = 286;
+        private const double BaseWindowHeight = 312;
         private const double BaseWindowMinWidth = 450;
-        private const double BaseWindowMinHeight = 252;
+        private const double BaseWindowMinHeight = 278;
         private const int GwlExStyle = -20;
         private const int WsExNoActivate = 0x08000000;
         private const int WsExToolWindow = 0x00000080;
@@ -86,7 +91,9 @@ namespace get_link_manga
             Action clearTempAction,
             Action toggleGlobalHotkeysAction,
             Action<string> pasteDirectLinkAction,
-            Action<int> folderTypeChangedAction)
+            Action<int> folderTypeChangedAction,
+            Action<int> connectionsChangedAction,
+            Action<int> multiDownloadChangedAction)
         {
             _startCopyAction = startCopyAction;
             _stopCopyAction = stopCopyAction;
@@ -102,7 +109,8 @@ namespace get_link_manga
             _toggleGlobalHotkeysAction = toggleGlobalHotkeysAction;
             _pasteDirectLinkAction = pasteDirectLinkAction;
             _folderTypeChangedAction = folderTypeChangedAction;
-
+            _connectionsChangedAction = connectionsChangedAction;
+            _multiDownloadChangedAction = multiDownloadChangedAction;
             Width = BaseWindowWidth;
             Height = BaseWindowHeight;
             MinWidth = BaseWindowMinWidth;
@@ -114,7 +122,6 @@ namespace get_link_manga
             ResizeMode = ResizeMode.NoResize;
             WindowStyle = WindowStyle.None;
             AllowsTransparency = true;
-            Background = Brushes.Transparent;
             ShowActivated = false;
             Opacity = 0.92;
 
@@ -179,14 +186,16 @@ namespace get_link_manga
             var root = new Grid();
             _contentScaleTransform = new ScaleTransform(1d, 1d);
             root.LayoutTransform = _contentScaleTransform;
-            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // Row 0: TopBar
+            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // Row 1: Pin, Auto Paste, Focus
+            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // Row 2: Download, Retry, Copy Text
+            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // Row 3: Folder
+            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // Row 4: Connections & MultiDownload
+            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // Row 5: System actions
+            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // Row 6: Build info
+            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // Row 7: Opacity
+            root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); // Row 8: Size
+
             root.MouseLeftButtonDown += (sender, args) =>
             {
                 if (args.ButtonState == MouseButtonState.Pressed)
@@ -272,8 +281,12 @@ namespace get_link_manga
             Grid.SetRow(bottomToggleRow, 3);
             root.Children.Add(bottomToggleRow);
 
+            var connectionsRow = CreateNetworkRow();
+            Grid.SetRow(connectionsRow, 4);
+            root.Children.Add(connectionsRow);
+
             var systemRow = CreateSystemRow(out _shutdownToggleButton, (sender, args) => _openShutdownOptionsAction?.Invoke());
-            Grid.SetRow(systemRow, 4);
+            Grid.SetRow(systemRow, 5);
             root.Children.Add(systemRow);
 
             var buildRow = new Grid { Margin = new Thickness(0, 2, 0, 0) };
@@ -295,7 +308,7 @@ namespace get_link_manga
             };
             Grid.SetColumn(_buildInfoText, 2);
             buildRow.Children.Add(_buildInfoText);
-            Grid.SetRow(buildRow, 5);
+            Grid.SetRow(buildRow, 6);
             root.Children.Add(buildRow);
 
             var opacityRow = new Grid { Margin = new Thickness(0, 5, 0, 0) };
@@ -353,7 +366,7 @@ namespace get_link_manga
             Grid.SetColumn(opacityBubble, 4);
             opacityRow.Children.Add(opacityBubble);
 
-            Grid.SetRow(opacityRow, 6);
+            Grid.SetRow(opacityRow, 7);
             root.Children.Add(opacityRow);
 
             var sizeRow = new Grid { Margin = new Thickness(0, 4, 0, 0) };
@@ -411,7 +424,7 @@ namespace get_link_manga
             Grid.SetColumn(sizeBubble, 4);
             sizeRow.Children.Add(sizeBubble);
 
-            Grid.SetRow(sizeRow, 7);
+            Grid.SetRow(sizeRow, 8);
             root.Children.Add(sizeRow);
 
             _shellBorder.Child = root;
@@ -1155,6 +1168,105 @@ namespace get_link_manga
             internal TextBlock StateText { get; }
 
             internal bool IsOn { get; set; }
+        }
+
+        private Grid CreateNetworkRow()
+        {
+            var row = new Grid { Margin = new Thickness(0, 0, 0, 4) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(75) }); // Label "Network"
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(6) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(118) }); // Connections combo
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(6) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(116) }); // MultiDownload combo
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(6) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            var labelText = CreateRowLabel("Network");
+            Grid.SetColumn(labelText, 0);
+            row.Children.Add(labelText);
+
+            _connectionsComboBox = new ComboBox
+            {
+                Style = TryFindResource("CyberpunkComboBox") as Style,
+                Height = 22,
+                Width = 118,
+                VerticalContentAlignment = VerticalAlignment.Center,
+                HorizontalContentAlignment = HorizontalAlignment.Center,
+                ToolTip = "CONNECTION: Số luồng tải ảnh song song mỗi book"
+            };
+            var itemStyle = TryFindResource("CyberpunkComboBoxItemStyle") as Style;
+            foreach (var val in new[] { "1", "2", "4", "8", "16", "32" })
+            {
+                _connectionsComboBox.Items.Add(new ComboBoxItem { Content = val, Style = itemStyle });
+            }
+            _connectionsComboBox.SelectedIndex = 2; // Default "4"
+            _connectionsComboBox.SelectionChanged += (sender, args) =>
+            {
+                if (!_suppressNetworkEvents)
+                {
+                    _connectionsChangedAction?.Invoke(_connectionsComboBox.SelectedIndex);
+                }
+            };
+            Grid.SetColumn(_connectionsComboBox, 2);
+            row.Children.Add(_connectionsComboBox);
+
+            _multiDownloadComboBox = new ComboBox
+            {
+                Style = TryFindResource("CyberpunkComboBox") as Style,
+                Height = 22,
+                Width = 116,
+                VerticalContentAlignment = VerticalAlignment.Center,
+                HorizontalContentAlignment = HorizontalAlignment.Center,
+                ToolTip = "DOWNLOAD MULTIPLE BOOK: Số lượng book tải song song cùng lúc"
+            };
+            foreach (var val in new[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" })
+            {
+                _multiDownloadComboBox.Items.Add(new ComboBoxItem { Content = val, Style = itemStyle });
+            }
+            _multiDownloadComboBox.SelectedIndex = 1; // Default "2"
+            _multiDownloadComboBox.SelectionChanged += (sender, args) =>
+            {
+                if (!_suppressNetworkEvents)
+                {
+                    _multiDownloadChangedAction?.Invoke(_multiDownloadComboBox.SelectedIndex);
+                }
+            };
+            Grid.SetColumn(_multiDownloadComboBox, 4);
+            row.Children.Add(_multiDownloadComboBox);
+
+            return row;
+        }
+
+        internal void UpdateConnections(int index)
+        {
+            if (_connectionsComboBox != null && _connectionsComboBox.SelectedIndex != index)
+            {
+                _suppressNetworkEvents = true;
+                try
+                {
+                    _connectionsComboBox.SelectedIndex = index;
+                }
+                finally
+                {
+                    _suppressNetworkEvents = false;
+                }
+            }
+        }
+
+        internal void UpdateMultiDownload(int index)
+        {
+            if (_multiDownloadComboBox != null && _multiDownloadComboBox.SelectedIndex != index)
+            {
+                _suppressNetworkEvents = true;
+                try
+                {
+                    _multiDownloadComboBox.SelectedIndex = index;
+                }
+                finally
+                {
+                    _suppressNetworkEvents = false;
+                }
+            }
         }
     }
 }

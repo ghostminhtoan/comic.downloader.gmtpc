@@ -1726,7 +1726,6 @@ namespace get_link_manga
             lblStatus.Text = _isVietnameseUi
                 ? "Đang dừng auto copy text..."
                 : "Stopping auto copy text...";
-            UpdateLightNovelFloatingControlState();
         }
 
         private void EnsureLightNovelFloatingControlWindow()
@@ -1763,7 +1762,33 @@ namespace get_link_manga
                     {
                         _suppressDownloadFolderTypeEvents = false;
                     }
-                })));            _lightNovelFloatingControlWindow.UpdateFolderType(cmbDownloadFolderType.SelectedIndex);
+                })),
+                index => Dispatcher.BeginInvoke(new Action(() => {
+                    _suppressConnectionEvents = true;
+                    try
+                    {
+                        cmbConnections.SelectedIndex = index;
+                    }
+                    finally
+                    {
+                        _suppressConnectionEvents = false;
+                    }
+                })),
+                index => Dispatcher.BeginInvoke(new Action(() => {
+                    _suppressMultiDownloadEvents = true;
+                    try
+                    {
+                        cmbMultiDownload.SelectedIndex = index;
+                    }
+                    finally
+                    {
+                        _suppressMultiDownloadEvents = false;
+                    }
+                })));
+
+            _lightNovelFloatingControlWindow.UpdateFolderType(cmbDownloadFolderType.SelectedIndex);
+            _lightNovelFloatingControlWindow.UpdateConnections(cmbConnections.SelectedIndex);
+            _lightNovelFloatingControlWindow.UpdateMultiDownload(cmbMultiDownload.SelectedIndex);
 
             _lightNovelFloatingControlWindow.Closed += (sender, args) =>
             {

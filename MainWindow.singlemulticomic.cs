@@ -8,6 +8,8 @@ namespace get_link_manga
     {
         private bool _isSingleComicFolderType = true;
         private bool _suppressDownloadFolderTypeEvents = false;
+        private bool _suppressConnectionEvents = false;
+        private bool _suppressMultiDownloadEvents = false;
 
         private void CmbDownloadFolderType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

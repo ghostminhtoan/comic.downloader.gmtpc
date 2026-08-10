@@ -9,6 +9,8 @@ namespace get_link_manga
     {
         private void CmbConnections_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (_suppressConnectionEvents) return;
+
             try
             {
                 if (cmbConnections == null || cmbConnections.SelectedItem == null)
@@ -25,6 +27,8 @@ namespace get_link_manga
 
                 RefreshActiveDownloadConcurrency();
                 Log($"[Connection] Đã cập nhật số trang song song mỗi book thành {newLimit}.");
+
+                _lightNovelFloatingControlWindow?.UpdateConnections(cmbConnections.SelectedIndex);
                 
                 try
                 {
@@ -42,6 +46,8 @@ namespace get_link_manga
 
         private void CmbMultiDownload_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (_suppressMultiDownloadEvents) return;
+
             try
             {
                 if (cmbMultiDownload == null || cmbMultiDownload.SelectedItem == null) return;
@@ -52,6 +58,9 @@ namespace get_link_manga
                 _currentMaxParallelBooks = GetCurrentMultiDownloadLimit();
                 Log($"[Multi Download] Số luồng tải song song được chỉnh thành {newVal}.");
                 RefreshActiveDownloadConcurrency();
+
+                _lightNovelFloatingControlWindow?.UpdateMultiDownload(cmbMultiDownload.SelectedIndex);
+
                 RequestGalleryListAutosave(500);
             }
             catch
