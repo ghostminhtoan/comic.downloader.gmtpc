@@ -624,6 +624,15 @@ namespace get_link_manga
                         var jTagsObj = new Newtonsoft.Json.Linq.JObject();
                         jTagsObj["tags"] = jArr;
 
+                        // Lưu tag JSON vào file .txt cùng tên trong preview-cache
+                        try
+                        {
+                            string cacheBasePath = GetGalleryHoverPreviewCacheBasePath(item, item.HoverPreviewThumbnailUrl);
+                            string txtTagPath = cacheBasePath + ".txt";
+                            File.WriteAllText(txtTagPath, jTagsObj.ToString(Newtonsoft.Json.Formatting.None));
+                        }
+                        catch { }
+
                         var displayLangs = langsList.Where(l => l != "translated").ToList();
                         string currentName = CleanTranslatedTagFromTitle(item.Name);
 
@@ -1130,6 +1139,21 @@ namespace get_link_manga
             {
                 item.HoverPreviewLocalPath = originalPath;
                 item.HoverPreviewThumbnailLocalPath = thumbnailPath;
+
+                // Load tag từ file .txt cùng tên định dạng .json nếu tồn tại
+                string txtTagPath = cacheBasePath + ".txt";
+                if (item.Tag == null && File.Exists(txtTagPath))
+                {
+                    try
+                    {
+                        string content = File.ReadAllText(txtTagPath);
+                        if (!string.IsNullOrWhiteSpace(content))
+                        {
+                            item.Tag = Newtonsoft.Json.Linq.JObject.Parse(content);
+                        }
+                    }
+                    catch { }
+                }
                 return true;
             }
 

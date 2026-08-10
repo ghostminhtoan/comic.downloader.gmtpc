@@ -34,6 +34,7 @@ namespace get_link_manga
         private bool _isSyncingResultsThumbnailSelection;
         private readonly ObservableCollection<GalleryItem> _thumbnailVisibleItems = new ObservableCollection<GalleryItem>();
         private ScrollViewer _resultsThumbnailScrollViewer;
+        private System.Windows.Threading.DispatcherTimer _thumbnailRefreshTimer;
         private const int ThumbnailColumns = 7;
         private const int CompactThumbnailColumns = 9;
         private const int ThumbnailInitialRows = 8;
@@ -1147,7 +1148,18 @@ namespace get_link_manga
                 return;
             }
 
-            RebuildThumbnailResultsView();
+            if (_thumbnailRefreshTimer == null)
+            {
+                _thumbnailRefreshTimer = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Background);
+                _thumbnailRefreshTimer.Interval = TimeSpan.FromMilliseconds(300);
+                _thumbnailRefreshTimer.Tick += (s, ev) =>
+                {
+                    _thumbnailRefreshTimer.Stop();
+                    RebuildThumbnailResultsView();
+                };
+            }
+            _thumbnailRefreshTimer.Stop();
+            _thumbnailRefreshTimer.Start();
         }
 
         private void LbResultsThumbnail_SelectionChanged(object sender, SelectionChangedEventArgs e)
