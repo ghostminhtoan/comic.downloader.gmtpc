@@ -27,12 +27,18 @@ namespace get_link_manga
         protected override void OnStartup(StartupEventArgs e)
         {
             PortableRuntimeBootstrap.EnsurePortableRuntime();
-            _singleInstanceMutex = new Mutex(true, BuildSingleInstanceMutexName(), out bool createdNew);
-            if (!createdNew)
+            try
             {
-                TryActivateExistingInstance();
-                Shutdown();
-                return;
+                _singleInstanceMutex = new Mutex(true, BuildSingleInstanceMutexName(), out bool createdNew);
+                if (!createdNew)
+                {
+                    TryActivateExistingInstance();
+                    Shutdown();
+                    return;
+                }
+            }
+            catch
+            {
             }
 
             // Tự động kiểm tra và cài đặt Cloudflare Warp nếu chưa có
