@@ -326,7 +326,8 @@ namespace get_link_manga
                     hasTagsSupport = true;
                 }
                 else if (item.Link != null && (item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                               item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0))
+                                               item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                               IsTruyenqqUrl(item.Link)))
                 {
                     hasTagsSupport = true;
                 }
