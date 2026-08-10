@@ -428,7 +428,7 @@ namespace get_link_manga
                                     IsChecked = false,
                                     HoverPreviewThumbnailUrl = thumbUrl,
                                     SourceDomain = "nhentai.net",
-                                    Tag = thumbUrl
+                                    Tag = null
                                 });
                                 pageCount++;
                             }
