@@ -3522,7 +3522,7 @@
                             <DataGridTemplateColumn x:Name="colGalleryDetails" Width="3.1*" SortMemberPath="Name">
                                 <DataGridTemplateColumn.Header>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="COMIC BOOKS" Foreground="{StaticResource CyberpunkPinkBrush}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock x:Name="txtColGalleryDetailsHeader" Text="COMIC BOOKS" Foreground="{StaticResource CyberpunkPinkBrush}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                         <Button Name="btnSortByName" Content="NAME" Click="BtnSortByName_Click" Width="Auto" Height="18" Padding="6,0" FontSize="10" ToolTip="SORT BY NAME" Margin="0,0,4,0">
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource CyberpunkButtonCyan}">

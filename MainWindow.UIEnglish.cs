@@ -823,6 +823,12 @@ namespace get_link_manga
                 return;
             }
 
+            if (column == colGalleryDetails && txtColGalleryDetailsHeader != null)
+            {
+                txtColGalleryDetailsHeader.Text = text;
+                return;
+            }
+
             if (column.Header is TextBlock textBlock)
             {
                 textBlock.Text = text;
@@ -844,7 +850,7 @@ namespace get_link_manga
 
         private TextBlock FindHeaderTextBlock(DependencyObject root)
         {
-            if (root == null)
+            if (root == null || root is Button)
             {
                 return null;
             }
