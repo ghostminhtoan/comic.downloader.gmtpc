@@ -134,8 +134,15 @@ namespace get_link_manga
                 if (!item.HasHoverPreviewThumbnailFile)
                 {
                     await EnsureGalleryHoverPreviewAsync(item);
-                    await EnsureGalleryHoverPreviewFileAsync(item, token);
+                    // fetchNhentaiTag=true: chỉ hover mới get tag nhentai, không fetch trong prefetch
+                    await EnsureGalleryHoverPreviewFileAsync(item, token, fetchNhentaiTag: true);
                 }
+                else if (IsNhentaiUrl(item.Link) && item.Tag == null)
+                {
+                    // Đã có ảnh (prefetch xong) nhưng chưa có tag → fetch tag on-demand khi hover
+                    await EnsureNhentaiNetTagAsync(item, token);
+                }
+
                 if (token.IsCancellationRequested ||
                     !host.IsMouseOver ||
                     !ReferenceEquals(_activeGalleryHoverPreviewHost, host) ||
@@ -629,7 +636,7 @@ namespace get_link_manga
             }
         }
 
-        private async Task EnsureGalleryHoverPreviewFileAsync(GalleryItem item, CancellationToken token)
+        private async Task EnsureGalleryHoverPreviewFileAsync(GalleryItem item, CancellationToken token, bool fetchNhentaiTag = false)
         {
             if (item == null)
             {
@@ -647,9 +654,11 @@ namespace get_link_manga
                 }
             }
 
+            // nhentai tag chỉ fetch khi hover (fetchNhentaiTag=true), không fetch trong prefetch
+            // tránh blast API nhentai cho toàn bộ danh sách gây 429
             bool isNhentai = string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase) ||
                              (item.Link != null && item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0);
-            if (isNhentai && item.Tag == null)
+            if (fetchNhentaiTag && isNhentai && item.Tag == null)
             {
                 await EnsureNhentaiNetTagAsync(item, token);
             }
