@@ -4428,13 +4428,24 @@ namespace get_link_manga
                             string fallbackPattern = @"href=[""'](?<link>[^""']*?" + escapedPath + @"-(?:chap|chapter|chuong)(?:[^""'\s?#]*)?)[""']";
                             matches = Regex.Matches(html, fallbackPattern, RegexOptions.IgnoreCase);
                         }
+                        if (matches.Count == 0)
+                        {
+                            // Fallback 2: Tìm bất kỳ link nào chứa segment của truyện kèm theo "-chap"
+                            string lastSegment = segments[segments.Length - 1];
+                            string loosePattern = @"href=[""'](?<link>[^""']*?" + Regex.Escape(lastSegment) + @"-chap(?:[^""'\s?#]*)?)[""']";
+                            matches = Regex.Matches(html, loosePattern, RegexOptions.IgnoreCase);
+                        }
                         var chapterLinks = new List<string>();
                         var seenChapters = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                         foreach (Match m in matches)
                         {
                             string link = m.Groups["link"].Value.Trim();
-                            if (!link.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && 
-                                !link.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                            if (link.StartsWith("//"))
+                            {
+                                link = uri.Scheme + ":" + link;
+                            }
+                            else if (!link.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && 
+                                     !link.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
                             {
                                 link = activeDomain + (link.StartsWith("/") ? "" : "/") + link;
                             }
