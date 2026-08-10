@@ -133,7 +133,7 @@ namespace get_link_manga
 
                 if (!item.HasHoverPreviewThumbnailFile)
                 {
-                    await EnsureGalleryHoverPreviewAsync(item);
+                    await EnsureGalleryHoverPreviewAsync(item, fetchNhentaiTag: true);
                     // fetchNhentaiTag=true: chỉ hover mới get tag nhentai, không fetch trong prefetch
                     await EnsureGalleryHoverPreviewFileAsync(item, token, fetchNhentaiTag: true);
                 }
@@ -183,7 +183,7 @@ namespace get_link_manga
             try
             {
                 item.IsHoverPreviewLoading = true;
-                await EnsureGalleryHoverPreviewAsync(item);
+                await EnsureGalleryHoverPreviewAsync(item, fetchNhentaiTag: false);
                 await EnsureGalleryHoverPreviewFileAsync(item, CancellationToken.None);
             }
             catch

@@ -609,7 +609,7 @@ namespace get_link_manga
                     link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
-        private async Task EnsureGalleryHoverPreviewAsync(GalleryItem item)
+        private async Task EnsureGalleryHoverPreviewAsync(GalleryItem item, bool fetchNhentaiTag = false)
         {
             if (item == null || !SupportsHoverPreview(item))
             {
@@ -627,9 +627,16 @@ namespace get_link_manga
             else
             {
                 // Đối với nhentai và truyenqq, nếu đã có cả ảnh bìa lẫn tag thì mới thoát sớm
-                if (!string.IsNullOrWhiteSpace(item.HoverPreviewThumbnailUrl) && item.Tag != null)
+                // NHƯNG riêng nhentai, nếu fetchNhentaiTag = false (đang prefetch), ta chỉ cần ảnh bìa là đủ thoát sớm
+                bool hasCover = !string.IsNullOrWhiteSpace(item.HoverPreviewThumbnailUrl);
+                bool hasTag = item.Tag != null;
+                if (IsNhentaiUrl(item.Link) && !fetchNhentaiTag)
                 {
-                    return;
+                    if (hasCover) return;
+                }
+                else
+                {
+                    if (hasCover && hasTag) return;
                 }
             }
 
@@ -723,7 +730,10 @@ namespace get_link_manga
 
             if (IsNhentaiUrl(link))
             {
-                ExtractAndApplyNhentaiPreviewTags(item, html);
+                if (fetchNhentaiTag)
+                {
+                    ExtractAndApplyNhentaiPreviewTags(item, html);
+                }
             }
             else if (IsTruyenqqUrl(link))
             {
