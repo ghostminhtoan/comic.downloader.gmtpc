@@ -1384,6 +1384,39 @@ namespace get_link_manga
             }
         }
 
+        private void ToggleAutoDownloadFromFloating()
+        {
+            // Liên kết với tglClearCookieAndRetry (Auto Download toggle) trong extracted gallery links
+            if (tglClearCookieAndRetry != null)
+            {
+                tglClearCookieAndRetry.IsChecked = !(tglClearCookieAndRetry.IsChecked == true);
+                TglClearCookieAndRetry_Click(tglClearCookieAndRetry, new RoutedEventArgs());
+            }
+            UpdateLightNovelFloatingControlState();
+        }
+
+        private void ToggleListThumbnailFromFloating()
+        {
+            // Liên kết với chkResultsPresentation trong extracted gallery links
+            if (chkResultsPresentation != null)
+            {
+                chkResultsPresentation.IsChecked = !(chkResultsPresentation.IsChecked == true);
+                ChkResultsPresentation_Click(chkResultsPresentation, new RoutedEventArgs());
+            }
+            UpdateLightNovelFloatingControlState();
+        }
+
+        private void ToggleNewWindowFromFloating()
+        {
+            // Liên kết với btnShowNewWindow trong extracted gallery links
+            if (btnShowNewWindow != null)
+            {
+                btnShowNewWindow.IsChecked = !(btnShowNewWindow.IsChecked == true);
+                BtnShowNewWindow_Click(btnShowNewWindow, new RoutedEventArgs());
+            }
+            UpdateLightNovelFloatingControlState();
+        }
+
         private Window _externalBookListWindow;
 
         private void BtnShowNewWindow_Click(object sender, RoutedEventArgs e)

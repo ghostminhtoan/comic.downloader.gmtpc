@@ -625,10 +625,11 @@ namespace get_link_manga
                     Dispatcher.BeginInvoke(new Action(() => _lightNovelFloatingControlWindow?.ToggleFocusFromGlobalKey()));
                     return true;
                 case HOTKEY_GLOBAL_DOWNLOAD_ID:
-                    Dispatcher.BeginInvoke(new Action(() => _lightNovelFloatingControlWindow?.ToggleDownloadFromGlobalKey()));
+                    Dispatcher.BeginInvoke(new Action(() => _lightNovelFloatingControlWindow?.ToggleAutoDownloadFromGlobalKey()));
                     return true;
                 case HOTKEY_GLOBAL_RETRY_ID:
-                    Dispatcher.BeginInvoke(new Action(() => _lightNovelFloatingControlWindow?.ToggleRetryFromGlobalKey()));
+                    // Retry hotkey nay linked ve Auto Download tu extracted gallery links
+                    Dispatcher.BeginInvoke(new Action(() => _lightNovelFloatingControlWindow?.ToggleAutoDownloadFromGlobalKey()));
                     return true;
                 case HOTKEY_GLOBAL_COPY_ID:
                     Dispatcher.BeginInvoke(new Action(() => _lightNovelFloatingControlWindow?.ToggleCopyFromGlobalKey()));

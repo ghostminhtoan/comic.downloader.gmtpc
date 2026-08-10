@@ -15,9 +15,9 @@ namespace get_link_manga
     {
         private readonly Action _startCopyAction;
         private readonly Action _stopCopyAction;
-        private readonly Action _startDownloadPictureAction;
-        private readonly Action _stopDownloadPictureAction;
-        private readonly Action<bool> _setRetryAction;
+        private readonly Action _toggleAutoDownloadAction;
+        private readonly Action _toggleListThumbnailAction;
+        private readonly Action _toggleNewWindowAction;
         private readonly Action _toggleAutoPasteAction;
         private readonly Action _openShutdownOptionsAction;
         private readonly Action _toggleAutoFocusAction;
@@ -39,8 +39,9 @@ namespace get_link_manga
         private readonly Button _globalHotkeyToggleButton;
         private readonly Button _autoPasteToggleButton;
         private readonly Button _focusToggleButton;
-        private readonly Button _downloadToggleButton;
-        private readonly Button _retryToggleButton;
+        private Button _autoDownloadToggleButton;
+        private Button _listThumbnailIconButton;
+        private Button _newWindowIconButton;
         private readonly Button _shutdownToggleButton;
         private readonly Button _moveButton;
         private Button _tweakButton;
@@ -80,9 +81,9 @@ namespace get_link_manga
             bool isVietnamese,
             Action startCopyAction,
             Action stopCopyAction,
-            Action startDownloadPictureAction,
-            Action stopDownloadPictureAction,
-            Action<bool> setRetryAction,
+            Action toggleAutoDownloadAction,
+            Action toggleListThumbnailAction,
+            Action toggleNewWindowAction,
             Action toggleAutoPasteAction,
             Action openShutdownOptionsAction,
             Action toggleAutoFocusAction,
@@ -97,9 +98,9 @@ namespace get_link_manga
         {
             _startCopyAction = startCopyAction;
             _stopCopyAction = stopCopyAction;
-            _startDownloadPictureAction = startDownloadPictureAction;
-            _stopDownloadPictureAction = stopDownloadPictureAction;
-            _setRetryAction = setRetryAction;
+            _toggleAutoDownloadAction = toggleAutoDownloadAction;
+            _toggleListThumbnailAction = toggleListThumbnailAction;
+            _toggleNewWindowAction = toggleNewWindowAction;
             _toggleAutoPasteAction = toggleAutoPasteAction;
             _openShutdownOptionsAction = openShutdownOptionsAction;
             _toggleAutoFocusAction = toggleAutoFocusAction;
@@ -270,10 +271,11 @@ namespace get_link_manga
             Grid.SetRow(topToggleRow, 1);
             root.Children.Add(topToggleRow);
 
-            var middleToggleRow = CreateTripleToggleRow(
-                "Download", out _downloadToggleButton, (sender, args) => ToggleDownload(),
-                "Retry", out _retryToggleButton, (sender, args) => ToggleRetry(),
-                "Copy text", out _copyToggleButton, (sender, args) => ToggleCopy());
+            var middleToggleRow = CreateAutoDownloadAndIconRow(
+                out _autoDownloadToggleButton,
+                out _listThumbnailIconButton,
+                out _newWindowIconButton,
+                isVietnamese);
             Grid.SetRow(middleToggleRow, 2);
             root.Children.Add(middleToggleRow);
 
@@ -439,7 +441,7 @@ namespace get_link_manga
 
             UpdateOpacityVisual();
             UpdateSizeVisual();
-            UpdateState(false, true, false, false, false, false, false, BuildInfo.DisplayText, isVietnamese);
+            UpdateState(false, true, false, false, false, false, false, false, false, BuildInfo.DisplayText, isVietnamese);
         }
 
         [DllImport("user32.dll")]
@@ -464,9 +466,9 @@ namespace get_link_manga
             SetWindowLong(handle, GwlExStyle, exStyle | WsExNoActivate | WsExToolWindow);
         }
 
-        internal void UpdateState(bool isCopyRunning, bool autoFocusEnabled, bool isDownloadRunning, bool isRetryEnabled, bool isShutdownEnabled, bool isAutoPasteEnabled, bool isGlobalHotkeysEnabled, string buildText, bool isVietnamese)
+        internal void UpdateState(bool isCopyRunning, bool autoFocusEnabled, bool isAutoDownloadRunning, bool isListThumbnailOn, bool isNewWindowOn, bool isShutdownEnabled, bool isAutoPasteEnabled, bool isGlobalHotkeysEnabled, bool isVietnameseUi, string buildText, bool isVietnamese)
         {
-            bool isRunning = isCopyRunning || isDownloadRunning;
+            bool isRunning = isCopyRunning || isAutoDownloadRunning;
             _statusText.Text = isRunning ? "RUNNING" : "STOPPED";
             _statusText.Foreground = new SolidColorBrush(isRunning
                 ? Color.FromRgb(0x00, 0xE5, 0xFF)
@@ -474,14 +476,21 @@ namespace get_link_manga
 
             SetToggleVisual(_pinToggleButton, _isPinned);
             SetToggleVisual(_focusToggleButton, autoFocusEnabled);
-            SetToggleVisual(_downloadToggleButton, isDownloadRunning);
-            SetToggleVisual(_retryToggleButton, isRetryEnabled);
+            SetToggleVisual(_autoDownloadToggleButton, isAutoDownloadRunning);
+            SetIconButtonVisual(_listThumbnailIconButton, isListThumbnailOn);
+            SetIconButtonVisual(_newWindowIconButton, isNewWindowOn);
             SetToggleVisual(_shutdownToggleButton, isShutdownEnabled);
             SetToggleVisual(_copyToggleButton, isCopyRunning);
             SetToggleVisual(_autoPasteToggleButton, isAutoPasteEnabled);
             SetWindowButtonToggleVisual(_globalHotkeyToggleButton, "GLOBAL KEY", isGlobalHotkeysEnabled, Color.FromRgb(0x00, 0xE5, 0xFF), Color.FromRgb(0xFF, 0x79, 0xC6));
             _globalHotkeyToggleButton.ToolTip = BuildGlobalHotkeyToolTip(isVietnamese);
             _buildInfoText.Text = string.IsNullOrWhiteSpace(buildText) ? "-" : buildText;
+
+            // Cập nhật tooltip EN/VI cho icon buttons
+            if (_listThumbnailIconButton != null)
+                _listThumbnailIconButton.ToolTip = isVietnameseUi ? "DANH SÁCH / THUMBNAIL" : "LIST / THUMBNAIL";
+            if (_newWindowIconButton != null)
+                _newWindowIconButton.ToolTip = isVietnameseUi ? "HIỂN THỊ CỬA SỔ MỚI" : "SHOW ON NEW WINDOW";
 
             _shellBorder.BorderBrush = new SolidColorBrush(isRunning
                 ? Color.FromRgb(0x00, 0xE5, 0xFF)
@@ -511,6 +520,113 @@ namespace get_link_manga
 
             return row;
         }
+
+        private Grid CreateAutoDownloadAndIconRow(out Button autoDownloadToggle, out Button listThumbnailBtn, out Button newWindowBtn, bool isVietnamese)
+        {
+            var row = new Grid { Margin = new Thickness(0, 0, 0, 4) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); // Auto Download
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(8) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); // Copy text
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(8) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // List/Thumb icon
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(6) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // New Window icon
+
+            var autoDownloadGroup = CreateToggleGroup("Auto Download", out autoDownloadToggle, (sender, args) => _toggleAutoDownloadAction?.Invoke());
+            Grid.SetColumn(autoDownloadGroup, 0);
+            row.Children.Add(autoDownloadGroup);
+
+            var copyGroup = CreateToggleGroup("Copy text", out _copyToggleButton, (sender, args) => ToggleCopy());
+            Grid.SetColumn(copyGroup, 2);
+            row.Children.Add(copyGroup);
+
+            // List/Thumbnail icon button - icon Segoe MDL2 Assets \uE8A9 (thumbnail grid icon)
+            listThumbnailBtn = CreateIconButton("\uE8A9", Color.FromRgb(0x00, 0xFF, 0x87), isVietnamese ? "DANH SÁCH / THUMBNAIL" : "LIST / THUMBNAIL",
+                (sender, args) => _toggleListThumbnailAction?.Invoke());
+            Grid.SetColumn(listThumbnailBtn, 4);
+            row.Children.Add(listThumbnailBtn);
+
+            // Show on New Window icon button - icon \uE8A7 (multi-window icon)
+            newWindowBtn = CreateIconButton("\uE8A7", Color.FromRgb(0x38, 0xBD, 0xF8), isVietnamese ? "HIỂN THỊ CỬA SỔ MỚI" : "SHOW ON NEW WINDOW",
+                (sender, args) => _toggleNewWindowAction?.Invoke());
+            Grid.SetColumn(newWindowBtn, 6);
+            row.Children.Add(newWindowBtn);
+
+            return row;
+        }
+
+        private static Button CreateIconButton(string icon, Color iconColor, string tooltip, RoutedEventHandler onClick)
+        {
+            var iconText = new TextBlock
+            {
+                Text = icon,
+                FontFamily = new System.Windows.Media.FontFamily("Segoe MDL2 Assets"),
+                FontSize = 17,
+                Foreground = new SolidColorBrush(iconColor),
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+
+            var border = new Border
+            {
+                Width = 34,
+                Height = 26,
+                CornerRadius = new CornerRadius(6),
+                Background = new SolidColorBrush(Color.FromArgb(40, iconColor.R, iconColor.G, iconColor.B)),
+                BorderBrush = new SolidColorBrush(Color.FromArgb(100, iconColor.R, iconColor.G, iconColor.B)),
+                BorderThickness = new Thickness(1.2),
+                Child = iconText,
+                Tag = iconColor
+            };
+
+            var btn = new Button
+            {
+                Content = border,
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                Padding = new Thickness(0),
+                Cursor = Cursors.Hand,
+                ToolTip = tooltip
+            };
+            btn.Click += onClick;
+
+            // Hover effect: brighten border
+            btn.MouseEnter += (s, e) =>
+            {
+                border.Background = new SolidColorBrush(Color.FromArgb(80, iconColor.R, iconColor.G, iconColor.B));
+                border.BorderBrush = new SolidColorBrush(iconColor);
+            };
+            btn.MouseLeave += (s, e) =>
+            {
+                if (!(bool)(btn.Tag ?? false))
+                {
+                    border.Background = new SolidColorBrush(Color.FromArgb(40, iconColor.R, iconColor.G, iconColor.B));
+                    border.BorderBrush = new SolidColorBrush(Color.FromArgb(100, iconColor.R, iconColor.G, iconColor.B));
+                }
+                else
+                {
+                    border.Background = new SolidColorBrush(Color.FromArgb(120, iconColor.R, iconColor.G, iconColor.B));
+                    border.BorderBrush = new SolidColorBrush(iconColor);
+                }
+            };
+
+            return btn;
+        }
+
+        private static void SetIconButtonVisual(Button button, bool isOn)
+        {
+            if (button?.Content is Border border && border.Tag is Color iconColor)
+            {
+                button.Tag = isOn;
+                border.Background = new SolidColorBrush(isOn
+                    ? Color.FromArgb(120, iconColor.R, iconColor.G, iconColor.B)
+                    : Color.FromArgb(40, iconColor.R, iconColor.G, iconColor.B));
+                border.BorderBrush = new SolidColorBrush(isOn
+                    ? iconColor
+                    : Color.FromArgb(100, iconColor.R, iconColor.G, iconColor.B));
+            }
+        }
+
 
         private Grid CreateSystemRow(out Button shutdownToggleButton, RoutedEventHandler shutdownClick)
         {
@@ -811,21 +927,9 @@ namespace get_link_manga
             _toggleAutoPasteAction?.Invoke();
         }
 
-        private void ToggleDownload()
+        private void ToggleAutoDownload()
         {
-            if (IsToggleOn(_downloadToggleButton))
-            {
-                _stopDownloadPictureAction?.Invoke();
-            }
-            else
-            {
-                _startDownloadPictureAction?.Invoke();
-            }
-        }
-
-        private void ToggleRetry()
-        {
-            _setRetryAction?.Invoke(!IsToggleOn(_retryToggleButton));
+            _toggleAutoDownloadAction?.Invoke();
         }
 
         private void ToggleShutdown()
@@ -855,14 +959,9 @@ namespace get_link_manga
             _toggleAutoFocusAction?.Invoke();
         }
 
-        internal void ToggleDownloadFromGlobalKey()
+        internal void ToggleAutoDownloadFromGlobalKey()
         {
-            ToggleDownload();
-        }
-
-        internal void ToggleRetryFromGlobalKey()
-        {
-            ToggleRetry();
+            ToggleAutoDownload();
         }
 
         internal void ToggleCopyFromGlobalKey()
