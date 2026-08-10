@@ -1383,5 +1383,108 @@ namespace get_link_manga
                 MessageBox.Show($"Error cancelling shutdown: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private Window _externalBookListWindow;
+
+        private void BtnShowNewWindow_Click(object sender, RoutedEventArgs e)
+        {
+            if (btnShowNewWindow.IsChecked == true)
+            {
+                OpenExternalBookListWindow();
+            }
+            else
+            {
+                CloseExternalBookListWindow();
+            }
+        }
+
+        private void OpenExternalBookListWindow()
+        {
+            if (_externalBookListWindow != null) return;
+
+            // 1. Detach grdBookListContainer khỏi parent trong MainWindow
+            var parent = grdBookListContainer.Parent as Panel;
+            if (parent != null)
+            {
+                parent.Children.Remove(grdBookListContainer);
+            }
+
+            // 2. Hiện placeholder ở MainWindow
+            borderBookListPlaceholder.Visibility = Visibility.Visible;
+
+            // 3. Tạo Window mới
+            _externalBookListWindow = new Window
+            {
+                Title = _isVietnameseUi ? "Danh sách truyện chờ tải - Comic Downloader GMTPC" : "Extracted Gallery Links - Comic Downloader GMTPC",
+                Width = 1000,
+                Height = 600,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = this,
+                Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#091018")
+            };
+
+            // Gán Icon
+            if (this.Icon != null)
+            {
+                _externalBookListWindow.Icon = this.Icon;
+            }
+
+            // Tạo Grid chứa container danh sách truyện
+            Grid mainGrid = new Grid();
+            mainGrid.Margin = new Thickness(10);
+            mainGrid.Children.Add(grdBookListContainer);
+
+            _externalBookListWindow.Content = mainGrid;
+
+            // Lắng nghe SizeChanged để tự động tính toán lại cột Grid Thumbnail
+            _externalBookListWindow.SizeChanged += (s, ev) =>
+            {
+                ApplyThumbnailDensity();
+                if (_isResultsThumbnailViewEnabled)
+                {
+                    RebuildThumbnailResultsView();
+                }
+            };
+
+            _externalBookListWindow.Closed += (s, ev) =>
+            {
+                // Khi window bị đóng (bởi nút X hoặc code)
+                // Detach khỏi Grid window phụ
+                mainGrid.Children.Remove(grdBookListContainer);
+
+                // Attach lại MainWindow
+                if (parent != null && !parent.Children.Contains(grdBookListContainer))
+                {
+                    parent.Children.Add(grdBookListContainer);
+                }
+
+                // Phục hồi Grid.Row
+                Grid.SetRow(grdBookListContainer, 3);
+
+                // Ẩn placeholder
+                borderBookListPlaceholder.Visibility = Visibility.Collapsed;
+
+                btnShowNewWindow.IsChecked = false;
+                _externalBookListWindow = null;
+
+                // Cập nhật lại density sau khi quay về MainWindow
+                ApplyThumbnailDensity();
+                if (_isResultsThumbnailViewEnabled)
+                {
+                    RebuildThumbnailResultsView();
+                }
+            };
+
+            _externalBookListWindow.Show();
+        }
+
+        private void CloseExternalBookListWindow()
+        {
+            if (_externalBookListWindow != null)
+            {
+                _externalBookListWindow.Close();
+                _externalBookListWindow = null;
+            }
+        }
     }
 }

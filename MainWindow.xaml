@@ -3279,6 +3279,13 @@
                                 <TextBlock Name="lblResultsPresentation" Text="&#xE8A9;" FontFamily="Segoe MDL2 Assets" Foreground="#00FF87" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <ToggleButton Name="chkResultsPresentation" Click="ChkResultsPresentation_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="LIST / THUMBNAIL"/>
                             </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,14,6" VerticalAlignment="Center">
+                                <StackPanel.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                </StackPanel.LayoutTransform>
+                                <TextBlock Name="lblShowNewWindow" Text="&#xE8A7;" FontFamily="Segoe MDL2 Assets" Foreground="#38BDF8" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <ToggleButton Name="btnShowNewWindow" Click="BtnShowNewWindow_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="SHOW ON NEW WINDOW"/>
+                            </StackPanel>
                             <Button Name="btnWebpCodec" Content="WEBP CODEC" Click="BtnWebpCodec_Click" Style="{StaticResource CompactCyanButton}" MinWidth="90" Width="Auto" Padding="10,2" Margin="0,0,6,0"/>
                             <Button Name="btnToolbarSortByName" Content="SORT BY NAME" Click="BtnSortByName_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
                             <Button Name="btnDuplicateName" Content="DUPLICATE NAME" Click="BtnDuplicateName_Click" Style="{StaticResource CompactPinkButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
@@ -3344,33 +3351,33 @@
                         </Grid>
                     </Border>
 
-                    <!-- Scraped links DataGrid -->
-                    <DataGrid Grid.Row="3" 
-                              Name="dgResults"
-                              Style="{StaticResource CyberpunkDataGrid}"
-                              ColumnHeaderStyle="{StaticResource CyberpunkDataGridColumnHeader}"
-                              CellStyle="{StaticResource CyberpunkDataGridCell}"
-                              AutoGenerateColumns="False"
-                              CanUserAddRows="False"
-                              CanUserDeleteRows="False"
-                              SelectionMode="Extended"
-                              SelectionUnit="FullRow"
-                              CanUserSortColumns="True"
-                              PreviewKeyDown="DgResults_PreviewKeyDown"
-                              PreviewTextInput="DgResults_PreviewTextInput"
-                              PreviewMouseLeftButtonDown="DgResults_MouseDoubleClick"
-                              SelectionChanged="DgResults_SelectionChanged"
-                              Sorting="DgResults_Sorting"
-                              VirtualizingPanel.IsVirtualizing="True"
-                              VirtualizingPanel.VirtualizationMode="Recycling"
-                              VirtualizingPanel.ScrollUnit="Item"
-                              AllowDrop="True"
-                              DragOver="DgResults_DragOver"
-                              DragLeave="DgResults_DragLeave"
-                              Drop="DgResults_Drop"
-                              EnableRowVirtualization="True"
-                              MinRowHeight="32"
-                              Margin="0,0,0,10">
+                    <!-- Book List Container -->
+                    <Grid Grid.Row="3" Name="grdBookListContainer" Margin="0,0,0,10">
+                        <!-- Scraped links DataGrid -->
+                        <DataGrid Name="dgResults"
+                                  Style="{StaticResource CyberpunkDataGrid}"
+                                  ColumnHeaderStyle="{StaticResource CyberpunkDataGridColumnHeader}"
+                                  CellStyle="{StaticResource CyberpunkDataGridCell}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  SelectionMode="Extended"
+                                  SelectionUnit="FullRow"
+                                  CanUserSortColumns="True"
+                                  PreviewKeyDown="DgResults_PreviewKeyDown"
+                                  PreviewTextInput="DgResults_PreviewTextInput"
+                                  PreviewMouseLeftButtonDown="DgResults_MouseDoubleClick"
+                                  SelectionChanged="DgResults_SelectionChanged"
+                                  Sorting="DgResults_Sorting"
+                                  VirtualizingPanel.IsVirtualizing="True"
+                                  VirtualizingPanel.VirtualizationMode="Recycling"
+                                  VirtualizingPanel.ScrollUnit="Item"
+                                  AllowDrop="True"
+                                  DragOver="DgResults_DragOver"
+                                  DragLeave="DgResults_DragLeave"
+                                  Drop="DgResults_Drop"
+                                  EnableRowVirtualization="True"
+                                  MinRowHeight="32">
                             <DataGrid.RowStyle>
                                 <Style TargetType="DataGridRow" BasedOn="{StaticResource CyberpunkDataGridRow}">
                                     <Setter Property="AllowDrop" Value="True"/>
@@ -4066,9 +4073,7 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <ListBox Grid.Row="3"
-                             Name="lbResultsThumbnail"
-                             Margin="0,0,0,10"
+                    <ListBox Name="lbResultsThumbnail"
                              Visibility="Collapsed"
                              Background="Transparent"
                              BorderThickness="0"
@@ -4590,16 +4595,27 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <!-- Empty State Grid -->
-                    <Grid Grid.Row="3" Name="grdEmptyState" Background="#0A101D" Panel.ZIndex="10" Visibility="Visible">
-                        <Border BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="12" Background="#0A101D">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="📂" FontSize="56" HorizontalAlignment="Center" Foreground="{StaticResource CyberpunkMutedTextBrush}" Margin="0,0,0,16"/>
-                                <TextBlock Name="txtEmptyStateTitle" Text="DANH SÁCH CHỜ TẢI ĐANG TRỐNG" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{StaticResource CyberpunkCyanBrush}" Margin="0,0,0,8"/>
-                                <TextBlock Name="txtEmptyStateDesc" Text="Dán link truyện hoặc kéo thả file/thư mục vào đây để bắt đầu" FontSize="12" HorizontalAlignment="Center" Foreground="{StaticResource CyberpunkMutedTextBrush}"/>
-                            </StackPanel>
-                        </Border>
+                        <!-- Empty State Grid -->
+                        <Grid Name="grdEmptyState" Background="#0A101D" Panel.ZIndex="10" Visibility="Visible">
+                            <Border BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="12" Background="#0A101D">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="📂" FontSize="56" HorizontalAlignment="Center" Foreground="{StaticResource CyberpunkMutedTextBrush}" Margin="0,0,0,16"/>
+                                    <TextBlock Name="txtEmptyStateTitle" Text="DANH SÁCH CHỜ TẢI ĐANG TRỐNG" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{StaticResource CyberpunkCyanBrush}" Margin="0,0,0,8"/>
+                                    <TextBlock Name="txtEmptyStateDesc" Text="Dán link truyện hoặc kéo thả file/thư mục vào đây để bắt đầu" FontSize="12" HorizontalAlignment="Center" Foreground="{StaticResource CyberpunkMutedTextBrush}"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </Grid>
+
+                    <!-- Book List Placeholder (Visible when popped out to a new window) -->
+                    <Border Grid.Row="3" Name="borderBookListPlaceholder" Style="{StaticResource WorkspaceSectionCard}" Margin="0,0,0,10" Visibility="Collapsed">
+                        <Grid>
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Name="txtExternalWindowActiveTitle" Text="DANH SÁCH ĐANG HIỂN THỊ Ở CỬA SỔ PHỤ" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                                <TextBlock Name="txtExternalWindowActiveDesc" Text="Cửa sổ danh sách truyện đang được mở riêng biệt. Đóng cửa sổ phụ để đưa danh sách quay lại." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="12" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
 
                     <!-- Download Section -->
                     <Border Grid.Row="4" Name="borderDownloadSection" Style="{StaticResource WorkspaceSectionCard}" Padding="16" Margin="0,8,0,0">
