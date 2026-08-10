@@ -243,8 +243,8 @@ namespace get_link_manga
             var image = new Image
             {
                 Stretch = Stretch.Uniform,
-                MaxWidth = 800,
-                MaxHeight = 1000,
+                MaxWidth = 320,
+                MaxHeight = 480,
                 Source = CreatePreviewImageSource(item?.HoverPreviewLocalPath, 0)
             };
 
@@ -448,7 +448,7 @@ namespace get_link_manga
                 Content = new Border
                 {
                     Padding = new Thickness(4),
-                    MaxWidth = 250,
+                    MaxWidth = 340,
                     Child = panel
                 }
             };
