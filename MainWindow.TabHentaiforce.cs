@@ -688,6 +688,14 @@ namespace get_link_manga
                 return;
             }
 
+            // Nhentai: nếu đã có cover, không fetch HTML nữa — tag sẽ được EnsureNhentaiNetTagAsync
+            // trong EnsureGalleryHoverPreviewFileAsync lo (API call, đã throttle qua _tagFetchSemaphore).
+            // Tránh fetch HTML trang nhentai gây double-request → 429.
+            if (IsNhentaiUrl(link) && !string.IsNullOrWhiteSpace(item.HoverPreviewThumbnailUrl))
+            {
+                return;
+            }
+
             string html = await FetchStringAsync(link, CancellationToken.None);
             string coverUrlNonMangadex = link.IndexOf("hentaiforce.net/view/", StringComparison.OrdinalIgnoreCase) >= 0
                 ? ExtractHentaiforceCoverUrl(html, link)

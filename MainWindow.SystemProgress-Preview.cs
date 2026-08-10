@@ -28,6 +28,11 @@ namespace get_link_manga
         private readonly Dictionary<string, List<string>> _galleryHoverPreviewCandidateCache = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         private readonly object _galleryHoverPreviewCandidateCacheLock = new object();
         private readonly SemaphoreSlim _galleryHoverPreviewImageSemaphore = new SemaphoreSlim(24, 24);
+        // Rate-limit tag fetch cho nhentai/truyenqq: tối đa 2 request cùng lúc
+        private readonly SemaphoreSlim _tagFetchSemaphore = new SemaphoreSlim(2, 2);
+        private readonly HashSet<string> _tagFetchFailedCache = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly object _tagFetchFailedCacheLock = new object();
+        private static readonly Random _tagFetchJitter = new Random();
 
         private void GalleryResultPreviewHost_MouseEnter(object sender, MouseEventArgs e)
         {
@@ -66,10 +71,30 @@ namespace get_link_manga
                 return;
             }
 
-            foreach (GalleryItem item in items.Where(SupportsHoverPreview).Distinct())
+            // Fire prefetch có throttle: nhentai/truyenqq chạy tuần tự (đã có semaphore bên trong),
+            // các domain khác vẫn fire-and-forget tự do.
+            _ = PrefetchGalleryHoverPreviewBatchAsync(items.Where(SupportsHoverPreview).Distinct().ToList());
+        }
+
+        private async Task PrefetchGalleryHoverPreviewBatchAsync(List<GalleryItem> items)
+        {
+            if (items == null || items.Count == 0) return;
+            var tasks = new List<Task>();
+            foreach (GalleryItem item in items)
             {
-                _ = PrefetchGalleryHoverPreviewAsync(item);
+                // nhentai và truyenqq: stagger để tránh burst song song
+                bool isRateSensitive = (item.Link != null) &&
+                    (IsNhentaiUrl(item.Link) || IsTruyenqqUrl(item.Link));
+                if (isRateSensitive)
+                {
+                    // Chờ trước khi thêm task mới để tạo jitter tự nhiên
+                    int jitter;
+                    lock (_tagFetchJitter) { jitter = _tagFetchJitter.Next(300, 900); }
+                    await Task.Delay(jitter);
+                }
+                tasks.Add(PrefetchGalleryHoverPreviewAsync(item));
             }
+            await Task.WhenAll(tasks);
         }
 
         private void StartGalleryHoverPreview(FrameworkElement host)
@@ -498,65 +523,110 @@ namespace get_link_manga
         private async Task EnsureNhentaiNetTagAsync(GalleryItem item, CancellationToken token)
         {
             if (item == null || item.Tag != null) return;
+
+            string link = item.Link ?? string.Empty;
+            lock (_tagFetchFailedCacheLock)
+            {
+                if (_tagFetchFailedCache.Contains(link)) return;
+            }
+
+            await _tagFetchSemaphore.WaitAsync(token);
             try
             {
-                string galleryId = GetNhentaiGalleryIdFromLink(item.Link);
+                // Double-check sau khi qua semaphore
+                if (item.Tag != null) return;
+                lock (_tagFetchFailedCacheLock)
+                {
+                    if (_tagFetchFailedCache.Contains(link)) return;
+                }
+
+                string galleryId = GetNhentaiGalleryIdFromLink(link);
                 if (string.IsNullOrEmpty(galleryId)) return;
 
+                // Jitter nhỏ trước request để tránh burst khi nhiều item hit semaphore cùng lúc
+                int jitter;
+                lock (_tagFetchJitter) { jitter = _tagFetchJitter.Next(100, 500); }
+                await Task.Delay(jitter, token);
+
                 string apiUrl = $"https://nhentai.net/api/gallery/{galleryId}";
-                string jsonContent = await FetchStringAsync(apiUrl, token);
+                string jsonContent;
+                try
+                {
+                    jsonContent = await FetchStringAsync(apiUrl, token);
+                }
+                catch (Exception ex) when (ex.Message.Contains("429") || (ex.InnerException?.Message?.Contains("429") == true))
+                {
+                    // 429: back-off 10s rồi mới cho item khác qua
+                    lock (_tagFetchFailedCacheLock) { _tagFetchFailedCache.Add(link); }
+                    Log($"[Preview] nhentai 429 – tạm bỏ qua tag cho {galleryId}, retry sau.");
+                    try { await Task.Delay(10000, token); } catch { }
+                    return;
+                }
+                catch { return; }
+
                 if (string.IsNullOrEmpty(jsonContent)) return;
 
-                var galleryInfo = Newtonsoft.Json.Linq.JObject.Parse(jsonContent);
-                if (galleryInfo != null && galleryInfo["tags"] is Newtonsoft.Json.Linq.JArray tagsArray)
+                try
                 {
-                    var jArr = new Newtonsoft.Json.Linq.JArray();
-                    var langsList = new List<string>();
+                    var galleryInfo = Newtonsoft.Json.Linq.JObject.Parse(jsonContent);
+                    if (galleryInfo == null) return;
 
-                    foreach (var t in tagsArray)
+                    // nhentai API trả error khi 429/404
+                    if (galleryInfo["error"] != null)
                     {
-                        string type = t["type"]?.ToString();
-                        string name = t["name"]?.ToString();
-                        if (!string.IsNullOrWhiteSpace(name))
+                        lock (_tagFetchFailedCacheLock) { _tagFetchFailedCache.Add(link); }
+                        return;
+                    }
+
+                    if (galleryInfo["tags"] is Newtonsoft.Json.Linq.JArray tagsArray)
+                    {
+                        var jArr = new Newtonsoft.Json.Linq.JArray();
+                        var langsList = new List<string>();
+
+                        foreach (var t in tagsArray)
                         {
-                            if (string.Equals(type, "language", StringComparison.OrdinalIgnoreCase))
+                            string type = t["type"]?.ToString();
+                            string name = t["name"]?.ToString();
+                            if (!string.IsNullOrWhiteSpace(name))
                             {
-                                langsList.Add(name);
+                                if (string.Equals(type, "language", StringComparison.OrdinalIgnoreCase))
+                                    langsList.Add(name);
+                                var tObj = new Newtonsoft.Json.Linq.JObject();
+                                tObj["tag"] = name;
+                                jArr.Add(tObj);
                             }
-                            var tObj = new Newtonsoft.Json.Linq.JObject();
-                            tObj["tag"] = name;
-                            jArr.Add(tObj);
                         }
-                    }
 
-                    var jTagsObj = new Newtonsoft.Json.Linq.JObject();
-                    jTagsObj["tags"] = jArr;
+                        var jTagsObj = new Newtonsoft.Json.Linq.JObject();
+                        jTagsObj["tags"] = jArr;
 
-                    var displayLangs = langsList.Where(l => l != "translated").ToList();
-                    string currentName = CleanTranslatedTagFromTitle(item.Name);
+                        var displayLangs = langsList.Where(l => l != "translated").ToList();
+                        string currentName = CleanTranslatedTagFromTitle(item.Name);
 
-                    if (displayLangs.Count > 0)
-                    {
-                        string langStr = string.Join(", ", displayLangs.Select(l => System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(l)));
-                        string suffix = $"[{langStr}]";
-                        if (!currentName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                        if (displayLangs.Count > 0)
                         {
-                            currentName = $"{currentName} {suffix}";
+                            string langStr = string.Join(", ", displayLangs.Select(l => System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(l)));
+                            string suffix = $"[{langStr}]";
+                            if (!currentName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                                currentName = $"{currentName} {suffix}";
                         }
-                    }
 
-                    Dispatcher.Invoke(() =>
-                    {
-                        if (item.Name != currentName)
+                        Dispatcher.Invoke(() =>
                         {
-                            item.Name = currentName;
-                        }
-                        item.Tag = jTagsObj;
-                        RecalculateDuplicates();
-                    });
+                            if (item.Name != currentName) item.Name = currentName;
+                            item.Tag = jTagsObj;
+                            RecalculateDuplicates();
+                        });
+                    }
                 }
+                catch { }
             }
-            catch { }
+            finally
+            {
+                // Delay nhỏ sau mỗi request để server không bị quá tải
+                try { await Task.Delay(300, token); } catch { }
+                _tagFetchSemaphore.Release();
+            }
         }
 
         private async Task EnsureGalleryHoverPreviewFileAsync(GalleryItem item, CancellationToken token)
