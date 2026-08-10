@@ -752,22 +752,17 @@ namespace get_link_manga
                 try
                 {
                     var truyenqqTags = new List<string>();
-                    // book_other tag contain list01 block
-                    Match bookOtherMatch = Regex.Match(html, @"<div[^>]*class=[""'][^""']*\bbook_other\b[^""']*[""'][^>]*>(?<content>[\s\S]*?)</div>", RegexOptions.IgnoreCase);
-                    if (bookOtherMatch.Success)
+                    // Lấy ul.list01 trực tiếp từ HTML để tránh lỗi phân cấp thẻ div của book_other
+                    Match list01Match = Regex.Match(html, @"<ul[^>]*class=[""'][^""']*\blist01\b[^""']*[""'][^>]*>(?<content>[\s\S]*?)</ul>", RegexOptions.IgnoreCase);
+                    if (list01Match.Success)
                     {
-                        string otherContent = bookOtherMatch.Groups["content"].Value;
-                        Match list01Match = Regex.Match(otherContent, @"<ul[^>]*class=[""'][^""']*\blist01\b[^""']*[""'][^>]*>(?<content>[\s\S]*?)</ul>", RegexOptions.IgnoreCase);
-                        if (list01Match.Success)
+                        string listContent = list01Match.Groups["content"].Value;
+                        foreach (Match liMatch in Regex.Matches(listContent, @"<a[^>]*href=[""'][^""']*the-loai/[^""']+[""'][^>]*>(?<tag>[^<]+)</a>", RegexOptions.IgnoreCase))
                         {
-                            string listContent = list01Match.Groups["content"].Value;
-                            foreach (Match liMatch in Regex.Matches(listContent, @"<a[^>]*href=[""'][^""']*the-loai/[^""']+[""'][^>]*>(?<tag>[^<]+)</a>", RegexOptions.IgnoreCase))
+                            string tagText = WebUtility.HtmlDecode(liMatch.Groups["tag"].Value).Trim();
+                            if (!string.IsNullOrWhiteSpace(tagText))
                             {
-                                string tagText = WebUtility.HtmlDecode(liMatch.Groups["tag"].Value).Trim();
-                                if (!string.IsNullOrWhiteSpace(tagText))
-                                {
-                                    truyenqqTags.Add(tagText);
-                                }
+                                truyenqqTags.Add(tagText);
                             }
                         }
                     }
