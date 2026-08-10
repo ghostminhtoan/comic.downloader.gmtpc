@@ -609,15 +609,17 @@ namespace get_link_manga
                     link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
-        private async Task EnsureGalleryHoverPreviewAsync(GalleryItem item, bool fetchNhentaiTag = false)
+        private async Task EnsureGalleryHoverPreviewAsync(GalleryItem item, bool fetchTags = false)
         {
             if (item == null || !SupportsHoverPreview(item))
             {
                 return;
             }
 
-            // Nếu không phải nhentai/truyenqq hoặc nếu là nhentai/truyenqq nhưng đã có sẵn tag/tiến trình hoàn thành thì thoát sớm
-            if (!IsNhentaiUrl(item.Link) && !IsTruyenqqUrl(item.Link))
+            bool hasTagsSupport = IsNhentaiUrl(item.Link) || IsTruyenqqUrl(item.Link) || (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
+
+            // Nếu không phải domain hỗ trợ tag hoặc đã có sẵn ảnh bìa thì thoát sớm
+            if (!hasTagsSupport)
             {
                 if (!string.IsNullOrWhiteSpace(item.HoverPreviewThumbnailUrl))
                 {
@@ -626,11 +628,11 @@ namespace get_link_manga
             }
             else
             {
-                // Đối với nhentai và truyenqq, nếu đã có cả ảnh bìa lẫn tag thì mới thoát sớm
-                // NHƯNG riêng nhentai, nếu fetchNhentaiTag = false (đang prefetch), ta chỉ cần ảnh bìa là đủ thoát sớm
+                // Đối với các domain có tag, nếu đã có cả ảnh bìa lẫn tag thì mới thoát sớm
+                // NHƯNG nếu fetchTags = false (đang prefetch), ta chỉ cần ảnh bìa là đủ thoát sớm để tránh call API/cào HTML
                 bool hasCover = !string.IsNullOrWhiteSpace(item.HoverPreviewThumbnailUrl);
                 bool hasTag = item.Tag != null;
-                if (IsNhentaiUrl(item.Link) && !fetchNhentaiTag)
+                if (!fetchTags)
                 {
                     if (hasCover) return;
                 }
@@ -730,14 +732,17 @@ namespace get_link_manga
 
             if (IsNhentaiUrl(link))
             {
-                if (fetchNhentaiTag)
+                if (fetchTags)
                 {
                     ExtractAndApplyNhentaiPreviewTags(item, html);
                 }
             }
             else if (IsTruyenqqUrl(link))
             {
-                ExtractAndApplyTruyenqqPreviewTags(item, html);
+                if (fetchTags)
+                {
+                    ExtractAndApplyTruyenqqPreviewTags(item, html);
+                }
             }
         }
 

@@ -133,14 +133,31 @@ namespace get_link_manga
 
                 if (!item.HasHoverPreviewThumbnailFile)
                 {
-                    await EnsureGalleryHoverPreviewAsync(item, fetchNhentaiTag: true);
-                    // fetchNhentaiTag=true: chỉ hover mới get tag nhentai, không fetch trong prefetch
-                    await EnsureGalleryHoverPreviewFileAsync(item, token, fetchNhentaiTag: true);
+                    await EnsureGalleryHoverPreviewAsync(item, fetchTags: true);
+                    // fetchTags=true: chỉ hover mới get tag, không fetch trong prefetch chạy ngầm
+                    await EnsureGalleryHoverPreviewFileAsync(item, token, fetchTags: true);
                 }
-                else if (IsNhentaiUrl(item.Link) && item.Tag == null)
+                else if (item.Tag == null)
                 {
-                    // Đã có ảnh (prefetch xong) nhưng chưa có tag → fetch tag on-demand khi hover
-                    await EnsureNhentaiNetTagAsync(item, token);
+                    if (IsNhentaiUrl(item.Link))
+                    {
+                        // Đã có ảnh (prefetch xong) nhưng chưa có tag → fetch tag on-demand khi hover
+                        await EnsureNhentaiNetTagAsync(item, token);
+                    }
+                    else if (IsTruyenqqUrl(item.Link))
+                    {
+                        // Đã có ảnh nhưng chưa có tag → cào tag truyenqq on-demand
+                        await EnsureGalleryHoverPreviewAsync(item, fetchTags: true);
+                    }
+                    else
+                    {
+                        bool isHitomi = string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) ||
+                                        (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
+                        if (isHitomi)
+                        {
+                            await EnsureHitomiLaTagAsync(item, token);
+                        }
+                    }
                 }
 
                 if (token.IsCancellationRequested ||
@@ -183,8 +200,8 @@ namespace get_link_manga
             try
             {
                 item.IsHoverPreviewLoading = true;
-                await EnsureGalleryHoverPreviewAsync(item, fetchNhentaiTag: false);
-                await EnsureGalleryHoverPreviewFileAsync(item, CancellationToken.None);
+                await EnsureGalleryHoverPreviewAsync(item, fetchTags: false);
+                await EnsureGalleryHoverPreviewFileAsync(item, CancellationToken.None, fetchTags: false);
             }
             catch
             {
@@ -636,7 +653,7 @@ namespace get_link_manga
             }
         }
 
-        private async Task EnsureGalleryHoverPreviewFileAsync(GalleryItem item, CancellationToken token, bool fetchNhentaiTag = false)
+        private async Task EnsureGalleryHoverPreviewFileAsync(GalleryItem item, CancellationToken token, bool fetchTags = false)
         {
             if (item == null)
             {
@@ -645,7 +662,7 @@ namespace get_link_manga
 
             bool isHitomi = string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) ||
                             (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
-            if (isHitomi && item.Tag == null)
+            if (fetchTags && isHitomi && item.Tag == null)
             {
                 await EnsureHitomiLaTagAsync(item, token);
                 if (item.Tag != null)
@@ -654,11 +671,11 @@ namespace get_link_manga
                 }
             }
 
-            // nhentai tag chỉ fetch khi hover (fetchNhentaiTag=true), không fetch trong prefetch
+            // nhentai tag chỉ fetch khi hover (fetchTags=true), không fetch trong prefetch
             // tránh blast API nhentai cho toàn bộ danh sách gây 429
             bool isNhentai = string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase) ||
                              (item.Link != null && item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0);
-            if (fetchNhentaiTag && isNhentai && item.Tag == null)
+            if (fetchTags && isNhentai && item.Tag == null)
             {
                 await EnsureNhentaiNetTagAsync(item, token);
             }
