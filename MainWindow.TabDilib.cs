@@ -252,6 +252,28 @@ namespace get_link_manga
             return cleaned;
         }
 
+        private string CleanChapterTitlePrefix(string chapterTitle, string bookTitle)
+        {
+            if (string.IsNullOrWhiteSpace(chapterTitle))
+            {
+                return string.Empty;
+            }
+
+            if (!string.IsNullOrWhiteSpace(bookTitle))
+            {
+                string cleanBook = bookTitle.Trim();
+                var prefixes = new[] { "truyện " + cleanBook, cleanBook };
+                foreach (var prefix in prefixes)
+                {
+                    if (chapterTitle.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return chapterTitle.Substring(prefix.Length).Trim().TrimStart('-', ' ', '/').Trim();
+                    }
+                }
+            }
+            return chapterTitle;
+        }
+
         internal void InitializeDilibDefaults()
         {
             if (txtDilibTagUrl != null && string.IsNullOrWhiteSpace(txtDilibTagUrl.Text))
@@ -647,8 +669,8 @@ namespace get_link_manga
             if (IsDilibChapterUrl(normalized))
             {
                 string html = await FetchStringAsync(normalized, token);
-                string chapterTitle = GetDilibChapterTitleFromHtml(html, normalized);
                 string bookTitle = GetDilibBookTitleFromHtml(html, normalized);
+                string chapterTitle = CleanChapterTitlePrefix(GetDilibChapterTitleFromHtml(html, normalized), bookTitle);
                 results.Add(new GalleryItem
                 {
                     Link = normalized,
@@ -939,7 +961,7 @@ namespace get_link_manga
                     string chapterNumber = GetDilibChapterNumberFromUrl(link);
                     chapterTitle = string.IsNullOrWhiteSpace(chapterNumber) ? "Chapter" : "Chapter " + chapterNumber;
                 }
-                chapterTitle = CleanDilibDisplayTitle(chapterTitle);
+                chapterTitle = CleanChapterTitlePrefix(CleanDilibDisplayTitle(chapterTitle), bookTitle);
 
                 results.Add(new GalleryItem
                 {
@@ -1481,7 +1503,7 @@ namespace get_link_manga
             string bookTitle = string.IsNullOrWhiteSpace(bookTitleOverride)
                     ? GetDilibBookTitleFromHtml(html, normalized)
                     : CleanDilibDisplayTitle(bookTitleOverride);
-                string chapterTitle = GetDilibChapterTitleFromHtml(html, normalized);
+                string chapterTitle = CleanChapterTitlePrefix(GetDilibChapterTitleFromHtml(html, normalized), bookTitle);
                 item.Name = FormatGalleryTitle($"{bookTitle} - {chapterTitle}");
 
             var imageUrls = ExtractDilibImageUrlsFromHtml(html, normalized);
