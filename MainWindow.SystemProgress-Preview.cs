@@ -144,9 +144,9 @@ namespace get_link_manga
                         // Đã có ảnh (prefetch xong) nhưng chưa có tag → fetch tag on-demand khi hover
                         await EnsureNhentaiNetTagAsync(item, token);
                     }
-                    else if (IsTruyenqqUrl(item.Link) || IsNettruyenUrl(item.Link))
+                    else if (IsTruyenqqUrl(item.Link) || IsNettruyenUrl(item.Link) || IsDilibUrl(item.Link))
                     {
-                        // Đã có ảnh nhưng chưa có tag → cào tag truyenqq/nettruyen on-demand
+                        // Đã có ảnh nhưng chưa có tag → cào tag truyenqq/nettruyen/thuviensach on-demand
                         await EnsureGalleryHoverPreviewAsync(item, fetchTags: true);
                     }
                     else
@@ -377,7 +377,8 @@ namespace get_link_manga
                 else if (item.Link != null && (item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0 ||
                                                item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0 ||
                                                IsTruyenqqUrl(item.Link) ||
-                                               IsNettruyenUrl(item.Link)))
+                                               IsNettruyenUrl(item.Link) ||
+                                               IsDilibUrl(item.Link)))
                 {
                     hasTagsSupport = true;
                 }
