@@ -245,7 +245,9 @@ namespace get_link_manga
 
             cleaned = Regex.Replace(cleaned, @"^\s*truyện\s+tranh\s+", string.Empty, RegexOptions.IgnoreCase);
             cleaned = Regex.Replace(cleaned, @"\s*[,|-]\s*thư\s+viện\s+số\s*$", string.Empty, RegexOptions.IgnoreCase);
+            cleaned = Regex.Replace(cleaned, @"\s*[,|-]\s*thư\s+viện\s+sách\s*$", string.Empty, RegexOptions.IgnoreCase);
             cleaned = Regex.Replace(cleaned, @"\s*-\s*truyện\s+tranh\s*$", string.Empty, RegexOptions.IgnoreCase);
+            cleaned = Regex.Replace(cleaned, @"\s*Tiếng\s+Việt,\s*Thư\s+Viện\s+Sách\s*$", string.Empty, RegexOptions.IgnoreCase);
             cleaned = Regex.Replace(cleaned, @"\s+", " ").Trim();
             return cleaned;
         }
@@ -1085,12 +1087,27 @@ namespace get_link_manga
                 return string.Empty;
             }
 
+            // Prioritize h1 tag for clean title on dilib/thuviensach.vn
+            var matchH1 = Regex.Match(html, @"<h1[^>]*>(?<title>.*?)</h1>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            if (matchH1.Success)
+            {
+                string title = WebUtility.HtmlDecode(Regex.Replace(matchH1.Groups["title"].Value, @"<[^>]+>", string.Empty)).Trim();
+                if (!string.IsNullOrWhiteSpace(title))
+                {
+                    // Convert uppercase title to Title Case
+                    if (title == title.ToUpper())
+                    {
+                        title = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(title.ToLower());
+                    }
+                    return title;
+                }
+            }
+
             var patterns = new[]
             {
                 @"<meta[^>]+property=""og:title""[^>]+content=""(?<title>[^""]+)""",
                 @"<meta[^>]+name=""title""[^>]+content=""(?<title>[^""]+)""",
-                @"<title>(?<title>.*?)</title>",
-                @"<h1[^>]*>(?<title>.*?)</h1>"
+                @"<title>(?<title>.*?)</title>"
             };
 
             foreach (string pattern in patterns)
@@ -1103,6 +1120,8 @@ namespace get_link_manga
 
                 string title = WebUtility.HtmlDecode(Regex.Replace(match.Groups["title"].Value, @"<[^>]+>", string.Empty)).Trim();
                 title = Regex.Replace(title, @"\s*[-|]\s*dilib\.vn.*$", string.Empty, RegexOptions.IgnoreCase).Trim();
+                title = Regex.Replace(title, @"\s*[-|]\s*thuviensach\.vn.*$", string.Empty, RegexOptions.IgnoreCase).Trim();
+                title = Regex.Replace(title, @"\s*Tiếng\s+Việt,\s*Thư\s+Viện\s+Sách.*$", string.Empty, RegexOptions.IgnoreCase).Trim();
                 if (!string.IsNullOrWhiteSpace(title))
                 {
                     return title;
