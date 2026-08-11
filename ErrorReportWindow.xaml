@@ -4,9 +4,10 @@
         Title="ERROR REPORT" Height="560" Width="820"
         Background="{StaticResource CyberpunkDarkBrush}"
         WindowStartupLocation="CenterOwner"
-        ResizeMode="CanResize">
+        ResizeMode="CanResize"
+        PreviewKeyDown="Window_PreviewKeyDown">
 
-    <Grid Margin="15">
+    <Grid x:Name="gridRoot" Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>

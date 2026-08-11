@@ -8,7 +8,8 @@
         Title="DUPLICATE NAME MANAGER" Height="650" Width="850"
         Background="{DynamicResource CyberpunkDarkBrush}"
         WindowStartupLocation="CenterOwner"
-        ShowInTaskbar="False">
+        ShowInTaskbar="False"
+        PreviewKeyDown="Window_PreviewKeyDown">
 
     <Window.Resources>
         <!-- DataGrid Style -->
@@ -120,7 +121,7 @@
         </Style>
     </Window.Resources>
 
-    <Grid Margin="15">
+    <Grid x:Name="gridRoot" Margin="15">
         <Grid.RowDefinitions>
             <!-- Header -->
             <RowDefinition Height="Auto"/>

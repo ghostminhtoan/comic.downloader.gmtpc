@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace get_link_manga
 {
@@ -320,6 +322,58 @@ namespace get_link_manga
             column.SortDirection = direction;
 
             view.CustomSort = new ErrorDisplayItemComparer(sortMember, direction);
+        }
+
+        private double _zoomScale = 1.0;
+
+        private void Window_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (e.Key == Key.OemPlus || e.Key == Key.Add)
+                {
+                    Zoom(0.1);
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.OemMinus || e.Key == Key.Subtract)
+                {
+                    Zoom(-0.1);
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.D0 || e.Key == Key.NumPad0)
+                {
+                    ResetZoom();
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void Zoom(double delta)
+        {
+            _zoomScale = Math.Max(0.5, Math.Min(3.0, _zoomScale + delta));
+            ApplyZoom();
+        }
+
+        private void ResetZoom()
+        {
+            _zoomScale = 1.0;
+            ApplyZoom();
+        }
+
+        private void ApplyZoom()
+        {
+            var rootGrid = this.Content as Grid;
+            if (rootGrid == null) return;
+
+            if (rootGrid.LayoutTransform is ScaleTransform scaleTransform)
+            {
+                scaleTransform.ScaleX = _zoomScale;
+                scaleTransform.ScaleY = _zoomScale;
+            }
+            else
+            {
+                rootGrid.LayoutTransform = new ScaleTransform(_zoomScale, _zoomScale);
+            }
         }
     }
 

@@ -1538,5 +1538,32 @@ namespace get_link_manga
                 _externalBookListWindow = null;
             }
         }
+
+        private double _externalWindowZoomScale = 1.0;
+        private void ZoomExternalWindow(double delta, bool reset = false)
+        {
+            if (_externalBookListWindow == null) return;
+            if (reset)
+            {
+                _externalWindowZoomScale = 1.0;
+            }
+            else
+            {
+                _externalWindowZoomScale = Math.Max(0.5, Math.Min(3.0, _externalWindowZoomScale + delta));
+            }
+
+            if (_externalBookListWindow.Content is Grid mainGrid)
+            {
+                if (mainGrid.LayoutTransform is System.Windows.Media.ScaleTransform scaleTransform)
+                {
+                    scaleTransform.ScaleX = _externalWindowZoomScale;
+                    scaleTransform.ScaleY = _externalWindowZoomScale;
+                }
+                else
+                {
+                    mainGrid.LayoutTransform = new System.Windows.Media.ScaleTransform(_externalWindowZoomScale, _externalWindowZoomScale);
+                }
+            }
+        }
     }
 }

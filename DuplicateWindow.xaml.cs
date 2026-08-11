@@ -1223,5 +1223,54 @@ namespace get_link_manga
             _mainWindow.Log($"Deleted {successCount} checked local duplicate folder(s) from disk.");
             lblStatus.Text = $"Deleted {successCount} checked local folder(s).";
         }
+
+        private double _zoomScale = 1.0;
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (e.Key == Key.OemPlus || e.Key == Key.Add)
+                {
+                    Zoom(0.1);
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.OemMinus || e.Key == Key.Subtract)
+                {
+                    Zoom(-0.1);
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.D0 || e.Key == Key.NumPad0)
+                {
+                    ResetZoom();
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void Zoom(double delta)
+        {
+            _zoomScale = Math.Max(0.5, Math.Min(3.0, _zoomScale + delta));
+            ApplyZoom();
+        }
+
+        private void ResetZoom()
+        {
+            _zoomScale = 1.0;
+            ApplyZoom();
+        }
+
+        private void ApplyZoom()
+        {
+            if (gridRoot.LayoutTransform is ScaleTransform scaleTransform)
+            {
+                scaleTransform.ScaleX = _zoomScale;
+                scaleTransform.ScaleY = _zoomScale;
+            }
+            else
+            {
+                gridRoot.LayoutTransform = new ScaleTransform(_zoomScale, _zoomScale);
+            }
+        }
     }
 }

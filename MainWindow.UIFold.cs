@@ -148,6 +148,46 @@ namespace get_link_manga
                 return;
             }
 
+            if (e.Key == Key.OemPlus || e.Key == Key.Add)
+            {
+                if (sender == _externalBookListWindow)
+                {
+                    ZoomExternalWindow(0.1);
+                }
+                else
+                {
+                    ChangeUiZoomPreset(1);
+                }
+                e.Handled = true;
+                return;
+            }
+            else if (e.Key == Key.OemMinus || e.Key == Key.Subtract)
+            {
+                if (sender == _externalBookListWindow)
+                {
+                    ZoomExternalWindow(-0.1);
+                }
+                else
+                {
+                    ChangeUiZoomPreset(-1);
+                }
+                e.Handled = true;
+                return;
+            }
+            else if (e.Key == Key.D0 || e.Key == Key.NumPad0)
+            {
+                if (sender == _externalBookListWindow)
+                {
+                    ZoomExternalWindow(0, reset: true);
+                }
+                else
+                {
+                    SetUiZoomPercent(DefaultUiZoomPercent);
+                }
+                e.Handled = true;
+                return;
+            }
+
             if (!hasShift && e.Key == Key.V)
             {
                 if (!isTextInputFocused && (_currentSection == AppSection.Download || _currentSection == AppSection.ChooseSource))
