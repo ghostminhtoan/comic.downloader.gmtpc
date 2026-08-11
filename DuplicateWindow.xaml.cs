@@ -81,6 +81,19 @@ namespace get_link_manga
                 SyncSortFromMain();
             }
 
+            // Synchronize selection changes
+            dgDuplicates.SelectionChanged += DgDuplicates_SelectionChanged;
+            lbDuplicatesThumbnail.SelectionChanged += LbDuplicatesThumbnail_SelectionChanged;
+
+            if (_mainWindow.dgResults != null)
+            {
+                _mainWindow.dgResults.SelectionChanged += MainWindow_SelectionChanged;
+            }
+            if (_mainWindow.lbResultsThumbnail != null)
+            {
+                _mainWindow.lbResultsThumbnail.SelectionChanged += MainWindow_SelectionChanged;
+            }
+
             // Hook PropertyChanged of each item to update counts if Checked changes
             foreach (var item in _mainWindow._scrapedItems)
             {
@@ -487,6 +500,19 @@ namespace get_link_manga
                 ((System.Collections.Specialized.INotifyCollectionChanged)mainView.SortDescriptions).CollectionChanged -= MainSortDescriptions_CollectionChanged;
             }
 
+            // Unregister selection changes
+            dgDuplicates.SelectionChanged -= DgDuplicates_SelectionChanged;
+            lbDuplicatesThumbnail.SelectionChanged -= LbDuplicatesThumbnail_SelectionChanged;
+
+            if (_mainWindow.dgResults != null)
+            {
+                _mainWindow.dgResults.SelectionChanged -= MainWindow_SelectionChanged;
+            }
+            if (_mainWindow.lbResultsThumbnail != null)
+            {
+                _mainWindow.lbResultsThumbnail.SelectionChanged -= MainWindow_SelectionChanged;
+            }
+
             base.OnClosed(e);
         }
 
@@ -723,6 +749,9 @@ namespace get_link_manga
                 {
                     lbDuplicatesThumbnail.SelectedItems.Add(item);
                 }
+
+                // Đồng bộ chọn dòng sang MainWindow
+                SyncSelectionToMainWindow(dgDuplicates.SelectedItems.Cast<GalleryItem>().ToList());
             }
             finally
             {
@@ -758,6 +787,9 @@ namespace get_link_manga
                 {
                     dgDuplicates.SelectedItems.Add(item);
                 }
+
+                // Đồng bộ chọn dòng sang MainWindow
+                SyncSelectionToMainWindow(lbDuplicatesThumbnail.SelectedItems.Cast<GalleryItem>().ToList());
             }
             finally
             {
@@ -1335,6 +1367,85 @@ namespace get_link_manga
                 {
                     return dgDuplicatesLocal.SelectedItems.Cast<GalleryItem>().Where(x => x != null).ToList();
                 }
+            }
+        }
+
+        private void MainWindow_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isSyncingSelection) return;
+            _isSyncingSelection = true;
+            try
+            {
+                System.Collections.Generic.List<GalleryItem> selectedItems = null;
+                if (sender is DataGrid dg)
+                {
+                    selectedItems = dg.SelectedItems.Cast<GalleryItem>().Where(x => x != null).ToList();
+                }
+                else if (sender is ListBox lb)
+                {
+                    selectedItems = lb.SelectedItems.Cast<GalleryItem>().Where(x => x != null).ToList();
+                }
+
+                if (selectedItems != null)
+                {
+                    SyncSelectionToDuplicateWindow(selectedItems);
+                }
+            }
+            finally
+            {
+                _isSyncingSelection = false;
+            }
+        }
+
+        private void SyncSelectionToMainWindow(System.Collections.Generic.List<GalleryItem> items)
+        {
+            if (_mainWindow.dgResults != null)
+            {
+                _mainWindow.dgResults.SelectedItems.Clear();
+                foreach (var item in items)
+                {
+                    _mainWindow.dgResults.SelectedItems.Add(item);
+                }
+                if (items.Count > 0)
+                {
+                    _mainWindow.dgResults.ScrollIntoView(items[0]);
+                }
+            }
+
+            if (_mainWindow.lbResultsThumbnail != null)
+            {
+                _mainWindow.lbResultsThumbnail.SelectedItems.Clear();
+                foreach (var item in items)
+                {
+                    _mainWindow.lbResultsThumbnail.SelectedItems.Add(item);
+                }
+                if (items.Count > 0)
+                {
+                    _mainWindow.lbResultsThumbnail.ScrollIntoView(items[0]);
+                }
+            }
+        }
+
+        private void SyncSelectionToDuplicateWindow(System.Collections.Generic.List<GalleryItem> items)
+        {
+            dgDuplicates.SelectedItems.Clear();
+            foreach (var item in items)
+            {
+                dgDuplicates.SelectedItems.Add(item);
+            }
+            if (items.Count > 0 && dgDuplicates.Items.Contains(items[0]))
+            {
+                dgDuplicates.ScrollIntoView(items[0]);
+            }
+
+            lbDuplicatesThumbnail.SelectedItems.Clear();
+            foreach (var item in items)
+            {
+                lbDuplicatesThumbnail.SelectedItems.Add(item);
+            }
+            if (items.Count > 0 && lbDuplicatesThumbnail.Items.Contains(items[0]))
+            {
+                lbDuplicatesThumbnail.ScrollIntoView(items[0]);
             }
         }
     }
