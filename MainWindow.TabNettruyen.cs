@@ -1409,13 +1409,15 @@ document.addEventListener('click', function (event) {
                             var existingItem = _scrapedItems.FirstOrDefault(item => item.Link.Equals(fullLink, StringComparison.OrdinalIgnoreCase));
                             if (existingItem == null && !pageParents.Any(p => p.Link.Equals(fullLink, StringComparison.OrdinalIgnoreCase)))
                             {
+                                string previewUrl = ExtractNettruyenviet10PreviewUrlFromHtml(rawContent, fullLink);
                                 pageParents.Add(new GalleryItem
                                 {
                                     Link = fullLink,
                                     Name = ExtractNettruyenBookTitle(null, title),
                                     SourceDomain = GetDownloadSiteKey(new GalleryItem { Link = fullLink }),
                                     OriginalIndex = _scrapedItems.Count + pageParents.Count,
-                                    IsChecked = false
+                                    IsChecked = false,
+                                    HoverPreviewThumbnailUrl = previewUrl
                                 });
                             }
                         }
@@ -1596,6 +1598,7 @@ document.addEventListener('click', function (event) {
                             title = ExtractNettruyenBookTitle(html, mangaName);
                         }
 
+                        string previewUrl = ExtractNettruyenviet10PreviewUrlFromHtml(html, link);
                         Dispatcher.BeginInvoke((Action)(() =>
                         {
                             _scrapedItems.Add(new GalleryItem
@@ -1606,7 +1609,8 @@ document.addEventListener('click', function (event) {
                                 OriginalIndex = _scrapedItems.Count,
                                 IsChecked = true,
                                 HasNoChapters = false,
-                                LinkCount = latestChapText
+                                LinkCount = latestChapText,
+                                HoverPreviewThumbnailUrl = previewUrl
                             });
                         }));
 
