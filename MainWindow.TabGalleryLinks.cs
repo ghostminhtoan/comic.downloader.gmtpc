@@ -3720,6 +3720,18 @@ namespace get_link_manga
                 return true;
             }
 
+            foreach (var chapter in chapters)
+            {
+                if (chapter != null && !chapter.ParsedChapterNumber.HasValue)
+                {
+                    if (TryParseReaderChapterNumber(chapter.Name, out double chapterNumber, out bool isDecimal))
+                    {
+                        chapter.ParsedChapterNumber = chapterNumber;
+                        chapter.IsDecimalChapter = isDecimal;
+                    }
+                }
+            }
+
             HashSet<int> numbers = new HashSet<int>(chapters
                 .Where(chapter => chapter != null && !chapter.IsDecimalChapter && chapter.ParsedChapterNumber.HasValue)
                 .SelectMany(chapter => EnumerateDownloadMissingChapterIntegers(chapter)));
