@@ -3520,6 +3520,37 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
+                            <!-- Thumbnail Column -->
+                            <DataGridTemplateColumn x:Name="colThumb" Header="THUMB" Width="80" Visibility="Collapsed">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid Width="70" Height="50" Margin="2">
+                                            <Border BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="2" Background="#06090e">
+                                                <Grid>
+                                                    <Image Source="{Binding HoverPreviewThumbnailImageSource}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="NO IMAGE" 
+                                                               FontSize="8" 
+                                                               Foreground="{StaticResource CyberpunkMutedTextBrush}" 
+                                                               HorizontalAlignment="Center" 
+                                                               VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding HoverPreviewThumbnailImageSource}" Value="{x:Null}">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Grid>
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
                             <!-- Gallery Details Column (Vertical stack of Name and Link) -->
                             <DataGridTemplateColumn x:Name="colGalleryDetails" Width="3.1*" SortMemberPath="Name">
                                 <DataGridTemplateColumn.Header>

@@ -1456,6 +1456,16 @@ namespace get_link_manga
                 Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#091018")
             };
 
+            // Hiện cột Thumbnail và tăng chiều cao dòng DataGrid lên 60
+            if (colThumb != null)
+            {
+                colThumb.Visibility = Visibility.Visible;
+            }
+            if (dgResults != null)
+            {
+                dgResults.MinRowHeight = 60;
+            }
+
             // Gán Icon
             if (this.Icon != null)
             {
@@ -1489,6 +1499,16 @@ namespace get_link_manga
 
                 // Phục hồi Grid.Row
                 Grid.SetRow(grdBookListContainer, 3);
+
+                // Khôi phục chiều cao dòng DataGrid và ẩn cột Thumbnail
+                if (colThumb != null)
+                {
+                    colThumb.Visibility = Visibility.Collapsed;
+                }
+                if (dgResults != null)
+                {
+                    dgResults.MinRowHeight = 32;
+                }
 
                 // Ẩn placeholder
                 borderBookListPlaceholder.Visibility = Visibility.Collapsed;
