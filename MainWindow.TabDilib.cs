@@ -254,6 +254,18 @@ namespace get_link_manga
             return cleaned;
         }
 
+        private string CleanDilibBookTitle(string title)
+        {
+            string cleaned = CleanDilibDisplayTitle(title);
+            if (string.IsNullOrWhiteSpace(cleaned))
+            {
+                return string.Empty;
+            }
+            // Loại bỏ hậu tố chapter/chương ở cuối tên book (ví dụ: " - Chap 1", " - Chương 48")
+            cleaned = Regex.Replace(cleaned, @"\s*[-|]?\s*\b(?:chap(?:ter)?|chương|chuong)\b\.?\s*\d+(?:\.\d+)?.*$", string.Empty, RegexOptions.IgnoreCase);
+            return cleaned.Trim();
+        }
+
         private string CleanChapterTitlePrefix(string chapterTitle, string bookTitle)
         {
             if (string.IsNullOrWhiteSpace(chapterTitle))
@@ -752,7 +764,7 @@ namespace get_link_manga
                     {
                         title = HumanizeDilibSlug(Path.GetFileNameWithoutExtension(new Uri(normalizedLink).AbsolutePath));
                     }
-                    title = CleanDilibDisplayTitle(title);
+                    title = CleanDilibBookTitle(title);
 
                     string count = match.Groups["count"].Success ? match.Groups["count"].Value.Trim() + " chapters" : string.Empty;
                     results.Add(new GalleryItem
@@ -1004,17 +1016,17 @@ namespace get_link_manga
             string title = ExtractDilibTitleFromHtml(html);
             if (!string.IsNullOrWhiteSpace(title))
             {
-                return CleanDilibDisplayTitle(title);
+                return CleanDilibBookTitle(title);
             }
 
             try
             {
                 string slug = GetDilibBookSlugFromUrl(link);
-                return CleanDilibDisplayTitle(HumanizeDilibSlug(slug));
+                return CleanDilibBookTitle(HumanizeDilibSlug(slug));
             }
             catch
             {
-                return CleanDilibDisplayTitle(HumanizeDilibSlug(link));
+                return CleanDilibBookTitle(HumanizeDilibSlug(link));
             }
         }
 
@@ -1504,7 +1516,7 @@ namespace get_link_manga
             string html = await FetchStringAsync(normalized, token);
             string bookTitle = string.IsNullOrWhiteSpace(bookTitleOverride)
                     ? GetDilibBookTitleFromHtml(html, normalized)
-                    : CleanDilibDisplayTitle(bookTitleOverride);
+                    : CleanDilibBookTitle(bookTitleOverride);
             string chapterTitle = CleanChapterTitlePrefix(GetDilibChapterTitleFromHtml(html, normalized), bookTitle);
 
             var imageUrls = ExtractDilibImageUrlsFromHtml(html, normalized);
