@@ -361,6 +361,7 @@ namespace get_link_manga
                     siteFolder.IndexOf("loppytoonn", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     siteFolder.IndexOf("hentai2read", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     siteFolder.IndexOf("dilib", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    siteFolder.IndexOf("thuviensach", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     siteFolder.IndexOf("daomeoden", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     siteFolder.IndexOf("mangadex", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     siteFolder.IndexOf("ggvn", StringComparison.OrdinalIgnoreCase) >= 0 ||

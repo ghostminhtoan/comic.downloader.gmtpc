@@ -244,9 +244,11 @@ namespace get_link_manga
             }
 
             cleaned = Regex.Replace(cleaned, @"^\s*truyện\s+tranh\s+", string.Empty, RegexOptions.IgnoreCase);
+            cleaned = Regex.Replace(cleaned, @"^\s*đọc\s+truyện\s+", string.Empty, RegexOptions.IgnoreCase);
             cleaned = Regex.Replace(cleaned, @"\s*[,|-]\s*thư\s+viện\s+số\s*$", string.Empty, RegexOptions.IgnoreCase);
             cleaned = Regex.Replace(cleaned, @"\s*[,|-]\s*thư\s+viện\s+sách\s*$", string.Empty, RegexOptions.IgnoreCase);
             cleaned = Regex.Replace(cleaned, @"\s*-\s*truyện\s+tranh\s*$", string.Empty, RegexOptions.IgnoreCase);
+            cleaned = Regex.Replace(cleaned, @"\s*-\s*đọc\s+truyện\s*$", string.Empty, RegexOptions.IgnoreCase);
             cleaned = Regex.Replace(cleaned, @"\s*Tiếng\s+Việt,\s*Thư\s+Viện\s+Sách\s*$", string.Empty, RegexOptions.IgnoreCase);
             cleaned = Regex.Replace(cleaned, @"\s+", " ").Trim();
             return cleaned;
@@ -262,7 +264,7 @@ namespace get_link_manga
             if (!string.IsNullOrWhiteSpace(bookTitle))
             {
                 string cleanBook = bookTitle.Trim();
-                var prefixes = new[] { "truyện " + cleanBook, cleanBook };
+                var prefixes = new[] { "đọc truyện " + cleanBook, "truyện tranh " + cleanBook, "truyện " + cleanBook, cleanBook };
                 foreach (var prefix in prefixes)
                 {
                     if (chapterTitle.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
