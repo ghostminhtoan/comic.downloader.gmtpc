@@ -1479,6 +1479,9 @@ namespace get_link_manga
 
             _externalBookListWindow.Content = mainGrid;
 
+            // Chuyển tiếp các phím tắt (như Ctrl+Shift+L) về MainWindow khi cửa sổ phụ đang active
+            _externalBookListWindow.PreviewKeyDown += MainWindow_PreviewPanelHotkeys;
+
             // Lắng nghe SizeChanged chỉ để tính toán lại layout mật độ và chiều cao, không Rebuild toàn bộ view gây lag
             _externalBookListWindow.SizeChanged += (s, ev) =>
             {
