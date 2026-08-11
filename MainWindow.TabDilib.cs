@@ -16,7 +16,7 @@ namespace get_link_manga
 {
     public partial class MainWindow : Window
     {
-        private const string DilibSiteFolder = "loppytoonn.com";
+        private const string DilibSiteFolder = "thuviensach.vn";
         private const string DilibBaseUrl = "https://thuviensach.vn";
         private const string DilibDefaultCategoryUrl = "https://thuviensach.vn/truyen-tranh/shounen/";
         private static readonly string[] DilibHosts = { "dilib.vn", "thuviensach.vn" };
