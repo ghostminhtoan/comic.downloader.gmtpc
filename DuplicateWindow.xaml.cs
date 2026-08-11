@@ -97,11 +97,7 @@ namespace get_link_manga
                 e.PropertyName == nameof(GalleryItem.IsDuplicate) ||
                 e.PropertyName == nameof(GalleryItem.IsCensorshipColorDuplicate))
             {
-                Dispatcher.InvokeAsync(() =>
-                {
-                    _duplicatesView?.Refresh();
-                    UpdateStatus();
-                });
+                Dispatcher.InvokeAsync(UpdateStatus);
             }
         }
 
@@ -137,11 +133,7 @@ namespace get_link_manga
                     item.PropertyChanged -= GalleryItem_PropertyChanged;
                 }
             }
-            Dispatcher.InvokeAsync(() =>
-            {
-                _duplicatesView?.Refresh();
-                UpdateStatus();
-            });
+            Dispatcher.InvokeAsync(UpdateStatus);
         }
 
         private void TabMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
