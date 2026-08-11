@@ -295,9 +295,17 @@ namespace get_link_manga
 
             if (itemsToRemove.Count == 0) return;
 
-            foreach (var item in itemsToRemove)
+            _isSyncingSelection = true;
+            try
             {
-                _mainWindow._scrapedItems.Remove(item);
+                foreach (var item in itemsToRemove)
+                {
+                    _mainWindow._scrapedItems.Remove(item);
+                }
+            }
+            finally
+            {
+                _isSyncingSelection = false;
             }
 
             _mainWindow.RecalculateDuplicates();
@@ -546,9 +554,17 @@ namespace get_link_manga
             var itemsToRemove = _mainWindow._scrapedItems.Where(item => item.IsChecked && visibleSet.Contains(item)).ToList();
             if (!itemsToRemove.Any()) return;
 
-            foreach (var item in itemsToRemove)
+            _isSyncingSelection = true;
+            try
             {
-                _mainWindow._scrapedItems.Remove(item);
+                foreach (var item in itemsToRemove)
+                {
+                    _mainWindow._scrapedItems.Remove(item);
+                }
+            }
+            finally
+            {
+                _isSyncingSelection = false;
             }
 
             _mainWindow.RecalculateDuplicates();
@@ -569,9 +585,17 @@ namespace get_link_manga
             var itemsToRemove = _mainWindow._scrapedItems.Where(item => !item.IsChecked && visibleSet.Contains(item)).ToList();
             if (!itemsToRemove.Any()) return;
 
-            foreach (var item in itemsToRemove)
+            _isSyncingSelection = true;
+            try
             {
-                _mainWindow._scrapedItems.Remove(item);
+                foreach (var item in itemsToRemove)
+                {
+                    _mainWindow._scrapedItems.Remove(item);
+                }
+            }
+            finally
+            {
+                _isSyncingSelection = false;
             }
 
             _mainWindow.RecalculateDuplicates();
