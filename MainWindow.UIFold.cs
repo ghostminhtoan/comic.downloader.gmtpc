@@ -240,7 +240,12 @@ namespace get_link_manga
                     e.Handled = true;
                     return;
                 case Key.L:
-                    SelectAppSection(AppSection.TraceLog);
+                    if (chkResultsPresentation != null)
+                    {
+                        bool isThumbnail = chkResultsPresentation.IsChecked == true;
+                        chkResultsPresentation.IsChecked = !isThumbnail;
+                        SetResultsPresentationMode(!isThumbnail, !isThumbnail);
+                    }
                     e.Handled = true;
                     return;
             }
