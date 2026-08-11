@@ -1178,6 +1178,20 @@ namespace get_link_manga
                 return $"{GetLocalizedLabel("Page", "Trang")} {pageValue}";
             }
 
+            if (lower.StartsWith("done"))
+            {
+                string statusText = lower.Contains("error")
+                    ? GetLocalizedLabel("Completed with errors", "Hoàn thành có lỗi")
+                    : GetLocalizedLabel("Completed", "Hoàn thành");
+
+                var match = System.Text.RegularExpressions.Regex.Match(trimmed, @"\((\d+/\d+)\)");
+                if (match.Success)
+                {
+                    return $"{statusText} ({match.Groups[1].Value})";
+                }
+                return statusText;
+            }
+
             if (trimmed.Contains("/"))
             {
                 return $"{GetLocalizedLabel("Page", "Trang")} {trimmed}";
