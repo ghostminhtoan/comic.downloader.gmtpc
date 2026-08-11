@@ -1525,13 +1525,11 @@ namespace get_link_manga
                 throw new Exception("Không tìm thấy ảnh chapter hợp lệ.");
             }
 
-            string safeBook = GetCanonicalBookFolderName(item, bookTitle, "Unknown Book");
-            string aliasSafeBook = GetSafePathName(bookTitle);
+            string safeBook = GetSafePathName(bookTitle);
             string safeChapter = GetDownloadChapterFolderName(bookTitle, chapterTitle);
 
             item.Name = FormatGalleryTitle($"{bookTitle} - {chapterTitle}");
             string siteRoot = GetSiteDownloadRoot(rootFolder, DilibSiteFolder);
-            await NormalizeChapterFolderAliasAsync(siteRoot, safeBook, aliasSafeBook, safeChapter, token);
             string unmergedPath = Path.Combine(siteRoot, $"{safeBook}-{safeChapter}");
             string mergedPath = Path.Combine(siteRoot, safeBook, safeChapter);
             string targetFolder = _isSingleComicFolderType ? mergedPath : unmergedPath;
