@@ -348,6 +348,15 @@ namespace get_link_manga
             }
         }
 
+        private void Window_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                Zoom(e.Delta > 0 ? 0.1 : -0.1);
+                e.Handled = true;
+            }
+        }
+
         private void Zoom(double delta)
         {
             _zoomScale = Math.Max(0.5, Math.Min(3.0, _zoomScale + delta));

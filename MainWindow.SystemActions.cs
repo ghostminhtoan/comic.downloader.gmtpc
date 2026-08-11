@@ -1481,6 +1481,7 @@ namespace get_link_manga
 
             // Chuyển tiếp các phím tắt (như Ctrl+Shift+L) về MainWindow khi cửa sổ phụ đang active
             _externalBookListWindow.PreviewKeyDown += MainWindow_PreviewPanelHotkeys;
+            _externalBookListWindow.PreviewMouseWheel += ExternalBookListWindow_PreviewMouseWheel;
 
             // Lắng nghe SizeChanged chỉ để tính toán lại layout mật độ và chiều cao, không Rebuild toàn bộ view gây lag
             _externalBookListWindow.SizeChanged += (s, ev) =>
@@ -1563,6 +1564,15 @@ namespace get_link_manga
                 {
                     mainGrid.LayoutTransform = new System.Windows.Media.ScaleTransform(_externalWindowZoomScale, _externalWindowZoomScale);
                 }
+            }
+        }
+
+        private void ExternalBookListWindow_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            if (System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Control)
+            {
+                ZoomExternalWindow(e.Delta > 0 ? 0.1 : -0.1);
+                e.Handled = true;
             }
         }
     }

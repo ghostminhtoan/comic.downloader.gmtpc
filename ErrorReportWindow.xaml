@@ -5,7 +5,8 @@
         Background="{StaticResource CyberpunkDarkBrush}"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize"
-        PreviewKeyDown="Window_PreviewKeyDown">
+        PreviewKeyDown="Window_PreviewKeyDown"
+        PreviewMouseWheel="Window_PreviewMouseWheel">
 
     <Grid x:Name="gridRoot" Margin="15">
         <Grid.RowDefinitions>

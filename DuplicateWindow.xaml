@@ -9,7 +9,8 @@
         Background="{DynamicResource CyberpunkDarkBrush}"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        PreviewKeyDown="Window_PreviewKeyDown">
+        PreviewKeyDown="Window_PreviewKeyDown"
+        PreviewMouseWheel="Window_PreviewMouseWheel">
 
     <Window.Resources>
         <!-- DataGrid Style -->
