@@ -47,6 +47,12 @@ namespace get_link_manga
                 }
                 return false;
             };
+            if (_duplicatesView.CanChangeLiveFiltering)
+            {
+                _duplicatesView.LiveFilteringProperties.Add(nameof(GalleryItem.IsDuplicate));
+                _duplicatesView.LiveFilteringProperties.Add(nameof(GalleryItem.IsCensorshipColorDuplicate));
+                _duplicatesView.IsLiveFiltering = true;
+            }
 
             dgDuplicates.ItemsSource = _duplicatesView;
             dgDuplicates.Loaded += DgDuplicates_Loaded;
@@ -91,7 +97,11 @@ namespace get_link_manga
                 e.PropertyName == nameof(GalleryItem.IsDuplicate) ||
                 e.PropertyName == nameof(GalleryItem.IsCensorshipColorDuplicate))
             {
-                Dispatcher.InvokeAsync(UpdateStatus);
+                Dispatcher.InvokeAsync(() =>
+                {
+                    _duplicatesView?.Refresh();
+                    UpdateStatus();
+                });
             }
         }
 
@@ -127,7 +137,11 @@ namespace get_link_manga
                     item.PropertyChanged -= GalleryItem_PropertyChanged;
                 }
             }
-            Dispatcher.InvokeAsync(UpdateStatus);
+            Dispatcher.InvokeAsync(() =>
+            {
+                _duplicatesView?.Refresh();
+                UpdateStatus();
+            });
         }
 
         private void TabMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -395,7 +409,7 @@ namespace get_link_manga
 
         private void MenuCheckSelected_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var item in GetActiveGrid().SelectedItems.Cast<GalleryItem>())
+            foreach (var item in GetSelectedGalleryItems())
             {
                 item.IsChecked = true;
             }
@@ -403,7 +417,7 @@ namespace get_link_manga
 
         private void MenuUncheckSelected_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var item in GetActiveGrid().SelectedItems.Cast<GalleryItem>())
+            foreach (var item in GetSelectedGalleryItems())
             {
                 item.IsChecked = false;
             }
@@ -420,8 +434,8 @@ namespace get_link_manga
 
         private void MenuCopySelectedLinks_Click(object sender, RoutedEventArgs e)
         {
-            if (dgDuplicates.SelectedItems.Count == 0) return;
-            var items = dgDuplicates.SelectedItems.Cast<GalleryItem>().ToList();
+            var items = GetSelectedGalleryItems();
+            if (items.Count == 0) return;
             string text = string.Join("\r\n", items.Select(item => item.Link));
             Clipboard.SetText(text);
             _mainWindow.Log($"Copied {items.Count} selected duplicate link(s) to clipboard.");
@@ -551,7 +565,7 @@ namespace get_link_manga
 
         private async void MenuDownloadSelected_Click(object sender, RoutedEventArgs e)
         {
-            var items = dgDuplicates.SelectedItems.Cast<GalleryItem>().ToList();
+            var items = GetSelectedGalleryItems();
             if (!items.Any())
             {
                 MessageBox.Show("Vui lòng bôi đen chọn ít nhất 1 dòng để tải (Please select at least one highlighted line to download).", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -1097,7 +1111,7 @@ namespace get_link_manga
 
         private void MenuCheckSelectedLocal_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var item in dgDuplicatesLocal.SelectedItems.Cast<GalleryItem>())
+            foreach (var item in GetSelectedGalleryItems())
             {
                 item.IsChecked = true;
             }
@@ -1106,7 +1120,7 @@ namespace get_link_manga
 
         private void MenuUncheckSelectedLocal_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var item in dgDuplicatesLocal.SelectedItems.Cast<GalleryItem>())
+            foreach (var item in GetSelectedGalleryItems())
             {
                 item.IsChecked = false;
             }
@@ -1125,8 +1139,8 @@ namespace get_link_manga
 
         private void MenuCopySelectedPathsLocal_Click(object sender, RoutedEventArgs e)
         {
-            if (dgDuplicatesLocal.SelectedItems.Count == 0) return;
-            var items = dgDuplicatesLocal.SelectedItems.Cast<GalleryItem>().ToList();
+            var items = GetSelectedGalleryItems();
+            if (items.Count == 0) return;
             string text = string.Join("\r\n", items.Select(item => item.Link));
             Clipboard.SetText(text);
             _mainWindow.Log($"Copied {items.Count} selected local path(s) to clipboard.");
@@ -1303,6 +1317,32 @@ namespace get_link_manga
             else
             {
                 gridRoot.LayoutTransform = new ScaleTransform(_zoomScale, _zoomScale);
+            }
+        }
+
+        private System.Collections.Generic.List<GalleryItem> GetSelectedGalleryItems()
+        {
+            if (tabMain.SelectedIndex == 0) // Online
+            {
+                if (chkResultsPresentation?.IsChecked == true)
+                {
+                    return lbDuplicatesThumbnail.SelectedItems.Cast<GalleryItem>().Where(x => x != null).ToList();
+                }
+                else
+                {
+                    return dgDuplicates.SelectedItems.Cast<GalleryItem>().Where(x => x != null).ToList();
+                }
+            }
+            else // Local
+            {
+                if (chkResultsPresentationLocal?.IsChecked == true)
+                {
+                    return lbDuplicatesThumbnailLocal.SelectedItems.Cast<GalleryItem>().Where(x => x != null).ToList();
+                }
+                else
+                {
+                    return dgDuplicatesLocal.SelectedItems.Cast<GalleryItem>().Where(x => x != null).ToList();
+                }
             }
         }
     }
