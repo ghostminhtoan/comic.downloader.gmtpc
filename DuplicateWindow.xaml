@@ -789,7 +789,11 @@
                 <TextBlock Name="lblStatus" Text="Ready to analyze." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" VerticalAlignment="Center"/>
             </StackPanel>
 
-            <Button Grid.Column="1" Name="btnClose" Content="CLOSE CONTROL" Click="BtnClose_Click" Style="{StaticResource CyberpunkButtonPink}" Height="35" Width="140" FontWeight="Bold"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Name="btnDeleteSelected" Content="DELETE SELECTED" Click="BtnDeleteSelected_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="35" Width="140" FontWeight="Bold" Margin="0,0,10,0"/>
+                <Button Name="btnDeleteChecked" Content="DELETE CHECKED" Click="BtnDeleteChecked_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="35" Width="140" FontWeight="Bold" Margin="0,0,10,0"/>
+                <Button Name="btnClose" Content="CLOSE CONTROL" Click="BtnClose_Click" Style="{StaticResource CyberpunkButtonPink}" Height="35" Width="140" FontWeight="Bold"/>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

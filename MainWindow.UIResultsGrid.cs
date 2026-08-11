@@ -3356,5 +3356,63 @@ namespace get_link_manga
                 : $"Finished counting disk images for {successCount} book(s).";
             Log(lblStatus.Text);
         }
+
+        private void DgResults_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Middle)
+            {
+                var dep = (DependencyObject)e.OriginalSource;
+                while (dep != null && !(dep is DataGridRow))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+
+                if (dep is DataGridRow row && row.DataContext is GalleryItem clickedItem)
+                {
+                    e.Handled = true;
+                    string clickedCore = GetSimilarityCore(clickedItem.Name, false);
+                    if (string.IsNullOrEmpty(clickedCore)) return;
+
+                    var matchingItems = _scrapedItems
+                        .Where(item => GetSimilarityCore(item.Name, false) == clickedCore)
+                        .ToList();
+
+                    dgResults.SelectedItems.Clear();
+                    foreach (var item in matchingItems)
+                    {
+                        dgResults.SelectedItems.Add(item);
+                    }
+                }
+            }
+        }
+
+        private void LbResultsThumbnail_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Middle)
+            {
+                var dep = (DependencyObject)e.OriginalSource;
+                while (dep != null && !(dep is ListBoxItem))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+
+                if (dep is ListBoxItem item && item.DataContext is GalleryItem clickedItem)
+                {
+                    e.Handled = true;
+                    string clickedCore = GetSimilarityCore(clickedItem.Name, false);
+                    if (string.IsNullOrEmpty(clickedCore)) return;
+
+                    var matchingItems = _scrapedItems
+                        .Where(g => GetSimilarityCore(g.Name, false) == clickedCore)
+                        .ToList();
+
+                    lbResultsThumbnail.SelectedItems.Clear();
+                    foreach (var m in matchingItems)
+                    {
+                        lbResultsThumbnail.SelectedItems.Add(m);
+                    }
+                }
+            }
+        }
     }
 }

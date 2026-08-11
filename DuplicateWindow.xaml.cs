@@ -432,6 +432,30 @@ namespace get_link_manga
             DeleteSelectedItems();
         }
 
+        private void BtnDeleteSelected_Click(object sender, RoutedEventArgs e)
+        {
+            if (tabMain.SelectedIndex == 0)
+            {
+                DeleteSelectedItems();
+            }
+            else
+            {
+                DeleteSelectedItemsLocal();
+            }
+        }
+
+        private void BtnDeleteChecked_Click(object sender, RoutedEventArgs e)
+        {
+            if (tabMain.SelectedIndex == 0)
+            {
+                DeleteCheckedItems();
+            }
+            else
+            {
+                DeleteCheckedItemsLocal();
+            }
+        }
+
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
             Close();

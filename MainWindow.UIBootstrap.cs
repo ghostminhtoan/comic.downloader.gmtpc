@@ -80,6 +80,15 @@ namespace get_link_manga
 
             Loaded += (sender, args) =>
             {
+                if (dgResults != null)
+                {
+                    dgResults.PreviewMouseDown += DgResults_PreviewMouseDown;
+                }
+                if (lbResultsThumbnail != null)
+                {
+                    lbResultsThumbnail.PreviewMouseDown += LbResultsThumbnail_PreviewMouseDown;
+                }
+
                 var pauseButton = FindPauseButton();
                 if (pauseButton == null)
                 {
