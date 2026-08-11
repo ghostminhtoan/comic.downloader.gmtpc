@@ -1469,25 +1469,10 @@ namespace get_link_manga
 
             _externalBookListWindow.Content = mainGrid;
 
-            // Lắng nghe SizeChanged để tự động tính toán lại cột Grid Thumbnail (có throttle qua timer để tránh lag)
+            // Lắng nghe SizeChanged chỉ để tính toán lại layout mật độ và chiều cao, không Rebuild toàn bộ view gây lag
             _externalBookListWindow.SizeChanged += (s, ev) =>
             {
                 ApplyThumbnailDensity();
-                if (_isResultsThumbnailViewEnabled)
-                {
-                    if (_thumbnailRefreshTimer == null)
-                    {
-                        _thumbnailRefreshTimer = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Background);
-                        _thumbnailRefreshTimer.Interval = TimeSpan.FromMilliseconds(300);
-                        _thumbnailRefreshTimer.Tick += (st, evt) =>
-                        {
-                            _thumbnailRefreshTimer.Stop();
-                            RebuildThumbnailResultsView();
-                        };
-                    }
-                    _thumbnailRefreshTimer.Stop();
-                    _thumbnailRefreshTimer.Start();
-                }
             };
 
             _externalBookListWindow.Closed += (s, ev) =>
