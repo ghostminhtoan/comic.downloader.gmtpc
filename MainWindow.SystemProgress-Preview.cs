@@ -1027,7 +1027,7 @@ namespace get_link_manga
 
             foreach (Match match in Regex.Matches(
                 htmlFragment,
-                @"(?:data-retries|src|data-src|data-original|data-lazy)=[""'](?<url>[^""']+?\.(?:jpe?g|png|webp)(?:\?[^""']*)?)[""']",
+                @"\b(?:data-retries|src|data-src|data-original|data-lazy)=[""'](?<url>https?://[^""']+?\.(?:jpe?g|png|webp)(?:\?[^""']*)?)[""']",
                 RegexOptions.IgnoreCase))
             {
                 foreach (string candidate in SplitNettruyenviet10PreviewUrlCandidates(match.Groups["url"].Value, pageUrl))
