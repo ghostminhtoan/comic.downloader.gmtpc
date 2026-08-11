@@ -3182,6 +3182,17 @@ namespace get_link_manga
                 item.HoverPreviewLocalPath = null;
                 item.HoverPreviewThumbnailLocalPath = null;
 
+                if (item.Link != null)
+                {
+                    _galleryHoverPreviewBitmapMissingCache.Remove(item.Link);
+                    _galleryHoverPreviewMissingCache.Remove(item.Link);
+                }
+
+                if (item.HoverPreviewThumbnailUrl != null)
+                {
+                    _galleryHoverPreviewBitmapMissingCache.Remove(item.HoverPreviewThumbnailUrl);
+                }
+
                 string domainFolder = GetDomainFolderName(item, item.HoverPreviewThumbnailUrl);
                 string previewRoot = System.IO.Path.Combine(PortablePaths.PortableTempRoot, "preview-cache", domainFolder);
 

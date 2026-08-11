@@ -754,6 +754,7 @@ namespace get_link_manga
             }
             else if (!string.IsNullOrWhiteSpace(item.Link) && IsNettruyenUrl(item.Link))
             {
+                await SolveNettruyenCaptchaIfNeededAsync(item.Link);
                 string html = await FetchStringAsync(item.Link, token);
                 string previewUrl = ExtractNettruyenviet10PreviewUrlFromHtml(html, item.Link);
                 if (!string.IsNullOrWhiteSpace(previewUrl))
