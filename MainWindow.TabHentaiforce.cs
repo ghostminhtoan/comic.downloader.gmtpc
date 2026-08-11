@@ -760,6 +760,13 @@ namespace get_link_manga
                     ExtractAndApplyNettruyenviet10PreviewTags(item, html);
                 }
             }
+            else if (IsDilibUrl(link))
+            {
+                if (fetchTags)
+                {
+                    ExtractAndApplyThuviensachPreviewTags(item, html);
+                }
+            }
         }
 
         private string ExtractMangadexPreviewUrlFromHtml(string html, string pageUrl)
