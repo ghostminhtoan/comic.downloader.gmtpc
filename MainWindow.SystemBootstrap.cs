@@ -704,7 +704,16 @@ namespace get_link_manga
                     Dispatcher.BeginInvoke(new Action(() => ShowProjectWindowForSection(AppSection.About)));
                     return true;
                 case HOTKEY_PROJECT_TRACELOG_SECTION_ID:
-                    Dispatcher.BeginInvoke(new Action(() => ShowProjectWindowForSection(AppSection.TraceLog)));
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        EnsureProjectWindowVisible();
+                        if (chkResultsPresentation != null)
+                        {
+                            bool isThumbnail = chkResultsPresentation.IsChecked == true;
+                            chkResultsPresentation.IsChecked = !isThumbnail;
+                            SetResultsPresentationMode(!isThumbnail, !isThumbnail);
+                        }
+                    }));
                     return true;
                 case HOTKEY_PROJECT_UPDATE_SECTION_ID:
                     Dispatcher.BeginInvoke(new Action(() => ShowProjectWindowForSection(AppSection.Update)));
