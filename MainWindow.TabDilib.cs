@@ -1499,12 +1499,12 @@ namespace get_link_manga
         private async Task<bool> DownloadDilibChapterAsync(GalleryItem item, string rootFolder, CancellationToken token, GalleryItem queueItem = null, bool isParentQueue = false, string bookTitleOverride = null)
         {
             string normalized = NormalizeDilibUrl(item.Link);
-                string html = await FetchStringAsync(normalized, token);
+            string html = await FetchStringAsync(normalized, token);
             string bookTitle = string.IsNullOrWhiteSpace(bookTitleOverride)
                     ? GetDilibBookTitleFromHtml(html, normalized)
                     : CleanDilibDisplayTitle(bookTitleOverride);
-                string chapterTitle = CleanChapterTitlePrefix(GetDilibChapterTitleFromHtml(html, normalized), bookTitle);
-                item.Name = FormatGalleryTitle($"{bookTitle} - {chapterTitle}");
+            string chapterTitle = CleanChapterTitlePrefix(GetDilibChapterTitleFromHtml(html, normalized), bookTitle);
+            item.Name = bookTitle;
 
             var imageUrls = ExtractDilibImageUrlsFromHtml(html, normalized);
             if (imageUrls.Count == 0)
@@ -1515,6 +1515,7 @@ namespace get_link_manga
             string safeBook = GetCanonicalBookFolderName(item, bookTitle, "Unknown Book");
             string aliasSafeBook = GetSafePathName(bookTitle);
             string safeChapter = GetDownloadChapterFolderName(bookTitle, chapterTitle);
+            item.Name = FormatGalleryTitle($"{bookTitle} - {chapterTitle}");
             string siteRoot = GetSiteDownloadRoot(rootFolder, DilibSiteFolder);
             await NormalizeChapterFolderAliasAsync(siteRoot, safeBook, aliasSafeBook, safeChapter, token);
             string unmergedPath = Path.Combine(siteRoot, $"{safeBook}-{safeChapter}");
