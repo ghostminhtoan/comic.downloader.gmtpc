@@ -1090,7 +1090,14 @@ namespace get_link_manga
                         ScrollThumbnailSelectionIntoView();
                         if (shouldPrefetch)
                         {
-                            PrefetchAllThumbnailResults();
+                            System.Threading.Tasks.Task.Run(() =>
+                            {
+                                try
+                                {
+                                    PrefetchAllThumbnailResults();
+                                }
+                                catch { }
+                            });
                         }
                         lbResultsThumbnail?.Focus();
                     }
@@ -1160,7 +1167,14 @@ namespace get_link_manga
 
             if (!_isResultsThumbnailViewEnabled)
             {
-                PrefetchAllThumbnailResults();
+                System.Threading.Tasks.Task.Run(() =>
+                {
+                    try
+                    {
+                        PrefetchAllThumbnailResults();
+                    }
+                    catch { }
+                });
                 return;
             }
 
