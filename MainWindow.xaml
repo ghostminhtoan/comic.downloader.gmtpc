@@ -853,7 +853,7 @@
                             </ScrollViewer>
                         </TabItem>
 
-                        <TabItem Header="dilib.vn / thuviensach.vn" Style="{StaticResource CyberpunkTabItem}">
+                        <TabItem Header="thuviensach.vn" Style="{StaticResource CyberpunkTabItem}">
                             <TabItem.Tag>
                                 <SolidColorBrush Color="#ffcc33"/>
                             </TabItem.Tag>
@@ -2902,9 +2902,6 @@
                                         </ComboBoxItem>
                                         <ComboBoxItem>
                                             <CheckBox Content="nettruyen.tech" Tag="nettruyen.tech"/>
-                                        </ComboBoxItem>
-                                        <ComboBoxItem>
-                                            <CheckBox Content="dilib.vn" Tag="dilib.vn"/>
                                         </ComboBoxItem>
                                         <ComboBoxItem>
                                             <CheckBox Content="thuviensach.vn" Tag="thuviensach.vn"/>

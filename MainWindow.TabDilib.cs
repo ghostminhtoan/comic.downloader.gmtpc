@@ -23,7 +23,7 @@ namespace get_link_manga
 
         private void DilibLog(string message)
         {
-            Log("[dilib.vn / thuviensach.vn] " + message);
+            Log("[thuviensach.vn] " + message);
         }
 
         private static bool IsDilibHost(string host)
