@@ -1174,12 +1174,9 @@ namespace get_link_manga
 
         private void PrefetchAllThumbnailResults()
         {
-            List<GalleryItem> items = _thumbnailVisibleItems.Count > 0
-                ? _thumbnailVisibleItems.Where(SupportsHoverPreview).ToList()
-                : GetThumbnailSourceItems()
-                    .Take(ThumbnailColumns * ThumbnailInitialRows)
-                    .Where(SupportsHoverPreview)
-                    .ToList();
+            List<GalleryItem> items = GetThumbnailSourceItems()
+                .Where(SupportsHoverPreview)
+                .ToList();
 
             if (items.Count == 0)
             {
