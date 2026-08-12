@@ -3408,6 +3408,10 @@
                                     <ToggleButton Name="btnSubShowNewWindow" Click="BtnShowNewWindow_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="{Binding IsChecked, ElementName=btnShowNewWindow, Mode=TwoWay}" ToolTip="SHOW ON NEW WINDOW"/>
                                 </StackPanel>
                             </WrapPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,4">
+                                <TextBlock Name="txtSubSearchLabel" Text="SEARCH" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBox Name="txtSubFilter" Text="{Binding Text, ElementName=txtFilter, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" TextChanged="TxtFilter_TextChanged" Style="{StaticResource SurfaceTextBox}" Width="200" ToolTip="Tìm kiếm tên truyện, link hoặc chapter..." VerticalAlignment="Center"/>
+                            </StackPanel>
                         </Grid>
 
                         <Grid Grid.Row="1">
