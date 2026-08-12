@@ -1050,8 +1050,13 @@ namespace get_link_manga
 
         private void CmbPresentationMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cmbPresentationMode == null) return;
-            int mode = cmbPresentationMode.SelectedIndex;
+            var cmb = sender as ComboBox;
+            if (cmb == null) cmb = cmbPresentationMode ?? cmbSubPresentationMode;
+            if (cmb == null) return;
+
+            int mode = cmb.SelectedIndex;
+            if (mode < 0) return;
+
             if (mode == 0) // List view
             {
                 if (colThumb != null) colThumb.Visibility = Visibility.Collapsed;

@@ -3410,7 +3410,8 @@
                                           Width="160"
                                           VerticalContentAlignment="Center"
                                           HorizontalContentAlignment="Left"
-                                          SelectedIndex="{Binding SelectedIndex, ElementName=cmbPresentationMode, Mode=TwoWay}">
+                                          SelectedIndex="{Binding SelectedIndex, ElementName=cmbPresentationMode, Mode=TwoWay}"
+                                          SelectionChanged="CmbPresentationMode_SelectionChanged">
                                     <ComboBoxItem Name="cbiSubListView" Content="List view"/>
                                     <ComboBoxItem Name="cbiSubThumbnailView" Content="Thumbnail view"/>
                                     <ComboBoxItem Name="cbiSubListThumbnailColumn" Content="List + thumbnail column"/>
