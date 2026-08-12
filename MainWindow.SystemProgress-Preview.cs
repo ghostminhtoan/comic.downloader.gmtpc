@@ -201,7 +201,15 @@ namespace get_link_manga
 
         private async Task PrefetchGalleryHoverPreviewAsync(GalleryItem item)
         {
-            if (item == null || (!string.IsNullOrWhiteSpace(item.HoverPreviewLocalPath) && File.Exists(item.HoverPreviewLocalPath)))
+            if (item == null)
+            {
+                return;
+            }
+
+            // Nếu đã có file cache và thuộc tính đường dẫn/ảnh bìa trên giao diện đã nạp đầy đủ thì mới thoát sớm
+            if (!string.IsNullOrWhiteSpace(item.HoverPreviewLocalPath) && 
+                File.Exists(item.HoverPreviewLocalPath) && 
+                item.HoverPreviewThumbnailImageSource != null)
             {
                 return;
             }
@@ -218,6 +226,12 @@ namespace get_link_manga
             finally
             {
                 item.IsHoverPreviewLoading = false;
+                if (!string.IsNullOrWhiteSpace(item.HoverPreviewLocalPath) && 
+                    File.Exists(item.HoverPreviewLocalPath) && 
+                    item.HoverPreviewThumbnailImageSource == null)
+                {
+                    item.ResetHoverPreviewCache();
+                }
             }
         }
 
