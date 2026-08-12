@@ -669,10 +669,8 @@ namespace get_link_manga
                     bitmap.UriSource = new Uri(path, UriKind.Absolute);
                     bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
                     bitmap.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.DelayCreation;
-                    if (!path.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
-                    {
-                        bitmap.DecodePixelHeight = 100; // Tiết kiệm RAM/CPU giải mã
-                    }
+                    bitmap.DecodePixelHeight = 100; // Giải nén kích thước nhỏ để tiết kiệm cực nhiều RAM (như Windows Explorer)
+                    bitmap.DecodePixelWidth = 0;
                     bitmap.EndInit();
                     bitmap.Freeze(); // Cho phép luồng giao diện truy cập cực nhanh
                     _hoverPreviewThumbnailImageSource = bitmap;
