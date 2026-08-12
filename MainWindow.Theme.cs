@@ -72,7 +72,7 @@ namespace get_link_manga
             SetSolidBrushColor("CyberpunkCardBrush", "#F7FAFF");
             SetSolidBrushColor("CyberpunkCyanBrush", "#0A84C6");
             SetSolidBrushColor("CyberpunkPinkBrush", "#C44569");
-            SetSolidBrushColor("CyberpunkYellowBrush", "#D49A00");
+            SetSolidBrushColor("CyberpunkYellowBrush", "#E5A93C");
             SetSolidBrushColor("CyberpunkGreenBrush", "#2E9F5B");
             SetSolidBrushColor("CyberpunkBorderBrush", "#C7D6E7");
             SetSolidBrushColor("CyberpunkSurfaceAltBrush", "#EAF1F8");
@@ -108,7 +108,7 @@ namespace get_link_manga
             SetSolidBrushColor("CyberpunkCardBrush", "#0D121F");
             SetSolidBrushColor("CyberpunkCyanBrush", "#00E5FF");
             SetSolidBrushColor("CyberpunkPinkBrush", "#FF2A85");
-            SetSolidBrushColor("CyberpunkYellowBrush", "#FFB800");
+            SetSolidBrushColor("CyberpunkYellowBrush", "#FFE600");
             SetSolidBrushColor("CyberpunkGreenBrush", "#28FF7A");
             SetSolidBrushColor("CyberpunkBorderBrush", "#1A2436");
             SetSolidBrushColor("CyberpunkSurfaceAltBrush", "#111827");

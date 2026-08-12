@@ -3628,7 +3628,7 @@
                                                                       <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
                                                                   </DataTrigger>
                                                                   <DataTrigger Binding="{Binding IsNumberedVariantDuplicate}" Value="True">
-                                                                      <Setter Property="Foreground" Value="#FFFFA347"/>
+                                                                      <Setter Property="Foreground" Value="#33FFCC"/>
                                                                   </DataTrigger>
                                                                   <DataTrigger Binding="{Binding IsCensorshipUncensoredVariant}" Value="True">
                                                                       <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
@@ -3655,7 +3655,7 @@
                                                                           <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
                                                                           <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
                                                                       </MultiDataTrigger.Conditions>
-                                                                      <Setter Property="Foreground" Value="#FF9DFF00"/>
+                                                                      <Setter Property="Foreground" Value="#00CCFF"/>
                                                                   </MultiDataTrigger>
                                                              </Style.Triggers>
                                                          </Style>
@@ -4431,7 +4431,7 @@
                                                                       <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
                                                                   </DataTrigger>
                                                                   <DataTrigger Binding="{Binding IsNumberedVariantDuplicate}" Value="True">
-                                                                      <Setter Property="Foreground" Value="#FFFFA347"/>
+                                                                      <Setter Property="Foreground" Value="#33FFCC"/>
                                                                   </DataTrigger>
                                                                   <DataTrigger Binding="{Binding IsCensorshipUncensoredVariant}" Value="True">
                                                                       <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
@@ -4458,7 +4458,7 @@
                                                                           <Condition Binding="{Binding IsNumberedVariantDuplicate}" Value="True"/>
                                                                           <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
                                                                       </MultiDataTrigger.Conditions>
-                                                                      <Setter Property="Foreground" Value="#FF9DFF00"/>
+                                                                      <Setter Property="Foreground" Value="#00CCFF"/>
                                                                   </MultiDataTrigger>
                                                              </Style.Triggers>
                                                          </Style>
