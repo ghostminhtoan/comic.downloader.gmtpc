@@ -146,6 +146,7 @@ namespace get_link_manga
                     item.PropertyChanged -= GalleryItem_PropertyChanged;
                 }
             }
+            _duplicatesView?.Refresh();
             Dispatcher.InvokeAsync(UpdateStatus);
         }
 
@@ -307,6 +308,8 @@ namespace get_link_manga
             {
                 _isSyncingSelection = false;
             }
+            
+            if (txtFilter != null) txtFilter.Text = string.Empty;
             
             _mainWindow.Log($"Deleted {itemsToRemove.Count} duplicate item(s) from duplicates review.");
             lblStatus.Text = $"Deleted {itemsToRemove.Count} item(s).";
@@ -566,6 +569,8 @@ namespace get_link_manga
                 _isSyncingSelection = false;
             }
             
+            if (txtFilter != null) txtFilter.Text = string.Empty;
+
             _mainWindow.Log($"Deleted {itemsToRemove.Count} checked duplicate item(s) from duplicates review.");
             lblStatus.Text = $"Deleted {itemsToRemove.Count} checked item(s).";
         }
@@ -595,6 +600,8 @@ namespace get_link_manga
             {
                 _isSyncingSelection = false;
             }
+
+            if (txtFilter != null) txtFilter.Text = string.Empty;
 
             _mainWindow.Log($"Deleted {itemsToRemove.Count} unchecked duplicate item(s) from duplicates review.");
             lblStatus.Text = $"Deleted {itemsToRemove.Count} unchecked item(s).";
