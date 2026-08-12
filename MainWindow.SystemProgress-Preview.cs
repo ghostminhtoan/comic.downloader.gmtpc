@@ -137,7 +137,16 @@ namespace get_link_manga
                     // fetchTags=true: chỉ hover mới get tag, không fetch trong prefetch chạy ngầm
                     await EnsureGalleryHoverPreviewFileAsync(item, token, fetchTags: true);
                 }
-                else if (item.Tag == null)
+                else
+                {
+                    // Đã có file cache nhưng chưa hiển thị lên UI, buộc reset cache để nạp lại
+                    if (item.HoverPreviewThumbnailImageSource == null)
+                    {
+                        item.ResetHoverPreviewCache();
+                    }
+                }
+
+                if (item.Tag == null)
                 {
                     if (IsNhentaiUrl(item.Link))
                     {

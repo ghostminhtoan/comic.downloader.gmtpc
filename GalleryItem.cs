@@ -718,6 +718,12 @@ namespace get_link_manga
 
         public string HoverPreviewIndicatorText => _isHoverPreviewLoading ? "preview" : string.Empty;
 
+        public void ResetHoverPreviewCache()
+        {
+            _hoverPreviewThumbnailImageSource = null;
+            OnPropertyChanged(nameof(HoverPreviewThumbnailImageSource));
+        }
+
         public void RefreshHoverPreviewBindings()
         {
             OnPropertyChanged(nameof(HoverPreviewThumbnailUrl));
