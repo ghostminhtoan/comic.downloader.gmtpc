@@ -1811,7 +1811,7 @@ namespace get_link_manga
                 _lightNovelCopyCts != null && !_lightNovelCopyBackoffActive,
                 _lightNovelAutoFocusEnabled,
                 _downloadCts != null,
-                chkResultsPresentation?.IsChecked == true,
+                cmbPresentationMode?.SelectedIndex == 1,
                 btnShowNewWindow?.IsChecked == true,
                 _shutdownAfterCompleted,
                 _globalAutoPasteEnabled,

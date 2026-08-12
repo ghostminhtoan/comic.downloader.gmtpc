@@ -1397,11 +1397,10 @@ namespace get_link_manga
 
         private void ToggleListThumbnailFromFloating()
         {
-            // Liên kết với chkResultsPresentation trong extracted gallery links
-            if (chkResultsPresentation != null)
+            if (cmbPresentationMode != null)
             {
-                chkResultsPresentation.IsChecked = !(chkResultsPresentation.IsChecked == true);
-                ChkResultsPresentation_Click(chkResultsPresentation, new RoutedEventArgs());
+                int nextIndex = (cmbPresentationMode.SelectedIndex + 1) % 3;
+                cmbPresentationMode.SelectedIndex = nextIndex;
             }
             UpdateLightNovelFloatingControlState();
         }

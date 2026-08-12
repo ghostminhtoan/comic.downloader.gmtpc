@@ -3270,11 +3270,19 @@
                                 <ToggleButton Name="chkHideSettings" Click="ChkHideSettings_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="HIDE SETTINGS"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,14,6" VerticalAlignment="Center">
-                                <StackPanel.LayoutTransform>
-                                    <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
-                                </StackPanel.LayoutTransform>
-                                <TextBlock Name="lblResultsPresentation" Text="&#xE8A9;" FontFamily="Segoe MDL2 Assets" Foreground="#00FF87" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                <ToggleButton Name="chkResultsPresentation" Click="ChkResultsPresentation_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="LIST / THUMBNAIL"/>
+                                <TextBlock Name="lblResultsPresentation" Text="VIEW MODE" Foreground="#00FF87" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <ComboBox Name="cmbPresentationMode"
+                                          Style="{StaticResource CyberpunkComboBox}"
+                                          ItemContainerStyle="{StaticResource CyberpunkComboBoxItemStyle}"
+                                          Height="22"
+                                          Width="160"
+                                          VerticalContentAlignment="Center"
+                                          HorizontalContentAlignment="Left"
+                                          SelectionChanged="CmbPresentationMode_SelectionChanged">
+                                    <ComboBoxItem Name="cbiListView" Content="List view"/>
+                                    <ComboBoxItem Name="cbiThumbnailView" Content="Thumbnail view"/>
+                                    <ComboBoxItem Name="cbiListThumbnailColumn" Content="List + thumbnail column"/>
+                                </ComboBox>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,14,6" VerticalAlignment="Center">
                                 <StackPanel.LayoutTransform>
@@ -3393,13 +3401,21 @@
                                     <TextBlock Name="lblSubHideSettings" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                     <ToggleButton Name="chkSubHideSettings" Click="ChkHideSettings_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="{Binding IsChecked, ElementName=chkHideSettings, Mode=TwoWay}" ToolTip="HIDE SETTINGS"/>
                                 </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,14,4" VerticalAlignment="Center">
-                                    <StackPanel.LayoutTransform>
-                                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
-                                    </StackPanel.LayoutTransform>
-                                    <TextBlock Name="lblSubResultsPresentation" Text="&#xE8A9;" FontFamily="Segoe MDL2 Assets" Foreground="#00FF87" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <ToggleButton Name="chkSubResultsPresentation" Click="ChkResultsPresentation_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="{Binding IsChecked, ElementName=chkResultsPresentation, Mode=TwoWay}" ToolTip="LIST / THUMBNAIL"/>
-                                </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,14,4" VerticalAlignment="Center">
+                                <TextBlock Name="lblSubResultsPresentation" Text="VIEW MODE" Foreground="#00FF87" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <ComboBox Name="cmbSubPresentationMode"
+                                          Style="{StaticResource CyberpunkComboBox}"
+                                          ItemContainerStyle="{StaticResource CyberpunkComboBoxItemStyle}"
+                                          Height="22"
+                                          Width="160"
+                                          VerticalContentAlignment="Center"
+                                          HorizontalContentAlignment="Left"
+                                          SelectedIndex="{Binding SelectedIndex, ElementName=cmbPresentationMode, Mode=TwoWay}">
+                                    <ComboBoxItem Name="cbiSubListView" Content="List view"/>
+                                    <ComboBoxItem Name="cbiSubThumbnailView" Content="Thumbnail view"/>
+                                    <ComboBoxItem Name="cbiSubListThumbnailColumn" Content="List + thumbnail column"/>
+                                </ComboBox>
+                            </StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,14,4" VerticalAlignment="Center">
                                     <StackPanel.LayoutTransform>
                                         <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>

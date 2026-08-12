@@ -280,11 +280,10 @@ namespace get_link_manga
                     e.Handled = true;
                     return;
                 case Key.L:
-                    if (chkResultsPresentation != null)
+                    if (cmbPresentationMode != null)
                     {
-                        bool isThumbnail = chkResultsPresentation.IsChecked == true;
-                        chkResultsPresentation.IsChecked = !isThumbnail;
-                        SetResultsPresentationMode(!isThumbnail, !isThumbnail);
+                        int nextIndex = (cmbPresentationMode.SelectedIndex + 1) % 3;
+                        cmbPresentationMode.SelectedIndex = nextIndex;
                     }
                     e.Handled = true;
                     return;

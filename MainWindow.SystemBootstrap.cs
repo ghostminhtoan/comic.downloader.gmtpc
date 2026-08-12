@@ -707,11 +707,10 @@ namespace get_link_manga
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
                         EnsureProjectWindowVisible();
-                        if (chkResultsPresentation != null)
+                        if (cmbPresentationMode != null)
                         {
-                            bool isThumbnail = chkResultsPresentation.IsChecked == true;
-                            chkResultsPresentation.IsChecked = !isThumbnail;
-                            SetResultsPresentationMode(!isThumbnail, !isThumbnail);
+                            int nextIndex = (cmbPresentationMode.SelectedIndex + 1) % 3;
+                            cmbPresentationMode.SelectedIndex = nextIndex;
                         }
                     }));
                     return true;

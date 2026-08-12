@@ -1045,9 +1045,29 @@ namespace get_link_manga
 
         private void ChkResultsPresentation_Click(object sender, RoutedEventArgs e)
         {
-            if (chkResultsPresentation == null) return;
-            bool isThumbnail = chkResultsPresentation.IsChecked == true;
-            SetResultsPresentationMode(isThumbnail, isThumbnail);
+            // Giữ lại để tránh lỗi compile nếu có chỗ khác gọi
+        }
+
+        private void CmbPresentationMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cmbPresentationMode == null) return;
+            int mode = cmbPresentationMode.SelectedIndex;
+            if (mode == 0) // List view
+            {
+                if (colThumb != null) colThumb.Visibility = Visibility.Collapsed;
+                if (dgResults != null) dgResults.MinRowHeight = 32;
+                SetResultsPresentationMode(false, false);
+            }
+            else if (mode == 1) // Thumbnail view
+            {
+                SetResultsPresentationMode(true, true);
+            }
+            else if (mode == 2) // List + thumbnail column
+            {
+                if (colThumb != null) colThumb.Visibility = Visibility.Visible;
+                if (dgResults != null) dgResults.MinRowHeight = 60;
+                SetResultsPresentationMode(false, false);
+            }
         }
 
         private void DgResults_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1144,16 +1164,6 @@ namespace get_link_manga
 
         private void UpdateResultsPresentationButtons()
         {
-            if (chkResultsPresentation != null)
-            {
-                chkResultsPresentation.IsChecked = _isResultsThumbnailViewEnabled;
-            }
-
-            if (lblResultsPresentation != null)
-            {
-                lblResultsPresentation.Text = _isResultsThumbnailViewEnabled ? "\uF0E2" : "\uE14C";
-            }
-
             UpdateGalleryPopupPreviewButtonState();
         }
 

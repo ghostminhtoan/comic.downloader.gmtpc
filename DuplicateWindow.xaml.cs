@@ -231,7 +231,7 @@ namespace get_link_manga
 
         private void DgDuplicates_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            var isThumbnail = chkResultsPresentation?.IsChecked == true;
+            var isThumbnail = _mainWindow.cmbPresentationMode?.SelectedIndex == 1;
             var itemsCount = isThumbnail ? lbDuplicatesThumbnail.Items.Count : dgDuplicates.Items.Count;
             if (itemsCount == 0) return;
 
