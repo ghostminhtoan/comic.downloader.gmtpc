@@ -300,14 +300,13 @@ namespace get_link_manga
                 {
                     _mainWindow._scrapedItems.Remove(item);
                 }
+                _mainWindow.RecalculateDuplicates();
+                _mainWindow.UpdateLinkCount();
             }
             finally
             {
                 _isSyncingSelection = false;
             }
-
-            _mainWindow.RecalculateDuplicates();
-            _mainWindow.UpdateLinkCount();
             
             _mainWindow.Log($"Deleted {itemsToRemove.Count} duplicate item(s) from duplicates review.");
             lblStatus.Text = $"Deleted {itemsToRemove.Count} item(s).";
@@ -559,14 +558,13 @@ namespace get_link_manga
                 {
                     _mainWindow._scrapedItems.Remove(item);
                 }
+                _mainWindow.RecalculateDuplicates();
+                _mainWindow.UpdateLinkCount();
             }
             finally
             {
                 _isSyncingSelection = false;
             }
-
-            _mainWindow.RecalculateDuplicates();
-            _mainWindow.UpdateLinkCount();
             
             _mainWindow.Log($"Deleted {itemsToRemove.Count} checked duplicate item(s) from duplicates review.");
             lblStatus.Text = $"Deleted {itemsToRemove.Count} checked item(s).";
@@ -590,15 +588,14 @@ namespace get_link_manga
                 {
                     _mainWindow._scrapedItems.Remove(item);
                 }
+                _mainWindow.RecalculateDuplicates();
+                _mainWindow.UpdateLinkCount();
             }
             finally
             {
                 _isSyncingSelection = false;
             }
 
-            _mainWindow.RecalculateDuplicates();
-            _mainWindow.UpdateLinkCount();
-            
             _mainWindow.Log($"Deleted {itemsToRemove.Count} unchecked duplicate item(s) from duplicates review.");
             lblStatus.Text = $"Deleted {itemsToRemove.Count} unchecked item(s).";
         }
