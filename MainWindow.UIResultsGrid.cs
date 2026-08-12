@@ -1686,12 +1686,11 @@ namespace get_link_manga
             EnsureThumbnailResultsViewInitialized();
             ApplyThumbnailDensity();
             List<GalleryItem> orderedItems = GetThumbnailSourceItems();
-            int targetCount = Math.Min(orderedItems.Count, GetThumbnailColumnCount() * ThumbnailInitialRows);
 
             _thumbnailVisibleItems.Clear();
-            for (int i = 0; i < targetCount; i++)
+            foreach (var item in orderedItems)
             {
-                _thumbnailVisibleItems.Add(orderedItems[i]);
+                _thumbnailVisibleItems.Add(item);
             }
 
             // Chạy Prefetch bất đồng bộ ở background thread để tránh Task.Delay/Jitter chặn UI Thread gây Not Responding
