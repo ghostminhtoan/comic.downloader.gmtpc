@@ -3240,7 +3240,65 @@
                         </StackPanel>
                     </Grid>
 
-
+                    <!-- Toolbar for Filtering and Sorting -->
+                    <Grid Name="grdToolbarFilterSort" Grid.Row="1" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <WrapPanel Grid.Column="0" Orientation="Horizontal">
+                            <Button Name="btnSortByLatestChapter" Content="sort by latest chapter" Click="BtnSortByLatestChapter_Click" Style="{StaticResource CompactYellowButton}" MinWidth="130" Width="Auto" Padding="10,2"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,10,6" VerticalAlignment="Center">
+                                <StackPanel.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                </StackPanel.LayoutTransform>
+                                <TextBlock Name="lblPopupPreview" Text="&#xE890;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <ToggleButton Name="btnPopupPreviewToggle" Click="BtnPopupPreviewToggle_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="True" ToolTip="POPUP PREVIEW"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,10,6" VerticalAlignment="Center">
+                                <StackPanel.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                </StackPanel.LayoutTransform>
+                                <TextBlock Name="lblCompactRows" Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkPinkBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <ToggleButton Name="chkCompactRows" Click="ChkCompactRows_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="COMPACT ROW"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,14,6" VerticalAlignment="Center">
+                                <StackPanel.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                </StackPanel.LayoutTransform>
+                                <TextBlock Name="lblHideSettings" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <ToggleButton Name="chkHideSettings" Click="ChkHideSettings_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="HIDE SETTINGS"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,14,6" VerticalAlignment="Center">
+                                <StackPanel.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                </StackPanel.LayoutTransform>
+                                <TextBlock Name="lblResultsPresentation" Text="&#xE8A9;" FontFamily="Segoe MDL2 Assets" Foreground="#00FF87" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <ToggleButton Name="chkResultsPresentation" Click="ChkResultsPresentation_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="LIST / THUMBNAIL"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,14,6" VerticalAlignment="Center">
+                                <StackPanel.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                </StackPanel.LayoutTransform>
+                                <TextBlock Name="lblShowNewWindow" Text="&#xE8A7;" FontFamily="Segoe MDL2 Assets" Foreground="#38BDF8" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <ToggleButton Name="btnShowNewWindow" Click="BtnShowNewWindow_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="SHOW ON NEW WINDOW"/>
+                            </StackPanel>
+                            <Button Name="btnWebpCodec" Content="WEBP CODEC" Click="BtnWebpCodec_Click" Style="{StaticResource CompactCyanButton}" MinWidth="90" Width="Auto" Padding="10,2" Margin="0,0,6,0"/>
+                            <Button Name="btnToolbarSortByName" Content="SORT BY NAME" Click="BtnSortByName_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
+                            <Button Name="btnDuplicateName" Content="DUPLICATE NAME" Click="BtnDuplicateName_Click" Style="{StaticResource CompactPinkButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
+                            <Button Name="btnReverseOrder" Content="REVERSE ORDER" Click="BtnReverseOrder_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
+                            <Button Name="btnClearComplete" Content="CLEAR COMPLETE BOOKS" Click="BtnClearComplete_Click" Style="{StaticResource CompactDarkBlueButton}" MinWidth="120" Width="Auto" Padding="10,2"/>
+                            <Button Name="btnExtractClearCookie" Content="CLEAR COOKIE" Click="BtnExtractClearCookie_Click" Style="{StaticResource CompactPinkButton}" MinWidth="90" Width="Auto" Padding="10,2" Margin="6,0,0,0" ToolTip="Xóa cookie của các trang đang hiển thị trong danh sách" Visibility="Collapsed">
+                                <Button.LayoutTransform>
+                                    <ScaleTransform ScaleX="0.7" ScaleY="0.7"/>
+                                </Button.LayoutTransform>
+                            </Button>
+                        </WrapPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,6">
+                            <TextBlock Name="txtSearchLabel" Text="SEARCH" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox Name="txtFilter" TextChanged="TxtFilter_TextChanged" Style="{StaticResource SurfaceTextBox}" Width="200" ToolTip="Tìm kiếm tên truyện, link hoặc chapter..." VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
 
                     <Border Grid.Row="2" Style="{StaticResource WorkspaceSectionCard}" Padding="14" Margin="0,0,0,12">
                         <Grid>
@@ -3292,73 +3350,8 @@
 
                     <!-- Book List Container -->
                     <Grid Grid.Row="3" Name="grdBookListContainer" Margin="0,0,0,10">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- Toolbar (moved inside container to display in external window) -->
-                        <Grid Grid.Row="0" Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <WrapPanel Grid.Column="0" Orientation="Horizontal">
-                                <Button Name="btnSortByLatestChapter" Content="sort by latest chapter" Click="BtnSortByLatestChapter_Click" Style="{StaticResource CompactYellowButton}" MinWidth="130" Width="Auto" Padding="10,2"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,10,6" VerticalAlignment="Center">
-                                    <StackPanel.LayoutTransform>
-                                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
-                                    </StackPanel.LayoutTransform>
-                                    <TextBlock Name="lblPopupPreview" Text="&#xE890;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <ToggleButton Name="btnPopupPreviewToggle" Click="BtnPopupPreviewToggle_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="True" ToolTip="POPUP PREVIEW"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,10,6" VerticalAlignment="Center">
-                                    <StackPanel.LayoutTransform>
-                                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
-                                    </StackPanel.LayoutTransform>
-                                    <TextBlock Name="lblCompactRows" Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkPinkBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <ToggleButton Name="chkCompactRows" Click="ChkCompactRows_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="COMPACT ROW"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,14,6" VerticalAlignment="Center">
-                                    <StackPanel.LayoutTransform>
-                                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
-                                    </StackPanel.LayoutTransform>
-                                    <TextBlock Name="lblHideSettings" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <ToggleButton Name="chkHideSettings" Click="ChkHideSettings_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="HIDE SETTINGS"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,14,6" VerticalAlignment="Center">
-                                    <StackPanel.LayoutTransform>
-                                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
-                                    </StackPanel.LayoutTransform>
-                                    <TextBlock Name="lblResultsPresentation" Text="&#xE8A9;" FontFamily="Segoe MDL2 Assets" Foreground="#00FF87" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <ToggleButton Name="chkResultsPresentation" Click="ChkResultsPresentation_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="LIST / THUMBNAIL"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,14,6" VerticalAlignment="Center">
-                                    <StackPanel.LayoutTransform>
-                                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
-                                    </StackPanel.LayoutTransform>
-                                    <TextBlock Name="lblShowNewWindow" Text="&#xE8A7;" FontFamily="Segoe MDL2 Assets" Foreground="#38BDF8" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <ToggleButton Name="btnShowNewWindow" Click="BtnShowNewWindow_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="False" ToolTip="SHOW ON NEW WINDOW"/>
-                                </StackPanel>
-                                <Button Name="btnWebpCodec" Content="WEBP CODEC" Click="BtnWebpCodec_Click" Style="{StaticResource CompactCyanButton}" MinWidth="90" Width="Auto" Padding="10,2" Margin="0,0,6,0"/>
-                                <Button Name="btnToolbarSortByName" Content="SORT BY NAME" Click="BtnSortByName_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
-                                <Button Name="btnDuplicateName" Content="DUPLICATE NAME" Click="BtnDuplicateName_Click" Style="{StaticResource CompactPinkButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
-                                <Button Name="btnReverseOrder" Content="REVERSE ORDER" Click="BtnReverseOrder_Click" Style="{StaticResource CompactYellowButton}" MinWidth="90" Width="Auto" Padding="10,2"/>
-                                <Button Name="btnClearComplete" Content="CLEAR COMPLETE BOOKS" Click="BtnClearComplete_Click" Style="{StaticResource CompactDarkBlueButton}" MinWidth="120" Width="Auto" Padding="10,2"/>
-                                <Button Name="btnExtractClearCookie" Content="CLEAR COOKIE" Click="BtnExtractClearCookie_Click" Style="{StaticResource CompactPinkButton}" MinWidth="90" Width="Auto" Padding="10,2" Margin="6,0,0,0" ToolTip="Xóa cookie của các trang đang hiển thị trong danh sách" Visibility="Collapsed">
-                                    <Button.LayoutTransform>
-                                        <ScaleTransform ScaleX="0.7" ScaleY="0.7"/>
-                                    </Button.LayoutTransform>
-                                </Button>
-                            </WrapPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,6">
-                                <TextBlock Name="txtSearchLabel" Text="SEARCH" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBox Name="txtFilter" TextChanged="TxtFilter_TextChanged" Style="{StaticResource SurfaceTextBox}" Width="200" ToolTip="Tìm kiếm tên truyện, link hoặc chapter..." VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Grid>
-
                         <!-- Scraped links DataGrid -->
-                        <DataGrid Grid.Row="1" Name="dgResults"
+                        <DataGrid Name="dgResults"
                                   Style="{StaticResource CyberpunkDataGrid}"
                                   ColumnHeaderStyle="{StaticResource CyberpunkDataGridColumnHeader}"
                                   CellStyle="{StaticResource CyberpunkDataGridCell}"
@@ -4525,199 +4518,123 @@
 
                                         <Grid Grid.Row="2" Margin="0,4,0,0">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <CheckBox Grid.Column="0" 
-                                                      IsChecked="{Binding GroupIsChecked, UpdateSourceTrigger=PropertyChanged}" 
-                                                      VerticalAlignment="Top" 
-                                                      Margin="0,0,4,0">
-                                                <CheckBox.Style>
-                                                    <Style TargetType="CheckBox">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </Style>
-                                                </CheckBox.Style>
-                                            </CheckBox>
-                                            <TextBlock Grid.Column="1"
-                                                       local:TextBlockLanguageColorizer.HighlightedText="{Binding DisplayName}"
+                                            <Grid.Style>
+                                                <Style TargetType="Grid">
+                                                    <Setter Property="Height" Value="15"/>
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsChecked, ElementName=chkCompactRows}" Value="True">
+                                                            <Setter Property="Height" Value="20"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Grid.Style>
+                                            <ProgressBar Grid.Column="0" Minimum="0" Maximum="100" VerticalAlignment="Center">
+                                                 <ProgressBar.Style>
+                                                     <Style TargetType="ProgressBar" BasedOn="{StaticResource ProgressBarSuccess}">
+                                                         <Setter Property="Value" Value="{Binding DownloadProgressPercent}"/>
+                                                         <Setter Property="Height" Value="13"/>
+                                                         <Setter Property="Foreground" Value="#888888"/>
+                                                         <Setter Property="BorderThickness" Value="1"/>
+                                                         <Setter Property="BorderBrush" Value="#888888"/>
+                                                         <Style.Triggers>
+                                                             <DataTrigger Binding="{Binding IsChecked, ElementName=chkCompactRows}" Value="True">
+                                                                 <Setter Property="Height" Value="18"/>
+                                                             </DataTrigger>
+                                                             <DataTrigger Binding="{Binding Status}" Value="Queued">
+                                                                 <Setter Property="Foreground" Value="#B19FFB"/><Setter Property="BorderBrush" Value="#B19FFB"/>
+                                                             </DataTrigger>
+                                                             <DataTrigger Binding="{Binding Status}" Value="Downloading">
+                                                                 <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkCyanBrush}"/>
+                                                             </DataTrigger>
+                                                             <MultiDataTrigger>
+                                                                  <MultiDataTrigger.Conditions>
+                                                                      <Condition Binding="{Binding Status}" Value="Completed"/>
+                                                                      <Condition Binding="{Binding DownloadingPageProgress}" Value=""/>
+                                                                  </MultiDataTrigger.Conditions>
+                                                                  <Setter Property="Foreground" Value="#888888"/><Setter Property="BorderBrush" Value="#888888"/>
+                                                                  <Setter Property="Value" Value="100"/>
+                                                              </MultiDataTrigger>
+                                                              <MultiDataTrigger>
+                                                                  <MultiDataTrigger.Conditions>
+                                                                      <Condition Binding="{Binding Status}" Value="Completed"/>
+                                                                      <Condition Binding="{Binding DownloadingPageProgress}" Value="Done"/>
+                                                                  </MultiDataTrigger.Conditions>
+                                                                  <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                  <Setter Property="Value" Value="100"/>
+                                                              </MultiDataTrigger>
+                                                              <MultiDataTrigger>
+                                                                  <MultiDataTrigger.Conditions>
+                                                                      <Condition Binding="{Binding Status}" Value="Completed"/>
+                                                                      <Condition Binding="{Binding DownloadingPageProgress}" Value="Complete"/>
+                                                                  </MultiDataTrigger.Conditions>
+                                                                  <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                  <Setter Property="Value" Value="100"/>
+                                                              </MultiDataTrigger>
+                                                             <DataTrigger Binding="{Binding Status}" Value="Paused">
+                                                                 <Setter Property="Foreground" Value="#FF8C00"/><Setter Property="BorderBrush" Value="#FF8C00"/>
+                                                             </DataTrigger>
+                                                             <DataTrigger Binding="{Binding Status}" Value="Completed">
+                                                                 <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                 <Setter Property="Value" Value="100"/>
+                                                             </DataTrigger>
+                                                             <DataTrigger Binding="{Binding DownloadingPageProgress}" Value="Done">
+                                                                 <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                 <Setter Property="Value" Value="100"/>
+                                                             </DataTrigger>
+                                                             <DataTrigger Binding="{Binding Status}" Value="Error">
+                                                                 <Setter Property="Foreground" Value="#FF0055"/><Setter Property="BorderBrush" Value="#FF0055"/>
+                                                             </DataTrigger>
+                                                             <DataTrigger Binding="{Binding HasErrors}" Value="True">
+                                                                 <Setter Property="Foreground" Value="#FF0055"/><Setter Property="BorderBrush" Value="#FF0055"/>
+                                                             </DataTrigger>
+                                                         </Style.Triggers>
+                                                     </Style>
+                                                 </ProgressBar.Style>
+                                             </ProgressBar>
+                                            <TextBlock Grid.Column="1" Text="{Binding DownloadProgressText}"
+                                                       
                                                        FontWeight="Bold"
-                                                       FontSize="9">
+                                                       Margin="4,0,0,0"
+                                                       VerticalAlignment="Center">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
-                                                        <Setter Property="Height" Value="32"/>
-                                                        <Setter Property="Margin" Value="0,0,0,4"/>
-                                                        <Setter Property="TextWrapping" Value="Wrap"/>
-                                                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                                        <Setter Property="Foreground" Value="{StaticResource CyberpunkTextBrush}"/>
+                                                        <Setter Property="FontSize" Value="9"/>
+                                                         <Setter Property="Foreground" Value="#888888"/>
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsParallelSplitParent}" Value="True">
-                                                                <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                            </DataTrigger>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding IsParallelSplitTask}" Value="True"/>
-                                                                    <Condition Binding="{Binding IsParallelSplitParent}" Value="False"/>
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Foreground" Value="#C77DFF"/>
-                                                                <Setter Property="Margin" Value="12,0,0,4"/>
-                                                            </MultiDataTrigger>
-                                                             <DataTrigger Binding="{Binding IsDuplicate}" Value="True">
+                                                             <DataTrigger Binding="{Binding Status}" Value="Queued">
+                                                                 <Setter Property="Foreground" Value="#B19FFB"/>
+                                                             </DataTrigger>
+                                                             <DataTrigger Binding="{Binding Status}" Value="Downloading">
                                                                  <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
                                                              </DataTrigger>
-                                                             <DataTrigger Binding="{Binding IsCensorshipColorDuplicate}" Value="True">
-                                                                 <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
+                                                             <DataTrigger Binding="{Binding Status}" Value="Paused">
+                                                                 <Setter Property="Foreground" Value="#FF8C00"/>
                                                              </DataTrigger>
-                                                             <DataTrigger Binding="{Binding IsNumberedVariantDuplicate}" Value="True">
-                                                                 <Setter Property="Foreground" Value="#33FFCC"/>
-                                                             </DataTrigger>
-                                                             <DataTrigger Binding="{Binding IsCensorshipUncensoredVariant}" Value="True">
+                                                             <DataTrigger Binding="{Binding Status}" Value="Completed">
                                                                  <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
                                                              </DataTrigger>
-                                                             <DataTrigger Binding="{Binding IsCensorshipFullColorVariant}" Value="True">
-                                                                 <Setter Property="Foreground" Value="#FFD78BFF"/>
+                                                             <DataTrigger Binding="{Binding DownloadingPageProgress}" Value="Done">
+                                                                 <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
                                                              </DataTrigger>
-                                                             <MultiDataTrigger>
-                                                                 <MultiDataTrigger.Conditions>
-                                                                     <Condition Binding="{Binding IsCensorshipUncensoredVariant}" Value="True"/>
-                                                                     <Condition Binding="{Binding IsCensorshipFullColorVariant}" Value="True"/>
-                                                                 </MultiDataTrigger.Conditions>
-                                                                 <Setter Property="Foreground" Value="{StaticResource CyberpunkPinkBrush}"/>
-                                                             </MultiDataTrigger>
-                                                             <MultiDataTrigger>
-                                                                 <MultiDataTrigger.Conditions>
-                                                                     <Condition Binding="{Binding IsChecked, ElementName=chkCompactRows}" Value="True"/>
-                                                                 </MultiDataTrigger.Conditions>
-                                                                 <Setter Property="Height" Value="20"/>
-                                                             </MultiDataTrigger>
-                                                         </Style.Triggers>
-                                                     </Style>
-                                                 </TextBlock.Style>
-                                             </TextBlock>
-                                         </Grid>
+                                                             <DataTrigger Binding="{Binding Status}" Value="Error">
+                                                                 <Setter Property="Foreground" Value="#FF0055"/>
+                                                             </DataTrigger>
+                                                             <DataTrigger Binding="{Binding HasErrors}" Value="True">
+                                                                 <Setter Property="Foreground" Value="#FF0055"/>
+                                                             </DataTrigger>
 
-                                         <Grid Grid.Row="2" Margin="0,2,0,0">
-                                             <Grid.Style>
-                                                 <Style TargetType="Grid">
-                                                     <Setter Property="Visibility" Value="Visible"/>
-                                                     <Style.Triggers>
-                                                         <DataTrigger Binding="{Binding IsChecked, ElementName=chkCompactRows}" Value="True">
-                                                             <Setter Property="Visibility" Value="Collapsed"/>
-                                                         </DataTrigger>
-                                                         <MultiDataTrigger>
-                                                             <MultiDataTrigger.Conditions>
-                                                                 <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=IsPortraitMode}" Value="True"/>
-                                                                 <Condition Binding="{Binding IsChecked, ElementName=chkHideSettings}" Value="False"/>
-                                                             </MultiDataTrigger.Conditions>
-                                                             <Setter Property="Visibility" Value="Collapsed"/>
-                                                         </MultiDataTrigger>
-                                                     </Style.Triggers>
-                                                 </Style>
-                                             </Grid.Style>
-                                             <Grid.ColumnDefinitions>
-                                                 <ColumnDefinition Width="*"/>
-                                                 <ColumnDefinition Width="Auto"/>
-                                             </Grid.ColumnDefinitions>
-                                             <ProgressBar Grid.Column="0" Minimum="0" Maximum="100" VerticalAlignment="Center">
-                                                  <ProgressBar.Style>
-                                                      <Style TargetType="ProgressBar" BasedOn="{StaticResource ProgressBarSuccess}">
-                                                          <Setter Property="Value" Value="{Binding DownloadProgressPercent}"/>
-                                                          <Setter Property="Height" Value="13"/>
-                                                          <Setter Property="Foreground" Value="#888888"/>
-                                                          <Setter Property="BorderThickness" Value="1"/>
-                                                          <Setter Property="BorderBrush" Value="#888888"/>
-                                                          <Style.Triggers>
-                                                              <DataTrigger Binding="{Binding IsChecked, ElementName=chkCompactRows}" Value="True">
-                                                                  <Setter Property="Height" Value="18"/>
-                                                              </DataTrigger>
-                                                              <DataTrigger Binding="{Binding Status}" Value="Queued">
-                                                                  <Setter Property="Foreground" Value="#B19FFB"/><Setter Property="BorderBrush" Value="#B19FFB"/>
-                                                              </DataTrigger>
-                                                              <DataTrigger Binding="{Binding Status}" Value="Downloading">
-                                                                  <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkCyanBrush}"/>
-                                                              </DataTrigger>
-                                                              <MultiDataTrigger>
-                                                                   <MultiDataTrigger.Conditions>
-                                                                       <Condition Binding="{Binding Status}" Value="Completed"/>
-                                                                       <Condition Binding="{Binding DownloadingPageProgress}" Value=""/>
-                                                                   </MultiDataTrigger.Conditions>
-                                                                   <Setter Property="Foreground" Value="#888888"/><Setter Property="BorderBrush" Value="#888888"/>
-                                                                   <Setter Property="Value" Value="100"/>
-                                                               </MultiDataTrigger>
-                                                               <MultiDataTrigger>
-                                                                   <MultiDataTrigger.Conditions>
-                                                                       <Condition Binding="{Binding Status}" Value="Completed"/>
-                                                                       <Condition Binding="{Binding DownloadingPageProgress}" Value="Done"/>
-                                                                   </MultiDataTrigger.Conditions>
-                                                                   <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                                   <Setter Property="Value" Value="100"/>
-                                                               </MultiDataTrigger>
-                                                               <MultiDataTrigger>
-                                                                   <MultiDataTrigger.Conditions>
-                                                                       <Condition Binding="{Binding Status}" Value="Completed"/>
-                                                                       <Condition Binding="{Binding DownloadingPageProgress}" Value="Complete"/>
-                                                                   </MultiDataTrigger.Conditions>
-                                                                   <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                                   <Setter Property="Value" Value="100"/>
-                                                               </MultiDataTrigger>
-                                                              <DataTrigger Binding="{Binding Status}" Value="Paused">
-                                                                  <Setter Property="Foreground" Value="#FF8C00"/><Setter Property="BorderBrush" Value="#FF8C00"/>
-                                                              </DataTrigger>
-                                                              <DataTrigger Binding="{Binding Status}" Value="Completed">
-                                                                  <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                                  <Setter Property="Value" Value="100"/>
-                                                              </DataTrigger>
-                                                              <DataTrigger Binding="{Binding DownloadingPageProgress}" Value="Done">
-                                                                  <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                                  <Setter Property="Value" Value="100"/>
-                                                              </DataTrigger>
-                                                              <DataTrigger Binding="{Binding Status}" Value="Error">
-                                                                  <Setter Property="Foreground" Value="#FF0055"/><Setter Property="BorderBrush" Value="#FF0055"/>
-                                                              </DataTrigger>
-                                                              <DataTrigger Binding="{Binding HasErrors}" Value="True">
-                                                                  <Setter Property="Foreground" Value="#FF0055"/><Setter Property="BorderBrush" Value="#FF0055"/>
-                                                              </DataTrigger>
-                                                          </Style.Triggers>
-                                                      </Style>
-                                                  </ProgressBar.Style>
-                                              </ProgressBar>
-                                             <TextBlock Grid.Column="1" Text="{Binding DownloadProgressText}"
-                                                        
-                                                        FontWeight="Bold"
-                                                        Margin="4,0,0,0"
-                                                        VerticalAlignment="Center">
-                                                 <TextBlock.Style>
-                                                     <Style TargetType="TextBlock">
-                                                         <Setter Property="FontSize" Value="9"/>
-                                                          <Setter Property="Foreground" Value="#888888"/>
-                                                         <Style.Triggers>
-                                                              <DataTrigger Binding="{Binding Status}" Value="Queued">
-                                                                  <Setter Property="Foreground" Value="#B19FFB"/>
-                                                              </DataTrigger>
-                                                              <DataTrigger Binding="{Binding Status}" Value="Downloading">
-                                                                  <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
-                                                              </DataTrigger>
-                                                              <DataTrigger Binding="{Binding Status}" Value="Paused">
-                                                                  <Setter Property="Foreground" Value="#FF8C00"/>
-                                                              </DataTrigger>
-                                                              <DataTrigger Binding="{Binding Status}" Value="Completed">
-                                                                  <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                              </DataTrigger>
-                                                              <DataTrigger Binding="{Binding DownloadingPageProgress}" Value="Done">
-                                                                  <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                              </DataTrigger>
-                                                              <DataTrigger Binding="{Binding Status}" Value="Error">
-                                                                  <Setter Property="Foreground" Value="#FF0055"/>
-                                                              </DataTrigger>
-                                                              <DataTrigger Binding="{Binding HasErrors}" Value="True">
-                                                                  <Setter Property="Foreground" Value="#FF0055"/>
-                                                              </DataTrigger>
-                                                              <DataTrigger Binding="{Binding IsChecked, ElementName=chkCompactRows}" Value="True">
-                                                                  <Setter Property="Visibility" Value="Collapsed"/>
-                                                              </DataTrigger>
-                                                         </Style.Triggers>
-                                                     </Style>
-                                                 </TextBlock.Style>
-                                             </TextBlock>
+                                                            <DataTrigger Binding="{Binding IsChecked, ElementName=chkCompactRows}" Value="True">
+                                                                <Setter Property="FontSize" Value="11"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+
                                         </Grid>
                                     </Grid>
                                 </Border>
