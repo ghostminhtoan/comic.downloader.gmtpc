@@ -710,6 +710,29 @@ namespace get_link_manga
 
             if (dgResults.Items.Count == 0 && e.Key != Key.Z && e.Key != Key.Y) return;
 
+            if (e.Key == Key.A && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                _isSyncingResultsThumbnailSelection = true;
+                try
+                {
+                    if (_isResultsThumbnailViewEnabled)
+                    {
+                        lbResultsThumbnail.SelectAll();
+                    }
+                    else
+                    {
+                        dgResults.SelectAll();
+                    }
+                }
+                finally
+                {
+                    _isSyncingResultsThumbnailSelection = false;
+                }
+                SyncThumbnailSelectionFromResults();
+                e.Handled = true;
+                return;
+            }
+
             if (e.Key == Key.C && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
                 MenuCopySelectedLinks_Click(null, null);
