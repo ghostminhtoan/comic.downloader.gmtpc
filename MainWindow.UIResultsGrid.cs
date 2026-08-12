@@ -1174,9 +1174,23 @@ namespace get_link_manga
 
         private void PrefetchAllThumbnailResults()
         {
-            List<GalleryItem> items = GetThumbnailSourceItems()
-                .Where(SupportsHoverPreview)
-                .ToList();
+            List<GalleryItem> items;
+            
+            // Nếu danh sách hiển thị đã được khởi tạo, ưu tiên tải các items đang hiện/lân cận trước
+            if (_thumbnailVisibleItems.Count > 0)
+            {
+                // Chỉ lấy tối đa 30 items kế tiếp/gần nhất để ưu tiên hiển thị mượt mà
+                items = _thumbnailVisibleItems
+                    .Where(SupportsHoverPreview)
+                    .Take(30)
+                    .ToList();
+            }
+            else
+            {
+                items = GetThumbnailSourceItems()
+                    .Where(SupportsHoverPreview)
+                    .ToList();
+            }
 
             if (items.Count == 0)
             {
