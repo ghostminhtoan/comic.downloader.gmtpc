@@ -58,5 +58,30 @@ namespace get_link_manga
                 _flushTimer.Start();
             }
         }
+
+        internal void RemoveRange(System.Collections.Generic.IEnumerable<T> items)
+        {
+            if (items == null) return;
+            var set = new System.Collections.Generic.HashSet<T>(items);
+            if (set.Count == 0) return;
+
+            var remaining = new System.Collections.Generic.List<T>();
+            foreach (var item in Items)
+            {
+                if (!set.Contains(item))
+                {
+                    remaining.Add(item);
+                }
+            }
+
+            if (remaining.Count == Items.Count) return;
+
+            Items.Clear();
+            foreach (var item in remaining)
+            {
+                Items.Add(item);
+            }
+            QueueNotification();
+        }
     }
 }

@@ -297,10 +297,7 @@ namespace get_link_manga
             _isSyncingSelection = true;
             try
             {
-                foreach (var item in itemsToRemove)
-                {
-                    _mainWindow._scrapedItems.Remove(item);
-                }
+                _mainWindow._scrapedItems.RemoveRange(itemsToRemove);
                 _mainWindow.RecalculateDuplicates();
                 _mainWindow.UpdateLinkCount();
             }
@@ -557,10 +554,7 @@ namespace get_link_manga
             _isSyncingSelection = true;
             try
             {
-                foreach (var item in itemsToRemove)
-                {
-                    _mainWindow._scrapedItems.Remove(item);
-                }
+                _mainWindow._scrapedItems.RemoveRange(itemsToRemove);
                 _mainWindow.RecalculateDuplicates();
                 _mainWindow.UpdateLinkCount();
             }
@@ -589,10 +583,7 @@ namespace get_link_manga
             _isSyncingSelection = true;
             try
             {
-                foreach (var item in itemsToRemove)
-                {
-                    _mainWindow._scrapedItems.Remove(item);
-                }
+                _mainWindow._scrapedItems.RemoveRange(itemsToRemove);
                 _mainWindow.RecalculateDuplicates();
                 _mainWindow.UpdateLinkCount();
             }
@@ -1226,6 +1217,7 @@ namespace get_link_manga
             if (confirm != MessageBoxResult.Yes) return;
 
             int successCount = 0;
+            var failedItems = new System.Collections.Generic.List<string>();
             foreach (var item in itemsToRemove)
             {
                 try
@@ -1240,7 +1232,17 @@ namespace get_link_manga
                 catch (Exception ex)
                 {
                     _mainWindow.Log($"Lỗi khi xóa thư mục {item.Link}: {ex.Message}");
+                    failedItems.Add($"{item.Name} ({item.Link}): {ex.Message}");
                 }
+            }
+
+            if (failedItems.Count > 0)
+            {
+                MessageBox.Show(
+                    $"Đã xóa thành công {successCount} thư mục.\nCó {failedItems.Count} thư mục lỗi không thể xóa:\n\n" + string.Join("\n", failedItems.Take(10)) + (failedItems.Count > 10 ? "\n...và một số thư mục khác." : ""),
+                    "Lỗi khi xóa một số thư mục",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
 
             RecalculateLocalDuplicates();
@@ -1288,6 +1290,7 @@ namespace get_link_manga
             if (confirm != MessageBoxResult.Yes) return;
 
             int successCount = 0;
+            var failedItems = new System.Collections.Generic.List<string>();
             foreach (var item in itemsToRemove)
             {
                 try
@@ -1302,7 +1305,17 @@ namespace get_link_manga
                 catch (Exception ex)
                 {
                     _mainWindow.Log($"Lỗi khi xóa thư mục {item.Link}: {ex.Message}");
+                    failedItems.Add($"{item.Name} ({item.Link}): {ex.Message}");
                 }
+            }
+
+            if (failedItems.Count > 0)
+            {
+                MessageBox.Show(
+                    $"Đã xóa thành công {successCount} thư mục đã tích chọn.\nCó {failedItems.Count} thư mục lỗi không thể xóa:\n\n" + string.Join("\n", failedItems.Take(10)) + (failedItems.Count > 10 ? "\n...và một số thư mục khác." : ""),
+                    "Lỗi khi xóa một số thư mục",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
 
             RecalculateLocalDuplicates();
