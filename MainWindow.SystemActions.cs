@@ -1455,14 +1455,10 @@ namespace get_link_manga
                 Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#091018")
             };
 
-            // Hiện cột Thumbnail và tăng chiều cao dòng DataGrid lên 60
-            if (colThumb != null)
+            // Cập nhật chế độ hiển thị phù hợp với ComboBox hiện tại
+            if (cmbPresentationMode != null)
             {
-                colThumb.Visibility = Visibility.Visible;
-            }
-            if (dgResults != null)
-            {
-                dgResults.MinRowHeight = 60;
+                CmbPresentationMode_SelectionChanged(null, null);
             }
 
             // Gán Icon
@@ -1503,14 +1499,10 @@ namespace get_link_manga
                 // Phục hồi Grid.Row
                 Grid.SetRow(grdBookListContainer, 3);
 
-                // Khôi phục chiều cao dòng DataGrid và ẩn cột Thumbnail
-                if (colThumb != null)
+                // Cập nhật lại chế độ hiển thị phù hợp với ComboBox hiện tại
+                if (cmbPresentationMode != null)
                 {
-                    colThumb.Visibility = Visibility.Collapsed;
-                }
-                if (dgResults != null)
-                {
-                    dgResults.MinRowHeight = 32;
+                    CmbPresentationMode_SelectionChanged(null, null);
                 }
 
                 // Ẩn placeholder
