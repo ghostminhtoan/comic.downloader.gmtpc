@@ -289,9 +289,7 @@ namespace get_link_manga
             bool isThumbnail = chkResultsPresentation?.IsChecked == true;
             int selectedIndex = isThumbnail ? lbDuplicatesThumbnail.SelectedIndex : dgDuplicates.SelectedIndex;
 
-            var itemsToRemove = isThumbnail
-                ? lbDuplicatesThumbnail.SelectedItems.Cast<GalleryItem>().ToList()
-                : dgDuplicates.SelectedItems.Cast<GalleryItem>().ToList();
+            var itemsToRemove = GetSelectedGalleryItems();
 
             if (itemsToRemove.Count == 0) return;
 
