@@ -1159,6 +1159,16 @@ namespace get_link_manga
                 {
                     try
                     {
+                        if (dgResults != null)
+                        {
+                            dgResults.ApplyTemplate();
+                            var dgScrollViewer = FindVisualChild<ScrollViewer>(dgResults);
+                            if (dgScrollViewer != null)
+                            {
+                                dgScrollViewer.ScrollChanged -= DgResults_ScrollChanged;
+                                dgScrollViewer.ScrollChanged += DgResults_ScrollChanged;
+                            }
+                        }
                         ScrollResultsSelectionIntoView();
                         dgResults?.Focus();
                     }
@@ -1174,21 +1184,46 @@ namespace get_link_manga
 
         private void PrefetchAllThumbnailResults()
         {
-            List<GalleryItem> items;
-            
-            // Nếu danh sách hiển thị đã được khởi tạo, ưu tiên tải các items đang hiện/lân cận trước
-            if (_thumbnailVisibleItems.Count > 0)
+            List<GalleryItem> items = null;
+
+            // Nếu đang hiển thị chế độ Thumbnail, ưu tiên các item hiển thị trong ListBox
+            if (_isResultsThumbnailViewEnabled && _thumbnailVisibleItems.Count > 0)
             {
-                // Chỉ lấy tối đa 30 items kế tiếp/gần nhất để ưu tiên hiển thị mượt mà
                 items = _thumbnailVisibleItems
                     .Where(SupportsHoverPreview)
                     .Take(30)
                     .ToList();
             }
-            else
+            // Nếu đang hiển thị chế độ DataGrid (nhất là List + thumbnail column)
+            else if (dgResults != null && dgResults.Visibility == Visibility.Visible)
+            {
+                // Tìm các item hiển thị trên giao diện của DataGrid bằng cách lấy các item thuộc Viewport
+                try
+                {
+                    var sortedItems = GetThumbnailSourceItems();
+                    if (sortedItems.Count > 0)
+                    {
+                        // Lấy ScrollViewer của DataGrid để tính vị trí dòng hiện tại
+                        var scrollViewer = FindVisualChild<ScrollViewer>(dgResults);
+                        if (scrollViewer != null)
+                        {
+                            int firstVisibleIndex = (int)Math.Max(0, scrollViewer.VerticalOffset);
+                            items = sortedItems
+                                .Skip(firstVisibleIndex)
+                                .Take(30)
+                                .Where(SupportsHoverPreview)
+                                .ToList();
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            if (items == null || items.Count == 0)
             {
                 items = GetThumbnailSourceItems()
                     .Where(SupportsHoverPreview)
+                    .Take(30)
                     .ToList();
             }
 
@@ -1198,6 +1233,21 @@ namespace get_link_manga
             }
 
             PrefetchGalleryHoverPreview(items);
+        }
+
+        private void DgResults_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (e.VerticalChange == 0) return;
+            
+            // Kích hoạt prefetch các ảnh xung quanh vị trí cuộn mới của DataGrid
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    PrefetchAllThumbnailResults();
+                }
+                catch { }
+            });
         }
 
         private void ResultsThumbnailItems_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
