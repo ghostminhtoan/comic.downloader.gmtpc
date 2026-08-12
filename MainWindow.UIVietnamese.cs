@@ -60,6 +60,11 @@ namespace get_link_manga
             if (chkResultsPresentation != null) chkResultsPresentation.ToolTip = "DANH SÁCH / THUMBNAIL";
             if (btnShowNewWindow != null) btnShowNewWindow.ToolTip = "HIỂN THỊ CỬA SỔ MỚI";
             if (lblShowNewWindow != null) lblShowNewWindow.ToolTip = "HIỂN THỊ CỬA SỔ MỚI";
+            if (btnSubPopupPreviewToggle != null) btnSubPopupPreviewToggle.ToolTip = "XEM TRƯỚC POPUP";
+            if (chkSubCompactRows != null) chkSubCompactRows.ToolTip = "NÉN DÒNG";
+            if (chkSubHideSettings != null) chkSubHideSettings.ToolTip = "ẨN THIẾT LẬP";
+            if (chkSubResultsPresentation != null) chkSubResultsPresentation.ToolTip = "DANH SÁCH / THUMBNAIL";
+            if (btnSubShowNewWindow != null) btnSubShowNewWindow.ToolTip = "HIỂN THỊ CỬA SỔ MỚI";
             if (btnDuplicateName != null) btnDuplicateName.Content = "Tên trùng";
             // if (btnNoLinkViHentai != null) btnNoLinkViHentai.Content = "Không có chapter";
             if (btnReverseOrder != null) btnReverseOrder.Content = "Đảo thứ tự";

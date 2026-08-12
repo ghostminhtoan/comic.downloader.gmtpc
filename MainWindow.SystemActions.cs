@@ -1435,17 +1435,11 @@ namespace get_link_manga
         {
             if (_externalBookListWindow != null) return;
 
-            // 1. Detach grdBookListContainer và grdToolbarFilterSort khỏi parent trong MainWindow
+            // 1. Detach grdBookListContainer khỏi parent trong MainWindow
             var parent = grdBookListContainer.Parent as Panel;
             if (parent != null)
             {
                 parent.Children.Remove(grdBookListContainer);
-            }
-
-            var toolbarParent = grdToolbarFilterSort.Parent as Panel;
-            if (toolbarParent != null)
-            {
-                toolbarParent.Children.Remove(grdToolbarFilterSort);
             }
 
             // 2. Hiện placeholder ở MainWindow
@@ -1456,7 +1450,7 @@ namespace get_link_manga
             {
                 Title = _isVietnameseUi ? "Danh sách truyện chờ tải - Comic Downloader GMTPC" : "Extracted Gallery Links - Comic Downloader GMTPC",
                 Width = 1000,
-                Height = 650,
+                Height = 600,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Owner = this,
                 Background = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString("#091018")
@@ -1478,18 +1472,9 @@ namespace get_link_manga
                 _externalBookListWindow.Icon = this.Icon;
             }
 
-            // Tạo Grid chứa container danh sách truyện và toolbar
+            // Tạo Grid chứa container danh sách truyện
             Grid mainGrid = new Grid();
             mainGrid.Margin = new Thickness(10);
-            mainGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-
-            // Thêm toolbar vào Row 0
-            Grid.SetRow(grdToolbarFilterSort, 0);
-            mainGrid.Children.Add(grdToolbarFilterSort);
-
-            // Thêm danh sách truyện vào Row 1
-            Grid.SetRow(grdBookListContainer, 1);
             mainGrid.Children.Add(grdBookListContainer);
 
             _externalBookListWindow.Content = mainGrid;
@@ -1508,21 +1493,16 @@ namespace get_link_manga
             {
                 // Khi window bị đóng (bởi nút X hoặc code)
                 // Detach khỏi Grid window phụ
-                mainGrid.Children.Remove(grdToolbarFilterSort);
                 mainGrid.Children.Remove(grdBookListContainer);
 
                 // Attach lại MainWindow
-                if (toolbarParent != null && !toolbarParent.Children.Contains(grdToolbarFilterSort))
-                {
-                    toolbarParent.Children.Add(grdToolbarFilterSort);
-                    Grid.SetRow(grdToolbarFilterSort, 1);
-                }
-
                 if (parent != null && !parent.Children.Contains(grdBookListContainer))
                 {
                     parent.Children.Add(grdBookListContainer);
-                    Grid.SetRow(grdBookListContainer, 3);
                 }
+
+                // Phục hồi Grid.Row
+                Grid.SetRow(grdBookListContainer, 3);
 
                 // Khôi phục chiều cao dòng DataGrid và ẩn cột Thumbnail
                 if (colThumb != null)

@@ -55,6 +55,7 @@ namespace get_link_manga
             }
 
             dgDuplicates.ItemsSource = _duplicatesView;
+            lbDuplicatesThumbnail.ItemsSource = _duplicatesView;
             dgDuplicates.Loaded += DgDuplicates_Loaded;
             dgDuplicates.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(DgDuplicates_ScrollChanged));
             lbDuplicatesThumbnail.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler(DgDuplicates_ScrollChanged));

@@ -952,13 +952,18 @@ namespace get_link_manga
             if (lblClearCookieAndRetry != null) lblClearCookieAndRetry.Text = "AUTO DOWNLOAD";
             if (chkHideSettings != null) chkHideSettings.ToolTip = "HIDE SETTINGS";
             if (chkResultsPresentation != null) chkResultsPresentation.ToolTip = "LIST / THUMBNAIL";
+            if (btnShowNewWindow != null) btnShowNewWindow.ToolTip = "SHOW ON NEW WINDOW";
+            if (lblShowNewWindow != null) lblShowNewWindow.ToolTip = "SHOW ON NEW WINDOW";
+            if (btnSubPopupPreviewToggle != null) btnSubPopupPreviewToggle.ToolTip = "POPUP PREVIEW";
+            if (chkSubCompactRows != null) chkSubCompactRows.ToolTip = "COMPACT ROW";
+            if (chkSubHideSettings != null) chkSubHideSettings.ToolTip = "HIDE SETTINGS";
+            if (chkSubResultsPresentation != null) chkSubResultsPresentation.ToolTip = "LIST / THUMBNAIL";
+            if (btnSubShowNewWindow != null) btnSubShowNewWindow.ToolTip = "SHOW ON NEW WINDOW";
             if (btnDuplicateName != null) btnDuplicateName.Content = "Duplicate names";
             // if (btnNoLinkViHentai != null) btnNoLinkViHentai.Content = "No chapters";
             if (btnReverseOrder != null) btnReverseOrder.Content = "Reverse order";
             if (btnClearComplete != null) btnClearComplete.Content = "Remove completed";
             if (btnExtractClearCookie != null) btnExtractClearCookie.Content = "Clear cookie";
-            if (btnShowNewWindow != null) btnShowNewWindow.ToolTip = "SHOW ON NEW WINDOW";
-            if (lblShowNewWindow != null) lblShowNewWindow.ToolTip = "SHOW ON NEW WINDOW";
             if (txtWebviewCpuAffinityLabel != null) txtWebviewCpuAffinityLabel.Text = "WEBVIEW CPU LIMIT";
             if (txtWebviewCpuPriorityLabel != null) txtWebviewCpuPriorityLabel.Text = "WEBVIEW CPU PRIORITY";
 

@@ -3241,7 +3241,7 @@
                     </Grid>
 
                     <!-- Toolbar for Filtering and Sorting -->
-                    <Grid Name="grdToolbarFilterSort" Grid.Row="1" Margin="0,0,0,12">
+                    <Grid Grid.Row="1" Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
@@ -3350,8 +3350,69 @@
 
                     <!-- Book List Container -->
                     <Grid Grid.Row="3" Name="grdBookListContainer" Margin="0,0,0,10">
-                        <!-- Scraped links DataGrid -->
-                        <DataGrid Name="dgResults"
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Sub-Toolbar for Popped-out Window and Main Window sync -->
+                        <Grid Grid.Row="0" Margin="0,0,0,8" VerticalAlignment="Center">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsChecked, ElementName=btnShowNewWindow}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <WrapPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,14,4" VerticalAlignment="Center">
+                                    <StackPanel.LayoutTransform>
+                                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                    </StackPanel.LayoutTransform>
+                                    <TextBlock Name="lblSubPopupPreview" Text="&#xE890;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <ToggleButton Name="btnSubPopupPreviewToggle" Click="BtnPopupPreviewToggle_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="{Binding IsChecked, ElementName=btnPopupPreviewToggle, Mode=TwoWay}" ToolTip="POPUP PREVIEW"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,14,4" VerticalAlignment="Center">
+                                    <StackPanel.LayoutTransform>
+                                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                    </StackPanel.LayoutTransform>
+                                    <TextBlock Name="lblSubCompactRows" Text="&#xE70F;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkPinkBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <ToggleButton Name="chkSubCompactRows" Click="ChkCompactRows_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="{Binding IsChecked, ElementName=chkCompactRows, Mode=TwoWay}" ToolTip="COMPACT ROW"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,14,4" VerticalAlignment="Center">
+                                    <StackPanel.LayoutTransform>
+                                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                    </StackPanel.LayoutTransform>
+                                    <TextBlock Name="lblSubHideSettings" Text="&#xE713;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <ToggleButton Name="chkSubHideSettings" Click="ChkHideSettings_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="{Binding IsChecked, ElementName=chkHideSettings, Mode=TwoWay}" ToolTip="HIDE SETTINGS"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,14,4" VerticalAlignment="Center">
+                                    <StackPanel.LayoutTransform>
+                                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                    </StackPanel.LayoutTransform>
+                                    <TextBlock Name="lblSubResultsPresentation" Text="&#xE8A9;" FontFamily="Segoe MDL2 Assets" Foreground="#00FF87" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <ToggleButton Name="chkSubResultsPresentation" Click="ChkResultsPresentation_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="{Binding IsChecked, ElementName=chkResultsPresentation, Mode=TwoWay}" ToolTip="LIST / THUMBNAIL"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,14,4" VerticalAlignment="Center">
+                                    <StackPanel.LayoutTransform>
+                                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                    </StackPanel.LayoutTransform>
+                                    <TextBlock Name="lblSubShowNewWindow" Text="&#xE8A7;" FontFamily="Segoe MDL2 Assets" Foreground="#38BDF8" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <ToggleButton Name="btnSubShowNewWindow" Click="BtnShowNewWindow_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="{Binding IsChecked, ElementName=btnShowNewWindow, Mode=TwoWay}" ToolTip="SHOW ON NEW WINDOW"/>
+                                </StackPanel>
+                            </WrapPanel>
+                        </Grid>
+
+                        <Grid Grid.Row="1">
+                            <!-- Scraped links DataGrid -->
+                            <DataGrid Name="dgResults"
                                   Style="{StaticResource CyberpunkDataGrid}"
                                   ColumnHeaderStyle="{StaticResource CyberpunkDataGridColumnHeader}"
                                   CellStyle="{StaticResource CyberpunkDataGridCell}"
@@ -4651,6 +4712,7 @@
                                     <TextBlock Name="txtEmptyStateDesc" Text="Dán link truyện hoặc kéo thả file/thư mục vào đây để bắt đầu" FontSize="12" HorizontalAlignment="Center" Foreground="{StaticResource CyberpunkMutedTextBrush}"/>
                                 </StackPanel>
                             </Border>
+                        </Grid>
                         </Grid>
                     </Grid>
 
