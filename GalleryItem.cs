@@ -174,6 +174,7 @@ namespace get_link_manga
         private bool _isChecked;
         private string _link;
         private string _name;
+        private bool _isTranslating;
         private int _originalIndex;
         private string _linkCount = "";
         private bool _isDuplicate;
@@ -362,6 +363,7 @@ namespace get_link_manga
                     _name = cleaned;
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(DisplayName));
+                    TriggerAutoTranslateIfNeeded(cleaned);
                 }
             }
         }
@@ -1631,6 +1633,110 @@ namespace get_link_manga
                     handler(this, new PropertyChangedEventArgs(propertyName));
                 }
             }
+        }
+
+        private static bool IsEnglishOrVietnamese(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return true;
+            return System.Text.RegularExpressions.Regex.IsMatch(text, @"^[a-zA-Z0-9\s.,!?:;()\[\]{}""''`~@#\$%\^&\*_\+-=\\/\|áàảãạâấầẩẫậăắằẳẵặéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđĐ★☆♥♦♣♠✦✧✿❀❁✪✓✔✗✘➔➕➖✖➗]*$");
+        }
+
+        private void TriggerAutoTranslateIfNeeded(string originalName)
+        {
+            if (_isTranslating || string.IsNullOrWhiteSpace(originalName)) return;
+            if (IsEnglishOrVietnamese(originalName)) return;
+
+            _isTranslating = true;
+            System.Threading.Tasks.Task.Run(async () =>
+            {
+                try
+                {
+                    string translated = await TranslateToEnglishAsync(originalName);
+                    if (!string.IsNullOrWhiteSpace(translated) && translated != originalName)
+                    {
+                        System.Windows.Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
+                        {
+                            _isTranslating = true;
+                            try
+                            {
+                                Name = translated;
+                            }
+                            finally
+                            {
+                                _isTranslating = false;
+                            }
+                        }));
+                    }
+                }
+                catch { }
+                finally
+                {
+                    _isTranslating = false;
+                }
+            });
+        }
+
+        private static async System.Threading.Tasks.Task<string> TranslateToEnglishAsync(string text)
+        {
+            try
+            {
+                string url = $"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={Uri.EscapeDataString(text)}";
+                using (var client = new System.Net.Http.HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromSeconds(10);
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+                    string response = await client.GetStringAsync(url);
+                    if (!string.IsNullOrWhiteSpace(response))
+                    {
+                        var langMatch = System.Text.RegularExpressions.Regex.Match(response, @",\s*null\s*,\s*""([^""]+)""\s*\]\s*$");
+                        if (langMatch.Success)
+                        {
+                            string detectedLang = langMatch.Groups[1].Value.ToLowerInvariant();
+                            if (detectedLang.StartsWith("en") || detectedLang.StartsWith("vi"))
+                            {
+                                return null;
+                            }
+                        }
+
+                        string translated = ParseFirstJsonString(response);
+                        if (!string.IsNullOrWhiteSpace(translated))
+                        {
+                            return System.Net.WebUtility.HtmlDecode(translated);
+                        }
+                    }
+                }
+            }
+            catch { }
+            return null;
+        }
+
+        private static string ParseFirstJsonString(string json)
+        {
+            if (string.IsNullOrEmpty(json) || !json.StartsWith("[[[\"")) return null;
+            var sb = new StringBuilder();
+            bool escaped = false;
+            for (int i = 4; i < json.Length; i++)
+            {
+                char c = json[i];
+                if (escaped)
+                {
+                    sb.Append(c);
+                    escaped = false;
+                }
+                else if (c == '\\')
+                {
+                    escaped = true;
+                }
+                else if (c == '"')
+                {
+                    break;
+                }
+                else
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString();
         }
     }
 }

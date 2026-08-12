@@ -81,7 +81,7 @@ namespace get_link_manga
             {
                 Items.Add(item);
             }
-            QueueNotification();
+            FlushPendingNotifications();
         }
     }
 }
