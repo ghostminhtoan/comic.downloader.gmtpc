@@ -789,6 +789,18 @@ namespace get_link_manga
             return null;
         }
 
+        private void ScheduleDuplicatePreviewPrefetch()
+        {
+            _previewPrefetchTimer.Stop();
+            _previewPrefetchTimer.Start();
+        }
+
+        private void PreviewPrefetchTimer_Tick(object sender, EventArgs e)
+        {
+            _previewPrefetchTimer.Stop();
+            UpdateDuplicateThumbnailsVirtualizationWindow();
+        }
+
         private void ChkResultsPresentation_Click(object sender, RoutedEventArgs e)
         {
             if (chkResultsPresentation == null) return;
