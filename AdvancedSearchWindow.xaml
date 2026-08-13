@@ -4,31 +4,19 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="ADVANCED SEARCH" Height="360" Width="550"
+        Title="ADVANCED SEARCH" Height="320" Width="550"
         Background="{DynamicResource CyberpunkDarkBrush}"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        ResizeMode="NoResize"
-        WindowStyle="None"
-        BorderBrush="{DynamicResource CyberpunkBorderBrush}"
-        BorderThickness="1"
-        MouseDown="Window_MouseDown">
+        ResizeMode="NoResize">
 
     <Grid Margin="15">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- Title / Window header -->
             <RowDefinition Height="*"/>    <!-- TextBoxes Grid -->
             <RowDefinition Height="Auto"/> <!-- Buttons -->
         </Grid.RowDefinitions>
 
-        <!-- Header -->
         <Grid Grid.Row="0" Margin="0,0,0,15">
-            <TextBlock Name="lblTitle" Text="ADVANCED SEARCH" Foreground="{DynamicResource CyberpunkCyanBrush}" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            <Button Content="X" Click="BtnCancel_Click" Style="{StaticResource CyberpunkButtonPink}" Width="26" Height="22" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="10"/>
-        </Grid>
-
-        <!-- Two Columns of TextBoxes -->
-        <Grid Grid.Row="1" Margin="0,0,0,15">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="15"/>
@@ -56,8 +44,7 @@
             </StackPanel>
         </Grid>
 
-        <!-- Bottom Buttons -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Name="btnApply" Content="APPLY" Click="BtnApply_Click" Style="{StaticResource CyberpunkButtonCyan}" Width="90" Height="26" Margin="0,0,8,0" FontWeight="Bold"/>
             <Button Name="btnClear" Content="CLEAR" Click="BtnClear_Click" Style="{StaticResource CyberpunkButtonCyan}" Width="90" Height="26" Margin="0,0,8,0"/>
             <Button Name="btnCancel" Content="CANCEL" Click="BtnCancel_Click" Style="{StaticResource CyberpunkButtonPink}" Width="90" Height="26"/>

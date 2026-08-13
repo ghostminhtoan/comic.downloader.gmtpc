@@ -33,7 +33,7 @@ namespace get_link_manga
         private void ApplyLocalization()
         {
             bool isVi = _mainWindow != null ? _mainWindow._isVietnameseUi : _duplicateWindow._mainWindow._isVietnameseUi;
-            lblTitle.Text = isVi ? "TÌM KIẾM NÂNG CAO" : "ADVANCED SEARCH";
+            Title = isVi ? "TÌM KIẾM NÂNG CAO" : "ADVANCED SEARCH";
             lblInclude.Text = isVi ? "BAO GỒM" : "INCLUDE";
             lblExclude.Text = isVi ? "LOẠI TRỪ" : "EXCLUDE";
 
