@@ -1184,70 +1184,14 @@ namespace get_link_manga
 
         private void PrefetchAllThumbnailResults()
         {
-            List<GalleryItem> items = null;
-
-            // Nếu đang hiển thị chế độ Thumbnail, ưu tiên các item hiển thị trong ListBox
-            if (_isResultsThumbnailViewEnabled && _thumbnailVisibleItems.Count > 0)
-            {
-                items = _thumbnailVisibleItems
-                    .Where(SupportsHoverPreview)
-                    .Take(30)
-                    .ToList();
-            }
-            // Nếu đang hiển thị chế độ DataGrid (nhất là List + thumbnail column)
-            else if (dgResults != null && dgResults.Visibility == Visibility.Visible)
-            {
-                // Tìm các item hiển thị trên giao diện của DataGrid bằng cách lấy các item thuộc Viewport
-                try
-                {
-                    var sortedItems = GetThumbnailSourceItems();
-                    if (sortedItems.Count > 0)
-                    {
-                        // Lấy ScrollViewer của DataGrid để tính vị trí dòng hiện tại
-                        var scrollViewer = FindVisualChild<ScrollViewer>(dgResults);
-                        if (scrollViewer != null)
-                        {
-                            int firstVisibleIndex = (int)Math.Max(0, scrollViewer.VerticalOffset);
-                            items = sortedItems
-                                .Skip(firstVisibleIndex)
-                                .Take(30)
-                                .Where(SupportsHoverPreview)
-                                .ToList();
-                        }
-                    }
-                }
-                catch { }
-            }
-
-            if (items == null || items.Count == 0)
-            {
-                items = GetThumbnailSourceItems()
-                    .Where(SupportsHoverPreview)
-                    .Take(30)
-                    .ToList();
-            }
-
-            if (items.Count == 0)
-            {
-                return;
-            }
-
-            PrefetchGalleryHoverPreview(items);
+            PrefetchAllScrapedItemsPreviewCache();
+            UpdateThumbnailsVirtualizationWindow();
         }
 
         private void DgResults_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             if (e.VerticalChange == 0) return;
-            
-            // Kích hoạt prefetch các ảnh xung quanh vị trí cuộn mới của DataGrid
-            System.Threading.Tasks.Task.Run(() =>
-            {
-                try
-                {
-                    PrefetchAllThumbnailResults();
-                }
-                catch { }
-            });
+            UpdateThumbnailsVirtualizationWindow();
         }
 
         private void ResultsThumbnailItems_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -1264,16 +1208,11 @@ namespace get_link_manga
             UpdateEmptyStateVisibility();
             UpdateGlobalProgressBar();
 
+            PrefetchAllScrapedItemsPreviewCache();
+            UpdateThumbnailsVirtualizationWindow();
+
             if (!_isResultsThumbnailViewEnabled)
             {
-                System.Threading.Tasks.Task.Run(() =>
-                {
-                    try
-                    {
-                        PrefetchAllThumbnailResults();
-                    }
-                    catch { }
-                });
                 return;
             }
 
@@ -1795,6 +1734,75 @@ namespace get_link_manga
             {
                 LoadMoreThumbnailResults(ThumbnailLoadMoreRows);
             }
+
+            UpdateThumbnailsVirtualizationWindow();
+        }
+
+        private void UpdateThumbnailsVirtualizationWindow()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action(UpdateThumbnailsVirtualizationWindow));
+                return;
+            }
+
+            try
+            {
+                var sortedItems = GetThumbnailSourceItems();
+                int totalCount = sortedItems.Count;
+                if (totalCount == 0) return;
+
+                int firstVisibleIndex = 0;
+                int lastVisibleIndex = totalCount - 1;
+
+                if (_isResultsThumbnailViewEnabled && lbResultsThumbnail != null)
+                {
+                    var scrollViewer = FindVisualChild<ScrollViewer>(lbResultsThumbnail);
+                    if (scrollViewer != null)
+                    {
+                        int columns = GetThumbnailColumnCount();
+                        int firstRow = (int)Math.Max(0, scrollViewer.VerticalOffset);
+                        int lastRow = firstRow + (int)Math.Ceiling(scrollViewer.ViewportHeight);
+
+                        firstVisibleIndex = firstRow * columns;
+                        lastVisibleIndex = (lastRow + 1) * columns;
+                    }
+                }
+                else if (dgResults != null && dgResults.Visibility == Visibility.Visible)
+                {
+                    var scrollViewer = FindVisualChild<ScrollViewer>(dgResults);
+                    if (scrollViewer != null)
+                    {
+                        firstVisibleIndex = (int)Math.Max(0, scrollViewer.VerticalOffset);
+                        lastVisibleIndex = firstVisibleIndex + (int)Math.Ceiling(scrollViewer.ViewportHeight);
+                    }
+                }
+
+                int minIndex = Math.Max(0, firstVisibleIndex - 30);
+                int maxIndex = Math.Min(totalCount - 1, lastVisibleIndex + 30);
+
+                for (int i = 0; i < totalCount; i++)
+                {
+                    var item = sortedItems[i];
+                    if (item == null) continue;
+
+                    if (i >= minIndex && i <= maxIndex)
+                    {
+                        if (item.HoverPreviewThumbnailImageSource == null && System.IO.File.Exists(item.HoverPreviewThumbnailLocalPath ?? item.HoverPreviewLocalPath))
+                        {
+                            var img = item.HoverPreviewThumbnailImageSource;
+                        }
+                    }
+                    else
+                    {
+                        if (item.HoverPreviewThumbnailImageSource != null)
+                        {
+                            item.ResetHoverPreviewCache();
+                        }
+                    }
+                }
+            }
+            catch { }
         }
 
         private static bool IsThumbnailDragCandidate(DependencyObject source)

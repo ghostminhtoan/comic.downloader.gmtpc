@@ -706,44 +706,87 @@ namespace get_link_manga
                 return;
             }
 
-            ScheduleDuplicatePreviewPrefetch();
+            UpdateDuplicateThumbnailsVirtualizationWindow();
         }
 
-        private void ScheduleDuplicatePreviewPrefetch()
+        private void UpdateDuplicateThumbnailsVirtualizationWindow()
         {
-            _previewPrefetchTimer.Stop();
-            _previewPrefetchTimer.Start();
-        }
-
-        private void PreviewPrefetchTimer_Tick(object sender, EventArgs e)
-        {
-            _previewPrefetchTimer.Stop();
-            PrefetchVisibleDuplicatePreviews();
-        }
-
-        private void PrefetchVisibleDuplicatePreviews()
-        {
-            if (_mainWindow == null) return;
-
-            System.Collections.Generic.List<GalleryItem> visibleItems;
-            if (chkResultsPresentation?.IsChecked == true)
+            if (!Dispatcher.CheckAccess())
             {
-                visibleItems = lbDuplicatesThumbnail.Items
-                    .Cast<GalleryItem>()
-                    .Where(item => lbDuplicatesThumbnail.ItemContainerGenerator.ContainerFromItem(item) is ListBoxItem)
-                    .Take(40)
-                    .ToList();
-            }
-            else
-            {
-                visibleItems = dgDuplicates.Items
-                    .Cast<GalleryItem>()
-                    .Where(item => dgDuplicates.ItemContainerGenerator.ContainerFromItem(item) is DataGridRow)
-                    .Take(20)
-                    .ToList();
+                Dispatcher.BeginInvoke(new Action(UpdateDuplicateThumbnailsVirtualizationWindow));
+                return;
             }
 
-            _mainWindow.PrefetchGalleryHoverPreview(visibleItems);
+            try
+            {
+                var sortedItems = _duplicatesView.Cast<GalleryItem>().ToList();
+                int totalCount = sortedItems.Count;
+                if (totalCount == 0) return;
+
+                int firstVisibleIndex = 0;
+                int lastVisibleIndex = totalCount - 1;
+
+                if (chkResultsPresentation?.IsChecked == true && lbDuplicatesThumbnail != null)
+                {
+                    var scrollViewer = FindVisualChild<ScrollViewer>(lbDuplicatesThumbnail);
+                    if (scrollViewer != null)
+                    {
+                        int columns = 7;
+                        int firstRow = (int)Math.Max(0, scrollViewer.VerticalOffset);
+                        int lastRow = firstRow + (int)Math.Ceiling(scrollViewer.ViewportHeight);
+
+                        firstVisibleIndex = firstRow * columns;
+                        lastVisibleIndex = (lastRow + 1) * columns;
+                    }
+                }
+                else if (dgDuplicates != null && dgDuplicates.Visibility == Visibility.Visible)
+                {
+                    var scrollViewer = FindVisualChild<ScrollViewer>(dgDuplicates);
+                    if (scrollViewer != null)
+                    {
+                        firstVisibleIndex = (int)Math.Max(0, scrollViewer.VerticalOffset);
+                        lastVisibleIndex = firstVisibleIndex + (int)Math.Ceiling(scrollViewer.ViewportHeight);
+                    }
+                }
+
+                int minIndex = Math.Max(0, firstVisibleIndex - 30);
+                int maxIndex = Math.Min(totalCount - 1, lastVisibleIndex + 30);
+
+                for (int i = 0; i < totalCount; i++)
+                {
+                    var item = sortedItems[i];
+                    if (item == null) continue;
+
+                    if (i >= minIndex && i <= maxIndex)
+                    {
+                        if (item.HoverPreviewThumbnailImageSource == null && System.IO.File.Exists(item.HoverPreviewThumbnailLocalPath ?? item.HoverPreviewLocalPath))
+                        {
+                            var img = item.HoverPreviewThumbnailImageSource;
+                        }
+                    }
+                    else
+                    {
+                        if (item.HoverPreviewThumbnailImageSource != null)
+                        {
+                            item.ResetHoverPreviewCache();
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T t) return t;
+                var result = FindVisualChild<T>(child);
+                if (result != null) return result;
+            }
+            return null;
         }
 
         private void ChkResultsPresentation_Click(object sender, RoutedEventArgs e)

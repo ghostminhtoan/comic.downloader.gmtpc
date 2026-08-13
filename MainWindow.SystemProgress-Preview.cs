@@ -76,6 +76,29 @@ namespace get_link_manga
             _ = PrefetchGalleryHoverPreviewBatchAsync(items.Where(SupportsHoverPreview).Distinct().ToList());
         }
 
+        internal void PrefetchAllScrapedItemsPreviewCache()
+        {
+            var items = _scrapedItems.ToList();
+            if (items.Count == 0) return;
+
+            Task.Run(async () =>
+            {
+                foreach (var item in items)
+                {
+                    try
+                    {
+                        if (SupportsHoverPreview(item))
+                        {
+                            // Tải file cache ảnh về ổ cứng (.tmp/preview-cache)
+                            await EnsureGalleryHoverPreviewAsync(item, fetchTags: false);
+                            await EnsureGalleryHoverPreviewFileAsync(item, CancellationToken.None, fetchTags: false);
+                        }
+                    }
+                    catch { }
+                }
+            });
+        }
+
         private async Task PrefetchGalleryHoverPreviewBatchAsync(List<GalleryItem> items)
         {
             if (items == null || items.Count == 0) return;
