@@ -4891,61 +4891,13 @@
                                                 </Grid.ColumnDefinitions>
                                                 
                                                 <!-- Cột 1: Positive Keywords -->
-                                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                                                    <ItemsControl ItemsSource="{Binding PositiveKeywords}">
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <Grid Margin="0,0,0,6">
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="*"/>
-                                                                        <ColumnDefinition Width="Auto"/>
-                                                                    </Grid.ColumnDefinitions>
-                                                                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="24" FontSize="11"/>
-                                                                    <Button Grid.Column="1" Command="{Binding DataContext.RemovePositiveKeywordCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" Margin="4,0,0,0" Width="20" Height="24" Content="×" Foreground="{StaticResource CyberpunkDangerBrush}" Background="Transparent" BorderThickness="0" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
-                                                                </Grid>
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                    <Button Command="{Binding AddPositiveKeywordCommand}" Content="+ Add Keyword" Style="{StaticResource CompactCyanButton}" Height="24" Margin="0,4,0,0" HorizontalAlignment="Left" FontSize="10"/>
-                                                </StackPanel>
-                                                
-                                                <!-- Cột 2: Non-Positive Keywords -->
-                                                <StackPanel Grid.Column="1" Margin="5,0,5,0">
-                                                    <ItemsControl ItemsSource="{Binding NonPositiveKeywords}">
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <Grid Margin="0,0,0,6">
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="*"/>
-                                                                        <ColumnDefinition Width="Auto"/>
-                                                                    </Grid.ColumnDefinitions>
-                                                                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="24" FontSize="11"/>
-                                                                    <Button Grid.Column="1" Command="{Binding DataContext.RemoveNonPositiveKeywordCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" Margin="4,0,0,0" Width="20" Height="24" Content="×" Foreground="{StaticResource CyberpunkDangerBrush}" Background="Transparent" BorderThickness="0" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
-                                                                </Grid>
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                    <Button Command="{Binding AddNonPositiveKeywordCommand}" Content="+ Add Keyword" Style="{StaticResource CompactCyanButton}" Height="24" Margin="0,4,0,0" HorizontalAlignment="Left" FontSize="10"/>
-                                                </StackPanel>
+                                                <TextBox Grid.Column="0" Text="{Binding PositiveText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="26" FontSize="11" Margin="0,0,5,0" ToolTip="Ví dụ: english;full color;censored"/>
 
+                                                <!-- Cột 2: Non-Positive Keywords -->
+                                                <TextBox Grid.Column="1" Text="{Binding NonPositiveText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="26" FontSize="11" Margin="5,0,5,0" ToolTip="Ví dụ: english;full color;censored"/>
+                                                
                                                 <!-- Cột 3: Negative Keywords -->
-                                                <StackPanel Grid.Column="2" Margin="5,0,0,0">
-                                                    <ItemsControl ItemsSource="{Binding NegativeKeywords}">
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <Grid Margin="0,0,0,6">
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="*"/>
-                                                                        <ColumnDefinition Width="Auto"/>
-                                                                    </Grid.ColumnDefinitions>
-                                                                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="24" FontSize="11"/>
-                                                                    <Button Grid.Column="1" Command="{Binding DataContext.RemoveNegativeKeywordCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" Margin="4,0,0,0" Width="20" Height="24" Content="×" Foreground="{StaticResource CyberpunkDangerBrush}" Background="Transparent" BorderThickness="0" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
-                                                                </Grid>
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                    <Button Command="{Binding AddNegativeKeywordCommand}" Content="+ Add Keyword" Style="{StaticResource CompactCyanButton}" Height="24" Margin="0,4,0,0" HorizontalAlignment="Left" FontSize="10"/>
-                                                </StackPanel>
+                                                <TextBox Grid.Column="2" Text="{Binding NegativeText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="26" FontSize="11" Margin="5,0,0,0" ToolTip="Ví dụ: english;full color;censored"/>
                                             </Grid>
                                             
                                             <!-- Hàng dưới cùng: Điều khiển (Undo/Redo/Clear) -->
