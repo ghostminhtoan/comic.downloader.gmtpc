@@ -399,6 +399,9 @@
     <Compile Include="AdvancedSearchViewModel.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AdaptiveHtmlTracker.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="BookmarkHistoryData.cs">
       <SubType>Code</SubType>
     </Compile>
