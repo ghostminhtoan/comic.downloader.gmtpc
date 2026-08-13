@@ -701,7 +701,7 @@ namespace get_link_manga
 
         private void DgDuplicates_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (e.VerticalChange == 0 && e.HorizontalChange == 0 && e.ExtentHeightChange == 0)
+            if (e.VerticalChange == 0 && e.HorizontalChange == 0)
             {
                 return;
             }

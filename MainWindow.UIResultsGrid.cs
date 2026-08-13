@@ -1725,7 +1725,7 @@ namespace get_link_manga
                 return;
             }
 
-            if (e.VerticalChange == 0 && e.ExtentHeightChange == 0)
+            if (e.VerticalChange == 0)
             {
                 return;
             }
