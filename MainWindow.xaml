@@ -3361,7 +3361,7 @@
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>
                                                 </ItemsControl>
-                                                <Button Command="{Binding AddPositiveKeywordCommand}" Content="+ Add Keyword" Style="{StaticResource ActionButtonSecondary}" Height="24" Margin="0,4,0,0" HorizontalAlignment="Left" FontSize="10"/>
+                                                <Button Command="{Binding AddPositiveKeywordCommand}" Content="+ Add Keyword" Style="{StaticResource CompactCyanButton}" Height="24" Margin="0,4,0,0" HorizontalAlignment="Left" FontSize="10"/>
                                             </StackPanel>
                                             
                                             <!-- Cột Phải: Negative Keywords -->
@@ -3380,14 +3380,14 @@
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>
                                                 </ItemsControl>
-                                                <Button Command="{Binding AddNegativeKeywordCommand}" Content="+ Add Keyword" Style="{StaticResource ActionButtonSecondary}" Height="24" Margin="0,4,0,0" HorizontalAlignment="Left" FontSize="10"/>
+                                                <Button Command="{Binding AddNegativeKeywordCommand}" Content="+ Add Keyword" Style="{StaticResource CompactCyanButton}" Height="24" Margin="0,4,0,0" HorizontalAlignment="Left" FontSize="10"/>
                                             </StackPanel>
                                         </Grid>
                                         
                                         <!-- Hàng dưới cùng: Điều khiển -->
                                         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
-                                            <Button Command="{Binding ResetCommand}" Content="Reset" Style="{StaticResource ActionButtonSecondary}" Height="26" Width="70" Margin="0,0,8,0" FontSize="11"/>
-                                            <Button Command="{Binding ApplySearchCommand}" Content="Apply" Style="{StaticResource ActionButtonPrimary}" Height="26" Width="70" FontSize="11"/>
+                                            <Button Command="{Binding ResetCommand}" Content="Reset" Style="{StaticResource CompactPinkButton}" Height="26" Width="70" Margin="0,0,8,0" FontSize="11"/>
+                                            <Button Command="{Binding ApplySearchCommand}" Content="Apply" Style="{StaticResource CompactCyanButton}" Height="26" Width="70" FontSize="11"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
