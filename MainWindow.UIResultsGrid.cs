@@ -3308,14 +3308,23 @@ namespace get_link_manga
                 item.HoverPreviewThumbnailUrl = null;
 
                 string sanitizedBook = GetSanitizedFileName(item.Name);
-                if (!string.IsNullOrWhiteSpace(sanitizedBook) && System.IO.Directory.Exists(previewRoot))
+                if (!string.IsNullOrWhiteSpace(sanitizedBook))
                 {
+                    if (System.IO.Directory.Exists(previewRoot))
+                    {
+                        try
+                        {
+                            foreach (var file in System.IO.Directory.GetFiles(previewRoot, sanitizedBook + "*"))
+                            {
+                                System.IO.File.Delete(file);
+                            }
+                        }
+                        catch { }
+                    }
+
                     try
                     {
-                        foreach (var file in System.IO.Directory.GetFiles(previewRoot, sanitizedBook + "*"))
-                        {
-                            System.IO.File.Delete(file);
-                        }
+                        System.IO.Directory.CreateDirectory(previewRoot);
                     }
                     catch { }
                 }
