@@ -278,6 +278,27 @@ namespace get_link_manga
                 }
                 catch { }
 
+                try
+                {
+                    string thumbConfigPath = Path.Combine(PortablePaths.PortableDataRoot, "thumb_connection_limit.txt");
+                    if (File.Exists(thumbConfigPath))
+                    {
+                        string valStr = File.ReadAllText(thumbConfigPath).Trim();
+                        if (int.TryParse(valStr, out int savedLimit))
+                        {
+                            foreach (ComboBoxItem item in cmbThumbCacheConnection.Items)
+                            {
+                                if (item.Content.ToString() == savedLimit.ToString())
+                                {
+                                    cmbThumbCacheConnection.SelectedItem = item;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch { }
+
                 GetCurrentConnectionLimit();
                 GetCurrentMultiDownloadLimit();
             };

@@ -83,19 +83,24 @@ namespace get_link_manga
 
             Task.Run(async () =>
             {
+                var tasks = new List<Task>();
                 foreach (var item in items)
                 {
-                    try
+                    if (SupportsHoverPreview(item))
                     {
-                        if (SupportsHoverPreview(item))
+                        tasks.Add(Task.Run(async () =>
                         {
-                            // Tải file cache ảnh về ổ cứng (.tmp/preview-cache)
-                            await EnsureGalleryHoverPreviewAsync(item, fetchTags: false);
-                            await EnsureGalleryHoverPreviewFileAsync(item, CancellationToken.None, fetchTags: false);
-                        }
+                            try
+                            {
+                                // Tải file cache ảnh về ổ cứng (.tmp/preview-cache)
+                                await EnsureGalleryHoverPreviewAsync(item, fetchTags: false);
+                                await EnsureGalleryHoverPreviewFileAsync(item, CancellationToken.None, fetchTags: false);
+                            }
+                            catch { }
+                        }));
                     }
-                    catch { }
                 }
+                await Task.WhenAll(tasks);
             });
         }
 
