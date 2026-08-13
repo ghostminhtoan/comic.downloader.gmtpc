@@ -3730,5 +3730,46 @@ namespace get_link_manga
                 }
             }
         }
+
+        private Point _dragStartPoint;
+        private double _originalHorizontalOffset;
+        private double _originalVerticalOffset;
+        private bool _isDraggingPopup;
+
+        private void DragPopup_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var element = sender as FrameworkElement;
+            if (element != null)
+            {
+                _isDraggingPopup = true;
+                _dragStartPoint = e.GetPosition(this);
+                _originalHorizontalOffset = popAdvancedFilter.HorizontalOffset;
+                _originalVerticalOffset = popAdvancedFilter.VerticalOffset;
+                element.CaptureMouse();
+            }
+        }
+
+        private void DragPopup_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isDraggingPopup)
+            {
+                Point currentPoint = e.GetPosition(this);
+                double deltaX = currentPoint.X - _dragStartPoint.X;
+                double deltaY = currentPoint.Y - _dragStartPoint.Y;
+
+                popAdvancedFilter.HorizontalOffset = _originalHorizontalOffset + deltaX;
+                popAdvancedFilter.VerticalOffset = _originalVerticalOffset + deltaY;
+            }
+        }
+
+        private void DragPopup_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isDraggingPopup)
+            {
+                _isDraggingPopup = false;
+                var element = sender as FrameworkElement;
+                element?.ReleaseMouseCapture();
+            }
+        }
     }
 }
