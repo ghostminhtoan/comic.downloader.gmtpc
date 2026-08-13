@@ -3294,6 +3294,7 @@ namespace get_link_manga
                 {
                     _galleryHoverPreviewBitmapMissingCache.Remove(item.Link);
                     _galleryHoverPreviewMissingCache.Remove(item.Link);
+                    _galleryHoverPreviewUrlCache.Remove(item.Link);
                 }
 
                 if (item.HoverPreviewThumbnailUrl != null)
