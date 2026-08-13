@@ -24,7 +24,7 @@
         <!-- Header -->
         <Grid Grid.Row="0" Margin="0,0,0,15">
             <TextBlock Name="lblTitle" Text="ADVANCED SEARCH" Foreground="{DynamicResource CyberpunkCyanBrush}" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            <Button Content="X" Click="BtnCancel_Click" Style="{StaticResource CyberpunkButton}" Width="26" Height="22" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="10"/>
+            <Button Content="X" Click="BtnCancel_Click" Style="{StaticResource CyberpunkButtonPink}" Width="26" Height="22" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="10"/>
         </Grid>
 
         <!-- Two Columns of TextBoxes -->
@@ -58,9 +58,9 @@
 
         <!-- Bottom Buttons -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Name="btnApply" Content="APPLY" Click="BtnApply_Click" Style="{StaticResource CyberpunkButton}" Width="90" Height="26" Margin="0,0,8,0" FontWeight="Bold"/>
-            <Button Name="btnClear" Content="CLEAR" Click="BtnClear_Click" Style="{StaticResource CyberpunkButton}" Width="90" Height="26" Margin="0,0,8,0"/>
-            <Button Name="btnCancel" Content="CANCEL" Click="BtnCancel_Click" Style="{StaticResource CyberpunkButton}" Width="90" Height="26"/>
+            <Button Name="btnApply" Content="APPLY" Click="BtnApply_Click" Style="{StaticResource CyberpunkButtonCyan}" Width="90" Height="26" Margin="0,0,8,0" FontWeight="Bold"/>
+            <Button Name="btnClear" Content="CLEAR" Click="BtnClear_Click" Style="{StaticResource CyberpunkButtonCyan}" Width="90" Height="26" Margin="0,0,8,0"/>
+            <Button Name="btnCancel" Content="CANCEL" Click="BtnCancel_Click" Style="{StaticResource CyberpunkButtonPink}" Width="90" Height="26"/>
         </StackPanel>
     </Grid>
 </Window>
