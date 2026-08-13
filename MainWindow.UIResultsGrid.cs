@@ -3305,7 +3305,7 @@ namespace get_link_manga
                 string domainFolder = GetDomainFolderName(item, item.HoverPreviewThumbnailUrl);
                 string previewRoot = System.IO.Path.Combine(PortablePaths.PortableTempRoot, "preview-cache", domainFolder);
 
-                item.HoverPreviewThumbnailUrl = null;
+
 
                 string sanitizedBook = GetSanitizedFileName(item.Name);
                 if (!string.IsNullOrWhiteSpace(sanitizedBook))
