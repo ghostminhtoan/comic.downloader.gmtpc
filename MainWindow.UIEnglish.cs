@@ -109,6 +109,7 @@ namespace get_link_manga
             ["CHAPTER SELECTION"] = "Chỉ tải chapter",
             ["CONNECTION"] = "Kết nối",
             ["DOWNLOAD MULTIPLE BOOK"] = "Tải cùng lúc",
+            ["THUMB. CACHE CONNECTION"] = "Kết nối tải thumb",
             ["SORT BY NAME"] = "Sắp xếp theo tên",
             ["RESTORE ORDER"] = "Trả về thứ tự cũ",
             ["DUPLICATE NAME"] = "Tên trùng",

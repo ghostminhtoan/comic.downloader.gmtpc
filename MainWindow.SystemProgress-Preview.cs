@@ -27,7 +27,7 @@ namespace get_link_manga
         private readonly HashSet<string> _galleryHoverPreviewBitmapMissingCache = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, List<string>> _galleryHoverPreviewCandidateCache = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         private readonly object _galleryHoverPreviewCandidateCacheLock = new object();
-        private readonly SemaphoreSlim _galleryHoverPreviewImageSemaphore = new SemaphoreSlim(24, 24);
+        private SemaphoreSlim _galleryHoverPreviewImageSemaphore = new SemaphoreSlim(4, 4);
         // Rate-limit tag fetch cho nhentai/truyenqq: tối đa 2 request cùng lúc
         private readonly SemaphoreSlim _tagFetchSemaphore = new SemaphoreSlim(2, 2);
         private readonly HashSet<string> _tagFetchFailedCache = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

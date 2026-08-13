@@ -68,6 +68,23 @@ namespace get_link_manga
             }
         }
 
+        private void CmbThumbCacheConnection_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (cmbThumbCacheConnection == null || cmbThumbCacheConnection.SelectedItem == null) return;
+                var selectedItem = cmbThumbCacheConnection.SelectedItem as ComboBoxItem;
+                if (selectedItem == null) return;
+                if (!int.TryParse(selectedItem.Content.ToString(), out int newVal)) return;
+
+                _galleryHoverPreviewImageSemaphore = new System.Threading.SemaphoreSlim(newVal, newVal);
+                Log($"[Thumb Connection] Số luồng kết nối tải thumbnail song song chỉnh thành {newVal}.");
+            }
+            catch
+            {
+            }
+        }
+
         private void CmbCreateSubfolderDomain_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_suppressCreateSubfolderEvents || !_createSubfolderUiReady)

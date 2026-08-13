@@ -1,4 +1,4 @@
-<Window x:Class="get_link_manga.MainWindow"
+﻿<Window x:Class="get_link_manga.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -4953,6 +4953,20 @@
                                     <ComboBoxItem Content="8"/>
                                     <ComboBoxItem Content="9"/>
                                     <ComboBoxItem Content="10"/>
+                                </ComboBox>
+                                <TextBlock Name="txtThumbCacheConnectionLabel" Text="THUMB. CACHE CONNECTION" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <ComboBox Name="cmbThumbCacheConnection" Style="{StaticResource CyberpunkComboBox}" Height="26" Width="50" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" SelectedIndex="2" SelectionChanged="CmbThumbCacheConnection_SelectionChanged" Margin="0,0,12,0" VerticalAlignment="Center">
+                                    <ComboBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <VirtualizingStackPanel Background="#121622"/>
+                                        </ItemsPanelTemplate>
+                                    </ComboBox.ItemsPanel>
+                                    <ComboBoxItem Content="1"/>
+                                    <ComboBoxItem Content="2"/>
+                                    <ComboBoxItem Content="4"/>
+                                    <ComboBoxItem Content="8"/>
+                                    <ComboBoxItem Content="12"/>
+                                    <ComboBoxItem Content="16"/>
                                 </ComboBox>
                                 <TextBlock Name="txtWebviewCpuAffinityLabel" Text="WEBVIEW CPU LIMIT" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                 <ComboBox Name="cmbWebviewCpuAffinity" Style="{StaticResource CyberpunkComboBox}" Height="26" Width="65" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="0,0,12,0" VerticalAlignment="Center">
