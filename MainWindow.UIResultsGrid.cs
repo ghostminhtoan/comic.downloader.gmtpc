@@ -3265,7 +3265,7 @@ namespace get_link_manga
             }
         }
 
-        private void BtnRescanThumbnail_Click(object sender, RoutedEventArgs e)
+        private async void BtnRescanThumbnail_Click(object sender, RoutedEventArgs e)
         {
             List<GalleryItem> selectedItems;
             if (_isResultsThumbnailViewEnabled)
@@ -3284,6 +3284,7 @@ namespace get_link_manga
 
             if (!selectedItems.Any()) return;
 
+            var tasks = new List<System.Threading.Tasks.Task>();
             foreach (var item in selectedItems)
             {
                 item.HoverPreviewLocalPath = null;
@@ -3318,8 +3319,11 @@ namespace get_link_manga
                     catch { }
                 }
 
-                _ = PrefetchGalleryHoverPreviewAsync(item);
+                tasks.Add(PrefetchGalleryHoverPreviewAsync(item));
             }
+
+            await System.Threading.Tasks.Task.WhenAll(tasks);
+            UpdateThumbnailsVirtualizationWindow();
 
             Log($"Rescanned thumbnail for {selectedItems.Count} book(s).");
             lblStatus.Text = $"Rescanned thumbnail for {selectedItems.Count} book(s).";

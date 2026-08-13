@@ -182,7 +182,7 @@ namespace get_link_manga
             ["PANEL 4 - .MD"] = "PANEL 4 - .MD",
             ["Move to top"] = "Đưa lên đầu",
             ["Move to bottom"] = "Đưa xuống cuối",
-            ["CLEAR TEMP"] = "Xóa tạm",
+            ["CLEAR TEMP"] = "Xóa temp",
             ["SPLIT SINGLE COMIC FOLDERS"] = "Tách thư mục truyện đơn",
             ["CHAP GROUP"] = "Nhóm chap",
             ["SPLIT FOLDER"] = "Tách thư mục",

@@ -256,7 +256,7 @@ namespace get_link_manga
 
             if (_toolbarClearTempButton == null)
             {
-                string clearTempText = _isVietnameseUi ? "XÓA TẠM" : "CLEAR TEMP";
+                string clearTempText = _isVietnameseUi ? "XÓA TEMP" : "CLEAR TEMP";
                 _toolbarClearTempButton = CreateCompactToolbarToggleButton(clearTempText, BtnClearTempFloating_Click);
                 _toolbarClearTempButton.Content = clearTempText;
                 _toolbarClearTempButton.ToolTip = clearTempText;
@@ -1887,7 +1887,7 @@ namespace get_link_manga
 
             if (_toolbarClearTempButton != null)
             {
-                string clearTempText = _isVietnameseUi ? "XÓA TẠM" : "CLEAR TEMP";
+                string clearTempText = _isVietnameseUi ? "XÓA TEMP" : "CLEAR TEMP";
                 _toolbarClearTempButton.Content = clearTempText;
                 _toolbarClearTempButton.ToolTip = clearTempText;
             }

@@ -62,34 +62,8 @@ namespace get_link_manga
                 Log($"[Clear Temp] Lỗi tự động xóa cookie: {ex.Message}");
             }
 
-            if (_scrapedItems != null)
-            {
-                foreach (var item in _scrapedItems)
-                {
-                    item.HoverPreviewLocalPath = null;
-                    item.HoverPreviewThumbnailLocalPath = null;
-                    item.HoverPreviewThumbnailUrl = null;
-                    item.Tag = null; // Khi dọn dẹp, xóa sạch tag trong bộ nhớ để khi hover phải get lại tag
-                }
-            }
-
             GC.Collect();
             GC.WaitForPendingFinalizers();
-
-            // Xóa luôn thư mục preview-cache (ảnh thumbnail & tệp tag .txt)
-            try
-            {
-                string previewCacheRoot = Path.Combine(PortablePaths.PortableTempRoot, "preview-cache");
-                if (Directory.Exists(previewCacheRoot))
-                {
-                    Directory.Delete(previewCacheRoot, true);
-                    Log("[Clear Temp] Đã dọn dẹp thư mục preview-cache.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log($"[Clear Temp] Lỗi dọn dẹp preview-cache: {ex.Message}");
-            }
 
             string downloadRoot = txtDownloadPath?.Text?.Trim() ?? string.Empty;
             ClearTempRootFolder(PortablePaths.PortableTempRoot);
