@@ -78,17 +78,20 @@ namespace get_link_manga
 
         internal void PrefetchAllScrapedItemsPreviewCache()
         {
-            var items = _scrapedItems.ToList();
+            var items = _scrapedItems.Where(SupportsHoverPreview).ToList();
             if (items.Count == 0) return;
 
             Task.Run(async () =>
             {
-                var tasks = new List<Task>();
-                foreach (var item in items)
+                var queue = new System.Collections.Concurrent.ConcurrentQueue<GalleryItem>(items);
+                int workerCount = 4;
+                var workers = new List<Task>();
+
+                for (int i = 0; i < workerCount; i++)
                 {
-                    if (SupportsHoverPreview(item))
+                    workers.Add(Task.Run(async () =>
                     {
-                        tasks.Add(Task.Run(async () =>
+                        while (queue.TryDequeue(out var item))
                         {
                             try
                             {
@@ -97,10 +100,11 @@ namespace get_link_manga
                                 await EnsureGalleryHoverPreviewFileAsync(item, CancellationToken.None, fetchTags: false);
                             }
                             catch { }
-                        }));
-                    }
+                        }
+                    }));
                 }
-                await Task.WhenAll(tasks);
+
+                await Task.WhenAll(workers);
             });
         }
 
