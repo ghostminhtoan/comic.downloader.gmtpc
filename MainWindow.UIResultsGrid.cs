@@ -3494,14 +3494,93 @@ namespace get_link_manga
                     string clickedCore = GetSimilarityCore(clickedItem.Name, false);
                     if (string.IsNullOrEmpty(clickedCore)) return;
 
-                    var matchingItems = _scrapedItems
+                    var listItems = dgResults.Items.Cast<GalleryItem>().ToList();
+                    var matchingItems = listItems
                         .Where(item => GetSimilarityCore(item.Name, false) == clickedCore)
                         .ToList();
 
-                    dgResults.SelectedItems.Clear();
-                    foreach (var item in matchingItems)
+                    bool isCtrl = (System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Control) == System.Windows.Input.ModifierKeys.Control;
+                    bool isShift = (System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Shift) == System.Windows.Input.ModifierKeys.Shift;
+
+                    if (isShift)
                     {
-                        dgResults.SelectedItems.Add(item);
+                        var anchor = dgResults.SelectedItem as GalleryItem;
+                        if (anchor == null && dgResults.SelectedItems.Count > 0)
+                        {
+                            anchor = dgResults.SelectedItems[0] as GalleryItem;
+                        }
+
+                        if (anchor != null)
+                        {
+                            int idx1 = listItems.IndexOf(anchor);
+                            int idx2 = listItems.IndexOf(clickedItem);
+                            int start = Math.Min(idx1, idx2);
+                            int end = Math.Max(idx1, idx2);
+
+                            var rangeItems = new System.Collections.Generic.List<GalleryItem>();
+                            for (int i = start; i <= end; i++)
+                            {
+                                rangeItems.Add(listItems[i]);
+                            }
+
+                            // Gộp thêm toàn bộ nhóm tương tự của dòng click hiện tại
+                            foreach (var item in matchingItems)
+                            {
+                                if (!rangeItems.Contains(item))
+                                {
+                                    rangeItems.Add(item);
+                                }
+                            }
+
+                            if (!isCtrl)
+                            {
+                                dgResults.SelectedItems.Clear();
+                            }
+                            foreach (var item in rangeItems)
+                            {
+                                if (!dgResults.SelectedItems.Contains(item))
+                                {
+                                    dgResults.SelectedItems.Add(item);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            dgResults.SelectedItems.Clear();
+                            foreach (var item in matchingItems)
+                            {
+                                dgResults.SelectedItems.Add(item);
+                            }
+                        }
+                    }
+                    else if (isCtrl)
+                    {
+                        bool allSelected = matchingItems.All(item => dgResults.SelectedItems.Contains(item));
+                        if (allSelected)
+                        {
+                            foreach (var item in matchingItems)
+                            {
+                                dgResults.SelectedItems.Remove(item);
+                            }
+                        }
+                        else
+                        {
+                            foreach (var item in matchingItems)
+                            {
+                                if (!dgResults.SelectedItems.Contains(item))
+                                {
+                                    dgResults.SelectedItems.Add(item);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        dgResults.SelectedItems.Clear();
+                        foreach (var item in matchingItems)
+                        {
+                            dgResults.SelectedItems.Add(item);
+                        }
                     }
                 }
             }
@@ -3523,14 +3602,93 @@ namespace get_link_manga
                     string clickedCore = GetSimilarityCore(clickedItem.Name, false);
                     if (string.IsNullOrEmpty(clickedCore)) return;
 
-                    var matchingItems = _scrapedItems
+                    var listItems = lbResultsThumbnail.Items.Cast<GalleryItem>().ToList();
+                    var matchingItems = listItems
                         .Where(g => GetSimilarityCore(g.Name, false) == clickedCore)
                         .ToList();
 
-                    lbResultsThumbnail.SelectedItems.Clear();
-                    foreach (var m in matchingItems)
+                    bool isCtrl = (System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Control) == System.Windows.Input.ModifierKeys.Control;
+                    bool isShift = (System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Shift) == System.Windows.Input.ModifierKeys.Shift;
+
+                    if (isShift)
                     {
-                        lbResultsThumbnail.SelectedItems.Add(m);
+                        var anchor = lbResultsThumbnail.SelectedItem as GalleryItem;
+                        if (anchor == null && lbResultsThumbnail.SelectedItems.Count > 0)
+                        {
+                            anchor = lbResultsThumbnail.SelectedItems[0] as GalleryItem;
+                        }
+
+                        if (anchor != null)
+                        {
+                            int idx1 = listItems.IndexOf(anchor);
+                            int idx2 = listItems.IndexOf(clickedItem);
+                            int start = Math.Min(idx1, idx2);
+                            int end = Math.Max(idx1, idx2);
+
+                            var rangeItems = new System.Collections.Generic.List<GalleryItem>();
+                            for (int i = start; i <= end; i++)
+                            {
+                                rangeItems.Add(listItems[i]);
+                            }
+
+                            // Gộp thêm toàn bộ nhóm tương tự của dòng click hiện tại
+                            foreach (var m in matchingItems)
+                            {
+                                if (!rangeItems.Contains(m))
+                                {
+                                    rangeItems.Add(m);
+                                }
+                            }
+
+                            if (!isCtrl)
+                            {
+                                lbResultsThumbnail.SelectedItems.Clear();
+                            }
+                            foreach (var m in rangeItems)
+                            {
+                                if (!lbResultsThumbnail.SelectedItems.Contains(m))
+                                {
+                                    lbResultsThumbnail.SelectedItems.Add(m);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            lbResultsThumbnail.SelectedItems.Clear();
+                            foreach (var m in matchingItems)
+                            {
+                                lbResultsThumbnail.SelectedItems.Add(m);
+                            }
+                        }
+                    }
+                    else if (isCtrl)
+                    {
+                        bool allSelected = matchingItems.All(m => lbResultsThumbnail.SelectedItems.Contains(m));
+                        if (allSelected)
+                        {
+                            foreach (var m in matchingItems)
+                            {
+                                lbResultsThumbnail.SelectedItems.Remove(m);
+                            }
+                        }
+                        else
+                        {
+                            foreach (var m in matchingItems)
+                            {
+                                if (!lbResultsThumbnail.SelectedItems.Contains(m))
+                                {
+                                    lbResultsThumbnail.SelectedItems.Add(m);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        lbResultsThumbnail.SelectedItems.Clear();
+                        foreach (var m in matchingItems)
+                        {
+                            lbResultsThumbnail.SelectedItems.Add(m);
+                        }
                     }
                 }
             }

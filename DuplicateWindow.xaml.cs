@@ -675,21 +675,96 @@ namespace get_link_manga
 
                 if (parentGrid == null) return;
 
-                var itemsSource = parentGrid.ItemsSource;
-                if (itemsSource == null) return;
-
                 string clickedCore = MainWindow.GetSimilarityCore(clickedItem.Name, false);
                 if (string.IsNullOrEmpty(clickedCore)) return;
 
-                var listItems = itemsSource.Cast<GalleryItem>().ToList();
+                var listItems = parentGrid.Items.Cast<GalleryItem>().ToList();
                 var matchingItems = listItems
                     .Where(item => MainWindow.GetSimilarityCore(item.Name, false) == clickedCore)
                     .ToList();
 
-                parentGrid.SelectedItems.Clear();
-                foreach (var item in matchingItems)
+                bool isCtrl = (System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Control) == System.Windows.Input.ModifierKeys.Control;
+                bool isShift = (System.Windows.Input.Keyboard.Modifiers & System.Windows.Input.ModifierKeys.Shift) == System.Windows.Input.ModifierKeys.Shift;
+
+                if (isShift)
                 {
-                    parentGrid.SelectedItems.Add(item);
+                    var anchor = parentGrid.SelectedItem as GalleryItem;
+                    if (anchor == null && parentGrid.SelectedItems.Count > 0)
+                    {
+                        anchor = parentGrid.SelectedItems[0] as GalleryItem;
+                    }
+
+                    if (anchor != null)
+                    {
+                        int idx1 = listItems.IndexOf(anchor);
+                        int idx2 = listItems.IndexOf(clickedItem);
+                        int start = Math.Min(idx1, idx2);
+                        int end = Math.Max(idx1, idx2);
+
+                        var rangeItems = new System.Collections.Generic.List<GalleryItem>();
+                        for (int i = start; i <= end; i++)
+                        {
+                            rangeItems.Add(listItems[i]);
+                        }
+
+                        // Gộp thêm toàn bộ nhóm tương tự của dòng click hiện tại
+                        foreach (var item in matchingItems)
+                        {
+                            if (!rangeItems.Contains(item))
+                            {
+                                rangeItems.Add(item);
+                            }
+                        }
+
+                        if (!isCtrl)
+                        {
+                            parentGrid.SelectedItems.Clear();
+                        }
+                        foreach (var item in rangeItems)
+                        {
+                            if (!parentGrid.SelectedItems.Contains(item))
+                            {
+                                parentGrid.SelectedItems.Add(item);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        parentGrid.SelectedItems.Clear();
+                        foreach (var item in matchingItems)
+                        {
+                            parentGrid.SelectedItems.Add(item);
+                        }
+                    }
+                }
+                else if (isCtrl)
+                {
+                    bool allSelected = matchingItems.All(item => parentGrid.SelectedItems.Contains(item));
+                    if (allSelected)
+                    {
+                        foreach (var item in matchingItems)
+                        {
+                            parentGrid.SelectedItems.Remove(item);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var item in matchingItems)
+                        {
+                            if (!parentGrid.SelectedItems.Contains(item))
+                            {
+                                parentGrid.SelectedItems.Add(item);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    parentGrid.SelectedItems.Clear();
+                    foreach (var item in matchingItems)
+                    {
+                        parentGrid.SelectedItems.Add(item);
+                    }
                 }
             }
         }
