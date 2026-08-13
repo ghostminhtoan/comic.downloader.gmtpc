@@ -22,7 +22,7 @@ namespace get_link_manga
         private readonly WebView2 _automationWebView = new WebView2();
         public CookieContainer ResolvedCookies { get; private set; } = new CookieContainer();
         public Uri ResolvedUri { get; private set; }
-        public string UserAgent { get; private set; } = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+        public string UserAgent { get; private set; } = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36";
         public string ResolvedHtml { get; private set; }
         public bool WasCompleted { get; private set; }
         private readonly string _targetUrl;
@@ -267,7 +267,7 @@ namespace get_link_manga
 
         private static bool ShouldUseVerifyFindSequence(string url)
         {
-            return IsTruyenqqChallengeUrl(url) || IsNettruyenUrl(url);
+            return IsTruyenqqChallengeUrl(url) || IsNettruyenUrl(url) || UrlContainsHost(url, "nhentai");
         }
 
         private double GetInitialCaptchaAttemptDelaySeconds(string url)
@@ -443,6 +443,13 @@ namespace get_link_manga
                                 if (isVerifyPhrase(getElementText(el))) {
                                     foundCandidate = el;
                                     break;
+                                }
+                            }
+
+                            if (!foundCandidate) {
+                                var turnstileIframe = document.querySelector('iframe[src*=""challenges.cloudflare.com""], iframe[src*=""turnstile""]');
+                                if (turnstileIframe && isVisible(turnstileIframe)) {
+                                    foundCandidate = turnstileIframe;
                                 }
                             }
 
@@ -739,7 +746,7 @@ namespace get_link_manga
                     webView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
                     webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
                     webView.CoreWebView2.Settings.IsZoomControlEnabled = true;
-                    if (UserAgent != "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    if (UserAgent != "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36")
                     {
                         webView.CoreWebView2.Settings.UserAgent = UserAgent;
                     }
@@ -769,7 +776,7 @@ textOnlyStyle.textContent = 'img, picture, video, audio, canvas, [style*=""backg
                     _automationWebView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
                     _automationWebView.CoreWebView2.Settings.IsStatusBarEnabled = false;
                     _automationWebView.CoreWebView2.Settings.IsZoomControlEnabled = false;
-                    if (UserAgent != "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    if (UserAgent != "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36")
                     {
                         _automationWebView.CoreWebView2.Settings.UserAgent = UserAgent;
                     }
@@ -1161,7 +1168,7 @@ document.addEventListener('click', function (event) {
                                     VerifyBypassAttempted = true;
                                     VerifyBypassSucceeded = true;
                                     MayAutoCloseAfterBypass = ExactVerifyDetected && VerifyBypassSucceeded;
-                                    _verifySolveCooldownUntil = DateTime.Now.AddSeconds(8);
+                                    _verifySolveCooldownUntil = DateTime.Now.AddSeconds(3);
                                 }
 
                                 continue;

@@ -33,7 +33,7 @@ namespace get_link_manga
         private static readonly ConcurrentDictionary<string, HttpClient> _scopedClients = new ConcurrentDictionary<string, HttpClient>(StringComparer.OrdinalIgnoreCase);
         private static HttpClientHandler _httpHandler;
         private static HttpClient _httpClient;
-        private static readonly string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+        private static readonly string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36";
         private static readonly SemaphoreSlim _captchaSemaphore = new SemaphoreSlim(1, 1);
         private static volatile bool _isCaptchaWindowActive = false;
         private static readonly ConcurrentDictionary<string, DateTime> _captchaSolvedAtUtc = new ConcurrentDictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
