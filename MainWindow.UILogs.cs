@@ -60,7 +60,7 @@ namespace get_link_manga
             {
                 bool isError = effectiveSeverity == LogSeverity.Error;
                 
-                // ponytail: skip progress logs during active downloads to prevent GUI lag/crash
+                // ponytail: skip progress/verbose logs during active downloads on all UI RichTextBoxes to prevent GUI lag/crash
                 if (_downloadCts != null && !isError)
                 {
                     string lowerMsg = (message ?? string.Empty).ToLowerInvariant();
@@ -74,7 +74,7 @@ namespace get_link_manga
                                          lowerMsg.Contains("start");
                     if (!isFinalStatus)
                     {
-                        return;
+                        return; // Skip updating all UI RichTextBoxes
                     }
                 }
                 if (txtLog != null)
