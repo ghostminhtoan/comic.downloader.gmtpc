@@ -2845,14 +2845,79 @@ namespace get_link_manga
 
         private void MergeDownloadMissingChapterRowsFromGalleryStates(IEnumerable<GalleryItemState> states)
         {
-            foreach (GalleryItemState state in states ?? Enumerable.Empty<GalleryItemState>())
+            if (states == null) return;
+            var statesList = states.ToList();
+            if (statesList.Count == 0) return;
+
+            // Build lookup dictionaries for _scrapedItems
+            var scrapedByLink = new Dictionary<string, GalleryItem>(StringComparer.OrdinalIgnoreCase);
+            var scrapedByNameAndDomain = new Dictionary<string, GalleryItem>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var item in _scrapedItems)
+            {
+                if (item == null) continue;
+                string cleanLink = (item.Link ?? string.Empty).Trim().TrimEnd('/');
+                if (!string.IsNullOrWhiteSpace(cleanLink))
+                {
+                    scrapedByLink[cleanLink] = item;
+                }
+                else
+                {
+                    string cleanName = (item.Name ?? string.Empty).Trim();
+                    string cleanDomain = (GetDownloadMissingChapterDomainLabel(item) ?? string.Empty).Trim();
+                    string nameDomainKey = cleanName + "|" + cleanDomain;
+                    if (!string.IsNullOrWhiteSpace(cleanName))
+                    {
+                        scrapedByNameAndDomain[nameDomainKey] = item;
+                    }
+                }
+            }
+
+            // Build lookup dictionaries for _downloadMissingChapterRows
+            var rowsByLink = new Dictionary<string, ReaderChapterIssueItem>(StringComparer.OrdinalIgnoreCase);
+            var rowsByNameAndDomain = new Dictionary<string, ReaderChapterIssueItem>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var row in _downloadMissingChapterRows)
+            {
+                if (row == null) continue;
+                string rowLink = (row.BookLink ?? string.Empty).Trim().TrimEnd('/');
+                if (!string.IsNullOrWhiteSpace(rowLink))
+                {
+                    rowsByLink[rowLink] = row;
+                }
+                else
+                {
+                    string rowName = (row.BookName ?? string.Empty).Trim();
+                    string rowDomain = (row.DomainLabel ?? string.Empty).Trim();
+                    string rowKey = rowName + "|" + rowDomain;
+                    if (!string.IsNullOrWhiteSpace(rowName))
+                    {
+                        rowsByNameAndDomain[rowKey] = row;
+                    }
+                }
+            }
+
+            foreach (GalleryItemState state in statesList)
             {
                 if (state == null)
                 {
                     continue;
                 }
 
-                GalleryItem item = FindGalleryItemForMissingChapterState(state.Link, state.Name, state.SourceDomain);
+                GalleryItem item = null;
+                string stateLink = (state.Link ?? string.Empty).Trim().TrimEnd('/');
+                if (!string.IsNullOrWhiteSpace(stateLink))
+                {
+                    scrapedByLink.TryGetValue(stateLink, out item);
+                }
+                if (item == null)
+                {
+                    string stateName = (state.Name ?? string.Empty).Trim();
+                    string stateDomain = (state.SourceDomain ?? string.Empty).Trim();
+                    string nameDomainKey = stateName + "|" + stateDomain;
+                    scrapedByNameAndDomain.TryGetValue(nameDomainKey, out item);
+                }
+
                 if (item == null)
                 {
                     continue;
@@ -2875,7 +2940,36 @@ namespace get_link_manga
                     continue;
                 }
 
-                ReaderChapterIssueItem row = FindDownloadMissingChapterRow(item) ?? CreateDownloadMissingChapterPlaceholderRow(item);
+                ReaderChapterIssueItem row = null;
+                string itemLink = (item.Link ?? string.Empty).Trim().TrimEnd('/');
+                if (!string.IsNullOrWhiteSpace(itemLink))
+                {
+                    rowsByLink.TryGetValue(itemLink, out row);
+                }
+                if (row == null)
+                {
+                    string itemName = (item.Name ?? string.Empty).Trim();
+                    string itemDomain = (GetDownloadMissingChapterDomainLabel(item) ?? string.Empty).Trim();
+                    string itemKey = itemName + "|" + itemDomain;
+                    rowsByNameAndDomain.TryGetValue(itemKey, out row);
+                }
+
+                if (row == null)
+                {
+                    row = CreateDownloadMissingChapterPlaceholderRow(item);
+                    if (!string.IsNullOrWhiteSpace(itemLink))
+                    {
+                        rowsByLink[itemLink] = row;
+                    }
+                    else
+                    {
+                        string itemName = (item.Name ?? string.Empty).Trim();
+                        string itemDomain = (GetDownloadMissingChapterDomainLabel(item) ?? string.Empty).Trim();
+                        string itemKey = itemName + "|" + itemDomain;
+                        rowsByNameAndDomain[itemKey] = row;
+                    }
+                }
+
                 row.DomainLabel = GetDownloadMissingChapterDomainLabel(item);
                 row.BookName = item.Name;
                 row.BookLink = item.Link;
@@ -3109,13 +3203,61 @@ namespace get_link_manga
                 }
             }
 
+            // Optimize by building a lookup dictionary for _downloadMissingChapterRows
+            var rowsByLink = new Dictionary<string, ReaderChapterIssueItem>(StringComparer.OrdinalIgnoreCase);
+            var rowsByNameAndDomain = new Dictionary<string, ReaderChapterIssueItem>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var row in _downloadMissingChapterRows)
+            {
+                if (row == null) continue;
+                string rowLink = (row.BookLink ?? string.Empty).Trim().TrimEnd('/');
+                if (!string.IsNullOrWhiteSpace(rowLink))
+                {
+                    rowsByLink[rowLink] = row;
+                }
+                else
+                {
+                    string rowName = (row.BookName ?? string.Empty).Trim();
+                    string rowDomain = (row.DomainLabel ?? string.Empty).Trim();
+                    string rowKey = rowName + "|" + rowDomain;
+                    if (!string.IsNullOrWhiteSpace(rowName))
+                    {
+                        rowsByNameAndDomain[rowKey] = row;
+                    }
+                }
+            }
+
             foreach (GalleryItem item in sourceItems.Where(item => item != null))
             {
-                ReaderChapterIssueItem row = FindDownloadMissingChapterRow(item);
+                ReaderChapterIssueItem row = null;
+                string itemLink = (item.Link ?? string.Empty).Trim().TrimEnd('/');
+                if (!string.IsNullOrWhiteSpace(itemLink))
+                {
+                    rowsByLink.TryGetValue(itemLink, out row);
+                }
+                if (row == null)
+                {
+                    string itemName = (item.Name ?? string.Empty).Trim();
+                    string itemDomain = (GetDownloadMissingChapterDomainLabel(item) ?? string.Empty).Trim();
+                    string itemKey = itemName + "|" + itemDomain;
+                    rowsByNameAndDomain.TryGetValue(itemKey, out row);
+                }
+
                 if (row == null)
                 {
                     row = CreateDownloadMissingChapterPlaceholderRow(item);
                     AddOrAttachDownloadMissingChapterRow(row, item);
+                    if (!string.IsNullOrWhiteSpace(itemLink))
+                    {
+                        rowsByLink[itemLink] = row;
+                    }
+                    else
+                    {
+                        string itemName = (item.Name ?? string.Empty).Trim();
+                        string itemDomain = (GetDownloadMissingChapterDomainLabel(item) ?? string.Empty).Trim();
+                        string itemKey = itemName + "|" + itemDomain;
+                        rowsByNameAndDomain[itemKey] = row;
+                    }
                 }
                 else
                 {
@@ -3170,12 +3312,49 @@ namespace get_link_manga
 
             List<ReaderChapterIssueItem> currentRows = _downloadMissingChapterRows.Where(row => row != null).ToList();
             var orderedRows = new List<ReaderChapterIssueItem>(currentRows.Count);
+            var orderedRowsSet = new HashSet<ReaderChapterIssueItem>();
+
+            // Build lookups for currentRows
+            var currentRowsByLink = new Dictionary<string, ReaderChapterIssueItem>(StringComparer.OrdinalIgnoreCase);
+            var currentRowsByNameAndDomain = new Dictionary<string, ReaderChapterIssueItem>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var row in currentRows)
+            {
+                if (row == null) continue;
+                string rowLink = (row.BookLink ?? string.Empty).Trim().TrimEnd('/');
+                if (!string.IsNullOrWhiteSpace(rowLink))
+                {
+                    currentRowsByLink[rowLink] = row;
+                }
+                else
+                {
+                    string rowName = (row.BookName ?? string.Empty).Trim();
+                    string rowDomain = (row.DomainLabel ?? string.Empty).Trim();
+                    string rowKey = rowName + "|" + rowDomain;
+                    if (!string.IsNullOrWhiteSpace(rowName))
+                    {
+                        currentRowsByNameAndDomain[rowKey] = row;
+                    }
+                }
+            }
 
             foreach (GalleryItem item in GetDownloadMissingChapterSourceItems().Where(candidate => candidate != null))
             {
-                ReaderChapterIssueItem match = currentRows.FirstOrDefault(row =>
-                    row != null && IsSameDownloadMissingChapterBook(item, row));
-                if (match != null && !orderedRows.Contains(match))
+                ReaderChapterIssueItem match = null;
+                string itemLink = (item.Link ?? string.Empty).Trim().TrimEnd('/');
+                if (!string.IsNullOrWhiteSpace(itemLink))
+                {
+                    currentRowsByLink.TryGetValue(itemLink, out match);
+                }
+                if (match == null)
+                {
+                    string itemName = (item.Name ?? string.Empty).Trim();
+                    string itemDomain = (GetDownloadMissingChapterDomainLabel(item) ?? string.Empty).Trim();
+                    string itemKey = itemName + "|" + itemDomain;
+                    currentRowsByNameAndDomain.TryGetValue(itemKey, out match);
+                }
+
+                if (match != null && orderedRowsSet.Add(match))
                 {
                     orderedRows.Add(match);
                 }
@@ -3183,7 +3362,7 @@ namespace get_link_manga
 
             foreach (ReaderChapterIssueItem row in currentRows)
             {
-                if (!orderedRows.Contains(row))
+                if (row != null && orderedRowsSet.Add(row))
                 {
                     orderedRows.Add(row);
                 }
