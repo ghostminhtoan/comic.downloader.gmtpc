@@ -263,7 +263,7 @@ namespace get_link_manga
                     .ThenBy(item => item.OriginalIndex)
                     .ToList();
                 _scrapedItems.Clear();
-                foreach (var item in sortedItems) _scrapedItems.Add(item);
+                _scrapedItems.AddRange(sortedItems);
 
                 RecalculateDuplicates();
                 ViHentaiLog($"Cào dữ liệu hoàn tất! Tổng cộng thu thập được {_scrapedItems.Count} liên kết độc nhất.");

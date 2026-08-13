@@ -2092,6 +2092,24 @@ namespace get_link_manga
             return false;
         }
 
+        private static readonly Regex BracketRegex1 = new Regex(@"\[[^\]]*\]", RegexOptions.Compiled);
+        private static readonly Regex BracketRegex2 = new Regex(@"\{[^\}]*\}", RegexOptions.Compiled);
+        private static readonly Regex BracketRegex3 = new Regex(@"\([^\)]*\)", RegexOptions.Compiled);
+
+        private static readonly Regex CommonKeywordsRegex = new Regex(
+            @"(?:extra\s+version|copy\s+of|part\s+\d+|part\d+|pt\s+\d+|pt\d+|vol\s+\d+|vol\d+|ch\s+\d+|ch\d+|chap\s+\d+|chap\d+|chapter\s+\d+|chapter\d+|extra|extras|version|rewrite|copy|doujin|dj|\bch\b|\bchap\b|\bpart\b|\bpt\b|\bvol\b)",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex VariantKeywordsRegex = new Regex(
+            @"(?:minidoujin|doujinshi|decensored|uncensored|censored|full\s*color|fullcolor|colorized|colored|color)",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex NumberBoundaryRegex = new Regex(@"\b\d+\b", RegexOptions.Compiled);
+        private static readonly Regex NonAlphaNumericRegex = new Regex(@"[^a-z0-9]", RegexOptions.Compiled);
+
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<object, System.Collections.Generic.HashSet<string>> _hitomiTagsCache =
+            new System.Runtime.CompilerServices.ConditionalWeakTable<object, System.Collections.Generic.HashSet<string>>();
+
         public static string GetSimilarityCore(string name)
         {
             return GetSimilarityCore(name, false);
@@ -2102,50 +2120,35 @@ namespace get_link_manga
             if (string.IsNullOrEmpty(name)) return "";
 
             string core = name.ToLowerInvariant();
-            core = Regex.Replace(core, @"\[[^\]]*\]", "");
-            core = Regex.Replace(core, @"\{[^\}]*\}", "");
-            core = Regex.Replace(core, @"\([^\)]*\)", "");
+            core = BracketRegex1.Replace(core, "");
+            core = BracketRegex2.Replace(core, "");
+            core = BracketRegex3.Replace(core, "");
 
-            string[] commonKeywords = new string[]
-            {
-                @"extra\s+version", @"copy\s+of",
-                @"part\s+\d+", @"part\d+", @"pt\s+\d+", @"pt\d+", @"vol\s+\d+", @"vol\d+",
-                @"ch\s+\d+", @"ch\d+", @"chap\s+\d+", @"chap\d+", @"chapter\s+\d+", @"chapter\d+",
-                @"extra", @"extras", @"version",
-                @"rewrite", @"copy", @"doujin", @"dj",
-                @"\bch\b", @"\bchap\b", @"\bpart\b", @"\bpt\b", @"\bvol\b"
-            };
-
-            foreach (string keyword in commonKeywords)
-            {
-                core = Regex.Replace(core, keyword, "");
-            }
+            core = CommonKeywordsRegex.Replace(core, "");
 
             if (mergeCensorshipColorVariants)
             {
-                string[] variantKeywords =
-                {
-                    @"minidoujin", @"doujinshi",
-                    @"decensored", @"uncensored", @"censored",
-                    @"full\s*color", @"fullcolor", @"colorized", @"colored", @"color"
-                };
-
-                foreach (string keyword in variantKeywords)
-                {
-                    core = Regex.Replace(core, keyword, "");
-                }
+                core = VariantKeywordsRegex.Replace(core, "");
             }
 
-            core = Regex.Replace(core, @"\b\d+\b", "");
-            core = Regex.Replace(core, @"[^a-z0-9]", "");
+            core = NumberBoundaryRegex.Replace(core, "");
+            core = NonAlphaNumericRegex.Replace(core, "");
             return core.Trim();
         }
 
         private static System.Collections.Generic.HashSet<string> GetHitomiTags(GalleryItem item)
         {
-            var tagSet = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (item?.Tag == null) return tagSet;
+            if (item?.Tag == null)
+            {
+                return new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            }
 
+            if (_hitomiTagsCache.TryGetValue(item.Tag, out var cachedTags))
+            {
+                return cachedTags;
+            }
+
+            var tagSet = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
             try
             {
                 Newtonsoft.Json.Linq.JObject galleryInfo = null;
@@ -2174,6 +2177,10 @@ namespace get_link_manga
                 }
             }
             catch { }
+
+            // Đảm bảo không ghi đè trùng lặp và ghi vào cache
+            _hitomiTagsCache.Remove(item.Tag);
+            _hitomiTagsCache.Add(item.Tag, tagSet);
 
             return tagSet;
         }
@@ -2339,20 +2346,38 @@ namespace get_link_manga
             return suffixCores[0];
         }
 
+        private static readonly Regex KeywordNumberVariantRegex = new Regex(
+            @"\b(?:chapter|chap|ch|book|vol|volume|part|pt)\s*\d+(?:[.,]\d+)?\b",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex SuffixNumberVariantRegex = new Regex(
+            @"(?:^|[\s_-])\d+(?:[.,]\d+)?\s*$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex GetNumberedVariantCoreRegex1 = new Regex(
+            @"\b(?:chapter|chap|ch|book|vol|volume|part|pt)\s*\d+(?:[.,]\d+)?\b",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex GetNumberedVariantCoreRegex2 = new Regex(
+            @"\b\d+(?:[.,]\d+)?\s*$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex HasUncensoredVariantRegex = new Regex(
+            @"(?:^|[^a-zA-Z])(?:decensored|uncensored)(?:$|[^a-zA-Z])",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex HasFullColorVariantRegex = new Regex(
+            @"(?:^|[^a-zA-Z])(?:full\s*color|fullcolor|colorized|colored)(?:$|[^a-zA-Z])",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         private static bool HasKeywordNumberVariantPattern(string name)
         {
-            return Regex.IsMatch(
-                StripDuplicateMetadata(name),
-                @"\b(?:chapter|chap|ch|book|vol|volume|part|pt)\s*\d+(?:[.,]\d+)?\b",
-                RegexOptions.IgnoreCase);
+            return KeywordNumberVariantRegex.IsMatch(StripDuplicateMetadata(name));
         }
 
         private static bool HasSuffixNumberVariantPattern(string name)
         {
-            return Regex.IsMatch(
-                StripDuplicateMetadata(name),
-                @"(?:^|[\s_-])\d+(?:[.,]\d+)?\s*$",
-                RegexOptions.IgnoreCase);
+            return SuffixNumberVariantRegex.IsMatch(StripDuplicateMetadata(name));
         }
 
         private static bool HasAnyNumberVariantPattern(string name)
@@ -2373,18 +2398,18 @@ namespace get_link_manga
         private static string StripDuplicateMetadata(string name)
         {
             string core = (name ?? string.Empty).ToLowerInvariant();
-            core = Regex.Replace(core, @"\[[^\]]*\]", " ");
-            core = Regex.Replace(core, @"\{[^\}]*\}", " ");
-            core = Regex.Replace(core, @"\([^\)]*\)", " ");
+            core = BracketRegex1.Replace(core, " ");
+            core = BracketRegex2.Replace(core, " ");
+            core = BracketRegex3.Replace(core, " ");
             return core;
         }
 
         private static string GetNumberedVariantCore(string name)
         {
             string core = StripDuplicateMetadata(name);
-            core = Regex.Replace(core, @"\b(?:chapter|chap|ch|book|vol|volume|part|pt)\s*\d+(?:[.,]\d+)?\b", " ");
-            core = Regex.Replace(core, @"\b\d+(?:[.,]\d+)?\s*$", " ");
-            core = Regex.Replace(core, @"[^a-z0-9]", string.Empty);
+            core = GetNumberedVariantCoreRegex1.Replace(core, " ");
+            core = GetNumberedVariantCoreRegex2.Replace(core, " ");
+            core = NonAlphaNumericRegex.Replace(core, string.Empty);
             return core.Trim();
         }
 
@@ -2395,12 +2420,12 @@ namespace get_link_manga
 
         internal static bool HasUncensoredVariant(string name)
         {
-            return Regex.IsMatch(name ?? string.Empty, @"(?:^|[^a-zA-Z])(?:decensored|uncensored)(?:$|[^a-zA-Z])", RegexOptions.IgnoreCase);
+            return HasUncensoredVariantRegex.IsMatch(name ?? string.Empty);
         }
 
         internal static bool HasFullColorVariant(string name)
         {
-            return Regex.IsMatch(name ?? string.Empty, @"(?:^|[^a-zA-Z])(?:full\s*color|fullcolor|colorized|colored)(?:$|[^a-zA-Z])", RegexOptions.IgnoreCase);
+            return HasFullColorVariantRegex.IsMatch(name ?? string.Empty);
         }
 
         private void BtnDuplicateName_Click(object sender, RoutedEventArgs e)

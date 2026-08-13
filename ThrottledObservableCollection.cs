@@ -59,6 +59,16 @@ namespace get_link_manga
             }
         }
 
+        internal void AddRange(System.Collections.Generic.IEnumerable<T> items)
+        {
+            if (items == null) return;
+            foreach (var item in items)
+            {
+                Items.Add(item);
+            }
+            QueueNotification();
+        }
+
         internal void RemoveRange(System.Collections.Generic.IEnumerable<T> items)
         {
             if (items == null) return;

@@ -1449,7 +1449,7 @@ document.addEventListener('click', function (event) {
                     .ThenBy(item => item.OriginalIndex)
                     .ToList();
                 _scrapedItems.Clear();
-                foreach (var item in sortedItems) _scrapedItems.Add(item);
+                _scrapedItems.AddRange(sortedItems);
 
                 RecalculateDuplicates();
                 NettruyenLog($"Cào dữ liệu hoàn tất! Tổng cộng thu thập được {_scrapedItems.Count} liên kết độc nhất.");

@@ -518,10 +518,9 @@ namespace get_link_manga
 
                     for (int i = 0; i < loadedItems.Count; i++)
                     {
-                        var item = loadedItems[i];
-                        item.OriginalIndex = i;
-                        _scrapedItems.Add(item);
+                        loadedItems[i].OriginalIndex = i;
                     }
+                    _scrapedItems.AddRange(loadedItems);
 
                     ApplyLoadedLightNovelBooks(loadedLightNovels);
                     MergeDownloadMissingChapterRowsFromGalleryStates(payload?.MangaItems);

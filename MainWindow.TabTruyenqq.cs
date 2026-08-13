@@ -630,7 +630,7 @@ namespace get_link_manga
                 RunWithGalleryAutosaveSuspended(() =>
                 {
                     _scrapedItems.Clear();
-                    foreach (var item in sortedItems) _scrapedItems.Add(item);
+                    _scrapedItems.AddRange(sortedItems);
                 });
                 RequestGalleryListAutosave();
 
