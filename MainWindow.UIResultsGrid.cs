@@ -276,7 +276,14 @@ namespace get_link_manga
 
         private void BtnAdvancedSearch_Click(object sender, RoutedEventArgs e)
         {
+            Window currentWindow = Window.GetWindow(sender as DependencyObject);
+            if (currentWindow == null)
+            {
+                currentWindow = this;
+            }
+
             var win = new AdvancedSearchWindow(this);
+            win.Owner = currentWindow;
             win.ShowDialog();
         }
 

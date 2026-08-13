@@ -9,14 +9,13 @@ namespace get_link_manga
 {
     public partial class AdvancedSearchWindow : Window
     {
-        private readonly MainWindow _mainWindow;
-        private readonly DuplicateWindow _duplicateWindow;
+        public readonly MainWindow _mainWindow;
+        public readonly DuplicateWindow _duplicateWindow;
 
         public AdvancedSearchWindow(MainWindow mainWindow)
         {
             InitializeComponent();
             _mainWindow = mainWindow;
-            Owner = _mainWindow;
 
             ApplyLocalization();
             LoadCurrentFilters();
@@ -26,7 +25,6 @@ namespace get_link_manga
         {
             InitializeComponent();
             _duplicateWindow = duplicateWindow;
-            Owner = _duplicateWindow;
 
             ApplyLocalization();
             LoadCurrentFilters();
