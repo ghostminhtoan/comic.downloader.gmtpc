@@ -943,6 +943,7 @@ namespace get_link_manga
             ApplyResultsGridHeaderLanguage("GALLERY DETAILS", "STATUS", "PROCESS", "VIEW");
             if (txtAutoZipCbzLabel != null) txtAutoZipCbzLabel.Text = "AUTO ZIP CBZ";
             if (btnAdvancedSearch != null) btnAdvancedSearch.Content = "ADVANCED SEARCH";
+            if (btnSubAdvancedSearch != null) btnSubAdvancedSearch.Content = "ADVANCED SEARCH";
 
             if (btnSaveList != null) btnSaveList.Content = "Save default";
             if (btnLoadList != null) btnLoadList.Content = "Open default";

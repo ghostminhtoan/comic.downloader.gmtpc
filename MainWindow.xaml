@@ -3418,7 +3418,7 @@
                                     <ComboBoxItem Name="cbiSubListThumbnailColumn" Content="List + thumbnail column"/>
                                 </ComboBox>
                             </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,14,4" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,14,4" VerticalAlignment="Center">
                                     <StackPanel.LayoutTransform>
                                         <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
                                     </StackPanel.LayoutTransform>
@@ -3429,6 +3429,7 @@
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,4">
                                 <TextBlock Name="txtSubSearchLabel" Text="SEARCH" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                 <TextBox Name="txtSubFilter" Text="{Binding Text, ElementName=txtFilter, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" TextChanged="TxtFilter_TextChanged" Style="{StaticResource SurfaceTextBox}" Width="200" ToolTip="Tìm kiếm tên truyện, link hoặc chapter..." VerticalAlignment="Center"/>
+                                <Button Name="btnSubAdvancedSearch" Click="BtnAdvancedSearch_Click" Style="{StaticResource CyberpunkButtonCyan}" Content="ADVANCED SEARCH" Height="22" Margin="8,0,0,0" Padding="8,0" FontSize="10" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
 

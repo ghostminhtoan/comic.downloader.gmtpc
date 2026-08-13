@@ -45,6 +45,7 @@ namespace get_link_manga
             ApplyResultsGridHeaderLanguage("CHI TIẾT TRUYỆN", "TRẠNG THÁI", "TIẾN TRÌNH", "XEM");
             if (txtAutoZipCbzLabel != null) txtAutoZipCbzLabel.Text = "TỰ ZIP CBZ";
             if (btnAdvancedSearch != null) btnAdvancedSearch.Content = "TÌM KIẾM NÂNG CAO";
+            if (btnSubAdvancedSearch != null) btnSubAdvancedSearch.Content = "TÌM KIẾM NÂNG CAO";
 
             if (btnSaveList != null) btnSaveList.Content = "Lưu mặc định";
             if (btnLoadList != null) btnLoadList.Content = "Mở file mặc định";

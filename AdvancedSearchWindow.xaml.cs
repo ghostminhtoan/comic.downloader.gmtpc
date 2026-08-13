@@ -10,6 +10,7 @@ namespace get_link_manga
     public partial class AdvancedSearchWindow : Window
     {
         private readonly MainWindow _mainWindow;
+        private readonly DuplicateWindow _duplicateWindow;
 
         public AdvancedSearchWindow(MainWindow mainWindow)
         {
@@ -21,9 +22,19 @@ namespace get_link_manga
             LoadCurrentFilters();
         }
 
+        public AdvancedSearchWindow(DuplicateWindow duplicateWindow)
+        {
+            InitializeComponent();
+            _duplicateWindow = duplicateWindow;
+            Owner = _duplicateWindow;
+
+            ApplyLocalization();
+            LoadCurrentFilters();
+        }
+
         private void ApplyLocalization()
         {
-            bool isVi = _mainWindow._isVietnameseUi;
+            bool isVi = _mainWindow != null ? _mainWindow._isVietnameseUi : _duplicateWindow._mainWindow._isVietnameseUi;
             lblTitle.Text = isVi ? "TÌM KIẾM NÂNG CAO" : "ADVANCED SEARCH";
             lblInclude.Text = isVi ? "BAO GỒM" : "INCLUDE";
             lblExclude.Text = isVi ? "LOẠI TRỪ" : "EXCLUDE";
@@ -35,24 +46,25 @@ namespace get_link_manga
 
         private void LoadCurrentFilters()
         {
-            if (_mainWindow.AdvancedSearchIncludes != null)
+            var includes = _mainWindow != null ? _mainWindow.AdvancedSearchIncludes : _duplicateWindow.AdvancedSearchIncludes;
+            var excludes = _mainWindow != null ? _mainWindow.AdvancedSearchExcludes : _duplicateWindow.AdvancedSearchExcludes;
+
+            if (includes != null)
             {
-                var incs = _mainWindow.AdvancedSearchIncludes;
-                if (incs.Count > 0) txtInc1.Text = incs[0];
-                if (incs.Count > 1) txtInc2.Text = incs[1];
-                if (incs.Count > 2) txtInc3.Text = incs[2];
-                if (incs.Count > 3) txtInc4.Text = incs[3];
-                if (incs.Count > 4) txtInc5.Text = incs[4];
+                if (includes.Count > 0) txtInc1.Text = includes[0];
+                if (includes.Count > 1) txtInc2.Text = includes[1];
+                if (includes.Count > 2) txtInc3.Text = includes[2];
+                if (includes.Count > 3) txtInc4.Text = includes[3];
+                if (includes.Count > 4) txtInc5.Text = includes[4];
             }
 
-            if (_mainWindow.AdvancedSearchExcludes != null)
+            if (excludes != null)
             {
-                var excs = _mainWindow.AdvancedSearchExcludes;
-                if (excs.Count > 0) txtExc1.Text = excs[0];
-                if (excs.Count > 1) txtExc2.Text = excs[1];
-                if (excs.Count > 2) txtExc3.Text = excs[2];
-                if (excs.Count > 3) txtExc4.Text = excs[3];
-                if (excs.Count > 4) txtExc5.Text = excs[4];
+                if (excludes.Count > 0) txtExc1.Text = excludes[0];
+                if (excludes.Count > 1) txtExc2.Text = excludes[1];
+                if (excludes.Count > 2) txtExc3.Text = excludes[2];
+                if (excludes.Count > 3) txtExc4.Text = excludes[3];
+                if (excludes.Count > 4) txtExc5.Text = excludes[4];
             }
         }
 
@@ -76,10 +88,18 @@ namespace get_link_manga
                 txtExc5.Text.Trim()
             }.Where(s => !string.IsNullOrEmpty(s)).ToList();
 
-            _mainWindow.AdvancedSearchIncludes = includes;
-            _mainWindow.AdvancedSearchExcludes = excludes;
-
-            _mainWindow.ApplyResultsFilter();
+            if (_mainWindow != null)
+            {
+                _mainWindow.AdvancedSearchIncludes = includes;
+                _mainWindow.AdvancedSearchExcludes = excludes;
+                _mainWindow.ApplyResultsFilter();
+            }
+            else
+            {
+                _duplicateWindow.AdvancedSearchIncludes = includes;
+                _duplicateWindow.AdvancedSearchExcludes = excludes;
+                _duplicateWindow.ApplyDuplicateResultsFilter();
+            }
 
             DialogResult = true;
             Close();
@@ -99,9 +119,18 @@ namespace get_link_manga
             txtExc4.Text = string.Empty;
             txtExc5.Text = string.Empty;
 
-            _mainWindow.AdvancedSearchIncludes = new List<string>();
-            _mainWindow.AdvancedSearchExcludes = new List<string>();
-            _mainWindow.ApplyResultsFilter();
+            if (_mainWindow != null)
+            {
+                _mainWindow.AdvancedSearchIncludes = new List<string>();
+                _mainWindow.AdvancedSearchExcludes = new List<string>();
+                _mainWindow.ApplyResultsFilter();
+            }
+            else
+            {
+                _duplicateWindow.AdvancedSearchIncludes = new List<string>();
+                _duplicateWindow.AdvancedSearchExcludes = new List<string>();
+                _duplicateWindow.ApplyDuplicateResultsFilter();
+            }
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
