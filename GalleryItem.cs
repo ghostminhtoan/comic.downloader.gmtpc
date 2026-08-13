@@ -360,9 +360,17 @@ namespace get_link_manga
                 string cleaned = CleanBookName(value);
                 if (_name != cleaned)
                 {
+                    string oldName = _name;
                     _name = cleaned;
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(DisplayName));
+                    
+                    try
+                    {
+                        MainWindow.RenameGalleryHoverPreviewCache(oldName, cleaned, this);
+                    }
+                    catch { }
+
                     TriggerAutoTranslateIfNeeded(cleaned);
                 }
             }

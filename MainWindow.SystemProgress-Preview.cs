@@ -1379,7 +1379,7 @@ namespace get_link_manga
             return domain;
         }
 
-        private static string GetGalleryHoverPreviewCacheBasePath(GalleryItem item, string imageUrl)
+        public static string GetGalleryHoverPreviewCacheBasePath(GalleryItem item, string imageUrl)
         {
             string domainFolder = GetDomainFolderName(item, imageUrl);
             string previewRoot = Path.Combine(PortablePaths.PortableTempRoot, "preview-cache", domainFolder);
@@ -1396,6 +1396,53 @@ namespace get_link_manga
                 string fileName = BitConverter.ToString(hash).Replace("-", string.Empty);
                 return Path.Combine(previewRoot, fileName);
             }
+        }
+
+        public static void RenameGalleryHoverPreviewCache(string oldName, string newName, GalleryItem item)
+        {
+            if (string.IsNullOrWhiteSpace(oldName) || string.IsNullOrWhiteSpace(newName) || oldName == newName || item == null)
+            {
+                return;
+            }
+
+            try
+            {
+                string domainFolder = GetDomainFolderName(item, item.HoverPreviewThumbnailUrl);
+                string previewRoot = Path.Combine(PortablePaths.PortableTempRoot, "preview-cache", domainFolder);
+                if (!Directory.Exists(previewRoot)) return;
+
+                string oldSanitized = GetSanitizedFileName(oldName);
+                string newSanitized = GetSanitizedFileName(newName);
+                if (string.IsNullOrWhiteSpace(oldSanitized) || string.IsNullOrWhiteSpace(newSanitized) || oldSanitized == newSanitized)
+                {
+                    return;
+                }
+
+                string oldBasePath = Path.Combine(previewRoot, oldSanitized);
+                string newBasePath = Path.Combine(previewRoot, newSanitized);
+
+                string[] extensions = { ".webp", ".txt" };
+                foreach (string ext in extensions)
+                {
+                    string oldPath = oldBasePath + ext;
+                    string newPath = newBasePath + ext;
+                    if (File.Exists(oldPath))
+                    {
+                        if (File.Exists(newPath))
+                        {
+                            try { File.Delete(newPath); } catch {}
+                        }
+                        File.Move(oldPath, newPath);
+                    }
+                }
+
+                if (File.Exists(newBasePath + ".webp"))
+                {
+                    item.HoverPreviewLocalPath = newBasePath + ".webp";
+                    item.HoverPreviewThumbnailLocalPath = newBasePath + ".webp";
+                }
+            }
+            catch { }
         }
 
         private static bool TryGetGalleryHoverPreviewCacheFiles(string cacheBasePath, out string originalPath, out string thumbnailPath)

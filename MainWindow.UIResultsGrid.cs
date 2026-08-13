@@ -1753,7 +1753,7 @@ namespace get_link_manga
                 if (totalCount == 0) return;
 
                 int firstVisibleIndex = 0;
-                int lastVisibleIndex = totalCount - 1;
+                int lastVisibleIndex = 30; // Mặc định nạp 30 item đầu nếu chưa lấy được ScrollViewer
 
                 if (_isResultsThumbnailViewEnabled && lbResultsThumbnail != null)
                 {
