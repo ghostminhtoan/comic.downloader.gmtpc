@@ -298,6 +298,7 @@ namespace get_link_manga
             }
 
             var posKeywords = AdvancedSearch?.GetActivePositiveKeywords() ?? new System.Collections.Generic.List<string>();
+            var nonPosKeywords = AdvancedSearch?.GetActiveNonPositiveKeywords() ?? new System.Collections.Generic.List<string>();
             var negKeywords = AdvancedSearch?.GetActiveNegativeKeywords() ?? new System.Collections.Generic.List<string>();
 
             view.Filter = item =>
@@ -328,7 +329,19 @@ namespace get_link_manga
                     }
                 }
 
-                // 3. Kiểm tra Negative Keywords (Không được chứa bất kỳ từ khóa nào)
+                // 3. Kiểm tra Non-Positive Keywords (Không được chứa bất kỳ từ khóa nào - Exclude logic)
+                if (nonPosKeywords.Count > 0)
+                {
+                    foreach (var k in nonPosKeywords)
+                    {
+                        if (IsGalleryItemMatchKeyword(galleryItem, k))
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                // 4. Kiểm tra Negative Keywords (Không được chứa bất kỳ từ khóa nào)
                 if (negKeywords.Count > 0)
                 {
                     foreach (var k in negKeywords)

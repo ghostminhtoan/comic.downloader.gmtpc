@@ -36,6 +36,7 @@ namespace get_link_manga
     public class SearchState
     {
         public List<string> Positive { get; set; }
+        public List<string> NonPositive { get; set; }
         public List<string> Negative { get; set; }
     }
 
@@ -49,6 +50,7 @@ namespace get_link_manga
         private bool _isRestoringState;
 
         public ObservableCollection<KeywordItem> PositiveKeywords { get; } = new ObservableCollection<KeywordItem>();
+        public ObservableCollection<KeywordItem> NonPositiveKeywords { get; } = new ObservableCollection<KeywordItem>();
         public ObservableCollection<KeywordItem> NegativeKeywords { get; } = new ObservableCollection<KeywordItem>();
 
         private bool _isActive;
@@ -67,6 +69,8 @@ namespace get_link_manga
 
         public ICommand AddPositiveKeywordCommand { get; }
         public ICommand RemovePositiveKeywordCommand { get; }
+        public ICommand AddNonPositiveKeywordCommand { get; }
+        public ICommand RemoveNonPositiveKeywordCommand { get; }
         public ICommand AddNegativeKeywordCommand { get; }
         public ICommand RemoveNegativeKeywordCommand { get; }
         public ICommand ClearCommand { get; }
@@ -79,6 +83,8 @@ namespace get_link_manga
 
             AddPositiveKeywordCommand = new RelayCommand(o => AddPositiveKeyword());
             RemovePositiveKeywordCommand = new RelayCommand(item => RemovePositiveKeyword(item as KeywordItem));
+            AddNonPositiveKeywordCommand = new RelayCommand(o => AddNonPositiveKeyword());
+            RemoveNonPositiveKeywordCommand = new RelayCommand(item => RemoveNonPositiveKeyword(item as KeywordItem));
             AddNegativeKeywordCommand = new RelayCommand(o => AddNegativeKeyword());
             RemoveNegativeKeywordCommand = new RelayCommand(item => RemoveNegativeKeyword(item as KeywordItem));
             ClearCommand = new RelayCommand(o => Clear());
@@ -92,6 +98,7 @@ namespace get_link_manga
             _debounceTimer.Tick += DebounceTimer_Tick;
 
             PositiveKeywords.CollectionChanged += Keywords_CollectionChanged;
+            NonPositiveKeywords.CollectionChanged += Keywords_CollectionChanged;
             NegativeKeywords.CollectionChanged += Keywords_CollectionChanged;
 
             InitializeDefaults();
@@ -103,10 +110,14 @@ namespace get_link_manga
             try
             {
                 PositiveKeywords.Clear();
+                NonPositiveKeywords.Clear();
                 NegativeKeywords.Clear();
 
                 PositiveKeywords.Add(new KeywordItem());
                 PositiveKeywords.Add(new KeywordItem());
+
+                NonPositiveKeywords.Add(new KeywordItem());
+                NonPositiveKeywords.Add(new KeywordItem());
 
                 NegativeKeywords.Add(new KeywordItem());
                 NegativeKeywords.Add(new KeywordItem());
@@ -136,7 +147,6 @@ namespace get_link_manga
                 }
             }
 
-            // Lưu trạng thái trước khi thay đổi cấu trúc danh sách (Thêm/Xóa dòng)
             PushUndoState();
             ApplySearch();
         }
@@ -147,16 +157,13 @@ namespace get_link_manga
 
             if (e.PropertyName == nameof(KeywordItem.Value))
             {
-                // Khi người dùng gõ chữ: áp dụng bộ lọc tức thì
                 ApplySearch();
 
-                // Khởi tạo trạng thái chờ lưu Undo nếu chưa có
                 if (_pendingStateForUndo == null)
                 {
                     _pendingStateForUndo = CreateSnapshot();
                 }
 
-                // Debounce lưu Undo khi gõ chữ
                 _debounceTimer.Stop();
                 _debounceTimer.Start();
             }
@@ -179,6 +186,7 @@ namespace get_link_manga
             return new SearchState
             {
                 Positive = PositiveKeywords.Select(k => k.Value ?? string.Empty).ToList(),
+                NonPositive = NonPositiveKeywords.Select(k => k.Value ?? string.Empty).ToList(),
                 Negative = NegativeKeywords.Select(k => k.Value ?? string.Empty).ToList()
             };
         }
@@ -196,8 +204,8 @@ namespace get_link_manga
             _isRestoringState = true;
             try
             {
-                // Hủy đăng ký sự kiện cũ
                 foreach (var k in PositiveKeywords) k.PropertyChanged -= Keyword_PropertyChanged;
+                foreach (var k in NonPositiveKeywords) k.PropertyChanged -= Keyword_PropertyChanged;
                 foreach (var k in NegativeKeywords) k.PropertyChanged -= Keyword_PropertyChanged;
 
                 PositiveKeywords.Clear();
@@ -208,6 +216,14 @@ namespace get_link_manga
                     PositiveKeywords.Add(item);
                 }
 
+                NonPositiveKeywords.Clear();
+                foreach (var val in state.NonPositive)
+                {
+                    var item = new KeywordItem { Value = val };
+                    item.PropertyChanged += Keyword_PropertyChanged;
+                    NonPositiveKeywords.Add(item);
+                }
+
                 NegativeKeywords.Clear();
                 foreach (var val in state.Negative)
                 {
@@ -216,7 +232,7 @@ namespace get_link_manga
                     NegativeKeywords.Add(item);
                 }
 
-                IsActive = GetActivePositiveKeywords().Any() || GetActiveNegativeKeywords().Any();
+                IsActive = GetActivePositiveKeywords().Any() || GetActiveNonPositiveKeywords().Any() || GetActiveNegativeKeywords().Any();
                 _applyCallback?.Invoke();
             }
             finally
@@ -236,6 +252,19 @@ namespace get_link_manga
             if (item != null && PositiveKeywords.Contains(item))
             {
                 PositiveKeywords.Remove(item);
+            }
+        }
+
+        private void AddNonPositiveKeyword()
+        {
+            NonPositiveKeywords.Add(new KeywordItem());
+        }
+
+        private void RemoveNonPositiveKeyword(KeywordItem item)
+        {
+            if (item != null && NonPositiveKeywords.Contains(item))
+            {
+                NonPositiveKeywords.Remove(item);
             }
         }
 
@@ -295,8 +324,9 @@ namespace get_link_manga
         private void ApplySearch()
         {
             var pos = GetActivePositiveKeywords();
+            var nonPos = GetActiveNonPositiveKeywords();
             var neg = GetActiveNegativeKeywords();
-            IsActive = pos.Any() || neg.Any();
+            IsActive = pos.Any() || nonPos.Any() || neg.Any();
 
             _applyCallback?.Invoke();
         }
@@ -304,6 +334,14 @@ namespace get_link_manga
         public List<string> GetActivePositiveKeywords()
         {
             return PositiveKeywords
+                .Select(k => k.Value?.Trim())
+                .Where(v => !string.IsNullOrEmpty(v))
+                .ToList();
+        }
+
+        public List<string> GetActiveNonPositiveKeywords()
+        {
+            return NonPositiveKeywords
                 .Select(k => k.Value?.Trim())
                 .Where(v => !string.IsNullOrEmpty(v))
                 .ToList();

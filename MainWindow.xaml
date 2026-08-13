@@ -4832,25 +4832,33 @@
                                 <Button Name="btnBrowseFolder" Content="BROWSE" Click="BtnBrowseFolder_Click" Style="{StaticResource CompactCyanButton}" Width="72" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                 <Button Name="btnOpenFolder" Content="&#x1F4C2;" Click="BtnOpenFolder_Click" Style="{StaticResource CompactCyanButton}" Width="92" Margin="0,0,16,0" FontFamily="Segoe UI Emoji" FontSize="12" ToolTip="OPEN FOLDER" VerticalAlignment="Center"/>
                                 <TextBlock Name="txtSearchLabel" Text="SEARCH" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBox Name="txtFilter" TextChanged="TxtFilter_TextChanged" Style="{StaticResource SurfaceTextBox}" Width="160" ToolTip="Tìm kiếm tên truyện, link hoặc chapter..." VerticalAlignment="Center"/>
-                                <ToggleButton Name="btnAdvancedFilter" Margin="4,0,16,0" Width="26" Height="22" VerticalAlignment="Center" ToolTip="Advanced Search Filter" Style="{StaticResource FloatSwitchToggle}">
+                                <Border BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="6" Background="#0A1120" Height="26" Margin="0,0,16,0" VerticalAlignment="Center">
                                     <Grid>
-                                        <Path Data="M3,4 L17,4 L12,10 L12,17 L8,15 L8,10 Z" StrokeThickness="1.5" Fill="Transparent" Stretch="Uniform" Width="12" Height="12">
-                                            <Path.Style>
-                                                <Style TargetType="Path">
-                                                    <Setter Property="Stroke" Value="{StaticResource CyberpunkMutedTextBrush}"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding AdvancedSearch.IsActive, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
-                                                            <Setter Property="Stroke" Value="{StaticResource CyberpunkGreenBrush}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Path.Style>
-                                        </Path>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Name="txtFilter" TextChanged="TxtFilter_TextChanged" Style="{StaticResource SurfaceTextBox}" BorderThickness="0" Background="Transparent" Width="180" ToolTip="Tìm kiếm tên truyện, link hoặc chapter..." VerticalAlignment="Center" Padding="4,2"/>
+                                        <ToggleButton Name="btnAdvancedFilter" Grid.Column="1" Margin="2,0,4,0" Width="20" Height="20" VerticalAlignment="Center" ToolTip="Advanced Search Filter" Style="{StaticResource FloatSwitchToggle}">
+                                            <Grid>
+                                                <Path Data="M3,4 L17,4 L12,10 L12,17 L8,15 L8,10 Z" StrokeThickness="1.5" Fill="Transparent" Stretch="Uniform" Width="10" Height="10">
+                                                    <Path.Style>
+                                                        <Style TargetType="Path">
+                                                            <Setter Property="Stroke" Value="{StaticResource CyberpunkMutedTextBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding AdvancedSearch.IsActive, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                                                                    <Setter Property="Stroke" Value="{StaticResource CyberpunkGreenBrush}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Path.Style>
+                                                </Path>
+                                            </Grid>
+                                        </ToggleButton>
                                     </Grid>
-                                </ToggleButton>
+                                </Border>
                                 <Popup Name="popAdvancedFilter" IsOpen="{Binding IsChecked, ElementName=btnAdvancedFilter}" PlacementTarget="{Binding ElementName=btnAdvancedFilter}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
-                                    <Border Background="{StaticResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Width="420" Margin="0,4,0,0">
+                                    <Border Background="{StaticResource CyberpunkSurfaceAltBrush}" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Width="620" Margin="0,4,0,0">
                                         <Grid DataContext="{Binding AdvancedSearch, RelativeSource={RelativeSource AncestorType=Window}}">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto"/>
@@ -4868,18 +4876,21 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Grid.Column="0" Text="POSITIVE SEARCH (+)" Foreground="{StaticResource CyberpunkGreenBrush}" FontSize="11" FontWeight="Bold"/>
-                                                <TextBlock Grid.Column="1" Text="NEGATIVE SEARCH (-)" Foreground="{StaticResource CyberpunkDangerBrush}" FontSize="11" FontWeight="Bold" Margin="10,0,0,0"/>
+                                                <TextBlock Grid.Column="1" Text="NON-POSITIVE SEARCH (&#x2205;)" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="11" FontWeight="Bold" Margin="10,0,0,0"/>
+                                                <TextBlock Grid.Column="2" Text="NEGATIVE SEARCH (-)" Foreground="{StaticResource CyberpunkDangerBrush}" FontSize="11" FontWeight="Bold" Margin="10,0,0,0"/>
                                             </Grid>
                                             
                                             <Grid Grid.Row="2" Margin="0,0,0,12">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 
-                                                <!-- Cột Trái: Positive Keywords -->
+                                                <!-- Cột 1: Positive Keywords -->
                                                 <StackPanel Grid.Column="0" Margin="0,0,5,0">
                                                     <ItemsControl ItemsSource="{Binding PositiveKeywords}">
                                                         <ItemsControl.ItemTemplate>
@@ -4898,8 +4909,27 @@
                                                     <Button Command="{Binding AddPositiveKeywordCommand}" Content="+ Add Keyword" Style="{StaticResource CompactCyanButton}" Height="24" Margin="0,4,0,0" HorizontalAlignment="Left" FontSize="10"/>
                                                 </StackPanel>
                                                 
-                                                <!-- Cột Phải: Negative Keywords -->
-                                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                                <!-- Cột 2: Non-Positive Keywords -->
+                                                <StackPanel Grid.Column="1" Margin="5,0,5,0">
+                                                    <ItemsControl ItemsSource="{Binding NonPositiveKeywords}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Grid Margin="0,0,0,6">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="24" FontSize="11"/>
+                                                                    <Button Grid.Column="1" Command="{Binding DataContext.RemoveNonPositiveKeywordCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" Margin="4,0,0,0" Width="20" Height="24" Content="×" Foreground="{StaticResource CyberpunkDangerBrush}" Background="Transparent" BorderThickness="0" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                    <Button Command="{Binding AddNonPositiveKeywordCommand}" Content="+ Add Keyword" Style="{StaticResource CompactCyanButton}" Height="24" Margin="0,4,0,0" HorizontalAlignment="Left" FontSize="10"/>
+                                                </StackPanel>
+
+                                                <!-- Cột 3: Negative Keywords -->
+                                                <StackPanel Grid.Column="2" Margin="5,0,0,0">
                                                     <ItemsControl ItemsSource="{Binding NegativeKeywords}">
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
