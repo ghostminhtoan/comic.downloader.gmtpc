@@ -741,17 +741,10 @@ namespace get_link_manga
                     Dispatcher.BeginInvoke(new Action(() => ShowProjectWindowForSection(AppSection.Update)));
                     return true;
                 case HOTKEY_PROJECT_DOWNLOAD_TOGGLE_ID:
-                    Dispatcher.BeginInvoke(new Action(async () =>
+                    Dispatcher.BeginInvoke(new Action(() =>
                     {
                         EnsureProjectWindowVisible();
-                        if (_downloadCts == null && btnStartDownload?.IsChecked != true)
-                        {
-                            await StartPictureDownloadFromFloatingAsync();
-                        }
-                        else
-                        {
-                            StopPictureDownloadFromFloating();
-                        }
+                        ToggleAutoDownloadFromFloating();
                     }));
                     return true;
                 case HOTKEY_PROJECT_RETRY_ID:

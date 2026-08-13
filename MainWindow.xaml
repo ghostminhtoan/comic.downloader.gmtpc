@@ -4832,14 +4832,14 @@
                                 <Button Name="btnBrowseFolder" Content="BROWSE" Click="BtnBrowseFolder_Click" Style="{StaticResource CompactCyanButton}" Width="72" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                 <Button Name="btnOpenFolder" Content="&#x1F4C2;" Click="BtnOpenFolder_Click" Style="{StaticResource CompactCyanButton}" Width="92" Margin="0,0,16,0" FontFamily="Segoe UI Emoji" FontSize="12" ToolTip="OPEN FOLDER" VerticalAlignment="Center"/>
                                 <TextBlock Name="txtSearchLabel" Text="SEARCH" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <Border BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="6" Background="#0A1120" Height="26" Margin="0,0,16,0" VerticalAlignment="Center">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox Name="txtFilter" TextChanged="TxtFilter_TextChanged" Style="{StaticResource SurfaceTextBox}" BorderThickness="0" Background="Transparent" Width="180" ToolTip="Tìm kiếm tên truyện, link hoặc chapter..." VerticalAlignment="Center" Padding="4,2"/>
-                                        <ToggleButton Name="btnAdvancedFilter" Grid.Column="1" Margin="2,0,4,0" Width="20" Height="20" VerticalAlignment="Center" ToolTip="Advanced Search Filter" Style="{StaticResource FloatSwitchToggle}">
+                                <Border BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="6" Background="#0A1120" Height="26" Margin="0,0,16,0" VerticalAlignment="Center" Width="210">
+                                     <Grid>
+                                         <Grid.ColumnDefinitions>
+                                             <ColumnDefinition Width="*"/>
+                                             <ColumnDefinition Width="Auto"/>
+                                         </Grid.ColumnDefinitions>
+                                         <TextBox Name="txtFilter" TextChanged="TxtFilter_TextChanged" Style="{StaticResource SurfaceTextBox}" BorderThickness="0" Background="Transparent" HorizontalAlignment="Stretch" ToolTip="Tìm kiếm tên truyện, link hoặc chapter..." VerticalAlignment="Center" Padding="4,2"/>
+                                         <ToggleButton Name="btnAdvancedFilter" Grid.Column="1" Margin="2,0,4,0" Width="20" Height="20" VerticalAlignment="Center" ToolTip="Advanced Search Filter" Style="{StaticResource FloatSwitchToggle}">
                                             <Grid>
                                                 <Path Data="M3,4 L17,4 L12,10 L12,17 L8,15 L8,10 Z" StrokeThickness="1.5" Fill="Transparent" Stretch="Uniform" Width="10" Height="10">
                                                     <Path.Style>

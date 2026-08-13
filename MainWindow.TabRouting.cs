@@ -289,6 +289,10 @@ namespace get_link_manga
             {
                 tabDownloadRoot.SelectedIndex = GetDownloadMangaTabIndex();
             }
+            if (txtFilter != null && !string.IsNullOrEmpty(txtFilter.Text))
+            {
+                txtFilter.Text = string.Empty;
+            }
         }
 
         private void SelectDownloadNovelTab()
