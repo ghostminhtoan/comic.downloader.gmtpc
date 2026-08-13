@@ -15,7 +15,7 @@ namespace get_link_manga
 {
     public partial class DuplicateWindow : Window
     {
-        internal readonly MainWindow _mainWindow;
+        private readonly MainWindow _mainWindow;
         private readonly ListCollectionView _duplicatesView;
         private string _searchBuffer = "";
         private DateTime _lastKeyPressTime = DateTime.MinValue;
@@ -115,64 +115,12 @@ namespace get_link_manga
             }
         }
 
-        public System.Collections.Generic.List<string> AdvancedSearchIncludes { get; set; } = new System.Collections.Generic.List<string>();
-        public System.Collections.Generic.List<string> AdvancedSearchExcludes { get; set; } = new System.Collections.Generic.List<string>();
-
-        private void BtnAdvancedSearch_Click(object sender, RoutedEventArgs e)
-        {
-            Window currentWindow = Window.GetWindow(sender as DependencyObject);
-            if (currentWindow == null)
-            {
-                currentWindow = this;
-            }
-
-            var win = new AdvancedSearchWindow(this);
-            win.Owner = currentWindow;
-            win.ShowDialog();
-        }
-
-        public void ApplyDuplicateResultsFilter()
-        {
-            _duplicatesView?.Refresh();
-            UpdateStatus();
-            ScheduleDuplicatePreviewPrefetch();
-        }
-
         private bool MatchesFilter(GalleryItem galleryItem)
         {
             string filterText = txtFilter.Text.Trim();
-
-            // 1. Kiểm tra filterText thông thường
-            if (!string.IsNullOrEmpty(filterText))
-            {
-                bool matchNormal = (galleryItem.Name != null && galleryItem.Name.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                                   (galleryItem.Link != null && galleryItem.Link.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) >= 0);
-                if (!matchNormal) return false;
-            }
-
-            // 2. Kiểm tra các từ khóa "Bao gồm" (phải chứa tất cả)
-            if (AdvancedSearchIncludes != null && AdvancedSearchIncludes.Count > 0)
-            {
-                foreach (var inc in AdvancedSearchIncludes)
-                {
-                    bool hasInc = (galleryItem.Name != null && galleryItem.Name.IndexOf(inc, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                                  (galleryItem.Link != null && galleryItem.Link.IndexOf(inc, StringComparison.OrdinalIgnoreCase) >= 0);
-                    if (!hasInc) return false;
-                }
-            }
-
-            // 3. Kiểm tra các từ khóa "Loại trừ" (không được chứa bất kỳ)
-            if (AdvancedSearchExcludes != null && AdvancedSearchExcludes.Count > 0)
-            {
-                foreach (var exc in AdvancedSearchExcludes)
-                {
-                    bool hasExc = (galleryItem.Name != null && galleryItem.Name.IndexOf(exc, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                                  (galleryItem.Link != null && galleryItem.Link.IndexOf(exc, StringComparison.OrdinalIgnoreCase) >= 0);
-                    if (hasExc) return false;
-                }
-            }
-
-            return true;
+            return string.IsNullOrEmpty(filterText) ||
+                   galleryItem.Name.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   galleryItem.Link.IndexOf(filterText, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private bool MatchesLocalFilter(GalleryItem galleryItem)

@@ -13,9 +13,6 @@ namespace get_link_manga
     {
         private static readonly Dictionary<string, string> UiTranslations = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["ADVANCED SEARCH"] = "Tìm kiếm nâng cao",
-            ["INCLUDE"] = "Bao gồm",
-            ["EXCLUDE"] = "Loại trừ",
             ["PARAMETERS CONFIG"] = "1. Chọn nguồn và dán link",
             ["📜 HISTORY"] = "📜 Lịch sử",
             ["📌 BOOKMARKS"] = "📌 Đánh dấu",
@@ -942,8 +939,6 @@ namespace get_link_manga
             ApplyRenameTabLanguage(false);
             ApplyResultsGridHeaderLanguage("GALLERY DETAILS", "STATUS", "PROCESS", "VIEW");
             if (txtAutoZipCbzLabel != null) txtAutoZipCbzLabel.Text = "AUTO ZIP CBZ";
-            if (btnAdvancedSearch != null) btnAdvancedSearch.Content = "ADVANCED SEARCH";
-            if (btnSubAdvancedSearch != null) btnSubAdvancedSearch.Content = "ADVANCED SEARCH";
 
             if (btnSaveList != null) btnSaveList.Content = "Save default";
             if (btnLoadList != null) btnLoadList.Content = "Open default";

@@ -183,21 +183,14 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <Grid Grid.Column="0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Name="txtFilter" 
-                                     TextChanged="TxtFilter_TextChanged"
-                                     Background="#0e121a" 
-                                     BorderBrush="{StaticResource CyberpunkBorderBrush}" 
-                                     Foreground="{StaticResource CyberpunkTextBrush}" 
-                                     CaretBrush="{StaticResource CyberpunkCyanBrush}"
-                                     Height="30"
-                                     VerticalContentAlignment="Center"/>
-                            <Button Grid.Column="1" Name="btnAdvancedSearch" Click="BtnAdvancedSearch_Click" Style="{StaticResource CyberpunkButtonCyan}" Content="ADVANCED SEARCH" Height="30" Margin="8,0,0,0" Padding="12,0" FontSize="11" VerticalAlignment="Center"/>
-                        </Grid>
+                        <TextBox Name="txtFilter" 
+                                 TextChanged="TxtFilter_TextChanged"
+                                 Background="#0e121a" 
+                                 BorderBrush="{StaticResource CyberpunkBorderBrush}" 
+                                 Foreground="{StaticResource CyberpunkTextBrush}" 
+                                 CaretBrush="{StaticResource CyberpunkCyanBrush}"
+                                 Height="30"
+                                 VerticalContentAlignment="Center"/>
 
                         <Button Grid.Column="2" Name="btnCheckAll" Content="CHECK ALL" Click="BtnCheckAll_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="30" Width="100" FontSize="11"/>
                         <Button Grid.Column="4" Name="btnUncheckAll" Content="UNCHECK ALL" Click="BtnUncheckAll_Click" Style="{StaticResource CyberpunkButtonPink}" Height="30" Width="100" FontSize="11"/>

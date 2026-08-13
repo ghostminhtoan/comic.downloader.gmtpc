@@ -21,6 +21,7 @@ namespace get_link_manga
     public partial class MainWindow : Window
     {
         public static MainWindow Instance { get; private set; }
+        public AdvancedSearchViewModel AdvancedSearch { get; set; }
         private static readonly RoutedUICommand StartLightNovelAutoCopyCommand =
             new RoutedUICommand("Start light novel auto copy", "StartLightNovelAutoCopy", typeof(MainWindow));
         private static readonly RoutedUICommand StopLightNovelAutoCopyCommand =
@@ -189,6 +190,7 @@ namespace get_link_manga
 
             UnfreezeApplicationBrushes();
             InitializeComponent();
+            AdvancedSearch = new AdvancedSearchViewModel(ApplyResultsFilter);
             InitializeWorkspaceShell();
             HookDisplaySettingsChanged();
             PreviewMouseWheel += MainWindow_PreviewMouseWheel;

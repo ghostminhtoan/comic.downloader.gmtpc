@@ -271,25 +271,16 @@ namespace get_link_manga
             ApplyResultsFilter();
         }
 
-        public System.Collections.Generic.List<string> AdvancedSearchIncludes { get; set; } = new System.Collections.Generic.List<string>();
-        public System.Collections.Generic.List<string> AdvancedSearchExcludes { get; set; } = new System.Collections.Generic.List<string>();
-
-        private void BtnAdvancedSearch_Click(object sender, RoutedEventArgs e)
+        private void ApplyResultsFilter()
         {
-            Window currentWindow = Window.GetWindow(sender as DependencyObject);
-            if (currentWindow == null)
-            {
-                currentWindow = this;
-            }
-
-            var win = new AdvancedSearchWindow(this);
-            win.Owner = currentWindow;
-            win.ShowDialog();
+            ApplyResultsFilter(ResultsView, txtFilter?.Text?.Trim() ?? string.Empty);
+            ApplyResultsFilter(CollectionViewSource.GetDefaultView(_lightNovelItems), string.Empty);
+            PrefetchAllThumbnailResults();
         }
 
-        private bool GalleryItemContainsKeyword(GalleryItem galleryItem, string keyword)
+        private bool IsGalleryItemMatchKeyword(GalleryItem galleryItem, string keyword)
         {
-            if (string.IsNullOrEmpty(keyword)) return true;
+            if (galleryItem == null || string.IsNullOrEmpty(keyword)) return false;
             return (galleryItem.Name != null && galleryItem.Name.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
                    (galleryItem.Link != null && galleryItem.Link.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
                    (galleryItem.MissingChapterStatusText != null && galleryItem.MissingChapterStatusText.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
@@ -299,19 +290,15 @@ namespace get_link_manga
                    (galleryItem.DownloadingPageProgress != null && galleryItem.DownloadingPageProgress.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
-        internal void ApplyResultsFilter()
-        {
-            ApplyResultsFilter(ResultsView, txtFilter?.Text?.Trim() ?? string.Empty);
-            ApplyResultsFilter(CollectionViewSource.GetDefaultView(_lightNovelItems), string.Empty);
-            PrefetchAllThumbnailResults();
-        }
-
         private void ApplyResultsFilter(ICollectionView view, string filterText)
         {
             if (view == null)
             {
                 return;
             }
+
+            var posKeywords = AdvancedSearch?.GetActivePositiveKeywords() ?? new System.Collections.Generic.List<string>();
+            var negKeywords = AdvancedSearch?.GetActiveNegativeKeywords() ?? new System.Collections.Generic.List<string>();
 
             view.Filter = item =>
             {
@@ -320,31 +307,33 @@ namespace get_link_manga
                     return false;
                 }
 
-                // 1. Kiểm tra filterText thông thường (nếu có)
+                // 1. Kiểm tra bộ lọc tìm kiếm nhanh chính (txtFilter)
                 if (!string.IsNullOrEmpty(filterText))
                 {
-                    bool matchNormal = GalleryItemContainsKeyword(galleryItem, filterText);
-                    if (!matchNormal) return false;
+                    if (!IsGalleryItemMatchKeyword(galleryItem, filterText))
+                    {
+                        return false;
+                    }
                 }
 
-                // 2. Kiểm tra các từ khóa "Bao gồm" (phải chứa tất cả)
-                if (AdvancedSearchIncludes != null && AdvancedSearchIncludes.Count > 0)
+                // 2. Kiểm tra Positive Keywords (Tất cả đều phải chứa - AND logic)
+                if (posKeywords.Count > 0)
                 {
-                    foreach (var inc in AdvancedSearchIncludes)
+                    foreach (var k in posKeywords)
                     {
-                        if (!GalleryItemContainsKeyword(galleryItem, inc))
+                        if (!IsGalleryItemMatchKeyword(galleryItem, k))
                         {
                             return false;
                         }
                     }
                 }
 
-                // 3. Kiểm tra các từ khóa "Loại trừ" (không được chứa bất kỳ)
-                if (AdvancedSearchExcludes != null && AdvancedSearchExcludes.Count > 0)
+                // 3. Kiểm tra Negative Keywords (Không được chứa bất kỳ từ khóa nào)
+                if (negKeywords.Count > 0)
                 {
-                    foreach (var exc in AdvancedSearchExcludes)
+                    foreach (var k in negKeywords)
                     {
-                        if (GalleryItemContainsKeyword(galleryItem, exc))
+                        if (IsGalleryItemMatchKeyword(galleryItem, k))
                         {
                             return false;
                         }
