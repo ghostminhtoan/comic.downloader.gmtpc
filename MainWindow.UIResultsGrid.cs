@@ -89,7 +89,7 @@ namespace get_link_manga
             }
             if (_isRailHidden)
             {
-                return 11;
+                return 7;
             }
             return IsCompactRowsEnabled() ? CompactThumbnailColumns : ThumbnailColumns;
         }
