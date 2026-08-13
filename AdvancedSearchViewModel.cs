@@ -11,6 +11,7 @@ namespace get_link_manga
     public class SearchState
     {
         public string Positive { get; set; } = string.Empty;
+        public string NonNegative { get; set; } = string.Empty;
         public string NonPositive { get; set; } = string.Empty;
         public string Negative { get; set; } = string.Empty;
     }
@@ -33,6 +34,21 @@ namespace get_link_manga
                 if (_positiveText != value)
                 {
                     _positiveText = value;
+                    OnPropertyChanged();
+                    OnTextChanged();
+                }
+            }
+        }
+
+        private string _nonNegativeText = string.Empty;
+        public string NonNegativeText
+        {
+            get => _nonNegativeText;
+            set
+            {
+                if (_nonNegativeText != value)
+                {
+                    _nonNegativeText = value;
                     OnPropertyChanged();
                     OnTextChanged();
                 }
@@ -106,16 +122,13 @@ namespace get_link_manga
         {
             if (_isRestoringState) return;
 
-            // Áp dụng bộ lọc tìm kiếm ngay lập tức
             ApplySearch();
 
-            // Khởi tạo trạng thái chờ lưu Undo nếu chưa có
             if (_pendingStateForUndo == null)
             {
                 _pendingStateForUndo = CreateSnapshot();
             }
 
-            // Debounce lưu Undo
             _debounceTimer.Stop();
             _debounceTimer.Start();
         }
@@ -137,6 +150,7 @@ namespace get_link_manga
             return new SearchState
             {
                 Positive = PositiveText ?? string.Empty,
+                NonNegative = NonNegativeText ?? string.Empty,
                 NonPositive = NonPositiveText ?? string.Empty,
                 Negative = NegativeText ?? string.Empty
             };
@@ -156,13 +170,15 @@ namespace get_link_manga
             try
             {
                 PositiveText = state.Positive;
+                NonNegativeText = state.NonNegative;
                 NonPositiveText = state.NonPositive;
                 NegativeText = state.Negative;
 
                 var pos = GetActivePositiveKeywords();
+                var nonNeg = GetActiveNonNegativeKeywords();
                 var nonPos = GetActiveNonPositiveKeywords();
                 var neg = GetActiveNegativeKeywords();
-                IsActive = pos.Any() || nonPos.Any() || neg.Any();
+                IsActive = pos.Any() || nonNeg.Any() || nonPos.Any() || neg.Any();
 
                 _applyCallback?.Invoke();
             }
@@ -180,6 +196,7 @@ namespace get_link_manga
             try
             {
                 PositiveText = string.Empty;
+                NonNegativeText = string.Empty;
                 NonPositiveText = string.Empty;
                 NegativeText = string.Empty;
                 IsActive = false;
@@ -226,9 +243,10 @@ namespace get_link_manga
         private void ApplySearch()
         {
             var pos = GetActivePositiveKeywords();
+            var nonNeg = GetActiveNonNegativeKeywords();
             var nonPos = GetActiveNonPositiveKeywords();
             var neg = GetActiveNegativeKeywords();
-            IsActive = pos.Any() || nonPos.Any() || neg.Any();
+            IsActive = pos.Any() || nonNeg.Any() || nonPos.Any() || neg.Any();
 
             _applyCallback?.Invoke();
         }
@@ -245,6 +263,11 @@ namespace get_link_manga
         public List<string> GetActivePositiveKeywords()
         {
             return ParseKeywords(PositiveText);
+        }
+
+        public List<string> GetActiveNonNegativeKeywords()
+        {
+            return ParseKeywords(NonNegativeText);
         }
 
         public List<string> GetActiveNonPositiveKeywords()
