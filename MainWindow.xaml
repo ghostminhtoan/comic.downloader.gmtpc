@@ -4888,10 +4888,10 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="POSITIVE SEARCH (+)" Foreground="{StaticResource CyberpunkGreenBrush}" FontSize="11" FontWeight="Bold"/>
-                                                <TextBlock Grid.Column="1" Text="NON-NEGATIVE SEARCH (?:)" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="11" FontWeight="Bold" Margin="10,0,0,0"/>
-                                                <TextBlock Grid.Column="2" Text="NON-POSITIVE SEARCH (&#x2205;)" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="11" FontWeight="Bold" Margin="10,0,0,0"/>
-                                                <TextBlock Grid.Column="3" Text="NEGATIVE SEARCH (-)" Foreground="{StaticResource CyberpunkDangerBrush}" FontSize="11" FontWeight="Bold" Margin="10,0,0,0"/>
+                                                <TextBlock Grid.Column="0" Text="MUST HAVE (+)" Foreground="{StaticResource CyberpunkGreenBrush}" FontSize="11" FontWeight="Bold"/>
+                                                <TextBlock Grid.Column="1" Text="CAN HAVE (OR)" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="11" FontWeight="Bold" Margin="10,0,0,0"/>
+                                                <TextBlock Grid.Column="2" Text="MUST NOT HAVE (-)" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="11" FontWeight="Bold" Margin="10,0,0,0"/>
+                                                <TextBlock Grid.Column="3" Text="EXCLUDE (-)" Foreground="{StaticResource CyberpunkDangerBrush}" FontSize="11" FontWeight="Bold" Margin="10,0,0,0"/>
                                             </Grid>
                                             
                                             <Grid Grid.Row="2" Margin="0,0,0,12">
@@ -4903,19 +4903,17 @@
                                                 </Grid.ColumnDefinitions>
                                                 
                                                 <!-- Cá»™t 1: Positive Keywords -->
-                                                <TextBox Grid.Column="0" Text="{Binding PositiveText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="26" FontSize="11" Margin="0,0,5,0" ToolTip="TÃ¬m kiáº¿m chá»©a Táº¤T Cáº¢ cÃ¡c tá»« nÃ y (vÃ­ dá»¥: english;full color)"/>
+                                                <TextBox Grid.Column="0" Text="{Binding PositiveText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="26" FontSize="11" Margin="0,0,5,0" ToolTip="Must contain ALL of these keywords (separated by semicolon, e.g. tags;genre)"/>
 
                                                 <!-- Cá»™t 2: Non-Negative Keywords (OR) -->
-                                                <TextBox Grid.Column="1" Text="{Binding NonNegativeText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="26" FontSize="11" Margin="5,0,5,0" ToolTip="TÃ¬m kiáº¿m chá»©a ÃT NHáº¤T Má»˜T trong cÃ¡c tá»« nÃ y (vÃ­ dá»¥: english;full color)"/>
+                                                <TextBox Grid.Column="1" Text="{Binding NonNegativeText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="26" FontSize="11" Margin="5,0,5,0" ToolTip="Must contain AT LEAST ONE of these keywords (separated by semicolon)"/>
 
                                                 <!-- Cá»™t 3: Non-Positive Keywords (Exclude 1) -->
-                                                <TextBox Grid.Column="2" Text="{Binding NonPositiveText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="26" FontSize="11" Margin="5,0,5,0" ToolTip="Loáº¡i trá»« cÃ¡c truyá»‡n chá»©a tá»« nÃ y (vÃ­ dá»¥: english;full color)"/>
+                                                <TextBox Grid.Column="2" Text="{Binding NonPositiveText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="26" FontSize="11" Margin="5,0,5,0" ToolTip="Must NOT contain any of these keywords (separated by semicolon)"/>
                                                 
                                                 <!-- Cá»™t 4: Negative Keywords (Exclude 2) -->
-                                                <TextBox Grid.Column="3" Text="{Binding NegativeText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="26" FontSize="11" Margin="5,0,0,0" ToolTip="Loáº¡i trá»« cÃ¡c truyá»‡n chá»©a tá»« nÃ y (vÃ­ dá»¥: english;full color)"/>
-                                            </Grid>
-                                            
-                                            <!-- HÃ ng dÆ°á»›i cÃ¹ng: Äiá»u khiá»ƒn (Undo/Redo/Clear) -->
+                                                <TextBox Grid.Column="3" Text="{Binding NegativeText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="26" FontSize="11" Margin="5,0,0,0" ToolTip="Exclude these keywords (separated by semicolon)"/>
+                                            </Grid><!-- HÃ ng dÆ°á»›i cÃ¹ng: Äiá»u khiá»ƒn (Undo/Redo/Clear) -->
                                             <Grid Grid.Row="3" Margin="0,4,0,0">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
