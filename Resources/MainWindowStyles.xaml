@@ -680,6 +680,37 @@
         <Setter Property="Margin" Value="0,0,0,10"/>
     </Style>
 
+    <Style x:Key="CyberpunkIconToggleButton" TargetType="ToggleButton">
+        <Setter Property="Background" Value="#142437"/>
+        <Setter Property="BorderBrush" Value="{StaticResource CyberpunkBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border Name="Border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="#1F3547"/>
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource CyberpunkGreenBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="#172437"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="FloatToggleSwitch" TargetType="ToggleButton">
         <Setter Property="Width" Value="70"/>
         <Setter Property="Height" Value="24"/>
