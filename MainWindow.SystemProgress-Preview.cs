@@ -28,6 +28,7 @@ namespace get_link_manga
         private readonly Dictionary<string, List<string>> _galleryHoverPreviewCandidateCache = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         private readonly object _galleryHoverPreviewCandidateCacheLock = new object();
         private SemaphoreSlim _galleryHoverPreviewImageSemaphore = new SemaphoreSlim(4, 4);
+        private CancellationTokenSource _prefetchCts;
         // Rate-limit tag fetch cho nhentai/truyenqq: tối đa 2 request cùng lúc
         private readonly SemaphoreSlim _tagFetchSemaphore = new SemaphoreSlim(2, 2);
         private readonly HashSet<string> _tagFetchFailedCache = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -78,13 +79,33 @@ namespace get_link_manga
 
         internal void PrefetchAllScrapedItemsPreviewCache()
         {
-            var items = _scrapedItems.Where(SupportsHoverPreview).ToList();
+            if (_prefetchCts != null)
+            {
+                try
+                {
+                    _prefetchCts.Cancel();
+                    _prefetchCts.Dispose();
+                }
+                catch { }
+            }
+            _prefetchCts = new CancellationTokenSource();
+            CancellationToken token = _prefetchCts.Token;
+
+            var items = (ResultsView != null)
+                ? ResultsView.Cast<object>().OfType<GalleryItem>().Where(SupportsHoverPreview).ToList()
+                : _scrapedItems.Where(SupportsHoverPreview).ToList();
             if (items.Count == 0) return;
+
+            int workerCount = 4;
+            if (cmbThumbCacheConnection != null && cmbThumbCacheConnection.SelectedItem is ComboBoxItem selectedItem &&
+                int.TryParse(selectedItem.Content.ToString(), out int val))
+            {
+                workerCount = val;
+            }
 
             Task.Run(async () =>
             {
                 var queue = new System.Collections.Concurrent.ConcurrentQueue<GalleryItem>(items);
-                int workerCount = 4;
                 var workers = new List<Task>();
 
                 for (int i = 0; i < workerCount; i++)
@@ -93,19 +114,20 @@ namespace get_link_manga
                     {
                         while (queue.TryDequeue(out var item))
                         {
+                            if (token.IsCancellationRequested) break;
                             try
                             {
                                 // Tải file cache ảnh về ổ cứng (.tmp/preview-cache)
                                 await EnsureGalleryHoverPreviewAsync(item, fetchTags: false);
-                                await EnsureGalleryHoverPreviewFileAsync(item, CancellationToken.None, fetchTags: false);
+                                await EnsureGalleryHoverPreviewFileAsync(item, token, fetchTags: false);
                             }
                             catch { }
                         }
-                    }));
+                    }, token));
                 }
 
                 await Task.WhenAll(workers);
-            });
+            }, token);
         }
 
         private async Task PrefetchGalleryHoverPreviewBatchAsync(List<GalleryItem> items)

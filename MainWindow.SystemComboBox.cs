@@ -79,6 +79,7 @@ namespace get_link_manga
 
                 _galleryHoverPreviewImageSemaphore = new System.Threading.SemaphoreSlim(newVal, newVal);
                 Log($"[Thumb Connection] Số luồng kết nối tải thumbnail song song chỉnh thành {newVal}.");
+                PrefetchAllScrapedItemsPreviewCache();
                 try
                 {
                     string configPath = System.IO.Path.Combine(PortablePaths.PortableDataRoot, "thumb_connection_limit.txt");
