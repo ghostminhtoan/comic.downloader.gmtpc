@@ -958,6 +958,10 @@ namespace get_link_manga
             if (chkSubCompactRows != null) chkSubCompactRows.ToolTip = "COMPACT ROW";
             if (chkSubHideSettings != null) chkSubHideSettings.ToolTip = "HIDE SETTINGS";
             if (btnSubShowNewWindow != null) btnSubShowNewWindow.ToolTip = "SHOW ON NEW WINDOW";
+            if (btnSubToolbarSortByName != null) btnSubToolbarSortByName.Content = "Sort by name";
+            if (btnSubDuplicateName != null) btnSubDuplicateName.Content = "Duplicate names";
+            if (lblSubAutoDownload != null) lblSubAutoDownload.Text = "AUTO DOWNLOAD";
+            if (tglSubClearCookieAndRetry != null) tglSubClearCookieAndRetry.ToolTip = "AUTO DOWNLOAD";
             if (btnDuplicateName != null) btnDuplicateName.Content = "Duplicate names";
             // if (btnNoLinkViHentai != null) btnNoLinkViHentai.Content = "No chapters";
             if (btnReverseOrder != null) btnReverseOrder.Content = "Reverse order";
