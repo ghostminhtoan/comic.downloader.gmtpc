@@ -6,7 +6,7 @@
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         xmlns:local="clr-namespace:get_link_manga"
         mc:Ignorable="d"
-        Title="Comic-GMTPC v1.0" Height="900" Width="800" MinWidth="550" MinHeight="560"
+        Title="Comic-GMTPC v1.0" Height="900" Width="720" MinWidth="470" MinHeight="560"
         Background="{StaticResource CyberpunkDarkBrush}"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
@@ -141,7 +141,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="520"/>
+                <ColumnDefinition Width="440"/>
                 <ColumnDefinition Width="18"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>

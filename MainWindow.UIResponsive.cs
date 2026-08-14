@@ -63,7 +63,7 @@ namespace get_link_manga
             if (gridMainContent.ColumnDefinitions.Count != 3)
             {
                 gridMainContent.ColumnDefinitions.Clear();
-                gridMainContent.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(188) });
+                gridMainContent.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(108) });
                 gridMainContent.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
                 gridMainContent.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             }
@@ -130,7 +130,7 @@ namespace get_link_manga
 
                 if (gridMainContent != null && gridMainContent.ColumnDefinitions.Count >= 3)
                 {
-                    gridMainContent.ColumnDefinitions[0].Width = new GridLength(ultraCompact ? 176 : compactMode ? 188 : 208);
+                    gridMainContent.ColumnDefinitions[0].Width = new GridLength(ultraCompact ? 96 : compactMode ? 108 : 128);
                     gridMainContent.ColumnDefinitions[1].Width = new GridLength(compactMode ? 10 : 18);
                 }
             }
@@ -139,9 +139,9 @@ namespace get_link_manga
             {
                 foreach (Button button in _navigationButtonHost.Children.OfType<Button>())
                 {
-                    button.FontSize = ultraCompact ? 11 : 12;
-                    button.Padding = ultraCompact ? new Thickness(8, 8, 8, 8) : new Thickness(14, 10, 14, 10);
-                    button.MinHeight = ultraCompact ? 40 : 46;
+                    button.FontSize = ultraCompact ? 9 : 10;
+                    button.Padding = ultraCompact ? new Thickness(5, 6, 5, 6) : new Thickness(8, 8, 8, 8);
+                    button.MinHeight = ultraCompact ? 36 : 42;
                     button.HorizontalAlignment = HorizontalAlignment.Stretch;
                     button.Width = double.NaN;
 
@@ -206,7 +206,7 @@ namespace get_link_manga
             if (gridMainContent.ColumnDefinitions.Count != 3)
             {
                 gridMainContent.ColumnDefinitions.Clear();
-                gridMainContent.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(188) });
+                gridMainContent.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(108) });
                 gridMainContent.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
                 gridMainContent.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             }
@@ -224,7 +224,7 @@ namespace get_link_manga
             Grid.SetColumn(_shellRootGrid, 2);
             Grid.SetRow(_shellRootGrid, 1);
 
-            _navigationRailBorder.Padding = ultraCompact ? new Thickness(8) : new Thickness(10, 10, 12, 10);
+            _navigationRailBorder.Padding = ultraCompact ? new Thickness(6) : new Thickness(8, 10, 8, 10);
 
             if (_isRailHidden)
             {
@@ -237,7 +237,7 @@ namespace get_link_manga
                 _navigationRailBorder.Visibility = Visibility.Visible;
                 if (gridMainContent.ColumnDefinitions.Count >= 3)
                 {
-                    double railWidth = width < 920 ? 148 : width < 1080 ? 164 : compactMode ? 188 : 208;
+                    double railWidth = width < 920 ? 96 : width < 1080 ? 108 : compactMode ? 108 : 128;
                     gridMainContent.ColumnDefinitions[0].Width = new GridLength(railWidth);
                     gridMainContent.ColumnDefinitions[1].Width = new GridLength(width < 920 ? 8 : compactMode ? 10 : 18);
                 }

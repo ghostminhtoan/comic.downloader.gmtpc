@@ -441,7 +441,7 @@ namespace get_link_manga
             gridMainContent.RowDefinitions.Clear();
             gridMainContent.ColumnDefinitions.Clear();
 
-            gridMainContent.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(250) });
+            gridMainContent.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(170) });
             gridMainContent.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
             gridMainContent.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
@@ -524,7 +524,7 @@ namespace get_link_manga
                 BorderBrush = (Brush)TryFindResource("CyberpunkBorderBrush"),
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(12),
-                Padding = new Thickness(10, 10, 12, 10),
+                Padding = new Thickness(8, 10, 8, 10),
                 Margin = new Thickness(0)
             };
 
@@ -542,15 +542,15 @@ namespace get_link_manga
             {
                 Text = "COMIC DOWNLOADER GMTPC",
                 Foreground = (Brush)TryFindResource("CyberpunkTextBrush"),
-                FontSize = 15,
+                FontSize = 13,
                 FontWeight = FontWeights.Bold,
                 TextWrapping = TextWrapping.Wrap
             };
 
             _showFloatRailButton = new Button
             {
-                Width = 56,
-                MinHeight = 32,
+                Width = 46,
+                MinHeight = 30,
                 Margin = new Thickness(0, 0, 4, 0),
                 Style = TryFindResource("SidebarMenuButton") as Style,
                 Padding = new Thickness(0),
@@ -567,16 +567,16 @@ namespace get_link_manga
                     parent.Children.Remove(grdShutdownMenu);
                 }
                 grdShutdownMenu.Margin = new Thickness(4, 0, 0, 0);
-                grdShutdownMenu.Width = 56;
-                grdShutdownMenu.Height = 32;
+                grdShutdownMenu.Width = 46;
+                grdShutdownMenu.Height = 30;
 
                 if (btnShutdownMenu != null)
                 {
                     _navigationButtons[AppSection.FinishOptions] = btnShutdownMenu;
                     btnShutdownMenu.Style = TryFindResource("SidebarMenuButton") as Style;
-                    btnShutdownMenu.Width = 56;
-                    btnShutdownMenu.Height = 32;
-                    btnShutdownMenu.MinHeight = 32;
+                    btnShutdownMenu.Width = 46;
+                    btnShutdownMenu.Height = 30;
+                    btnShutdownMenu.MinHeight = 30;
                     btnShutdownMenu.Margin = new Thickness(0);
                     btnShutdownMenu.Padding = new Thickness(0);
                     btnShutdownMenu.HorizontalContentAlignment = HorizontalAlignment.Center;
@@ -598,8 +598,8 @@ namespace get_link_manga
 
             _h2rLogButton = new Button
             {
-                Width = 116,
-                MinHeight = 32,
+                Width = 96,
+                MinHeight = 30,
                 Margin = new Thickness(0, 0, 0, 8),
                 Style = TryFindResource("SidebarMenuButton") as Style
             };
@@ -632,8 +632,8 @@ namespace get_link_manga
         {
             var button = new Button
             {
-                Width = 116,
-                MinHeight = 58,
+                Width = 96,
+                MinHeight = 50,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Style = TryFindResource("SidebarMenuButton") as Style
             };
@@ -665,7 +665,7 @@ namespace get_link_manga
                         TextWrapping = TextWrapping.NoWrap,
                         TextAlignment = TextAlignment.Center,
                         HorizontalAlignment = HorizontalAlignment.Center,
-                        FontSize = 10.2,
+                        FontSize = 9.2,
                         FontWeight = FontWeights.SemiBold
                     },
                     new TextBlock
@@ -675,7 +675,7 @@ namespace get_link_manga
                         TextAlignment = TextAlignment.Center,
                         HorizontalAlignment = HorizontalAlignment.Center,
                         Foreground = new SolidColorBrush(Color.FromRgb(0x8F, 0x9E, 0xB2)),
-                        FontSize = 9.2,
+                        FontSize = 8.2,
                         Margin = new Thickness(0, 2, 0, 0)
                     }
                 }
@@ -689,8 +689,8 @@ namespace get_link_manga
                 Data = System.Windows.Media.Geometry.Parse(geometryData),
                 Fill = brush,
                 Stretch = Stretch.Uniform,
-                Width = 18,
-                Height = 18,
+                Width = 16,
+                Height = 16,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             };
