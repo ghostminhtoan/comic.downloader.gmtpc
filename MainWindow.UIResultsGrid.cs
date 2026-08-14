@@ -275,6 +275,7 @@ namespace get_link_manga
         {
             ApplyResultsFilter(ResultsView, txtFilter?.Text?.Trim() ?? string.Empty);
             ApplyResultsFilter(CollectionViewSource.GetDefaultView(_lightNovelItems), string.Empty);
+            SafeRefreshResultsView();
             PrefetchAllThumbnailResults();
         }
 
