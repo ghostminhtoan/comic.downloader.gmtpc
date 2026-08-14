@@ -720,7 +720,7 @@ namespace get_link_manga
                 languageCard.Width = double.NaN;
                 languageCard.MinWidth = 0;
                 languageCard.MaxWidth = double.PositiveInfinity;
-                languageCard.HorizontalAlignment = HorizontalAlignment.Left;
+                languageCard.HorizontalAlignment = HorizontalAlignment.Stretch;
             }
 
             if (scaleCard != null)
@@ -728,7 +728,7 @@ namespace get_link_manga
                 scaleCard.Width = double.NaN;
                 scaleCard.MinWidth = 0;
                 scaleCard.MaxWidth = double.PositiveInfinity;
-                scaleCard.HorizontalAlignment = HorizontalAlignment.Left;
+                scaleCard.HorizontalAlignment = HorizontalAlignment.Stretch;
             }
 
             if (headerActionsPanel != null)
@@ -737,7 +737,16 @@ namespace get_link_manga
                 headerActionsPanel.Margin = new Thickness(0, 0, 0, 8);
                 headerActionsPanel.Orientation = Orientation.Vertical;
                 headerActionsPanel.HorizontalAlignment = HorizontalAlignment.Stretch;
-                CompactHeaderPanelButtons(headerActionsPanel, true);
+                foreach (Button button in headerActionsPanel.Children.OfType<Button>())
+                {
+                    button.MinWidth = 0;
+                    button.Width = double.NaN;
+                    button.Height = 22;
+                    button.Padding = new Thickness(3, 0, 3, 0);
+                    button.Margin = new Thickness(0, 2, 0, 2);
+                    button.FontSize = 8.2;
+                    button.HorizontalAlignment = HorizontalAlignment.Stretch;
+                }
                 _sidebarToolsHost.Children.Add(headerActionsPanel);
             }
         }

@@ -314,11 +314,11 @@
                     </WrapPanel>
 
                     <StackPanel Name="headerActionsPanel" Grid.Row="2" Orientation="Vertical" Margin="0,8,0,0">
-                        <Button Name="btnNewList" Content="NEW LIST" Click="BtnNewList_Click" Style="{StaticResource CompactCyanButton}" MinWidth="84" Padding="12,3" FontWeight="Bold"/>
-                        <Button Name="btnSaveList" Content="SAVE DEFAULT" Click="BtnSave_Click" Style="{StaticResource CompactCyanButton}" MinWidth="126" Padding="12,3" FontWeight="Bold"/>
-                        <Button Name="btnLoadList" Content="OPEN DEFAULT" Click="BtnLoad_Click" Style="{StaticResource CompactCyanButton}" MinWidth="126" Padding="12,3" FontWeight="Bold"/>
-                        <Button Name="btnSaveCustomList" Content="SAVE AS" Click="BtnSaveCustom_Click" Style="{StaticResource CompactPinkButton}" MinWidth="126" Padding="12,3" FontWeight="Bold"/>
-                        <Button Name="btnLoadCustomList" Content="OPEN FILE" Click="BtnLoadCustom_Click" Style="{StaticResource CompactPinkButton}" MinWidth="126" Padding="12,3" FontWeight="Bold"/>
+                        <Button Name="btnNewList" Content="NEW LIST" Click="BtnNewList_Click" Style="{StaticResource CompactCyanButton}" MinWidth="0" Padding="3,3" FontWeight="Bold"/>
+                        <Button Name="btnSaveList" Content="SAVE DEFAULT" Click="BtnSave_Click" Style="{StaticResource CompactCyanButton}" MinWidth="0" Padding="3,3" FontWeight="Bold"/>
+                        <Button Name="btnLoadList" Content="OPEN DEFAULT" Click="BtnLoad_Click" Style="{StaticResource CompactCyanButton}" MinWidth="0" Padding="3,3" FontWeight="Bold"/>
+                        <Button Name="btnSaveCustomList" Content="SAVE AS" Click="BtnSaveCustom_Click" Style="{StaticResource CompactPinkButton}" MinWidth="0" Padding="3,3" FontWeight="Bold"/>
+                        <Button Name="btnLoadCustomList" Content="OPEN FILE" Click="BtnLoadCustom_Click" Style="{StaticResource CompactPinkButton}" MinWidth="0" Padding="3,3" FontWeight="Bold"/>
                     </StackPanel>
                 </Grid>
             </Border>

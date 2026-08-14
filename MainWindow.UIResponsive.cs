@@ -165,8 +165,8 @@ namespace get_link_manga
 
             if (headerUtilityPanel != null)
             {
-                headerUtilityPanel.MinWidth = ultraCompact ? 0 : compactMode ? 200 : 220;
-                headerUtilityPanel.MaxWidth = ultraCompact ? double.PositiveInfinity : compactMode ? 220 : 240;
+                headerUtilityPanel.MinWidth = 0;
+                headerUtilityPanel.MaxWidth = double.PositiveInfinity;
             }
 
             if (languageCard != null)
@@ -174,7 +174,7 @@ namespace get_link_manga
                 languageCard.Width = double.NaN;
                 languageCard.MinWidth = 0;
                 languageCard.MaxWidth = double.PositiveInfinity;
-                languageCard.HorizontalAlignment = HorizontalAlignment.Left;
+                languageCard.HorizontalAlignment = HorizontalAlignment.Stretch;
             }
 
             if (scaleCard != null)
@@ -182,7 +182,7 @@ namespace get_link_manga
                 scaleCard.Width = double.NaN;
                 scaleCard.MinWidth = 0;
                 scaleCard.MaxWidth = double.PositiveInfinity;
-                scaleCard.HorizontalAlignment = HorizontalAlignment.Left;
+                scaleCard.HorizontalAlignment = HorizontalAlignment.Stretch;
             }
 
             if (windowControlsHost != null)
