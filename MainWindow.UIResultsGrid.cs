@@ -35,6 +35,8 @@ namespace get_link_manga
         private readonly ObservableCollection<GalleryItem> _thumbnailVisibleItems = new ObservableCollection<GalleryItem>();
         private ScrollViewer _resultsThumbnailScrollViewer;
         private System.Windows.Threading.DispatcherTimer _thumbnailRefreshTimer;
+        private System.Windows.Threading.DispatcherTimer _searchDebounceTimer;
+        private System.Windows.Threading.DispatcherTimer _scrollPrefetchTimer;
         private const int ThumbnailColumns = 7;
         private const int CompactThumbnailColumns = 9;
         private const int ThumbnailInitialRows = 8;
@@ -272,6 +274,34 @@ namespace get_link_manga
         }
 
         private void ApplyResultsFilter()
+        {
+            if (_searchDebounceTimer == null)
+            {
+                _searchDebounceTimer = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Input);
+                _searchDebounceTimer.Interval = TimeSpan.FromMilliseconds(400);
+                _searchDebounceTimer.Tick += (s, e) =>
+                {
+                    _searchDebounceTimer.Stop();
+                    ExecuteResultsFilter();
+                };
+            }
+
+            string filterText = txtFilter?.Text?.Trim() ?? string.Empty;
+            bool isAdvancedSearchActive = AdvancedSearch?.IsActive == true;
+
+            if (string.IsNullOrEmpty(filterText) && !isAdvancedSearchActive)
+            {
+                _searchDebounceTimer.Stop();
+                ExecuteResultsFilter();
+            }
+            else
+            {
+                _searchDebounceTimer.Stop();
+                _searchDebounceTimer.Start();
+            }
+        }
+
+        private void ExecuteResultsFilter()
         {
             ApplyResultsFilter(ResultsView, txtFilter?.Text?.Trim() ?? string.Empty);
             ApplyResultsFilter(CollectionViewSource.GetDefaultView(_lightNovelItems), string.Empty);
@@ -1871,6 +1901,19 @@ namespace get_link_manga
                         }
                     }
                 }
+
+                if (_scrollPrefetchTimer == null)
+                {
+                    _scrollPrefetchTimer = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Background);
+                    _scrollPrefetchTimer.Interval = TimeSpan.FromMilliseconds(250);
+                    _scrollPrefetchTimer.Tick += (s, ev) =>
+                    {
+                        _scrollPrefetchTimer.Stop();
+                        PrefetchAllScrapedItemsPreviewCache();
+                    };
+                }
+                _scrollPrefetchTimer.Stop();
+                _scrollPrefetchTimer.Start();
             }
             catch { }
         }
