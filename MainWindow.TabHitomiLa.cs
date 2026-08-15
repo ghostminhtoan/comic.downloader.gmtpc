@@ -778,6 +778,7 @@ namespace get_link_manga
                                 if (language == "中文") language = "Chinese";
                                 else if (language == "日本語") language = "Japanese";
                                 else if (language == "한국어") language = "Korean";
+                                else if (language == "Español") language = "Spanish";
                             }
                             if (!string.IsNullOrEmpty(language))
                             {

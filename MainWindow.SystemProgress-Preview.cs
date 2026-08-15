@@ -91,48 +91,9 @@ namespace get_link_manga
             _prefetchCts = new CancellationTokenSource();
             CancellationToken token = _prefetchCts.Token;
 
-            var sortedItems = GetThumbnailSourceItems();
-            if (sortedItems == null || sortedItems.Count == 0) return;
-
-            int firstVisibleIndex = 0;
-            int lastVisibleIndex = 30; // Default buffer size
-
-            if (_isResultsThumbnailViewEnabled && lbResultsThumbnail != null)
-            {
-                var scrollViewer = FindVisualChild<ScrollViewer>(lbResultsThumbnail);
-                if (scrollViewer != null)
-                {
-                    int columns = GetThumbnailColumnCount();
-                    int firstRow = (int)Math.Max(0, scrollViewer.VerticalOffset);
-                    int lastRow = firstRow + (int)Math.Ceiling(scrollViewer.ViewportHeight);
-
-                    firstVisibleIndex = firstRow * columns;
-                    lastVisibleIndex = (lastRow + 1) * columns;
-                }
-            }
-            else if (dgResults != null && dgResults.Visibility == Visibility.Visible)
-            {
-                var scrollViewer = FindVisualChild<ScrollViewer>(dgResults);
-                if (scrollViewer != null)
-                {
-                    firstVisibleIndex = (int)Math.Max(0, scrollViewer.VerticalOffset);
-                    lastVisibleIndex = firstVisibleIndex + (int)Math.Ceiling(scrollViewer.ViewportHeight);
-                }
-            }
-
-            int minIndex = Math.Max(0, firstVisibleIndex - 30);
-            int maxIndex = Math.Min(sortedItems.Count - 1, lastVisibleIndex + 30);
-
-            var items = new List<GalleryItem>();
-            for (int i = minIndex; i <= maxIndex; i++)
-            {
-                var item = sortedItems[i];
-                if (item != null && SupportsHoverPreview(item))
-                {
-                    items.Add(item);
-                }
-            }
-
+            var items = (ResultsView != null)
+                ? ResultsView.Cast<object>().OfType<GalleryItem>().Where(SupportsHoverPreview).ToList()
+                : _scrapedItems.Where(SupportsHoverPreview).ToList();
             if (items.Count == 0) return;
 
             int workerCount = 4;
