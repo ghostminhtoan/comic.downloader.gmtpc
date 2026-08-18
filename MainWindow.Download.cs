@@ -6357,10 +6357,11 @@ namespace get_link_manga
                             {
                                 string traceMessage = $"Book: {item.Link}{Environment.NewLine}Page: {pageNum}{Environment.NewLine}Error: {ex.Message}";
                                 string errorImgUrl = imgUrl ?? item.Link;
+                                string pageName = Path.GetFileNameWithoutExtension(name);
                                 Dispatcher.Invoke(new Action(() =>
                                 {
-                                    queueItem.AddError(string.Empty, pageNum, traceMessage, errorImgUrl, item.Link, pageNum.ToString());
-                                    RecordCheckError("hitomi.la", item.Name, string.Empty, pageNum, traceMessage, errorImgUrl, pageNum.ToString());
+                                    queueItem.AddError(string.Empty, pageNum, traceMessage, errorImgUrl, item.Link, pageName);
+                                    RecordCheckError("hitomi.la", item.Name, string.Empty, pageNum, traceMessage, errorImgUrl, pageName);
                                 }));
                             }
                         }
