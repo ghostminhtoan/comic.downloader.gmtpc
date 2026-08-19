@@ -4862,8 +4862,8 @@ namespace get_link_manga
                 // Limit active connection per server (host) to match user setting
                 try
                 {
-                    int limit = GetCurrentConnectionLimit();
-                    handler.MaxConnectionsPerServer = Math.Max(1, limit);
+                    int limit = Math.Max(32, GetCurrentConnectionLimit());
+                    handler.MaxConnectionsPerServer = limit;
                 }
                 catch {}
 
@@ -6244,6 +6244,8 @@ namespace get_link_manga
                 {
                     queueItem.TotalChapters = totalPages;
                     queueItem.CompletedChapters = 0;
+                    queueItem.DownloadingChapter = "Trang 0/" + totalPages;
+                    queueItem.CurrentProcess = "Trang 0/" + totalPages;
                 });
             }
 
@@ -6316,8 +6318,9 @@ namespace get_link_manga
                                 lock (lockObj)
                                 {
                                     completedPages++;
-                                    UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, $"{completedPages}/{totalPages} pages", 0, 0);
-                                    WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} existed");
+                                    string processText = $"Trang {completedPages}/{totalPages}";
+                                    UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, processText, 0, 0);
+                                    WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, processText, $"Page {pageNum} existed");
                                 }
                                 ClearResolvedPageError(queueItem, string.Empty, pageNum);
                                 return;
@@ -6366,8 +6369,9 @@ namespace get_link_manga
                                 completedPages++;
                                 pageWatch.Stop();
                                 long downloadedBytes = File.Exists(downloadedPath) ? new FileInfo(downloadedPath).Length : 0;
-                                UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, $"{completedPages}/{totalPages} pages", downloadedBytes, pageWatch.ElapsedMilliseconds);
-                                WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} completed");
+                                string processText = $"Trang {completedPages}/{totalPages}";
+                                UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, processText, downloadedBytes, pageWatch.ElapsedMilliseconds);
+                                WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, processText, $"Page {pageNum} completed");
                             }
                             ClearResolvedPageError(queueItem, string.Empty, pageNum);
                         }
