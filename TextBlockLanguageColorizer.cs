@@ -61,6 +61,7 @@ namespace get_link_manga
                     "burmese", "myanmar", "မြန်မာဘာသာ", "japanese*"
                 };
 
+                bool anyAdded = false;
                 foreach (Match match in matches)
                 {
                     string innerVal = match.Value.Trim('[', ']');
@@ -73,6 +74,7 @@ namespace get_link_manga
                     if (match.Index > lastIndex)
                     {
                         textBlock.Inlines.Add(new Run(text.Substring(lastIndex, match.Index - lastIndex)));
+                        anyAdded = true;
                     }
 
                     // Add highlighted language run
@@ -87,6 +89,7 @@ namespace get_link_manga
                     }
                     run.FontWeight = FontWeights.Bold;
                     textBlock.Inlines.Add(run);
+                    anyAdded = true;
 
                     lastIndex = match.Index + match.Length;
                 }
@@ -94,6 +97,12 @@ namespace get_link_manga
                 if (lastIndex < text.Length)
                 {
                     textBlock.Inlines.Add(new Run(text.Substring(lastIndex)));
+                    anyAdded = true;
+                }
+
+                if (!anyAdded && !string.IsNullOrEmpty(text))
+                {
+                    textBlock.Inlines.Add(new Run(text));
                 }
             }
         }
