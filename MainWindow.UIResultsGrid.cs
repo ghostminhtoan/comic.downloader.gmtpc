@@ -2271,6 +2271,20 @@ namespace get_link_manga
                 }
             }
 
+            // Gán variant màu sắc/uncensored cho các truyện hitomi.la / nhentai.net và candidate hentai bất kể có duplicate hay không
+            foreach (var item in itemList)
+            {
+                bool isHitomi = string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) ||
+                                (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
+                bool isNhentai = string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase) ||
+                                 (item.Link != null && item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0);
+                if (isHitomi || isNhentai || IsHentaiDuplicateCandidate(item))
+                {
+                    item.IsCensorshipFullColorVariant = HasFullColorVariant(item.Name) || HasFullColorInTags(item);
+                    item.IsCensorshipUncensoredVariant = HasUncensoredVariant(item.Name) || HasUncensoredInTags(item);
+                }
+            }
+
             var censorshipColorGroups = itemList
                 .Where(IsHentaiDuplicateCandidate)
                 .GroupBy(item => GetSimilarityCore(item.Name, true))
