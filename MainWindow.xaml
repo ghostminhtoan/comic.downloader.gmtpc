@@ -3006,6 +3006,57 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Name="txtResultsHeader" Text="EXTRACTED GALLERY LINKS" FontSize="15" FontWeight="Bold" Foreground="{StaticResource CyberpunkCyanBrush}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <!-- Color Legend Rules Badge / Popup / Quick View -->
+                            <Border CornerRadius="4" Background="#111A28" BorderBrush="#1F2E45" BorderThickness="1" Padding="8,3" Margin="0,0,0,0" VerticalAlignment="Center"
+                                    ToolTipService.InitialShowDelay="100" ToolTipService.ShowDuration="30000">
+                                <Border.ToolTip>
+                                    <ToolTip Background="#0B131E" BorderBrush="{StaticResource CyberpunkCyanBrush}" BorderThickness="1" Padding="10">
+                                        <StackPanel Orientation="Vertical">
+                                            <TextBlock Text="QUY ĐỊNH MÀU SẮC (COLOR RULES)" FontWeight="Bold" FontSize="12" Foreground="{StaticResource CyberpunkCyanBrush}" Margin="0,0,0,8"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                                <Border Width="12" Height="12" Background="{StaticResource CyberpunkYellowBrush}" CornerRadius="2" Margin="0,0,8,0"/>
+                                                <TextBlock Text="Vàng (Yellow): Uncensored / Decensored" Foreground="#E0E6ED" FontSize="11"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                                <Border Width="12" Height="12" Background="#FFD78BFF" CornerRadius="2" Margin="0,0,8,0"/>
+                                                <TextBlock Text="Tím (Purple): Full Color / Colorized" Foreground="#E0E6ED" FontSize="11"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                                <Border Width="12" Height="12" Background="{StaticResource CyberpunkPinkBrush}" CornerRadius="2" Margin="0,0,8,0"/>
+                                                <TextBlock Text="Hồng (Pink): Cả Uncensored + Full Color" Foreground="#E0E6ED" FontSize="11"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                                <Border Width="12" Height="12" Background="{StaticResource CyberpunkCyanBrush}" CornerRadius="2" Margin="0,0,8,0"/>
+                                                <TextBlock Text="Xanh Cyan: Truyện Duplicate (Trùng tên)" Foreground="#E0E6ED" FontSize="11"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                                <Border Width="12" Height="12" Background="#33FFCC" CornerRadius="2" Margin="0,0,8,0"/>
+                                                <TextBlock Text="Xanh Mint (#33FFCC): Numbered Variant Duplicate" Foreground="#E0E6ED" FontSize="11"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                                <Border Width="12" Height="12" Background="#FF9DFF00" CornerRadius="2" Margin="0,0,8,0"/>
+                                                <TextBlock Text="Vàng chanh (#FF9DFF00): Numbered + Uncensored" Foreground="#E0E6ED" FontSize="11"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2">
+                                                <Border Width="12" Height="12" Background="#00CCFF" CornerRadius="2" Margin="0,0,8,0"/>
+                                                <TextBlock Text="Xanh dương sáng (#00CCFF): Numbered + Full Color" Foreground="#E0E6ED" FontSize="11"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </Border.ToolTip>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="COLOR RULES" FontSize="9" FontWeight="Bold" Foreground="{StaticResource CyberpunkMutedTextBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <Border Width="8" Height="8" CornerRadius="2" Background="{StaticResource CyberpunkYellowBrush}" Margin="0,0,3,0" ToolTip="Uncensored"/>
+                                    <TextBlock Text="Uncen" FontSize="9" Foreground="{StaticResource CyberpunkYellowBrush}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <Border Width="8" Height="8" CornerRadius="2" Background="#FFD78BFF" Margin="0,0,3,0" ToolTip="Full Color"/>
+                                    <TextBlock Text="Color" FontSize="9" Foreground="#FFD78BFF" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <Border Width="8" Height="8" CornerRadius="2" Background="{StaticResource CyberpunkPinkBrush}" Margin="0,0,3,0" ToolTip="Uncen + Color"/>
+                                    <TextBlock Text="Both" FontSize="9" Foreground="{StaticResource CyberpunkPinkBrush}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <Border Width="8" Height="8" CornerRadius="2" Background="{StaticResource CyberpunkCyanBrush}" Margin="0,0,3,0" ToolTip="Duplicate"/>
+                                    <TextBlock Text="Dupl" FontSize="9" Foreground="{StaticResource CyberpunkCyanBrush}" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="ℹ" FontSize="10" FontWeight="Bold" Foreground="{StaticResource CyberpunkCyanBrush}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" Margin="0,0,0,5">
