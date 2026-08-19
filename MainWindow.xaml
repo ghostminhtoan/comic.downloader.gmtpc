@@ -3755,7 +3755,8 @@
                                                  <TextBlock Grid.Column="1"
                                                             local:TextBlockLanguageColorizer.HighlightedText="{Binding DisplayName}"
                                                             FontWeight="Bold"
-                                                            FontSize="12">
+                                                            FontSize="12"
+                                                            Effect="{StaticResource TextWhiteOutlineEffect}">
                                                      <TextBlock.Style>
                                                          <Style TargetType="TextBlock">
                                                              <Setter Property="Height" Value="32"/>
@@ -4558,7 +4559,8 @@
                                                  <TextBlock Grid.Column="1"
                                                             local:TextBlockLanguageColorizer.HighlightedText="{Binding DisplayName}"
                                                             FontWeight="Bold"
-                                                            FontSize="9">
+                                                            FontSize="9"
+                                                            Effect="{StaticResource TextWhiteOutlineEffect}">
                                                      <TextBlock.Style>
                                                          <Style TargetType="TextBlock">
                                                              <Setter Property="Height" Value="32"/>
