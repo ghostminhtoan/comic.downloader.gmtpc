@@ -874,6 +874,11 @@ document.addEventListener('click', function (event) {
                                 html.indexOf('challenge-platform') !== -1) {
                                 return 'challenge';
                             }
+                            if (html.indexOf('error 429') !== -1 ||
+                                html.indexOf('you\'re being rate limited') !== -1 ||
+                                html.indexOf('too many requests') !== -1) {
+                                return 'rate_limited';
+                            }
                             return 'ok';
                         })()";
 
@@ -889,7 +894,20 @@ document.addEventListener('click', function (event) {
                         }
                     });
 
-                    if (result != null && result.Trim('"') == "ok")
+                    string checkStatus = result?.Trim('"')?.ToLowerInvariant() ?? "challenge";
+                    if (checkStatus == "rate_limited")
+                    {
+                        // Đang dính 429 Too Many Requests -> Không tính là ok, chờ 4s rồi tự bấm reload hoặc refresh
+                        _okStateDetectedAt = DateTime.MinValue;
+                        await Task.Delay(4000);
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            try { webView.CoreWebView2?.Reload(); } catch {}
+                        });
+                        continue;
+                    }
+
+                    if (checkStatus == "ok")
                     {
                         _verifySolveCooldownUntil = DateTime.MinValue;
 

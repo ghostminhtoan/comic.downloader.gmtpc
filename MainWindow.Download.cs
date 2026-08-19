@@ -2806,26 +2806,17 @@ namespace get_link_manga
 
                         if (is429)
                         {
-                            Log($"[RateLimit 429] Phát hiện 429 cho '{item.Name}'. Tạm dừng tải...");
+                            Log($"[RateLimit 429] Phát hiện 429 cho '{item.Name}'. Tự động cách ly & chờ hồi phục (10s)...");
                             countAsCompleted = false;
-                            PauseAllDownloads();
                             Dispatcher.Invoke(() =>
                             {
                                 item.Status = "Paused";
-                                item.CurrentProcess = "429 pause";
+                                item.CurrentProcess = "429 cooling down (10s)";
                             });
 
-                            Log("[RateLimit 429] Chờ 5 giây...");
-                            await Task.Delay(5000, token);
-
-                            Log("[RateLimit 429] Đang xóa temp/process/webview2 theo book...");
+                            // Xóa artifact lỗi và chờ 10s backoff cho riêng host
                             Delete429ArtifactsForItem(item, downloadRoot);
-
-                            Log("[RateLimit 429] Đang xóa cookie...");
-                            InitializeHttpClientState();
-
-                            Log("[RateLimit 429] Đợi thêm 5 giây trước khi tải lại...");
-                            await Task.Delay(5000, token);
+                            await Task.Delay(10000, token);
 
                             Dispatcher.Invoke(() =>
                             {
@@ -2837,11 +2828,8 @@ namespace get_link_manga
                                 item.IsChecked = true;
                             });
 
-                            ResumeAllDownloads();
-                            Log($"[RateLimit 429] Đang bắt đầu tải lại '{item.Name}'...");
-                            _ = StartDownloadProcessAsync(new List<GalleryItem> { item }, preserveExistingState: false);
-                            
-                            throw new OperationCanceledException("Cancelled due to RateLimit 429", ex);
+                            Log($"[RateLimit 429] Hoàn tất hồi phục 429 cho '{item.Name}'. Sẵn sàng tiếp tục.");
+                            return;
                         }
 
                         Log($"[Lỗi] Không thể tải truyện '{item.Name}': {ex.ToString()}");
