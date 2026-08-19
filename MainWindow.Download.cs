@@ -3433,12 +3433,12 @@ namespace get_link_manga
             item.NhentaiTotalPagesHint = totalPages;
             Log($"[{nhentaiSiteKey}] Book: {normalizedBookUrl} | Pages: {totalPages}");
 
-            // Get number of connections
-            int maxThreads = GetCurrentConnectionLimit();
+            // Get number of connections (Cap at 4 for nhentai to prevent 429 Too Many Requests)
+            int maxThreads = Math.Min(GetCurrentConnectionLimit(), 4);
 
             Log($"[Đa luồng {nhentaiSiteKey}] Bắt đầu tải {totalPages} trang, tối đa {maxThreads} kết nối song song...");
 
-            using (var semaphore = new DynamicSemaphore(maxThreads, GetCurrentConnectionLimit))
+            using (var semaphore = new DynamicSemaphore(maxThreads, () => Math.Min(GetCurrentConnectionLimit(), 4)))
             {
                 var tasks = new System.Collections.Generic.List<Task>();
                 int completedPages = 0;
@@ -5024,12 +5024,14 @@ namespace get_link_manga
 
                                 using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, sendCts.Token))
                                 {
-                                if (isViHentai && (int)response.StatusCode == 429 && attempt < maxAttempts)
+                                bool isNhentai = url != null && (url.Contains("nhentai.net") || url.Contains("nhentaimg.com"));
+                                if ((isViHentai || isNhentai) && (int)response.StatusCode == 429 && attempt < maxAttempts)
                                 {
                                     int retryDelay = GetRetryDelayMilliseconds(response, attempt, delayMs);
-                                    Log($"[vi-hentai.pro] 429 khi tải ảnh. Chờ {retryDelay}ms rồi thử lại ({attempt}/{maxAttempts}): {url}");
+                                    string domainTag = isNhentai ? "[nhentai.net]" : "[vi-hentai.pro]";
+                                    Log($"{domainTag} 429 Too Many Requests khi tải ảnh. Chờ {retryDelay}ms rồi thử lại ({attempt}/{maxAttempts}): {url}");
                                     await Task.Delay(retryDelay, token);
-                                    delayMs = Math.Min(delayMs * 2, 8000);
+                                    delayMs = Math.Min(delayMs * 2, 10000);
                                     continue;
                                 }
 
