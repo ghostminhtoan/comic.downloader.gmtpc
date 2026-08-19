@@ -6247,6 +6247,9 @@ namespace get_link_manga
                 });
             }
 
+            // Làm mới gg.js 1 lần duy nhất cho toàn bộ gallery
+            await _hitomiGG.RefreshAsync(this);
+
             int maxThreads = GetCurrentConnectionLimit();
             Log($"[hitomi.la] Bắt đầu tải {totalPages} trang với tối đa {maxThreads} kết nối...");
 
@@ -6320,24 +6323,42 @@ namespace get_link_manga
                                 return;
                             }
 
-                            imgUrl = await ResolveHitomiImageUrlAsync(this, hash, name, isThumbnail: false);
+                            // Giải mã URL ảnh từ metadata đã lưu
+                            string b = _hitomiGG.B;
+                            string s = _hitomiGG.GetS(hash);
+                            string fullUrl = $"https://a.gold-usergeneratedcontent.net/{b}{s}/{hash}.webp";
+                            string fullSub = GetHitomiSubdomainAsync(fullUrl, null, "webp");
+                            imgUrl = fullUrl.Replace("//a.gold-usergeneratedcontent.net/", $"//{fullSub}.gold-usergeneratedcontent.net/");
+
                             string fileExt = Path.GetExtension(imgUrl) ?? ".webp";
                             string directPath = Path.ChangeExtension(localFilePath, fileExt);
 
-                            string hitomiReferer = null;
-                            if (!string.IsNullOrEmpty(galleryId))
+                            string hitomiReferer = !string.IsNullOrEmpty(galleryId)
+                                ? $"https://hitomi.la/reader/{galleryId}.html"
+                                : (item.Link != null ? Regex.Replace(item.Link, @"^https?://hitomi\.la/(?:doujinshi|manga|gamecg|cg|gallery)/", "https://hitomi.la/reader/") : "https://hitomi.la/");
+
+                            // Tải ảnh trực tiếp qua Shared HttpClient không bị chặn jitter delay
+                            var httpClient = GetSharedHttpClient(imgUrl);
+                            using (var sendCts = CancellationTokenSource.CreateLinkedTokenSource(token))
                             {
-                                hitomiReferer = $"https://hitomi.la/reader/{galleryId}.html";
-                            }
-                            else if (item.Link != null)
-                            {
-                                var idMatch = Regex.Match(item.Link, @"(\d+)(?:\.html)?$");
-                                if (idMatch.Success)
+                                sendCts.CancelAfter(30000);
+                                using (var request = new HttpRequestMessage(HttpMethod.Get, imgUrl))
                                 {
-                                    hitomiReferer = $"https://hitomi.la/reader/{idMatch.Groups[1].Value}.html";
+                                    if (!string.IsNullOrEmpty(hitomiReferer))
+                                    {
+                                        request.Headers.Referrer = new Uri(hitomiReferer);
+                                    }
+                                    using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, sendCts.Token))
+                                    {
+                                        response.EnsureSuccessStatusCode();
+                                        using (var contentStream = await response.Content.ReadAsStreamAsync())
+                                        using (var fileStream = new FileStream(directPath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
+                                        {
+                                            await CopyToAsyncWithTimeout(contentStream, fileStream, 81920, token);
+                                        }
+                                    }
                                 }
                             }
-                            await DownloadUrlToFileWithRefererAsync(imgUrl, hitomiReferer, directPath, token);
                             downloadedPath = directPath;
 
                             lock (lockObj)
