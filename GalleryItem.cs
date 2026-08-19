@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Media;
 
 namespace get_link_manga
@@ -318,6 +319,15 @@ namespace get_link_manga
                 return name;
 
             string temp = name.Trim();
+
+            // Quy tắc xử lý dấu câu tiếng Tây Ban Nha ¿ và ¡:
+            // ¿b? -> b❓
+            // ¡b! -> b❗
+            temp = Regex.Replace(temp, @"¿([^?¿]*)\?", "$1❓");
+            temp = Regex.Replace(temp, @"¡([^!¡]*)!", "$1❗");
+            // Xóa dấu sót nếu không có dấu đóng tương ứng
+            temp = temp.Replace("¿", "").Replace("¡", "");
+
             bool changed;
             do
             {
