@@ -47,7 +47,7 @@ namespace get_link_manga
             ["Missing chapters"] = "Chương thiếu",
             ["Download queue"] = "Hàng chờ tải",
             ["Watch offline"] = "Đọc offline",
-            ["About"] = "Giới thiệu",
+            ["About"] = "Hướng dẫn",
             ["Update"] = "Cập nhật",
             ["Search"] = "Tìm kiếm",
             ["Word wrap"] = "Xuống dòng",

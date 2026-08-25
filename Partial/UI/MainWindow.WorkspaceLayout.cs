@@ -1853,7 +1853,7 @@ namespace get_link_manga
                 _navigationButtons[AppSection.ChooseSource].Content = CreateNavigationButtonContent(_isVietnameseUi ? "Nguồn" : "Source", "Ctrl+Shift+S");
                 _navigationButtons[AppSection.Download].Content = CreateNavigationButtonContent(_isVietnameseUi ? "Tải về" : "Download", "Ctrl+Shift+D");
                 _navigationButtons[AppSection.Watch].Content = CreateNavigationButtonContent(_isVietnameseUi ? "Xem truyện" : "Watch", "Ctrl+Shift+W");
-                _navigationButtons[AppSection.About].Content = CreateNavigationButtonContent(_isVietnameseUi ? "Giới thiệu" : "About", "Ctrl+Shift+A");
+                _navigationButtons[AppSection.About].Content = CreateNavigationButtonContent(_isVietnameseUi ? "Hướng dẫn" : "Tutorial", "Ctrl+Shift+A");
                 _navigationButtons[AppSection.TraceLog].Content = CreateNavigationButtonContent(_isVietnameseUi ? "Trace Log" : "Trace Log", "Ctrl+Shift+L");
                 _navigationButtons[AppSection.Update].Content = CreateNavigationButtonContent(_isVietnameseUi ? "Cập nhật" : "Update", "Ctrl+Shift+U");
             }

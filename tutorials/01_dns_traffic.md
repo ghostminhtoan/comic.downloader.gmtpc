@@ -16,7 +16,6 @@ Các web hentai sau đây BẮT BUỘC sử dụng chế độ DNS Only (HTTPS):
   - damconuong.shop
   - sayhentai
   - hentaiforce
-  - nhentai.xxx
   - hentai2read
   - hentaiera
   - daomeoden
@@ -24,7 +23,6 @@ Các web hentai sau đây BẮT BUỘC sử dụng chế độ DNS Only (HTTPS):
 ## 3. Bắt buộc Traffic & DNS UDP
 Các trang web sau đây BẮT BUỘC phải dùng Traffic & DNS UDP để đường truyền ổn định không bị nhà mạng bóp:
   - hentaivn
-  - nhentai.net
   - hako (ln.hako.vn / docln.net)
 
 <!-- EN -->
@@ -40,7 +38,6 @@ The following hentai sites MUST use DNS Only (HTTPS) mode:
   - damconuong.shop
   - sayhentai
   - hentaiforce
-  - nhentai.xxx
   - hentai2read
   - hentaiera
   - daomeoden
@@ -48,5 +45,4 @@ The following hentai sites MUST use DNS Only (HTTPS) mode:
 ## 3. Mandatory Traffic & DNS UDP
 The following sites MUST use Traffic & DNS UDP to bypass ISP throttling:
   - hentaivn
-  - nhentai.net
   - hako (ln.hako.vn / docln.net)

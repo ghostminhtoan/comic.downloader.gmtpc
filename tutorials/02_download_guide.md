@@ -34,7 +34,6 @@ en: Download Guide
   - Damconuong.shop
   - HentaiVN
   - Hako / Docln (Light Novel)
-  - NHentai (.net / .xxx)
   - Dilib.vn / Thuviensach.vn
 
 
@@ -73,7 +72,6 @@ The app supports 2 flexible methods to get comic links:
   - Damconuong.shop
   - HentaiVN
   - Hako / Docln (Light Novel)
-  - NHentai (.net / .xxx)
   - Dilib.vn / Thuviensach.vn
 
 🔴 SITES WITHOUT ANALYZE (Direct book / chapter paste only):
