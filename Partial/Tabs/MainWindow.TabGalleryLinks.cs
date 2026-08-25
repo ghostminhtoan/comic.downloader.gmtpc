@@ -1561,7 +1561,9 @@ namespace get_link_manga
             string domain = GetDownloadMissingChapterDomainLabel(item);
             return domain.IndexOf("hentaiforce", StringComparison.OrdinalIgnoreCase) >= 0 ||
                    domain.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   domain.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0;
+                   domain.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   domain.IndexOf("e-hentai.org", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   domain.IndexOf("exhentai.org", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private List<GalleryItem> GetDownloadMissingChapterPendingScanItems()
