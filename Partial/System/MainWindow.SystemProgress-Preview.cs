@@ -475,40 +475,147 @@ namespace get_link_manga
                         galleryInfo = jObj;
                     }
 
-                    if (galleryInfo != null && galleryInfo["tags"] is Newtonsoft.Json.Linq.JArray tagsArray)
+                    if (galleryInfo != null)
                     {
-                        var tagsList = new List<string>();
-                        foreach (var t in tagsArray)
+                        // Helper local function to extract list from JArray of strings or objects
+                        List<string> GetCategoryItems(string key)
                         {
-                            string tagName = t["tag"]?.ToString();
-                            if (!string.IsNullOrWhiteSpace(tagName))
+                            var list = new List<string>();
+                            if (galleryInfo[key] is Newtonsoft.Json.Linq.JArray arr)
                             {
-                                tagName = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(tagName);
-                                var femaleProp = t["female"];
-                                var maleProp = t["male"];
-                                if (femaleProp != null && (femaleProp.ToString() == "1" || femaleProp.ToString().ToLower() == "true"))
+                                foreach (var elem in arr)
                                 {
-                                    tagName += " ♀";
+                                    string val = elem is Newtonsoft.Json.Linq.JObject o ? (o["name"]?.ToString() ?? o["tag"]?.ToString()) : elem?.ToString();
+                                    if (!string.IsNullOrWhiteSpace(val))
+                                    {
+                                        list.Add(System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(val.Trim()));
+                                    }
                                 }
-                                else if (maleProp != null && (maleProp.ToString() == "1" || maleProp.ToString().ToLower() == "true"))
-                                {
-                                    tagName += " ♂";
-                                }
-                                tagsList.Add(tagName);
                             }
+                            return list;
                         }
 
-                        if (tagsList.Count > 0)
+                        // Specific metadata lines if available
+                        var artists = GetCategoryItems("artist");
+                        if (artists.Count > 0)
                         {
                             panel.Children.Add(new TextBlock
                             {
-                                Text = "Tags: " + string.Join(", ", tagsList),
+                                Text = "Artist: " + string.Join(", ", artists),
+                                Foreground = TryFindResource("CyberpunkCyanBrush") as Brush ?? Brushes.Cyan,
+                                FontWeight = FontWeights.SemiBold,
+                                FontSize = 11,
+                                TextWrapping = TextWrapping.Wrap,
+                                Margin = new Thickness(2, 2, 2, 0)
+                            });
+                        }
+
+                        var groups = GetCategoryItems("group");
+                        if (groups.Count > 0)
+                        {
+                            panel.Children.Add(new TextBlock
+                            {
+                                Text = "Group: " + string.Join(", ", groups),
+                                Foreground = TryFindResource("CyberpunkCyanBrush") as Brush ?? Brushes.Cyan,
+                                FontWeight = FontWeights.SemiBold,
+                                FontSize = 11,
+                                TextWrapping = TextWrapping.Wrap,
+                                Margin = new Thickness(2, 2, 2, 0)
+                            });
+                        }
+
+                        var parodies = GetCategoryItems("parody");
+                        if (parodies.Count > 0)
+                        {
+                            panel.Children.Add(new TextBlock
+                            {
+                                Text = "Parody: " + string.Join(", ", parodies),
+                                Foreground = TryFindResource("CyberpunkYellowBrush") as Brush ?? Brushes.Gold,
+                                FontWeight = FontWeights.Normal,
+                                FontSize = 11,
+                                TextWrapping = TextWrapping.Wrap,
+                                Margin = new Thickness(2, 2, 2, 0)
+                            });
+                        }
+
+                        var characters = GetCategoryItems("character");
+                        if (characters.Count > 0)
+                        {
+                            panel.Children.Add(new TextBlock
+                            {
+                                Text = "Characters: " + string.Join(", ", characters),
+                                Foreground = TryFindResource("CyberpunkYellowBrush") as Brush ?? Brushes.Gold,
+                                FontWeight = FontWeights.Normal,
+                                FontSize = 11,
+                                TextWrapping = TextWrapping.Wrap,
+                                Margin = new Thickness(2, 2, 2, 0)
+                            });
+                        }
+
+                        var languages = GetCategoryItems("language");
+                        if (languages.Count > 0)
+                        {
+                            panel.Children.Add(new TextBlock
+                            {
+                                Text = "Language: " + string.Join(", ", languages),
                                 Foreground = TryFindResource("CyberpunkMutedTextBrush") as Brush ?? Brushes.Gray,
                                 FontWeight = FontWeights.Normal,
                                 FontSize = 11,
                                 TextWrapping = TextWrapping.Wrap,
                                 Margin = new Thickness(2, 2, 2, 0)
                             });
+                        }
+
+                        // Tags list (filter out language, artist, group, parody, character if already rendered)
+                        bool hasRenderedSpecificCategories = artists.Count > 0 || groups.Count > 0 || parodies.Count > 0 || characters.Count > 0 || languages.Count > 0;
+
+                        if (galleryInfo["tags"] is Newtonsoft.Json.Linq.JArray tagsArray)
+                        {
+                            var tagsList = new List<string>();
+                            foreach (var t in tagsArray)
+                            {
+                                string tagName = t["tag"]?.ToString();
+                                if (!string.IsNullOrWhiteSpace(tagName))
+                                {
+                                    if (hasRenderedSpecificCategories)
+                                    {
+                                        if (tagName.StartsWith("language:", StringComparison.OrdinalIgnoreCase) ||
+                                            tagName.StartsWith("artist:", StringComparison.OrdinalIgnoreCase) ||
+                                            tagName.StartsWith("group:", StringComparison.OrdinalIgnoreCase) ||
+                                            tagName.StartsWith("parody:", StringComparison.OrdinalIgnoreCase) ||
+                                            tagName.StartsWith("character:", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            continue;
+                                        }
+                                    }
+
+                                    tagName = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(tagName);
+                                    var femaleProp = t["female"];
+                                    var maleProp = t["male"];
+                                    if (femaleProp != null && (femaleProp.ToString() == "1" || femaleProp.ToString().ToLower() == "true"))
+                                    {
+                                        tagName += " ♀";
+                                    }
+                                    else if (maleProp != null && (maleProp.ToString() == "1" || maleProp.ToString().ToLower() == "true"))
+                                    {
+                                        tagName += " ♂";
+                                    }
+                                    tagsList.Add(tagName);
+                                }
+                            }
+
+                            if (tagsList.Count > 0)
+                            {
+                                panel.Children.Add(new TextBlock
+                                {
+                                    Text = "Tags: " + string.Join(", ", tagsList),
+                                    Foreground = TryFindResource("CyberpunkMutedTextBrush") as Brush ?? Brushes.Gray,
+                                    FontWeight = FontWeights.Normal,
+                                    FontSize = 11,
+                                    TextWrapping = TextWrapping.Wrap,
+                                    Margin = new Thickness(2, 2, 2, 0)
+                                });
+                            }
                         }
                     }
                 }
