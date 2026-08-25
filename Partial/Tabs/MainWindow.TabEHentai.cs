@@ -410,6 +410,13 @@ namespace get_link_manga
 
                         title = FormatGalleryTitle(title);
 
+                        // If title does not contain language in brackets, append [Japanese] by default for e-hentai listing
+                        var langCheckRegex = new Regex(@"\[(english|japanese|korean|chinese|vietnamese|french|spanish|german|russian|italian|portuguese|thai|indonesian|日本語|中文|한국어)\]", RegexOptions.IgnoreCase);
+                        if (!langCheckRegex.IsMatch(title))
+                        {
+                            title = $"{title} [Japanese]";
+                        }
+
                         // Try to extract thumb url from snippet
                         string coverUrl = string.Empty;
                         var imgMatch = Regex.Match(snippet, @"<img[^>]+(?:src|data-src)=['""](?<url>[^'""]+?)['""]", RegexOptions.IgnoreCase);
