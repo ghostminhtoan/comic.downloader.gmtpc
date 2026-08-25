@@ -879,7 +879,6 @@ namespace get_link_manga
             AddCreateSubfolderDomainItem("truyenggvn");
             AddCreateSubfolderDomainItem("sayhentai");
             AddCreateSubfolderDomainItem("vi-hentai.pro");
-            AddCreateSubfolderDomainItem("nhentai.net");
             AddCreateSubfolderDomainItem("hentaiforce.net");
             AddCreateSubfolderDomainItem("hentaiera.com");
             AddCreateSubfolderDomainItem("hentai2read.com");

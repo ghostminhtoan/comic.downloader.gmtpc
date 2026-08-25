@@ -2186,8 +2186,6 @@ namespace get_link_manga
             // Cho phép Get Link / Fetch Info trong khi download
             btnScrape.IsEnabled = true;
             btnFetchInfo.IsEnabled = true;
-            if (btnNhentaiNetScrape != null) btnNhentaiNetScrape.IsEnabled = true;
-            if (btnNhentaiNetFetchInfo != null) btnNhentaiNetFetchInfo.IsEnabled = true;
             if (btnViHentaiScrape != null) btnViHentaiScrape.IsEnabled = true;
             if (btnViHentaiFetchInfo != null) btnViHentaiFetchInfo.IsEnabled = true;
             if (btnTruyenqqScrape != null) btnTruyenqqScrape.IsEnabled = true;
@@ -2290,8 +2288,6 @@ namespace get_link_manga
                 btnOpenFolder.IsEnabled = true;
                 btnScrape.IsEnabled = true;
                 btnFetchInfo.IsEnabled = true;
-                if (btnNhentaiNetScrape != null) btnNhentaiNetScrape.IsEnabled = true;
-                if (btnNhentaiNetFetchInfo != null) btnNhentaiNetFetchInfo.IsEnabled = true;
                 if (btnViHentaiScrape != null) btnViHentaiScrape.IsEnabled = true;
                 if (btnViHentaiFetchInfo != null) btnViHentaiFetchInfo.IsEnabled = true;
                 if (btnTruyenqqScrape != null) btnTruyenqqScrape.IsEnabled = true;

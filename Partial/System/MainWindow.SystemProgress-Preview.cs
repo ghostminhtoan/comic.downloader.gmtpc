@@ -202,12 +202,7 @@ namespace get_link_manga
 
                 if (item.Tag == null)
                 {
-                    if (IsNhentaiUrl(item.Link))
-                    {
-                        // Đã có ảnh (prefetch xong) nhưng chưa có tag → fetch tag on-demand khi hover
-                        await EnsureNhentaiNetTagAsync(item, token);
-                    }
-                    else if (IsTruyenqqUrl(item.Link) || IsNettruyenUrl(item.Link) || IsDilibUrl(item.Link))
+                    if (IsTruyenqqUrl(item.Link) || IsNettruyenUrl(item.Link) || IsDilibUrl(item.Link))
                     {
                         // Đã có ảnh nhưng chưa có tag → cào tag truyenqq/nettruyen/thuviensach on-demand
                         await EnsureGalleryHoverPreviewAsync(item, fetchTags: true);
@@ -623,124 +618,6 @@ namespace get_link_manga
             }
         }
 
-        private async Task EnsureNhentaiNetTagAsync(GalleryItem item, CancellationToken token)
-        {
-            if (item == null || item.Tag != null) return;
-
-            string link = item.Link ?? string.Empty;
-            lock (_tagFetchFailedCacheLock)
-            {
-                if (_tagFetchFailedCache.Contains(link)) return;
-            }
-
-            await _tagFetchSemaphore.WaitAsync(token);
-            try
-            {
-                // Double-check sau khi qua semaphore
-                if (item.Tag != null) return;
-                lock (_tagFetchFailedCacheLock)
-                {
-                    if (_tagFetchFailedCache.Contains(link)) return;
-                }
-
-                string galleryId = GetNhentaiGalleryIdFromLink(link);
-                if (string.IsNullOrEmpty(galleryId)) return;
-
-                // Jitter nhỏ trước request để tránh burst khi nhiều item hit semaphore cùng lúc
-                int jitter;
-                lock (_tagFetchJitter) { jitter = _tagFetchJitter.Next(100, 500); }
-                await Task.Delay(jitter, token);
-
-                string apiUrl = $"https://nhentai.net/api/gallery/{galleryId}";
-                string jsonContent;
-                try
-                {
-                    jsonContent = await FetchStringAsync(apiUrl, token);
-                }
-                catch (Exception ex) when (ex.Message.Contains("429") || (ex.InnerException?.Message?.Contains("429") == true))
-                {
-                    // 429: back-off 10s rồi mới cho item khác qua
-                    lock (_tagFetchFailedCacheLock) { _tagFetchFailedCache.Add(link); }
-                    Log($"[Preview] nhentai 429 – tạm bỏ qua tag cho {galleryId}, retry sau.");
-                    try { await Task.Delay(10000, token); } catch { }
-                    return;
-                }
-                catch { return; }
-
-                if (string.IsNullOrEmpty(jsonContent)) return;
-
-                try
-                {
-                    var galleryInfo = Newtonsoft.Json.Linq.JObject.Parse(jsonContent);
-                    if (galleryInfo == null) return;
-
-                    // nhentai API trả error khi 429/404
-                    if (galleryInfo["error"] != null)
-                    {
-                        lock (_tagFetchFailedCacheLock) { _tagFetchFailedCache.Add(link); }
-                        return;
-                    }
-
-                    if (galleryInfo["tags"] is Newtonsoft.Json.Linq.JArray tagsArray)
-                    {
-                        var jArr = new Newtonsoft.Json.Linq.JArray();
-                        var langsList = new List<string>();
-
-                        foreach (var t in tagsArray)
-                        {
-                            string type = t["type"]?.ToString();
-                            string name = t["name"]?.ToString();
-                            if (!string.IsNullOrWhiteSpace(name))
-                            {
-                                if (string.Equals(type, "language", StringComparison.OrdinalIgnoreCase))
-                                    langsList.Add(name);
-                                var tObj = new Newtonsoft.Json.Linq.JObject();
-                                tObj["tag"] = name;
-                                jArr.Add(tObj);
-                            }
-                        }
-
-                        var jTagsObj = new Newtonsoft.Json.Linq.JObject();
-                        jTagsObj["tags"] = jArr;
-
-                        // Lưu tag JSON vào file .txt cùng tên trong preview-cache
-                        try
-                        {
-                            string cacheBasePath = GetGalleryHoverPreviewCacheBasePath(item, item.HoverPreviewThumbnailUrl);
-                            string txtTagPath = cacheBasePath + ".txt";
-                            File.WriteAllText(txtTagPath, jTagsObj.ToString(Newtonsoft.Json.Formatting.None));
-                        }
-                        catch { }
-
-                        var displayLangs = langsList.Where(l => l != "translated").ToList();
-                        string currentName = CleanTranslatedTagFromTitle(item.Name);
-
-                        if (displayLangs.Count > 0)
-                        {
-                            string langStr = string.Join(", ", displayLangs.Select(l => System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(l)));
-                            string suffix = $"[{langStr}]";
-                            if (!currentName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
-                                currentName = $"{currentName} {suffix}";
-                        }
-
-                        Dispatcher.Invoke(() =>
-                        {
-                            if (item.Name != currentName) item.Name = currentName;
-                            item.Tag = jTagsObj;
-                            RecalculateDuplicates();
-                        });
-                    }
-                }
-                catch { }
-            }
-            finally
-            {
-                // Delay nhỏ sau mỗi request để server không bị quá tải
-                try { await Task.Delay(300, token); } catch { }
-                _tagFetchSemaphore.Release();
-            }
-        }
-
         private async Task EnsureGalleryHoverPreviewFileAsync(GalleryItem item, CancellationToken token, bool fetchTags = false)
         {
             if (item == null)
@@ -757,15 +634,6 @@ namespace get_link_manga
                 {
                     RecalculateDuplicates();
                 }
-            }
-
-            // nhentai tag chỉ fetch khi hover (fetchTags=true), không fetch trong prefetch
-            // tránh blast API nhentai cho toàn bộ danh sách gây 429
-            bool isNhentai = string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase) ||
-                             (item.Link != null && item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0);
-            if (fetchTags && isNhentai && item.Tag == null)
-            {
-                await EnsureNhentaiNetTagAsync(item, token);
             }
 
             await EnsureTruyenqqHoverPreviewUrlAsync(item, token);
@@ -936,67 +804,6 @@ namespace get_link_manga
                     }
                 }
                 catch {}
-            }
-            else if (!string.IsNullOrWhiteSpace(item.Link) && IsNhentaiUrl(item.Link))
-            {
-                try
-                {
-                    string html = await FetchStringAsync(item.Link, token);
-                    if (!string.IsNullOrEmpty(html))
-                    {
-                        string coverUrl = ExtractNhentaiNetGalleryCover(html);
-                        if (!string.IsNullOrWhiteSpace(coverUrl))
-                        {
-                            item.HoverPreviewThumbnailUrl = coverUrl;
-                            AddGalleryHoverPreviewCandidate(imageUrls, coverUrl);
-                        }
-
-                        var langs = ExtractNhentaiNetLanguages(html);
-                        var displayLangs = langs.Where(l => l != "translated").ToList();
-                        string currentName = CleanTranslatedTagFromTitle(item.Name);
-
-                        if (displayLangs.Count > 0)
-                        {
-                            string langStr = string.Join(", ", displayLangs.Select(l => System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(l)));
-                            string suffix = $"[{langStr}]";
-                            if (!currentName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
-                            {
-                                currentName = $"{currentName} {suffix}";
-                            }
-                        }
-
-                        var nhentaiTags = ExtractNhentaiNetTags(html);
-                        Newtonsoft.Json.Linq.JObject jTagsObj = null;
-                        if (nhentaiTags.Count > 0)
-                        {
-                            var jArr = new Newtonsoft.Json.Linq.JArray();
-                            foreach (var tag in nhentaiTags)
-                            {
-                                var tObj = new Newtonsoft.Json.Linq.JObject();
-                                tObj["tag"] = tag;
-                                jArr.Add(tObj);
-                            }
-                            jTagsObj = new Newtonsoft.Json.Linq.JObject();
-                            jTagsObj["tags"] = jArr;
-                        }
-
-                        Dispatcher.Invoke(() =>
-                        {
-                            if (item.Name != currentName)
-                            {
-                                item.Name = currentName;
-                            }
-                            if (jTagsObj != null)
-                            {
-                                item.Tag = jTagsObj;
-                                RecalculateDuplicates();
-                            }
-                        });
-                    }
-                }
-                catch
-                {
-                }
             }
 
             return imageUrls;

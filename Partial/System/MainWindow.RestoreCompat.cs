@@ -573,10 +573,6 @@ namespace get_link_manga
                     return txtTruyenggvnTagUrl;
                 case "hentaiforce":
                     return txtTagUrl;
-                case "nhentai.net":
-                    return txtNhentaiNetTagUrl;
-                case "nhentai":
-                    return txtNhentaiNetTagUrl;
                 case "hentai2read":
                     return txtHentai2readTagUrl;
                 case "hentaiera":

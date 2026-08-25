@@ -703,14 +703,6 @@ namespace get_link_manga
                 return;
             }
 
-            // Nhentai: nếu đã có cover, không fetch HTML nữa — tag sẽ được EnsureNhentaiNetTagAsync
-            // trong EnsureGalleryHoverPreviewFileAsync lo (API call, đã throttle qua _tagFetchSemaphore).
-            // Tránh fetch HTML trang nhentai gây double-request → 429.
-            if (IsNhentaiUrl(link) && !string.IsNullOrWhiteSpace(item.HoverPreviewThumbnailUrl))
-            {
-                return;
-            }
-
             string html = await FetchStringAsync(link, CancellationToken.None);
             string coverUrlNonMangadex = link.IndexOf("hentaiforce.net/view/", StringComparison.OrdinalIgnoreCase) >= 0
                 ? ExtractHentaiforceCoverUrl(html, link)
@@ -720,8 +712,6 @@ namespace get_link_manga
                         ? ExtractDilibPreviewUrlFromHtml(html, link)
                     : IsNettruyenUrl(link)
                         ? ExtractNettruyenviet10PreviewUrlFromHtml(html, link)
-                    : IsNhentaiUrl(link)
-                        ? ExtractNhentaiNetGalleryCover(html)
                     : IsTruyenqqUrl(link)
                         ? ExtractTruyenqqPreviewUrlFromHtml(html, link)
                     : link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0
@@ -739,14 +729,7 @@ namespace get_link_manga
                 item.HoverPreviewThumbnailUrl = coverUrlNonMangadex;
             }
 
-            if (IsNhentaiUrl(link))
-            {
-                if (fetchTags)
-                {
-                    ExtractAndApplyNhentaiPreviewTags(item, html);
-                }
-            }
-            else if (IsTruyenqqUrl(link))
+            if (IsTruyenqqUrl(link))
             {
                 if (fetchTags)
                 {

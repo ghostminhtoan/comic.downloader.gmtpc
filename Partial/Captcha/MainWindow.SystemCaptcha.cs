@@ -24,7 +24,6 @@ namespace get_link_manga
             else if (button == btnTruyenggvnFetchCaptcha) { url = txtTruyenggvnTagUrl.Text; defaultFallbackDomain = "truyengg.com"; }
             else if (button == btnHentai2readFetchCaptcha) { url = txtHentai2readTagUrl.Text; defaultFallbackDomain = "hentai2read.com"; }
             else if (button == btnHentaieraFetchCaptcha) { url = txtHentaieraTagUrl.Text; defaultFallbackDomain = "hentaiera.com"; }
-            else if (button == btnNhentaiNetFetchCaptcha) { url = txtNhentaiNetTagUrl?.Text; defaultFallbackDomain = "nhentai.net"; }
 
             // Lấy domain cần xóa cookie
             string targetDomain = defaultFallbackDomain;
@@ -137,11 +136,6 @@ namespace get_link_manga
             }
 
             ResetCookiesForCaptcha(url);
-            if (IsNhentaiCaptchaUrl(url))
-            {
-                ShowInfo("Đã làm mới cookie cho nhentai.net.", "Thông báo");
-                return;
-            }
 
             await await Dispatcher.InvokeAsync(async () =>
             {
@@ -160,7 +154,6 @@ namespace get_link_manga
             if (tabLeftPanel?.SelectedIndex == 1)
             {
                 string selectedHentai = (tabHentai?.SelectedItem as TabItem)?.Header?.ToString()?.ToLowerInvariant() ?? string.Empty;
-                if (selectedHentai.Contains("nhentai")) return txtNhentaiNetTagUrl?.Text?.Trim() ?? string.Empty;
                 if (selectedHentai.Contains("hentai2read")) return txtHentai2readTagUrl?.Text?.Trim() ?? string.Empty;
                 if (selectedHentai.Contains("hentaiera")) return txtHentaieraTagUrl?.Text?.Trim() ?? string.Empty;
                 if (selectedHentai.Contains("hentaiforce")) return txtTagUrl?.Text?.Trim() ?? string.Empty;
@@ -181,11 +174,7 @@ namespace get_link_manga
             return txtTruyenqqTagUrl?.Text?.Trim() ?? string.Empty;
         }
 
-        private static bool IsNhentaiCaptchaUrl(string url)
-        {
-            return !string.IsNullOrWhiteSpace(url) &&
-                   url.IndexOf("nhentai", StringComparison.OrdinalIgnoreCase) >= 0;
-        }
+
 
         private void SyncCaptchaWindowState(string url, CaptchaWindow captchaWin)
         {

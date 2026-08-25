@@ -153,7 +153,6 @@ Chuẩn làm việc repo hiện tại. Mục tiêu: sửa đúng chỗ, ít file
 
 ### `Partial\PreviewTag\` — Preview tag theo domain
 - `MainWindow.previewtagTruyenqq.cs`
-- `MainWindow.previewtagNhentai.cs`
 - `MainWindow.previewtagNettruyenviet10.cs`
 - `MainWindow.previewtagThuviensach.cs`
 
@@ -200,7 +199,6 @@ Chuẩn làm việc repo hiện tại. Mục tiêu: sửa đúng chỗ, ít file
 - `vi-hentai`
 - `truyengg` / `sayhentai`
 - `hentaiforce`
-- `nhentai`
 - `hentai2read`
 - `hentaiera`
 

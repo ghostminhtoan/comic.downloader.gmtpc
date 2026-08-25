@@ -265,10 +265,6 @@
       <SubType>Code</SubType>
     </Compile>
 
-    <Compile Include="Partial\Tabs\MainWindow.TabNhentaiNet.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Partial\Tabs\MainWindow.TabViHentai.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -282,10 +278,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Partial\PreviewTag\MainWindow.previewtagTruyenqq.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Partial\PreviewTag\MainWindow.previewtagNhentai.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>

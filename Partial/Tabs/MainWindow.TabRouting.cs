@@ -313,7 +313,7 @@ namespace get_link_manga
                    lower.Contains("sayhentai") || lower.Contains("truyengg") || lower.Contains("hentaiforce") ||
                    lower.Contains("damconuong") ||
                    lower.Contains("mangadex.org") || lower.Contains("www.mangadex.org") ||
-                   lower.Contains("nhentai") || lower.Contains("hentai2read") || lower.Contains("hentaiera") ||
+                   lower.Contains("hentai2read") || lower.Contains("hentaiera") ||
                    lower.Contains("hako") || lower.Contains("docln.net") || lower.Contains("docln.sbs");
         }
 
@@ -355,22 +355,6 @@ namespace get_link_manga
             }
 
             url = url.Trim();
-            if (url.IndexOf("nhentai.xxx", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                url = Regex.Replace(url, @"nhentai\.xxx", "nhentai.net", RegexOptions.IgnoreCase);
-            }
-
-            string lower = url.ToLowerInvariant();
-            if (lower.Contains("nhentai.net/g/"))
-            {
-                // Regex tìm kiếm pattern /g/{galleryId}/{pageNum}/ hoặc /g/{galleryId}/{pageNum}
-                // ví dụ: https://nhentai.net/g/159844/1/
-                var match = Regex.Match(url, @"^(https?://nhentai\.net/g/\d+)/(\d+)/?$", RegexOptions.IgnoreCase);
-                if (match.Success)
-                {
-                    return match.Groups[1].Value + "/";
-                }
-            }
             return url;
         }
 
@@ -550,14 +534,7 @@ namespace get_link_manga
                 BtnFetchInfo_Click(this, new RoutedEventArgs());
                 await WaitAndScrapeAsync(btnFetchInfo, BtnScrape_Click);
             }
-            else if (lowerUrl.Contains("nhentai.net"))
-            {
-                SelectHentaiSourceRoot();
-                SelectHentaiTabByHeader("nhentai.net");
-                if (txtNhentaiNetTagUrl != null) txtNhentaiNetTagUrl.Text = url;
-                BtnNhentaiNetFetchInfo_Click(this, new RoutedEventArgs());
-                await WaitAndScrapeAsync(btnNhentaiNetFetchInfo, BtnNhentaiNetScrape_Click);
-            }
+
             else if (lowerUrl.Contains("hentai2read"))
             {
                 SelectHentaiSourceRoot();
@@ -932,29 +909,7 @@ namespace get_link_manga
                 return true;
             }
 
-            if (lowerUrl.Contains("nhentai.net"))
-            {
-                if (IsNhentaiNetTagOrListUrl(url))
-                {
-                    if (allowUiJump)
-                    {
-                        SelectHentaiSourceRoot();
-                        SelectHentaiTabByHeader("nhentai.net");
-                    }
-                    if (txtNhentaiNetTagUrl != null) txtNhentaiNetTagUrl.Text = url;
-                    BtnNhentaiNetFetchInfo_Click(this, new RoutedEventArgs());
-                    await WaitAndScrapeAsync(btnNhentaiNetFetchInfo, BtnNhentaiNetScrape_Click);
-                    return true;
-                }
 
-                if (allowUiJump)
-                {
-                    SelectHentaiSourceRoot();
-                    SelectHentaiTabByHeader("nhentai.net");
-                }
-                await ImportNhentaiNetDirectLinksAsync(new List<string> { url }, showMessageBox);
-                return true;
-            }
 
             if (lowerUrl.Contains("hentai2read"))
             {
@@ -1041,24 +996,6 @@ namespace get_link_manga
             }
         }
 
-        private bool IsNhentaiNetTagOrListUrl(string url)
-        {
-            if (string.IsNullOrWhiteSpace(url)) return false;
-            string lower = url.Trim().ToLowerInvariant();
-            
-            // Nếu có /g/ và theo sau là ID số cụ thể thì đó là Link Book chứ không phải Link List
-            if (Regex.IsMatch(lower, @"nhentai\.net/g/\d+"))
-            {
-                return false;
-            }
-
-            return lower.Contains("/tag/") ||
-                   lower.Contains("/artist/") ||
-                   lower.Contains("/parody/") ||
-                   lower.Contains("/group/") ||
-                   lower.Contains("/character/") ||
-                   lower.Contains("/search/") ||
-                   lower.Contains("?q=");
-        }
     }
 }
+
