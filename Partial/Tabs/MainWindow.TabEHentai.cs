@@ -101,7 +101,7 @@ namespace get_link_manga
                 if (IsEHentaiGalleryUrl(url))
                 {
                     // For single gallery: count gallery index pages or read total image pages
-                    // Total pages in gallery footer table.ptt td
+                    // Total pages in gallery footer table.ptt td or table.ptb td
                     var pttMatches = Regex.Matches(html, @"[?&]p=(\d+)", RegexOptions.IgnoreCase);
                     foreach (Match m in pttMatches)
                     {
@@ -111,7 +111,6 @@ namespace get_link_manga
                         }
                     }
 
-                    // Also check if we can read total image count e.g. "123 pages" or "Showing 1 - 40 of 1024 images"
                     var countMatch = Regex.Match(html, @"Showing\s+[\d,]+\s*-\s*[\d,]+\s+of\s+([\d,]+)\s+images", RegexOptions.IgnoreCase);
                     if (!countMatch.Success)
                     {
@@ -124,7 +123,25 @@ namespace get_link_manga
                 }
                 else
                 {
-                    // Tag / Search / Uploader pagination: table.ptt td a or ?page=X
+                    // 1. Check "Found about X,XXX results" / "Showing X - Y of Z results"
+                    var foundResultsMatch = Regex.Match(html, @"Found\s+(?:about\s+)?([\d,]+)\s+results", RegexOptions.IgnoreCase);
+                    if (!foundResultsMatch.Success)
+                    {
+                        foundResultsMatch = Regex.Match(html, @"Showing\s+[\d,]+\s*-\s*[\d,]+\s+of\s+([\d,]+)\s+results", RegexOptions.IgnoreCase);
+                    }
+
+                    if (foundResultsMatch.Success && int.TryParse(foundResultsMatch.Groups[1].Value.Replace(",", ""), out int totalResults))
+                    {
+                        // E-Hentai displays 25 galleries per page in list/compact mode
+                        int calculatedPages = (int)Math.Ceiling(totalResults / 25.0);
+                        if (calculatedPages > maxPage)
+                        {
+                            maxPage = calculatedPages;
+                            EHentaiLog($"Tìm thấy khoảng {totalResults:N0} truyện (~{maxPage:N0} trang).");
+                        }
+                    }
+
+                    // 2. Check legacy table.ptt if present
                     var pageMatches = Regex.Matches(html, @"[?&]page=(\d+)", RegexOptions.IgnoreCase);
                     foreach (Match m in pageMatches)
                     {
@@ -205,6 +222,33 @@ namespace get_link_manga
             }
             SelectDownloadMangaTab();
             await ScrapeEHentaiAsync(clearExisting: false);
+        }
+
+        private string ExtractEHentaiNextUrl(string html, string currentUrl)
+        {
+            if (string.IsNullOrWhiteSpace(html)) return null;
+
+            // 1. Variable in javascript: var nexturl="https://e-hentai.org/...";
+            var varMatch = Regex.Match(html, @"var\s+nexturl\s*=\s*['""](?<url>https?://[^'""]+?)['""]", RegexOptions.IgnoreCase);
+            if (varMatch.Success && !string.IsNullOrWhiteSpace(varMatch.Groups["url"].Value))
+            {
+                return WebUtility.HtmlDecode(varMatch.Groups["url"].Value);
+            }
+
+            // 2. Element in HTML: <a id="dnext" href="..."> or <a id="unext" href="...">
+            var aMatch = Regex.Match(html, @"<a[^>]+id=['""][ud]next['""][^>]+href=['""](?<url>[^'""]+?)['""]", RegexOptions.IgnoreCase);
+            if (aMatch.Success)
+            {
+                string rawUrl = WebUtility.HtmlDecode(aMatch.Groups["url"].Value);
+                if (!rawUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && !rawUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                {
+                    var baseUri = new Uri(currentUrl);
+                    return new Uri(baseUri, rawUrl).AbsoluteUri;
+                }
+                return rawUrl;
+            }
+
+            return null;
         }
 
         private async Task ScrapeEHentaiAsync(bool clearExisting)
@@ -293,17 +337,34 @@ namespace get_link_manga
                 int totalPages = pageTo - pageFrom + 1;
                 int pagesProcessed = 0;
 
+                // Keyset sequential pagination for e-hentai tag/search listings
+                string currentUrl = baseUrl;
+
+                // If starting from a page > 1, seek to that page first
+                for (int p = 1; p < pageFrom; p++)
+                {
+                    token.ThrowIfCancellationRequested();
+                    EHentaiLog($"Đang tua đến trang {pageFrom} (bước qua trang {p})...");
+                    string seekHtml = await FetchStringAsync(currentUrl, token);
+                    string nextUrl = ExtractEHentaiNextUrl(seekHtml, currentUrl);
+                    if (string.IsNullOrWhiteSpace(nextUrl))
+                    {
+                        EHentaiLog($"Không tìm thấy trang tiếp theo sau trang {p}.");
+                        break;
+                    }
+                    currentUrl = nextUrl;
+                }
+
                 for (int page = pageFrom; page <= pageTo; page++)
                 {
                     token.ThrowIfCancellationRequested();
 
-                    string pageUrl = GetEHentaiPageUrl(baseUrl, page);
-                    EHentaiLog($"Đang tải trang {page}: {pageUrl}");
+                    EHentaiLog($"Đang tải trang {page}: {currentUrl}");
 
-                    string html = await FetchStringAsync(pageUrl, token);
+                    string html = await FetchStringAsync(currentUrl, token);
                     if (string.IsNullOrWhiteSpace(html))
                     {
-                        continue;
+                        break;
                     }
 
                     // Extract gallery cards from listing: <a href="https://e-hentai.org/g/XXXX/YYYY/">
@@ -381,6 +442,17 @@ namespace get_link_manga
                     lblStatus.Text = $"Searching page {page}/{pageTo} ({progressPct:0}%)";
                     UpdateResultsCrawlProgress(pagesProcessed, totalPages, GuessImportDisplayName(baseUrl));
                     lblLinkCount.Text = _scrapedItems.Count.ToString();
+
+                    if (page < pageTo)
+                    {
+                        string nextUrl = ExtractEHentaiNextUrl(html, currentUrl);
+                        if (string.IsNullOrWhiteSpace(nextUrl))
+                        {
+                            EHentaiLog($"Đã đến trang cuối cùng của danh mục tại trang {page}.");
+                            break;
+                        }
+                        currentUrl = nextUrl;
+                    }
                 }
 
                 RecalculateDuplicates();
