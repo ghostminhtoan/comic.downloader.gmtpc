@@ -202,9 +202,9 @@ namespace get_link_manga
 
                 if (item.Tag == null)
                 {
-                    if (IsTruyenqqUrl(item.Link) || IsNettruyenUrl(item.Link) || IsDilibUrl(item.Link))
+                    if (IsTruyenqqUrl(item.Link) || IsNettruyenUrl(item.Link) || IsDilibUrl(item.Link) || IsEHentaiUrl(item.Link))
                     {
-                        // Đã có ảnh nhưng chưa có tag → cào tag truyenqq/nettruyen/thuviensach on-demand
+                        // Đã có ảnh nhưng chưa có tag → cào tag truyenqq/nettruyen/thuviensach/e-hentai on-demand
                         await EnsureGalleryHoverPreviewAsync(item, fetchTags: true);
                     }
                     else
@@ -835,6 +835,10 @@ namespace get_link_manga
             else if (!string.IsNullOrWhiteSpace(item.Link) && IsEHentaiUrl(item.Link))
             {
                 string html = await FetchStringAsync(item.Link, token);
+                if (item.Tag == null)
+                {
+                    ExtractAndApplyEHentaiPreviewTags(item, html);
+                }
                 string coverUrl = ExtractEHentaiCoverUrl(html, item.Link);
                 if (!string.IsNullOrWhiteSpace(coverUrl))
                 {

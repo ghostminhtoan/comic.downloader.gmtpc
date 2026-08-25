@@ -325,6 +325,7 @@ namespace get_link_manga
                         {
                             item.HoverPreviewThumbnailUrl = coverUrl;
                         }
+                        ExtractAndApplyEHentaiPreviewTags(item, html);
                         _scrapedItems.Add(item);
                     });
 
@@ -557,6 +558,7 @@ namespace get_link_manga
                             {
                                 item.HoverPreviewThumbnailUrl = coverUrl;
                             }
+                            ExtractAndApplyEHentaiPreviewTags(item, html);
                             _scrapedItems.Add(item);
                         });
 
