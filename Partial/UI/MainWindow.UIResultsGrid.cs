@@ -2224,14 +2224,17 @@ namespace get_link_manga
             if (items == null) return;
             var itemList = items.ToList();
 
-            // 1. Tự động chèn metadata vào tên truyện dựa trên tag Hitomi/Nhentai trước
+            // 1. Tự động chèn metadata vào tên truyện dựa trên tag Hitomi/Nhentai/E-Hentai trước
             foreach (var item in itemList)
             {
                 bool isHitomi = string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) ||
                                 (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
                 bool isNhentai = string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase) ||
                                  (item.Link != null && item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0);
-                if (isHitomi || isNhentai)
+                bool isEHentai = string.Equals(item.SourceDomain, "e-hentai.org", StringComparison.OrdinalIgnoreCase) ||
+                                 (item.Link != null && (item.Link.IndexOf("e-hentai.org", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                                        item.Link.IndexOf("exhentai.org", StringComparison.OrdinalIgnoreCase) >= 0));
+                if (isHitomi || isNhentai || isEHentai)
                 {
                     if (HasUncensoredInTags(item) && !HasUncensoredVariant(item.Name))
                     {
@@ -2271,14 +2274,17 @@ namespace get_link_manga
                 }
             }
 
-            // Gán variant màu sắc/uncensored cho các truyện hitomi.la / nhentai.net và candidate hentai bất kể có duplicate hay không
+            // Gán variant màu sắc/uncensored cho các truyện hitomi.la / nhentai.net / e-hentai.org và candidate hentai bất kể có duplicate hay không
             foreach (var item in itemList)
             {
                 bool isHitomi = string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) ||
                                 (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
                 bool isNhentai = string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase) ||
                                  (item.Link != null && item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0);
-                if (isHitomi || isNhentai || IsHentaiDuplicateCandidate(item))
+                bool isEHentai = string.Equals(item.SourceDomain, "e-hentai.org", StringComparison.OrdinalIgnoreCase) ||
+                                 (item.Link != null && (item.Link.IndexOf("e-hentai.org", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                                        item.Link.IndexOf("exhentai.org", StringComparison.OrdinalIgnoreCase) >= 0));
+                if (isHitomi || isNhentai || isEHentai || IsHentaiDuplicateCandidate(item))
                 {
                     item.IsCensorshipFullColorVariant = HasFullColorVariant(item.Name) || HasFullColorInTags(item);
                     item.IsCensorshipUncensoredVariant = HasUncensoredVariant(item.Name) || HasUncensoredInTags(item);
@@ -2331,7 +2337,8 @@ namespace get_link_manga
             string[] hentaiDomains =
             {
                 "hentaiforce", "nhentai", "hentai2read", "hentaiera",
-                "vi-hentai", "daomeoden", "damconuong", "truyengg", "sayhentai", "hitomi"
+                "vi-hentai", "daomeoden", "damconuong", "truyengg", "sayhentai", "hitomi",
+                "e-hentai", "exhentai"
             };
 
             return hentaiDomains.Any(domain => haystack.Contains(domain));
