@@ -605,6 +605,7 @@ namespace get_link_manga
                     IsNettruyenUrl(link) ||
                     IsMangadexUrl(link) ||
                     IsNhentaiUrl(link) ||
+                    IsEHentaiUrl(link) ||
                     link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
@@ -705,6 +706,8 @@ namespace get_link_manga
             string html = await FetchStringAsync(link, CancellationToken.None);
             string coverUrlNonMangadex = link.IndexOf("hentaiforce.net/view/", StringComparison.OrdinalIgnoreCase) >= 0
                 ? ExtractHentaiforceCoverUrl(html, link)
+                : IsEHentaiUrl(link)
+                    ? ExtractEHentaiCoverUrl(html, link)
                 : IsDilibUrl(link)
                     ? ExtractDilibPreviewUrlFromHtml(html, link)
                 : IsNettruyenUrl(link)

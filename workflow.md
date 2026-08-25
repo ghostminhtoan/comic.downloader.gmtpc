@@ -199,6 +199,7 @@ Chuẩn làm việc repo hiện tại. Mục tiêu: sửa đúng chỗ, ít file
 - `hentaiforce`
 - `hentai2read`
 - `hentaiera`
+- `e-hentai.org` / `exhentai.org`
 
 ### Light novel
 - `hako.vn`

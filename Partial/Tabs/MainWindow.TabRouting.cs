@@ -313,7 +313,7 @@ namespace get_link_manga
                    lower.Contains("sayhentai") || lower.Contains("truyengg") || lower.Contains("hentaiforce") ||
                    lower.Contains("damconuong") ||
                    lower.Contains("mangadex.org") || lower.Contains("www.mangadex.org") ||
-                   lower.Contains("hentai2read") || lower.Contains("hentaiera") ||
+                   lower.Contains("hentai2read") || lower.Contains("hentaiera") || lower.Contains("e-hentai.org") || lower.Contains("exhentai.org") ||
                    lower.Contains("hako") || lower.Contains("docln.net") || lower.Contains("docln.sbs");
         }
 
@@ -536,6 +536,14 @@ namespace get_link_manga
                 if (txtHentaieraTagUrl != null) txtHentaieraTagUrl.Text = url;
                 BtnHentaieraFetchInfo_Click(this, new RoutedEventArgs());
                 await WaitAndScrapeAsync(btnHentaieraFetchInfo, BtnHentaieraScrape_Click);
+            }
+            else if (lowerUrl.Contains("e-hentai") || lowerUrl.Contains("exhentai"))
+            {
+                SelectHentaiSourceRoot();
+                SelectHentaiTabByHeader("e-hentai.org");
+                if (txtEHentaiTagUrl != null) txtEHentaiTagUrl.Text = url;
+                BtnEHentaiFetchInfo_Click(this, new RoutedEventArgs());
+                await WaitAndScrapeAsync(btnEHentaiFetchInfo, BtnEHentaiScrape_Click);
             }
             else if (lowerUrl.Contains("hitomi.la"))
             {
@@ -901,6 +909,17 @@ namespace get_link_manga
                     SelectHentaiTabByHeader("hentaiera");
                 }
                 await ImportHentaieraDirectLinksAsync(new List<string> { url }, showMessageBox);
+                return true;
+            }
+
+            if (lowerUrl.Contains("e-hentai") || lowerUrl.Contains("exhentai"))
+            {
+                if (allowUiJump)
+                {
+                    SelectHentaiSourceRoot();
+                    SelectHentaiTabByHeader("e-hentai.org");
+                }
+                await ImportEHentaiDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;
             }
 

@@ -25,6 +25,7 @@ en: Domain Connections & Concurrency
 • **hentai2read** (`hentai2read.com`): 2 connection, 4 truyện
 • **hentaiera** (`hentaiera.com`): 2 connection, 2 truyện
 • **daomeoden** (`daomeoden.net`): 4 connection, 2 truyện
+• **e-hentai** (`e-hentai.org` / `exhentai.org`): 2 connection, 2 truyện
 
 ### 📚 3. Novel
 • **hako** (`ln.hako.vn` / `docln.net`): 1 connection, 2 truyện
@@ -56,6 +57,7 @@ To optimize download speed and avoid server rate-limits (HTTP 429 / Cloudflare 4
 • **hentai2read** (`hentai2read.com`): 2 connections, 4 books
 • **hentaiera** (`hentaiera.com`): 2 connections, 2 books
 • **daomeoden** (`daomeoden.net`): 4 connections, 2 books
+• **e-hentai** (`e-hentai.org` / `exhentai.org`): 2 connections, 2 books
 
 ### 📚 3. Novel
 • **hako** (`ln.hako.vn` / `docln.net`): 1 connection, 2 books

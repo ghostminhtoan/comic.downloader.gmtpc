@@ -3006,6 +3006,12 @@ namespace get_link_manga
                 return;
             }
 
+            if (hostName.Contains("e-hentai.org") || hostName.Contains("exhentai.org"))
+            {
+                await DownloadEHentaiGalleryAsync(item, rootFolder, token, queueItem, chapterFilter);
+                return;
+            }
+
             if (hostName.Contains("hentai2read.com") || hostName.Contains("static.hentaicdn.com"))
             {
                 await DownloadHentai2readGalleryAsync(item, rootFolder, token, queueItem, chapterFilter);
@@ -6055,6 +6061,293 @@ namespace get_link_manga
             else
             {
                 throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang đọc Hentaiera {pageNum}");
+            }
+        }
+
+        private async Task DownloadEHentaiGalleryAsync(GalleryItem item, string rootFolder, CancellationToken token, GalleryItem queueItem = null, ChapterFilter chapterFilter = null)
+        {
+            item.Link = NormalizeEHentaiUrl(item.Link);
+            string safeTitle = GetSafePathName(item.Name);
+            string resolvedRoot = GetConfiguredDownloadRoot(rootFolder, item);
+            string targetFolder = Path.Combine(resolvedRoot, safeTitle);
+            string tempFolder = BuildStableTempFolderPath(resolvedRoot, EHentaiSiteFolder, safeTitle, item.Link, item.Name);
+            Directory.CreateDirectory(tempFolder);
+            RegisterTempFolder(tempFolder);
+
+            try
+            {
+                // Fetch first page of gallery
+                string html = await FetchStringAsync(item.Link, token);
+
+                // Determine total images (pages)
+                int totalImages = 0;
+                var countMatch = Regex.Match(html, @"Showing\s+[\d,]+\s*-\s*[\d,]+\s+of\s+([\d,]+)\s+images", RegexOptions.IgnoreCase);
+                if (!countMatch.Success)
+                {
+                    countMatch = Regex.Match(html, @"<td[^>]*class=""gdt2""[^>]*>(\d+)\s+pages</td>", RegexOptions.IgnoreCase);
+                }
+                if (countMatch.Success && int.TryParse(countMatch.Groups[1].Value.Replace(",", ""), out int parsedCount))
+                {
+                    totalImages = parsedCount;
+                }
+
+                // Collect all reader page URLs across gallery index pages (?p=0, ?p=1, ...)
+                // e-hentai pages reader URLs look like: https://e-hentai.org/s/{filetoken}/{gid}-{page}
+                var readerUrls = new List<string>();
+                var seenReaderUrls = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                void HarvestReaderUrlsFromHtml(string pageHtml)
+                {
+                    var matches = Regex.Matches(pageHtml, @"<a[^>]+href=['""](?<url>https?://(?:e-hentai|exhentai)\.org/s/[a-zA-Z0-9]+/\d+-\d+)['""][^>]*>", RegexOptions.IgnoreCase);
+                    foreach (Match m in matches)
+                    {
+                        string rUrl = m.Groups["url"].Value;
+                        if (!seenReaderUrls.Contains(rUrl))
+                        {
+                            seenReaderUrls.Add(rUrl);
+                            readerUrls.Add(rUrl);
+                        }
+                    }
+                }
+
+                HarvestReaderUrlsFromHtml(html);
+
+                // Determine max gallery pagination pages from table.ptt
+                int maxPIndex = 0;
+                var pttMatches = Regex.Matches(html, @"[?&]p=(\d+)", RegexOptions.IgnoreCase);
+                foreach (Match m in pttMatches)
+                {
+                    if (int.TryParse(m.Groups[1].Value, out int pVal))
+                    {
+                        if (pVal > maxPIndex) maxPIndex = pVal;
+                    }
+                }
+
+                // If gallery has multiple index pages, fetch each page index (?p=1, ?p=2, ...) to collect all reader page URLs
+                string baseGalleryUrl = Regex.Replace(item.Link, @"([?&])p=\d+(&|$)", "$1", RegexOptions.IgnoreCase).TrimEnd('&', '?');
+                string sep = baseGalleryUrl.Contains("?") ? "&" : "?";
+
+                for (int p = 1; p <= maxPIndex; p++)
+                {
+                    token.ThrowIfCancellationRequested();
+                    string nextGalleryPageUrl = $"{baseGalleryUrl}{sep}p={p}";
+                    try
+                    {
+                        string nextHtml = await FetchStringAsync(nextGalleryPageUrl, token);
+                        HarvestReaderUrlsFromHtml(nextHtml);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"[E-Hentai Warning] Không thể lấy danh sách trang tại index p={p}: {ex.Message}");
+                    }
+                }
+
+                int totalPages = readerUrls.Count > 0 ? readerUrls.Count : (totalImages > 0 ? totalImages : 1);
+
+                if (queueItem != null)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        queueItem.TotalChapters = totalPages;
+                        queueItem.CompletedChapters = 0;
+                    });
+                }
+
+                WriteTempProgressLog(tempFolder, item, "Downloading", 0, totalPages, $"0/{totalPages} pages", "Bắt đầu tải E-Hentai");
+
+                int maxThreads = GetCurrentConnectionLimit();
+                Log($"[E-Hentai] Bắt đầu tải {totalPages} trang với tối đa {maxThreads} kết nối song song...");
+
+                using (var semaphore = new DynamicSemaphore(maxThreads, GetCurrentConnectionLimit))
+                {
+                    var tasks = new List<Task>();
+                    int completedPages = 0;
+                    object lockObj = new object();
+
+                    for (int i = 0; i < readerUrls.Count; i++)
+                    {
+                        int pageNum = i + 1;
+                        string readerUrl = readerUrls[i];
+
+                        tasks.Add(Task.Run(async () =>
+                        {
+                            while (_isDownloadPaused || item.IsPaused)
+                            {
+                                token.ThrowIfCancellationRequested();
+                                if (item.IsStopped) throw new OperationCanceledException();
+                                await Task.Delay(200, token);
+                            }
+                            token.ThrowIfCancellationRequested();
+
+                            await semaphore.WaitAsync(token);
+                            try
+                            {
+                                while (_isDownloadPaused || item.IsPaused)
+                                {
+                                    token.ThrowIfCancellationRequested();
+                                    if (item.IsStopped) throw new OperationCanceledException();
+                                    await Task.Delay(200, token);
+                                }
+                                token.ThrowIfCancellationRequested();
+
+                                string downloadedPath = null;
+                                var pageWatch = Stopwatch.StartNew();
+
+                                bool exists = false;
+                                string[] extensions = new string[] { ".jpg", ".png", ".jpeg", ".webp", ".gif", ".bmp" };
+                                string[] searchPatterns = new[]
+                                {
+                                    $"{pageNum:D4}-*"
+                                };
+                                foreach (string pattern in searchPatterns)
+                                {
+                                    foreach (string folder in new[] { tempFolder, targetFolder })
+                                    {
+                                        if (!Directory.Exists(folder)) continue;
+                                        foreach (string existingPath in Directory.GetFiles(folder, pattern))
+                                        {
+                                            if (extensions.Contains(Path.GetExtension(existingPath), StringComparer.OrdinalIgnoreCase) &&
+                                                new FileInfo(existingPath).Length > 1024)
+                                            {
+                                                exists = true;
+                                                downloadedPath = existingPath;
+                                                break;
+                                            }
+                                        }
+
+                                        if (exists) break;
+                                    }
+
+                                    if (exists) break;
+                                }
+
+                                if (exists)
+                                {
+                                    pageWatch.Stop();
+                                    lock (lockObj)
+                                    {
+                                        completedPages++;
+                                        UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, $"{completedPages}/{totalPages} pages", 0, 0);
+                                        WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} existed");
+                                    }
+                                    return;
+                                }
+
+                                downloadedPath = await DownloadEHentaiPageAsync(item, readerUrl, pageNum, tempFolder, token);
+
+                                lock (lockObj)
+                                {
+                                    completedPages++;
+                                    pageWatch.Stop();
+                                    long downloadedBytes = !string.IsNullOrWhiteSpace(downloadedPath) && File.Exists(downloadedPath) ? new FileInfo(downloadedPath).Length : 0;
+                                    UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, $"{completedPages}/{totalPages} pages", downloadedBytes, pageWatch.ElapsedMilliseconds);
+                                    WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} completed");
+                                }
+                            }
+                            finally
+                            {
+                                semaphore.Release();
+                            }
+                        }, token));
+                    }
+
+                    await Task.WhenAll(tasks);
+
+                    WriteTempProgressLog(tempFolder, item, "Done", totalPages, totalPages, $"{totalPages}/{totalPages} pages", "Download completed");
+                    MoveTempFolderToTarget(tempFolder, targetFolder, "E-Hentai");
+                }
+
+                ValidateDownloadedFiles(targetFolder, totalPages, queueItem, "Pages");
+            }
+            finally
+            {
+                if (token.IsCancellationRequested && Directory.Exists(tempFolder))
+                {
+                    try
+                    {
+                        Directory.Delete(tempFolder, true);
+                        Log($"[Cleanup] Đã xóa thư mục tạm tải dở: {tempFolder}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"[Cleanup Warning] Không thể xóa thư mục tạm '{tempFolder}': {ex.Message}");
+                    }
+                }
+
+                UnregisterTempFolder(tempFolder);
+            }
+        }
+
+        private async Task<string> DownloadEHentaiPageAsync(GalleryItem item, string readerUrl, int pageNum, string targetFolder, CancellationToken token)
+        {
+            while (_isDownloadPaused || item.IsPaused)
+            {
+                token.ThrowIfCancellationRequested();
+                if (item.IsStopped) throw new OperationCanceledException();
+                await Task.Delay(200, token);
+            }
+            token.ThrowIfCancellationRequested();
+
+            string readerHtml = await FetchStringAsync(readerUrl, token);
+
+            // 1. Extract direct image URL from <img id="img" src="...">
+            string imgUrl = null;
+            var imgTagMatch = Regex.Match(readerHtml, @"<img[^>]+id=""img""[^>]*>", RegexOptions.IgnoreCase);
+            if (imgTagMatch.Success)
+            {
+                string tag = imgTagMatch.Value;
+                var srcMatch = Regex.Match(tag, @"src=['""](?<url>[^'""]+?)['""]", RegexOptions.IgnoreCase);
+                if (srcMatch.Success)
+                {
+                    imgUrl = srcMatch.Groups["url"].Value;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(imgUrl))
+            {
+                // Fallback: look for hath.network or e-hentai image cdn url pattern
+                var genMatch = Regex.Match(readerHtml, @"['""](?<url>https?://[^'""]*?\.(?:hath\.network|ehgt\.org)[^'""]*?\.(?:jpg|png|jpeg|webp|gif|bmp)[^'""]*)['""]", RegexOptions.IgnoreCase);
+                if (genMatch.Success)
+                {
+                    imgUrl = genMatch.Groups["url"].Value;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(imgUrl))
+            {
+                imgUrl = WebUtility.HtmlDecode(imgUrl);
+                string actualExt = GetSafeImageExtensionFromUrl(imgUrl);
+                string[] allowedExts = new string[] { ".jpg", ".png", ".jpeg", ".bmp", ".gif", ".webp" };
+                bool isAllowed = false;
+                foreach (var ext in allowedExts)
+                {
+                    if (actualExt.Equals(ext, StringComparison.OrdinalIgnoreCase))
+                    {
+                        isAllowed = true;
+                        break;
+                    }
+                }
+                if (!isAllowed)
+                {
+                    actualExt = ".webp";
+                }
+
+                string finalPath = Path.Combine(targetFolder, BuildOrderedImageFilename(pageNum, imgUrl, actualExt, $"page-{pageNum}"));
+
+                while (_isDownloadPaused || item.IsPaused)
+                {
+                    token.ThrowIfCancellationRequested();
+                    if (item.IsStopped) throw new OperationCanceledException();
+                    await Task.Delay(200, token);
+                }
+                token.ThrowIfCancellationRequested();
+
+                await DownloadUrlToFileWithRefererAsync(imgUrl, readerUrl, finalPath, token);
+                return finalPath;
+            }
+            else
+            {
+                throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang đọc E-Hentai {pageNum}: {readerUrl}");
             }
         }
 

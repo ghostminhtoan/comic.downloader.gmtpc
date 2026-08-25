@@ -723,6 +723,19 @@ namespace get_link_manga
                     AddGalleryHoverPreviewCandidate(imageUrls, candidateUrl);
                 }
             }
+            else if (!string.IsNullOrWhiteSpace(item.Link) && IsEHentaiUrl(item.Link))
+            {
+                string html = await FetchStringAsync(item.Link, token);
+                string coverUrl = ExtractEHentaiCoverUrl(html, item.Link);
+                if (!string.IsNullOrWhiteSpace(coverUrl))
+                {
+                    AddGalleryHoverPreviewCandidate(imageUrls, coverUrl);
+                }
+                foreach (string thumbUrl in ExtractEHentaiPreviewThumbnails(html, item.Link))
+                {
+                    AddGalleryHoverPreviewCandidate(imageUrls, thumbUrl);
+                }
+            }
             else if (!string.IsNullOrWhiteSpace(item.Link) && IsDilibUrl(item.Link))
             {
                 string html = await FetchStringAsync(item.Link, token);

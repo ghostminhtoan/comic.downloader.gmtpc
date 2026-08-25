@@ -483,6 +483,11 @@ namespace get_link_manga
                     return "https://hentaiera.com/";
                 case "hentai2read":
                     return "https://hentai2read.com/";
+                case "e-hentai":
+                case "e-hentai.org":
+                case "exhentai":
+                case "exhentai.org":
+                    return "https://e-hentai.org/";
                 default:
                     return null;
             }
@@ -518,6 +523,11 @@ namespace get_link_manga
                     return "https://hentai2read.com/";
                 case "hentaiera":
                     return "https://hentaiera.com/artist/yamamoto/popular/";
+                case "e-hentai":
+                case "e-hentai.org":
+                case "exhentai":
+                case "exhentai.org":
+                    return "https://e-hentai.org/tag/language:english";
                 case "hako":
                     return "https://ln.hako.vn/the-loai/action";
                 case "hitomi.la":
@@ -557,6 +567,11 @@ namespace get_link_manga
                     return txtHentai2readTagUrl;
                 case "hentaiera":
                     return txtHentaieraTagUrl;
+                case "e-hentai":
+                case "e-hentai.org":
+                case "exhentai":
+                case "exhentai.org":
+                    return txtEHentaiTagUrl;
                 case "hako":
                     return txtHakoTagUrl;
                 case "hitomi.la":

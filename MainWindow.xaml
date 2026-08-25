@@ -2186,6 +2186,154 @@
                             </Grid>
                             </ScrollViewer>
                         </TabItem>
+
+                        <!-- e-hentai.org tab -->
+                        <TabItem x:Name="tabEHentaiItem" Header="e-hentai.org" Style="{StaticResource CyberpunkTabItem}">
+                            <TabItem.Tag>
+                                <SolidColorBrush Color="#ff9900"/>
+                            </TabItem.Tag>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="True" Background="Transparent" BorderThickness="0" Padding="0">
+                            <Grid Margin="0,10,0,0">
+                                <Border Name="borderEHentaiLeftPanel" Style="{StaticResource CyberpunkCard}" Padding="15">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/> <!-- Section Title -->
+                                            <RowDefinition Height="Auto"/> <!-- URL Input -->
+                                            <RowDefinition Height="Auto"/> <!-- Fetch Button -->
+                                            <RowDefinition Height="Auto"/> <!-- Page Info -->
+                                            <RowDefinition Height="0"/>    <!-- Row Range Input -->
+                                            <RowDefinition Height="Auto"/> <!-- Scrape Button -->
+                                            <RowDefinition Height="*"/>    <!-- Progress Logs -->
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Panel Header with Bookmarks & History -->
+                                        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                                            <TextBlock Text="PARAMETERS CONFIG" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            <WrapPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                                <Button Name="btnOpenHomepageEHentai" Tag="e-hentai" Content="HOME" Click="BtnOpenHomepage_Click" Style="{StaticResource CompactCyanButton}" MinWidth="86" Padding="8,0" FontWeight="Bold"/>
+                                                <Button Tag="e-hentai" Content="RESTORE DEFAULT TAG" Click="BtnRestoreDefaultTag_Click" Style="{StaticResource CompactCyanButton}" MinWidth="156" Padding="8,0" FontWeight="Bold"/>
+                                                <Button Content="HISTORY" Click="BtnOpenHistory_Click" Style="{StaticResource CompactCyanButton}" MinWidth="78" Padding="8,0" FontWeight="Bold"/>
+                                                <Button Content="BOOKMARKS" Click="BtnOpenBookmarks_Click" Style="{StaticResource CompactCyanButton}" MinWidth="94" Padding="8,0" FontWeight="Bold"/>
+                                            </WrapPanel>
+                                        </StackPanel>
+
+                                        <!-- Target URL -->
+                                        <StackPanel Grid.Row="1" Margin="0,0,0,12">
+                                            <TextBlock Text="TARGET TAG OR GALLERY URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                            <TextBox Name="txtEHentaiTagUrl" 
+                                                         Text="https://e-hentai.org/tag/language:english"
+                                                         Background="#0e121a" 
+                                                         BorderBrush="{StaticResource CyberpunkBorderBrush}" 
+                                                         Foreground="{StaticResource CyberpunkTextBrush}" 
+                                                         CaretBrush="{StaticResource CyberpunkCyanBrush}"
+                                                         Height="32"/>
+                                        </StackPanel>
+
+                                        <!-- Fetch Info Action -->
+                                        <Grid Grid.Row="2" Margin="0,0,0,15">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Name="btnEHentaiFetchInfo" Content="ANALYZE TARGET PAGE" Click="BtnEHentaiFetchInfo_Click" Style="{StaticResource TabFetchPrimaryButton}"/>
+                                            <Button Grid.Column="2" Name="btnEHentaiFetchCaptcha" Content="DELETE COOKIE" Click="BtnCaptcha_Click" Style="{StaticResource TabFetchSecondaryButton}"/>
+                                        </Grid>
+
+                                        <!-- Page Info Status -->
+                                        <Grid Grid.Row="3" Margin="0,0,0,15">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                <TextBox Name="txtEHentaiTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" CaretBrush="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtEHentaiTotalPages_TextChanged"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                <TextBox Name="txtEHentaiPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="4">
+                                                <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                <TextBox Name="txtEHentaiPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Grid Grid.Row="4" Height="0" Margin="0"/>
+
+                                        <!-- Scrape & Direct Import Actions -->
+                                        <Grid Grid.Row="5" Margin="0,15,0,15">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Name="btnEHentaiScrape" Content="GET LINK" Click="BtnEHentaiScrape_Click" Style="{StaticResource WideActionButton}"/>
+                                            <Button Grid.Column="2" Name="btnEHentaiCrawlMore" Content="GET MORE" Click="BtnEHentaiCrawlMore_Click" Style="{StaticResource WideActionButton}"/>
+                                            <Button Grid.Column="4" Name="btnEHentaiPasteDirect" Content="PASTE DIRECT LINK" Click="BtnEHentaiPasteDirect_Click" Style="{StaticResource WideActionButton}"/>
+                                        </Grid>
+
+                                        <!-- Check Error Panel -->
+                                        <Grid Grid.Row="6" Visibility="Collapsed">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid Grid.Row="0" Margin="0,0,0,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="CHECK ERROR" Foreground="{StaticResource CyberpunkPinkBrush}" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding CheckErrors.Count, RelativeSource={RelativeSource AncestorType=Window}, StringFormat=TOTAL: {0}}" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="9" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                <Button Grid.Column="2" Name="btnClearCheckErrorsEHentai" Content="CLEAR" Click="BtnClearCheckErrors_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="20" Width="60" FontSize="9" Padding="0"/>
+                                            </Grid>
+                                            <Border Grid.Row="1" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3">
+                                                <DataGrid Name="dgCheckErrorsEHentai"
+                                                          ItemsSource="{Binding CheckErrors, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          AutoGenerateColumns="False"
+                                                          IsReadOnly="True"
+                                                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                          Background="Transparent"
+                                                          BorderThickness="0"
+                                                          Foreground="{StaticResource CyberpunkTextBrush}"
+                                                          HeadersVisibility="Column"
+                                                          RowHeaderWidth="0"
+                                                          GridLinesVisibility="Horizontal"
+                                                          HorizontalGridLinesBrush="#1f293d"
+                                                          VerticalGridLinesBrush="#1f293d"
+                                                          ColumnHeaderStyle="{StaticResource CyberpunkDataGridColumnHeader}"
+                                                          RowStyle="{StaticResource CyberpunkDataGridRow}"
+                                                          CellStyle="{StaticResource CyberpunkDataGridCell}">
+                                                    <DataGrid.Columns>
+                                                        <DataGridTextColumn Header="TIME" Binding="{Binding LastSeen, StringFormat=HH:mm:ss}" Width="85" ElementStyle="{StaticResource CheckErrorWrapTextStyle}"/>
+                                                        <DataGridTextColumn Header="BOOK" Binding="{Binding DisplayBook}" Width="260" ElementStyle="{StaticResource CheckErrorWrapTextStyle}"/>
+                                                        <DataGridTextColumn Header="ERROR" Binding="{Binding ErrorMessage}" Width="300" ElementStyle="{StaticResource CheckErrorWrapTextStyle}"/>
+                                                    </DataGrid.Columns>
+                                                </DataGrid>
+                                            </Border>
+                                            <Grid Visibility="Collapsed">
+                                                <RichTextBox Name="txtEHentaiLog" VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0" Foreground="#a8ffb2" FontFamily="Consolas, Courier New" FontSize="11" IsReadOnly="True" Padding="10"/>
+                                                <ToggleButton Name="chkAutoScrollEHentaiLog" Style="{StaticResource ToggleButtonSwitch}" IsChecked="True" Height="16" Width="32"/>
+                                                <Button Name="btnClearEHentaiLog" Content="CLEAR" Click="BtnClearEHentaiLog_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="20" Width="60" FontSize="9" Padding="0"/>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                            </ScrollViewer>
+                        </TabItem>
                     </TabControl>
                 </TabItem>
 
