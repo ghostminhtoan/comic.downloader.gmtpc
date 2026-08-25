@@ -314,6 +314,7 @@ namespace get_link_manga
                    lower.Contains("damconuong") ||
                    lower.Contains("mangadex.org") || lower.Contains("www.mangadex.org") ||
                    lower.Contains("hentai2read") || lower.Contains("hentaiera") || lower.Contains("e-hentai.org") || lower.Contains("exhentai.org") ||
+                   lower.Contains("hitomi.la") ||
                    lower.Contains("hako") || lower.Contains("docln.net") || lower.Contains("docln.sbs");
         }
 

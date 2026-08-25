@@ -508,16 +508,19 @@ namespace get_link_manga
             {
                 btnEHentaiScrape.IsEnabled = false;
                 btnEHentaiFetchInfo.IsEnabled = false;
+                progressBar.Value = 0;
+                progressBar.IsIndeterminate = false;
             }
-            progressBar.Value = 0;
-            progressBar.IsIndeterminate = false;
 
             int total = links.Count;
             int imported = 0;
             int failed = 0;
 
             EHentaiLog($"[Import] Bắt đầu phân tích và nhập {total} liên kết e-hentai trực tiếp...");
-            lblStatus.Text = $"Importing 0/{total} links...";
+            if (!keepControlsEnabled)
+            {
+                lblStatus.Text = $"Importing 0/{total} links...";
+            }
 
             try
             {
@@ -528,7 +531,10 @@ namespace get_link_manga
                     {
                         link = NormalizeEHentaiUrl(link);
                     }
-                    lblStatus.Text = $"[{i + 1}/{total}] Đang phân tích: {link}";
+                    if (!keepControlsEnabled)
+                    {
+                        lblStatus.Text = $"[{i + 1}/{total}] Đang phân tích: {link}";
+                    }
 
                     try
                     {
@@ -585,9 +591,9 @@ namespace get_link_manga
                         });
                     }
 
-                    double pct = ((double)(i + 1) / total) * 100;
                     if (!keepControlsEnabled)
                     {
+                        double pct = ((double)(i + 1) / total) * 100;
                         progressBar.Value = pct;
                     }
                     lblLinkCount.Text = _scrapedItems.Count.ToString();
@@ -596,7 +602,10 @@ namespace get_link_manga
                 RecalculateDuplicates();
                 lblLinkCount.Text = _scrapedItems.Count.ToString();
                 EHentaiLog($"[Import] Nhập hoàn tất! Thành công: {imported}, Lỗi/Fallback: {failed}.");
-                lblStatus.Text = $"Import completed. Success: {imported}, Failed: {failed}.";
+                if (!keepControlsEnabled)
+                {
+                    lblStatus.Text = $"Import completed. Success: {imported}, Failed: {failed}.";
+                }
 
                 ShowImportSummaryIfNeeded(showMessageBox, total, imported, failed);
             }
@@ -606,10 +615,7 @@ namespace get_link_manga
                 {
                     btnEHentaiScrape.IsEnabled = true;
                     btnEHentaiFetchInfo.IsEnabled = true;
-                }
-                if (btnStartDownload != null) btnStartDownload.IsEnabled = true;
-                if (!keepControlsEnabled)
-                {
+                    if (btnStartDownload != null) btnStartDownload.IsEnabled = true;
                     progressBar.Value = 100;
                 }
             }
