@@ -616,7 +616,7 @@ namespace get_link_manga
                 return;
             }
 
-            bool hasTagsSupport = IsNhentaiUrl(item.Link) || IsTruyenqqUrl(item.Link) || IsNettruyenUrl(item.Link) || IsDilibUrl(item.Link) || (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
+            bool hasTagsSupport = IsNhentaiUrl(item.Link) || IsTruyenqqUrl(item.Link) || IsNettruyenUrl(item.Link) || IsDilibUrl(item.Link) || IsEHentaiUrl(item.Link) || (item.Link != null && item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0);
 
             // Nếu không phải domain hỗ trợ tag hoặc đã có sẵn ảnh bìa thì thoát sớm
             if (!hasTagsSupport)
@@ -748,6 +748,13 @@ namespace get_link_manga
                 if (fetchTags)
                 {
                     ExtractAndApplyThuviensachPreviewTags(item, html);
+                }
+            }
+            else if (IsEHentaiUrl(link))
+            {
+                if (fetchTags)
+                {
+                    ExtractAndApplyEHentaiPreviewTags(item, html);
                 }
             }
         }

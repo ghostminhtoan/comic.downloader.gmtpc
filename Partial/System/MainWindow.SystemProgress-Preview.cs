@@ -364,9 +364,9 @@ namespace get_link_manga
             var image = new Image
             {
                 Stretch = Stretch.Uniform,
-                MaxWidth = 320,
-                MaxHeight = 480,
-                Source = CreatePreviewImageSource(item?.HoverPreviewLocalPath, 320)
+                MaxWidth = 340,
+                MaxHeight = 340,
+                Source = CreatePreviewImageSource(item?.HoverPreviewLocalPath, 340)
             };
 
             var panel = new StackPanel();
@@ -442,12 +442,14 @@ namespace get_link_manga
             if (item != null)
             {
                 if (string.Equals(item.SourceDomain, "hitomi.la", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase))
+                    string.Equals(item.SourceDomain, "nhentai.net", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(item.SourceDomain, "e-hentai.org", StringComparison.OrdinalIgnoreCase))
                 {
                     hasTagsSupport = true;
                 }
                 else if (item.Link != null && (item.Link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0 ||
                                                item.Link.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                               IsEHentaiUrl(item.Link) ||
                                                IsTruyenqqUrl(item.Link) ||
                                                IsNettruyenUrl(item.Link) ||
                                                IsDilibUrl(item.Link)))
@@ -571,7 +573,7 @@ namespace get_link_manga
                 Content = new Border
                 {
                     Padding = new Thickness(4),
-                    MaxWidth = 340,
+                    MaxWidth = 360,
                     Child = panel
                 }
             };
