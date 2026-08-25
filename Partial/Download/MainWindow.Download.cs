@@ -2806,17 +2806,26 @@ namespace get_link_manga
 
                         if (is429)
                         {
-                            Log($"[RateLimit 429] Phát hiện 429 cho '{item.Name}'. Tự động cách ly & chờ hồi phục (10s)...");
+                            Log($"[RateLimit 429] Phát hiện 429 cho '{item.Name}'. Tạm dừng tải...");
                             countAsCompleted = false;
+                            PauseAllDownloads();
                             Dispatcher.Invoke(() =>
                             {
                                 item.Status = "Paused";
-                                item.CurrentProcess = "429 cooling down (10s)";
+                                item.CurrentProcess = "429 pause";
                             });
 
-                            // Xóa artifact lỗi và chờ 10s backoff cho riêng host
+                            Log("[RateLimit 429] Chờ 5 giây...");
+                            await Task.Delay(5000, token);
+
+                            Log("[RateLimit 429] Đang xóa temp/process/webview2 theo book...");
                             Delete429ArtifactsForItem(item, downloadRoot);
-                            await Task.Delay(10000, token);
+
+                            Log("[RateLimit 429] Đang xóa cookie...");
+                            InitializeHttpClientState();
+
+                            Log("[RateLimit 429] Đợi thêm 5 giây trước khi tải lại...");
+                            await Task.Delay(5000, token);
 
                             Dispatcher.Invoke(() =>
                             {
@@ -2828,8 +2837,11 @@ namespace get_link_manga
                                 item.IsChecked = true;
                             });
 
-                            Log($"[RateLimit 429] Hoàn tất hồi phục 429 cho '{item.Name}'. Sẵn sàng tiếp tục.");
-                            return;
+                            ResumeAllDownloads();
+                            Log($"[RateLimit 429] Đang bắt đầu tải lại '{item.Name}'...");
+                            _ = StartDownloadProcessAsync(new List<GalleryItem> { item }, preserveExistingState: false);
+                            
+                            throw new OperationCanceledException("Cancelled due to RateLimit 429", ex);
                         }
 
                         Log($"[Lỗi] Không thể tải truyện '{item.Name}': {ex.ToString()}");
@@ -3421,12 +3433,12 @@ namespace get_link_manga
             item.NhentaiTotalPagesHint = totalPages;
             Log($"[{nhentaiSiteKey}] Book: {normalizedBookUrl} | Pages: {totalPages}");
 
-            // Get number of connections (Cap at 4 for nhentai to prevent 429 Too Many Requests)
-            int maxThreads = Math.Min(GetCurrentConnectionLimit(), 4);
+            // Get number of connections
+            int maxThreads = GetCurrentConnectionLimit();
 
             Log($"[Đa luồng {nhentaiSiteKey}] Bắt đầu tải {totalPages} trang, tối đa {maxThreads} kết nối song song...");
 
-            using (var semaphore = new DynamicSemaphore(maxThreads, () => Math.Min(GetCurrentConnectionLimit(), 4)))
+            using (var semaphore = new DynamicSemaphore(maxThreads, GetCurrentConnectionLimit))
             {
                 var tasks = new System.Collections.Generic.List<Task>();
                 int completedPages = 0;
@@ -5012,14 +5024,12 @@ namespace get_link_manga
 
                                 using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, sendCts.Token))
                                 {
-                                bool isNhentai = url != null && (url.Contains("nhentai.net") || url.Contains("nhentaimg.com"));
-                                if ((isViHentai || isNhentai) && (int)response.StatusCode == 429 && attempt < maxAttempts)
+                                if (isViHentai && (int)response.StatusCode == 429 && attempt < maxAttempts)
                                 {
                                     int retryDelay = GetRetryDelayMilliseconds(response, attempt, delayMs);
-                                    string domainTag = isNhentai ? "[nhentai.net]" : "[vi-hentai.pro]";
-                                    Log($"{domainTag} 429 Too Many Requests khi tải ảnh. Chờ {retryDelay}ms rồi thử lại ({attempt}/{maxAttempts}): {url}");
+                                    Log($"[vi-hentai.pro] 429 khi tải ảnh. Chờ {retryDelay}ms rồi thử lại ({attempt}/{maxAttempts}): {url}");
                                     await Task.Delay(retryDelay, token);
-                                    delayMs = Math.Min(delayMs * 2, 10000);
+                                    delayMs = Math.Min(delayMs * 2, 8000);
                                     continue;
                                 }
 

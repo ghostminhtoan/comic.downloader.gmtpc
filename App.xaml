@@ -35,7 +35,6 @@
             <SolidColorBrush x:Key="CyberpunkDangerBrush" Color="{StaticResource CyberpunkDangerColor}" />
             <SolidColorBrush x:Key="CyberpunkTextBrush" Color="#F8FAFC" />
             <SolidColorBrush x:Key="CyberpunkMutedTextBrush" Color="#8F9EB2" />
-            <DropShadowEffect x:Key="TextWhiteOutlineEffect" Color="#FFFFFF" BlurRadius="2" ShadowDepth="0" Opacity="0.9"/>
             <LinearGradientBrush x:Key="CyberpunkHeroBrush" StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Color="{StaticResource CyberpunkHeroTopColor}" Offset="0"/>
                 <GradientStop Color="#1A253E" Offset="0.5"/>

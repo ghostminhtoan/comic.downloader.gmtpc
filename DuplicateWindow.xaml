@@ -120,8 +120,6 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-
-        <DropShadowEffect x:Key="TextWhiteOutlineEffect" Color="#FFFFFF" BlurRadius="2" ShadowDepth="0" Opacity="0.9"/>
     </Window.Resources>
 
     <Grid x:Name="gridRoot" Margin="15">
@@ -282,8 +280,7 @@
                                                        FontWeight="Bold"
                                                        FontSize="12"
                                                        Margin="0,0,0,4"
-                                                       TextWrapping="NoWrap"
-                                                       Effect="{StaticResource TextWhiteOutlineEffect}">
+                                                       TextWrapping="NoWrap">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
@@ -408,8 +405,7 @@
                                                        FontSize="10" 
                                                        TextTrimming="CharacterEllipsis" 
                                                        TextWrapping="Wrap" 
-                                                       Height="30"
-                                                       Effect="{StaticResource TextWhiteOutlineEffect}">
+                                                       Height="30">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
@@ -590,8 +586,7 @@
                                                        FontWeight="Bold"
                                                        FontSize="12"
                                                        Margin="0,0,0,4"
-                                                       TextWrapping="NoWrap"
-                                                       Effect="{StaticResource TextWhiteOutlineEffect}">
+                                                       TextWrapping="NoWrap">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>
@@ -727,8 +722,7 @@
                                                        FontSize="10" 
                                                        TextTrimming="CharacterEllipsis" 
                                                        TextWrapping="Wrap" 
-                                                       Height="30"
-                                                       Effect="{StaticResource TextWhiteOutlineEffect}">
+                                                       Height="30">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/>

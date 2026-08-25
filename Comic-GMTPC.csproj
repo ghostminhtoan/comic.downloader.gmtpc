@@ -122,7 +122,7 @@
     <Compile Include="TextBlockLanguageColorizer.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SystemFloatingControlWindow.cs">
+    <Compile Include="Partial\System\MainWindow.SystemFloatingControlWindow.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="HakoChapterCaptureWindow.cs">
@@ -140,7 +140,7 @@
     <Compile Include="ThrottledObservableCollection.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.singlemulticomic.cs">
+    <Compile Include="Partial\Download\MainWindow.singlemulticomic.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
@@ -148,236 +148,236 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.UIExtensions.cs">
+    <Compile Include="Partial\UI\MainWindow.UIExtensions.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabHitomiLa.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabHitomiLa.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SystemBootstrap.cs">
+    <Compile Include="Partial\System\MainWindow.SystemBootstrap.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SystemWebviewCpu.cs">
+    <Compile Include="Partial\System\MainWindow.SystemWebviewCpu.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SystemCaptcha.cs">
+    <Compile Include="Partial\Captcha\MainWindow.SystemCaptcha.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.Login.cs">
+    <Compile Include="Partial\System\MainWindow.Login.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.CaptchaGeneral.cs">
+    <Compile Include="Partial\Captcha\MainWindow.CaptchaGeneral.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.CaptchaSpecial.cs">
+    <Compile Include="Partial\Captcha\MainWindow.CaptchaSpecial.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.Captchawatchmore.cs">
+    <Compile Include="Partial\Captcha\MainWindow.Captchawatchmore.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.Theme.cs">
+    <Compile Include="Partial\UI\MainWindow.Theme.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SystemActions.cs">
+    <Compile Include="Partial\System\MainWindow.SystemActions.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SourceSearch.cs">
+    <Compile Include="Partial\System\MainWindow.SourceSearch.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.PostDownload.cs">
+    <Compile Include="Partial\Download\MainWindow.PostDownload.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SystemFolders.cs">
+    <Compile Include="Partial\System\MainWindow.SystemFolders.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SystemExplorer.cs">
+    <Compile Include="Partial\System\MainWindow.SystemExplorer.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SystemBuild.cs">
+    <Compile Include="Partial\System\MainWindow.SystemBuild.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SystemProgress-Preview.cs">
+    <Compile Include="Partial\System\MainWindow.SystemProgress-Preview.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SystemFirecrawl.cs">
+    <Compile Include="Partial\System\MainWindow.SystemFirecrawl.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SystemUpdate.cs">
+    <Compile Include="Partial\System\MainWindow.SystemUpdate.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabHentaiforce.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabHentaiforce.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabHentai2read.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabHentai2read.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabDaomeoden.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabDaomeoden.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabDamconuong.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabDamconuong.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabDilib.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabDilib.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabDoctruyen.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabDoctruyen.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabLoppytoonn.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabLoppytoonn.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabHaibaba.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabHaibaba.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabMangadex.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabMangadex.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabHako.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabHako.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
 
-    <Compile Include="MainWindow.TabNhentaiNet.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabNhentaiNet.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabViHentai.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabViHentai.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabTruyenqq.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabTruyenqq.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabTruyenggvn.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabTruyenggvn.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.previewtagTruyenqq.cs">
+    <Compile Include="Partial\PreviewTag\MainWindow.previewtagTruyenqq.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.previewtagNhentai.cs">
+    <Compile Include="Partial\PreviewTag\MainWindow.previewtagNhentai.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.previewtagNettruyenviet10.cs">
+    <Compile Include="Partial\PreviewTag\MainWindow.previewtagNettruyenviet10.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.previewtagThuviensach.cs">
+    <Compile Include="Partial\PreviewTag\MainWindow.previewtagThuviensach.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabNettruyen.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabNettruyen.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabHentaiera.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabHentaiera.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabGalleryLinks.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabGalleryLinks.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabWatch.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabWatch.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabRename.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabRename.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SystemComboBox.cs">
+    <Compile Include="Partial\System\MainWindow.SystemComboBox.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.SystemMessageBox.cs">
+    <Compile Include="Partial\System\MainWindow.SystemMessageBox.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.UIResponsive.cs">
+    <Compile Include="Partial\UI\MainWindow.UIResponsive.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.UIResultsGrid.cs">
+    <Compile Include="Partial\UI\MainWindow.UIResultsGrid.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.UIEnglish.cs">
+    <Compile Include="Partial\UI\MainWindow.UIEnglish.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.UIBootstrap.cs">
+    <Compile Include="Partial\UI\MainWindow.UIBootstrap.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.UILogs.cs">
+    <Compile Include="Partial\UI\MainWindow.UILogs.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.UIVietnamese.cs">
+    <Compile Include="Partial\UI\MainWindow.UIVietnamese.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.UIFold.cs">
+    <Compile Include="Partial\UI\MainWindow.UIFold.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.WorkspaceLayout.cs">
+    <Compile Include="Partial\UI\MainWindow.WorkspaceLayout.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.LightNovelDesk.cs">
+    <Compile Include="Partial\Tabs\MainWindow.LightNovelDesk.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.Download.cs">
+    <Compile Include="Partial\Download\MainWindow.Download.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.Reader.cs">
+    <Compile Include="Partial\Tabs\MainWindow.Reader.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.DownloadPipeline.cs">
+    <Compile Include="Partial\Download\MainWindow.DownloadPipeline.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.DownloadState.cs">
+    <Compile Include="Partial\Download\MainWindow.DownloadState.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.Logs.cs">
+    <Compile Include="Partial\System\MainWindow.Logs.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
@@ -443,15 +443,15 @@
     <Compile Include="GreaterThanZeroConverter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.UINewFeatures.cs">
+    <Compile Include="Partial\UI\MainWindow.UINewFeatures.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.RestoreCompat.cs">
+    <Compile Include="Partial\System\MainWindow.RestoreCompat.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.TabRouting.cs">
+    <Compile Include="Partial\Tabs\MainWindow.TabRouting.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>

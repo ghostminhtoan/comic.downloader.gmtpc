@@ -1,119 +1,106 @@
 # Workflow hiện tại - Comic Downloader GMTPC
 
-Tài liệu này là chuẩn làm việc cho repo hiện tại. Mục tiêu: sửa đúng chỗ, ít file, build sạch, không phá lane khác.
+Chuẩn làm việc repo hiện tại. Mục tiêu: sửa đúng chỗ, ít file, build sạch, không phá lane khác.
 
 ## 1. Quy tắc nền
-- Luôn trả lời tiếng Việt.
-- Luôn dùng emotion phong phú (không lặp đi lặp lại) để tôi không bị nhàm chán.
-- Luôn dùng skill `ponyman` khi code, dù người dùng không tag skill.
-- Ưu tiên sửa tối thiểu. Không thêm abstraction nếu chưa cần.
-- Khi code phải chuẩn UTF-8, không được phép lỗi mobijake.
-- WPF/UI đi qua `Dispatcher` khi đụng control từ luồng nền.
-- Tác vụ dài phải giữ `async/await` và tôn trọng `CancellationToken`.
-- Lỗi lẻ trong download/scan không được kéo sập cả app; log crash vào `.tmp\crash` và đánh dấu item/row lỗi rồi cho batch tiếp tục nếu còn an toàn.
-- Sửa xong phải build sạch `0 error, 0 warning`.
-- Sau build phải commit, push `main`, và trả mã commit.
-- Khi đụng UI song ngữ, kiểm tra cả ENG/VI và trace vào `MainWindow.ENG-VI.md`.
-- Không revert thay đổi người dùng nếu không được yêu cầu.
-- Sau khi code xong luôn đánh giá và gợi ý các file cần sửa nếu cần sửa và rà soát lại các file cần kiểm tra nếu có, luôn kiểm tra EN/VI nếu có. 
-- Luôn luôn đánh giá workflow.md và cập nhật nếu cần.
-- Luôn luôn đánh giá prompt vừa làm và gợi ý các tính năng có thể có hoặc tính năng nên thêm vào và các file cần thiết kế thêm, hoặc các file nên thêm mới. Đừng ngại thay đổi workflow.md hoặc prompt.md và cập nhật lại nếu cần thiết.
+- Trả lời tiếng Việt.
+- Dùng emotion phong phú, không lặp lại.
+- Dùng skill `ponyman` khi code, kể cả không tag skill.
+- Sửa tối thiểu, không thêm abstraction thừa.
+- Chuẩn UTF-8, cấm lỗi mobijake.
+- WPF/UI qua `Dispatcher` từ luồng nền.
+- Giữ `async/await`, tôn trọng `CancellationToken`.
+- Lỗi lẻ download/scan không sập app; log crash `.tmp\crash`, đánh dấu lỗi, tiếp tục batch an toàn.
+- Build sạch `0 error, 0 warning`.
+- Build xong: commit, push `main`, trả commit hash.
+- UI song ngữ: check ENG/VI, trace `MainWindow.ENG-VI.md`.
+- Không revert thay đổi của user nếu không yêu cầu.
+- Xong việc: đánh giá, gợi ý file cần sửa/kiểm tra, rà soát EN/VI.
+- Luôn đánh giá, cập nhật `workflow.md`.
+- Đánh giá prompt, gợi ý tính năng/file thiết kế mới; cập nhật workflow.md/prompt.md khi cần.
 
 ## 2. Snapshot kiến trúc hiện tại
 
 ### Nền tảng
-- App WPF .NET Framework `4.8`.
-- Project file: `Comic-GMTPC.csproj`.
-- App chạy kiểu portable:
-  - root download mặc định: `PortablePaths.DefaultDownloadRoot`
-  - data portable: `.portable`
-  - temp portable: `.tmp`
-  - danh sách autosave: `save gallery.md`
-- Single-instance hiện tại:
-  - cùng folder app: không được mở nhiều instance
-  - khác folder app: được mở song song
-  - logic nằm ở `App.xaml.cs`, mutex name sinh theo `PortablePaths.AppRoot`
+- WPF .NET Framework `4.8`.
+- Project: `Comic-GMTPC.csproj`.
+- Chạy portable:
+  - root download: `PortablePaths.DefaultDownloadRoot`
+  - data: `.portable`
+  - temp: `.tmp`
+  - autosave: `save gallery.md`
+- Single-instance:
+  - cùng folder: chặn mở nhiều instance
+  - khác folder: mở song song
+  - logic tại `App.xaml.cs`, mutex theo `PortablePaths.AppRoot`
 
 ### Dependency đang dùng
 - `Microsoft.Web.WebView2`
 - `Selenium.WebDriver`
 - `System.Data.SQLite.Core`
-- Có tích hợp Firecrawl qua API hoặc CLI fallback trong `MainWindow.SystemFirecrawl.cs`
+- Firecrawl qua API / CLI fallback tại `MainWindow.SystemFirecrawl.cs`
 
 ## 3. Bản đồ file quan trọng
 
+> File partial class được tổ chức vào thư mục `Partial\<Group>\` trong project root.
+> `MainWindow.xaml` và `MainWindow.xaml.cs` giữ nguyên ở root (WPF yêu cầu XAML + code-behind cùng folder).
+
 ### Khởi động và portable
-- `App.xaml.cs`
-  - bootstrap runtime
-  - single-instance theo folder
-  - long path
-  - hardware acceleration
-- `PortablePaths.cs`
-  - toàn bộ path chuẩn của app portable
+- `App.xaml.cs`: bootstrap runtime, single-instance theo folder, long path, hardware acceleration.
+- `PortablePaths.cs`: toàn bộ path chuẩn app portable.
 - `PortableRuntimeBootstrap.cs`
 - `PortableArchiveBootstrap.cs`
 
 ### Main window
-- `MainWindow.xaml`
-  - layout chính
-  - toggle ENG/VI
-  - combo `Single comic` / `Multi-comic`
-  - toggle download/retry/copy/focus/global key
-- `MainWindow.xaml.cs`
-  - constructor và nối các phần partial
-- `MainWindow.SystemProgress-Preview.cs`
-  - hover preview dùng chung cho download queue và duplicate names
-  - badge `preview`, delay `500ms`, cache ảnh, prefetch bitmap
-- extracted gallery list có 2 mode:
+- `MainWindow.xaml`: layout chính, toggle ENG/VI, combo `Single comic` / `Multi-comic`, toggle download/retry/copy/focus/global key.
+- `MainWindow.xaml.cs`: constructor, nối partial.
+- `Partial\System\MainWindow.SystemProgress-Preview.cs`: hover preview queue + duplicate names, badge `preview`, delay `500ms`, cache ảnh, prefetch bitmap.
+- Extracted gallery list có 2 mode:
   - `details list`: `dgResults`
-  - `details list` có toggle `Compact row` / `Dòng gọn`; mặc định bật để show nhiều hàng, tắt thì row tự cao để xem đủ link/progress phụ
-  - compact row vẫn phải hiện mini progress bar trong cột trạng thái khi đang tải/pause; chỉ ẩn text phần trăm để giữ row thấp
-  - `thumbnail list`: grid 7 cột thường, 9 cột khi compact, tile hẹp cho ảnh đứng, dùng chung `_scrapedItems`, có selection/keyboard/context menu/drag cơ bản giống `dgResults`
-  - khi `Dòng gọn` bật trong `thumbnail list`, thumbnail dùng 9 cột và tự fit chiều cao tile để thấy đúng 2 hàng trong khung; metadata phụ ẩn, hover/popup vẫn xem đủ chi tiết
-  - thumbnail preview phải cache file ở `.tmp\preview-cache`, lưu file gốc theo đúng đuôi ảnh và sinh thêm `.thumb.jpg` nhỏ cho grid
-  - thumbnail list vẫn phải auto tải ảnh thumbnail nhỏ như cũ để hiện trực tiếp trong grid, không phụ thuộc hover
-  - nút `popup preview` nằm giữa `details list` và `thumbnail list`, chỉ bật/tắt popup hover preview phóng to cho `details list`, `thumbnail list`, và `duplicate names`; thumbnail grid phải auto load độc lập, không phụ thuộc trạng thái nút này
-  - sau khi tắt hoặc bật `popup preview`, `thumbnail list` vẫn phải tự refresh và auto load lại thumbnail ngay, không bắt người dùng hover lại để kick preview
-  - thumbnail item phải có selected/focus highlight nhìn thấy rõ khi click hoặc chọn bằng bàn phím
-  - checkbox trong thumbnail list chỉ dùng ô vuông, không kèm chữ; đặt chồng ở góc trên ảnh thumbnail
-  - khi chọn thumbnail bằng chuột hoặc bàn phím, item đang chọn phải đổi nền/viền sang màu vàng rõ ràng
-  - title trong thumbnail list phải đủ cao để hiện 3 dòng
-  - popup preview khi hover phải hiện ảnh, title, và nếu đã có dữ liệu quét thiếu chap số nguyên thì hiện thêm `latest chapter: <chapter mới nhất>`
-  - popup preview khi đã có dữ liệu scan phải hiện cả trạng thái `missing integer chapter: complete/thiếu chapter số nguyên`
-  - auto scan missing integer chapter phải chạy theo `_scrapedItems` chung, không phụ thuộc đang ở `details list` hay `thumbnail list`; collection reset/bulk add vẫn phải trigger scan các item chưa quét
-  - tab `Scan missing integer chapter` / `Scan chap số nguyên thiếu` có combo `multiple check`/`check song song` từ 1 đến 16, mặc định 8; giá trị combo phải điều khiển số tác vụ scan missing integer chapter chạy song song thật, không chỉ đổi text UI
-  - scan missing integer chapter phải tự chạy ngay sau import/get link/load list khi có item mới, không chờ download
-  - row sync của tab scan nếu tạo row trống phải tự kick scan ngay; không chỉ chờ user bấm tab hoặc chờ download
-  - scan phải luôn lấy thứ tự từ list truyện hiện tại, bắt đầu từ book trên cùng; không lấy thứ tự từ grid scan/cached row cũ
-  - khi list truyện đổi trong lúc đang scan, phải hủy scan cũ và tự scan lại list mới; không để task cũ âm thầm ghi kết quả vào list mới
-  - scan/rescan missing integer chapter không phụ thuộc checkbox book; checkbox chỉ dùng cho thao tác chọn/copy/toggle
-  - right click trong tab scan phải có copy book link, copy missing integer chapter, copy decimal chapter; Ctrl+C trong tab scan chỉ copy link truyện
-  - mọi domain khi scan missing integer chapter phải tôn trọng `multiple check`; không đặt semaphore/lock bao toàn domain khiến scan bị single check
-  - `nettruyen.tech`/`nettruyenviet10.com` khi cần WebView bấm `Xem thêm` phải cho mở ngầm song song theo số scan task đang chạy; không khóa WatchMore WebView còn 1 cửa
-  - WatchMore WebView phải đóng và dispose sau khi lấy HTML/cookie; giảm `multiple check` thì không mở thêm WebView vượt limit mới
-  - `nettruyen.tech`/`nettruyenviet10.com` phải ưu tiên API/AJAX chapter list trước; chỉ mở WebView bấm `Xem thêm` khi AJAX thiếu hoặc thất bại để tránh scan quá chậm
-  - `nettruyen.tech`/`nettruyenviet10.com` nguồn chapter đầy đủ ưu tiên `/Comic/Services/ComicService.asmx/ChapterList?slug=<book-slug>`; đây là API của nút `Xem thêm`, dùng để tránh hụt chap đầu như `thuong-hoang-tro-ve`
-  - nếu scan ra thiếu chap số nguyên 1-3 thì tự quét lại tối đa 3 lần trước khi lưu kết quả
-  - mọi domain: label chap dạng `số:số`, `số-số`, `số - số` phải được tính là range phủ đủ các số trong khoảng đó, không báo thiếu các số nằm trong range
-  - khi domain trả chapter label riêng với link (ví dụ Nettruyen API `chapter_name`), cache `ReaderChapterItem.Name` phải giữ label thật; không tự build lại từ link nếu làm mất range như `Chapter 58: 59`
-  - cột missing integer chapter phải word wrap
-  - progress scan song song không được báo như đang xử lý tuần tự một hàng; phải hiển thị số đã xong thật và số hàng vừa hoàn tất, cột `#` phải có checkbox kèm số thứ tự hàng
-  - scan missing integer chapter phải phân biệt truyện bằng link/domain, không chỉ tên; cùng tên khác domain vẫn quét riêng, nhưng các task split/merge cùng link chỉ quét một lần
-  - nếu nhiều domain có cùng tên truyện, từng token missing integer chapter trùng giữa domain phải màu vàng; token chỉ thiếu ở một domain phải màu trắng
-  - cột chap thập phân có toggle `WRAP`; mặc định tắt để tránh hàng quá cao, bật thì màu xanh và chỉ cột chap thập phân xuống dòng, tắt thì màu đỏ và không wrap
-  - không giữ bitmap RAM toàn cục cho preview
+  - `details list` có toggle `Compact row` / `Dòng gọn` (mặc định bật xem nhiều hàng; tắt để row tự cao xem link/progress phụ).
+  - Compact row: hiện mini progress bar cột status khi tải/pause; ẩn text % để giữ row thấp.
+  - `thumbnail list`: 7 cột (9 cột khi compact), tile hẹp ảnh đứng, dùng chung `_scrapedItems`, selection/keyboard/context menu/drag như `dgResults`.
+  - `Dòng gọn` bật ở `thumbnail list`: 9 cột, fit chiều cao tile thấy đúng 2 hàng; metadata phụ ẩn, hover/popup xem đủ chi tiết.
+  - Thumbnail preview: cache `.tmp\preview-cache`, lưu file gốc đúng đuôi, sinh `.thumb.jpg` nhỏ cho grid.
+  - Thumbnail list: auto tải thumbnail nhỏ hiện thẳng grid, không phụ thuộc hover.
+  - Nút `popup preview`: giữa `details list` và `thumbnail list`, chỉ bật/tắt popup hover phóng to cho `details list`, `thumbnail list`, `duplicate names`; thumbnail grid auto load độc lập nút này.
+  - Bật/tắt `popup preview`: `thumbnail list` tự refresh, auto load lại thumbnail ngay, không cần hover kích hoạt.
+  - Thumbnail item: focus/selected highlight rõ ràng khi click hoặc chọn phím.
+  - Checkbox thumbnail list: ô vuông không kèm chữ, đặt góc trên ảnh thumbnail.
+  - Chọn thumbnail chuột/phím: viền/nền đổi màu vàng rõ ràng.
+  - Title thumbnail list: đủ cao hiện 3 dòng.
+  - Popup preview hover: hiện ảnh, title; nếu có scan chap thiếu thì hiện `latest chapter: <chapter mới nhất>`.
+  - Popup preview: hiện trạng thái `missing integer chapter: complete/thiếu chapter số nguyên`.
+  - Auto scan missing integer chapter: chạy theo `_scrapedItems` chung (cả `details list` và `thumbnail list`); reset/bulk add tự trigger scan item chưa quét.
+  - Tab `Scan missing integer chapter` / `Scan chap số nguyên thiếu`: combo `multiple check`/`check song song` từ 1-16 (mặc định 8), điều khiển số scan task song song thật.
+  - Scan missing integer chapter: tự chạy sau import/get link/load list khi có item mới, không chờ download.
+  - Row sync tab scan: tạo row trống tự kick scan ngay.
+  - Scan lấy thứ tự list truyện hiện tại, từ book trên cùng; không lấy thứ tự từ grid scan/cached row cũ.
+  - List truyện đổi khi đang scan: hủy scan cũ, tự scan list mới; task cũ không ghi đè list mới.
+  - Scan/rescan không phụ thuộc checkbox book (checkbox chỉ để chọn/copy/toggle).
+  - Right click tab scan: copy book link, copy missing integer chapter, copy decimal chapter; Ctrl+C chỉ copy link truyện.
+  - Mọi domain scan missing integer chapter phải tôn trọng `multiple check`; cấm semaphore/lock toàn domain gây single check.
+  - `nettruyen.tech`/`nettruyenviet10.com`: WebView `Xem thêm` mở ngầm song song theo số scan task; không khóa WatchMore WebView còn 1 cửa.
+  - WatchMore WebView: đóng, dispose sau khi lấy HTML/cookie; giảm `multiple check` không mở vượt limit mới.
+  - `nettruyen.tech`/`nettruyenviet10.com`: ưu tiên API/AJAX chapter list; chỉ mở WebView `Xem thêm` khi AJAX thiếu/thất bại.
+  - `nettruyen.tech`/`nettruyenviet10.com`: nguồn chapter đầy đủ ưu tiên `/Comic/Services/ComicService.asmx/ChapterList?slug=<book-slug>` (API của nút `Xem thêm`, tránh hụt chap đầu như `thuong-hoang-tro-ve`).
+  - Scan thiếu chap số nguyên 1-3: tự quét lại tối đa 3 lần trước khi lưu.
+  - Mọi domain: label chap `số:số`, `số-số`, `số - số` tính là range phủ đủ các số trong khoảng, không báo thiếu số trong range.
+  - Domain trả chapter label riêng với link (ví dụ Nettruyen API `chapter_name`): cache `ReaderChapterItem.Name` giữ label thật, không tự build lại từ link làm mất range như `Chapter 58: 59`.
+  - Cột missing integer chapter: word wrap.
+  - Progress scan song song: hiện số hoàn thành thật và số hàng vừa xong; cột `#` có checkbox + số thứ tự hàng.
+  - Scan missing integer chapter: phân biệt truyện bằng link/domain; cùng link chia task chỉ quét 1 lần.
+  - Nhiều domain cùng tên truyện: token missing integer chapter trùng giữa các domain tô màu vàng; chỉ thiếu ở 1 domain tô màu trắng.
+  - Cột chap thập phân có toggle `WRAP`: tắt để tránh hàng cao (màu đỏ, không wrap); bật màu xanh (chỉ cột chap thập phân xuống dòng).
+  - Cấm giữ bitmap RAM toàn cục cho preview.
 
-### System/UI
-- `MainWindow.SystemBootstrap.cs`
-  - init app
-  - hotkey global/project
-  - clipboard auto paste
-  - http client/cookie state
-- `MainWindow.SourceSearch.cs`
-  - tab `Search` cạnh `Password` trong section source
-  - ô `Search book` + combo checkbox domain dùng style `CyberpunkComboBox`
-  - nút `Search` mở Google dạng `https://www.google.com/search?q=site:<domain không http/https>+<tên truyện encode>` để khóa đúng domain
-  - domain search phải lấy theo home/redirect thật của tab, ví dụ `truyenqq` -> `truyenqqko.com`; tab có redirect thì dùng redirect hiện tại
+### `Partial\System\` — System/UI
+- `MainWindow.SystemBootstrap.cs`: init app, hotkey global/project, clipboard auto paste, http client/cookie state.
+- `MainWindow.SourceSearch.cs`:
+  - tab `Search` cạnh `Password`
+  - ô `Search book` + combo checkbox domain style `CyberpunkComboBox`
+  - nút `Search` mở Google: `https://www.google.com/search?q=site:<domain không http/https>+<tên truyện encode>`
+  - domain search lấy theo home/redirect thật của tab (ví dụ `truyenqq` -> `truyenqqko.com`).
 - `MainWindow.SystemActions.cs`
 - `MainWindow.SystemBuild.cs`
 - `MainWindow.SystemUpdate.cs`
@@ -122,6 +109,13 @@ Tài liệu này là chuẩn làm việc cho repo hiện tại. Mục tiêu: s�
 - `MainWindow.SystemComboBox.cs`
 - `MainWindow.SystemMessageBox.cs`
 - `MainWindow.SystemFloatingControlWindow.cs`
+- `MainWindow.Login.cs`
+- `MainWindow.Logs.cs`
+- `MainWindow.RestoreCompat.cs`
+- `MainWindow.SystemFirecrawl.cs`
+- `MainWindow.SystemWebviewCpu.cs`
+
+### `Partial\UI\` — UI
 - `MainWindow.WorkspaceLayout.cs`
 - `MainWindow.Theme.cs`
 - `MainWindow.UIBootstrap.cs`
@@ -132,37 +126,38 @@ Tài liệu này là chuẩn làm việc cho repo hiện tại. Mục tiêu: s�
 - `MainWindow.UIVietnamese.cs`
 - `MainWindow.UIFold.cs`
 - `MainWindow.UINewFeatures.cs`
+- `MainWindow.UIExtensions.cs`
 
-### Download
-- `MainWindow.Download.cs`
-  - flow tải chính
-  - path/file naming
-  - pause/resume/stop state
-- `MainWindow.DownloadPipeline.cs`
-  - profile theo domain
-  - retry/rate-limit/browser session
-  - manifest tải trang
-- `MainWindow.DownloadState.cs`
-  - state/cancel/token/phối hợp queue
-- `MainWindow.singlemulticomic.cs`
-  - nguồn sự thật cho mode folder type
+### `Partial\Download\` — Download
+- `MainWindow.Download.cs`: flow tải chính, path/file naming, pause/resume/stop state.
+- `MainWindow.DownloadPipeline.cs`: profile theo domain, retry/rate-limit/browser session, manifest tải trang.
+- `MainWindow.DownloadState.cs`: state/cancel/token/phối hợp queue.
+- `MainWindow.PostDownload.cs`
+- `MainWindow.singlemulticomic.cs`:
+  - nguồn sự thật mode folder type
   - `GetDownloadChapterFolderName()` chỉ trả tên folder chapter
-  - caller tự ghép book/chapter cho mode multi-comic
+  - caller tự ghép book/chapter cho multi-comic.
 
-### Routing và scraper theo domain
-- `MainWindow.TabRouting.cs`
-  - nhận URL, chọn lane, điều hướng tab, import direct link
-- `MainWindow.Tab*.cs`
-  - mỗi domain một partial riêng
-
-### Novel / Reader / Watch
+### `Partial\Tabs\` — Routing và scraper theo domain
+- `MainWindow.TabRouting.cs`: nhận URL, chọn lane, điều hướng tab, import direct link.
+- `MainWindow.Tab*.cs`: partial riêng từng domain.
 - `MainWindow.LightNovelDesk.cs`
 - `MainWindow.Reader.cs`
 - `MainWindow.TabWatch.cs`
-- `HakoChapterCaptureWindow.cs`
-- `ChapterRangeParser.cs`
 
-### Window phụ
+### `Partial\Captcha\` — Captcha / Anti-bot
+- `MainWindow.SystemCaptcha.cs`
+- `MainWindow.CaptchaGeneral.cs`
+- `MainWindow.CaptchaSpecial.cs`
+- `MainWindow.Captchawatchmore.cs`
+
+### `Partial\PreviewTag\` — Preview tag theo domain
+- `MainWindow.previewtagTruyenqq.cs`
+- `MainWindow.previewtagNhentai.cs`
+- `MainWindow.previewtagNettruyenviet10.cs`
+- `MainWindow.previewtagThuviensach.cs`
+
+### Window phụ (root)
 - `CaptchaWindow.xaml.cs`
 - `DuplicateWindow.xaml.cs`
 - `DirectDownloadWindow.xaml.cs`
@@ -170,29 +165,33 @@ Tài liệu này là chuẩn làm việc cho repo hiện tại. Mục tiêu: s�
 - `ErrorLogWindow.xaml.cs`
 - `ErrorReportWindow.xaml.cs`
 
+### Standalone helpers (root)
+- `HakoChapterCaptureWindow.cs`
+- `ChapterRangeParser.cs`
+
+
 ## 4. Domain đang support
 
 ### Manga
-- `truyenqq`
-  - preview cover ưu tiên lấy từ `div.book_avatar img`
-  - giữ nguyên query string của URL ảnh nếu site trả về cùng file `.jpg?...`, không tự cắt phần sau dấu `?`
-  - nếu `book_avatar` có cả `src` và `data-ni` hay nhiều host ảnh, preview phải thử tuần tự từng URL thay vì fail ngay ở URL đầu
-- `haibabamanga.somee.com`
-  - preview cover ưu tiên lấy từ `div.manga-cover-container img.manga-cover`, chấp nhận cả `.jpg` và `.png`
-- `mangadex.org`
-  - ưu tiên route theo `tag / title / chapter`
-  - lane hiện tại dùng API chính chủ để lấy chapter list, cover preview, và ảnh chapter
+- `truyenqq`:
+  - preview cover ưu tiên `div.book_avatar img`
+  - giữ nguyên query string URL ảnh (`.jpg?...`), không cắt sau `?`
+  - `book_avatar` có `src` và `data-ni` hoặc nhiều host ảnh: thử tuần tự từng URL, không fail ngay ở URL đầu.
+- `haibabamanga.somee.com`: preview cover ưu tiên `div.manga-cover-container img.manga-cover`, nhận cả `.jpg` và `.png`.
+- `mangadex.org`:
+  - ưu tiên route `tag / title / chapter`
+  - dùng API chính chủ lấy chapter list, cover preview, ảnh chapter.
 - `nettruyen`
-- `nettruyen.tech`
-  - preview cover lấy từ `div.col-image img`, chấp nhận `.jpg`, `.png`, `.webp`; khi hover book phải hiện badge trắng `preview` nếu tích hợp thành công
-  - download folder/process phải tách riêng `nettruyen.tech`, không dùng chung folder `nettruyen` hoặc `nettruyenviet10.com`
-- `nettruyenviet10.com`
-  - download folder/process phải tách riêng `nettruyenviet10.com`, không dùng chung folder `nettruyen` hoặc `nettruyen.tech`
-  - khi AJAX `ProcessChapterList`/`GetListChapter` trả danh sách chương đầy đủ, phải gán lại `chapterLinks` bằng kết quả AJAX, không chỉ thay HTML trung gian
-- `dilib.vn / thuviensach.vn`
-  - book slug có thể chứa số; khi nhận dạng book từ chapter URL chỉ cắt phần sau marker chapter (`-chap-...` hoặc `/chuong...`), không xóa số cuối book slug
-  - book URL hợp lệ gồm cả `/{book-slug}.html` và `/truyen-tranh/{book-slug}`; `/truyen-tranh/{book-slug}` không được route nhầm thành category
-  - khi scan missing integer chapter, tên `ReaderChapterItem` phải lấy từ chapter URL/label (`chap 469`), không dùng title gồm tên book vì book có số như `7 Viên...` sẽ bị parse thành chapter 7
+- `nettruyen.tech`:
+  - preview cover từ `div.col-image img` (`.jpg`, `.png`, `.webp`); hover book hiện badge trắng `preview` khi tích hợp thành công.
+  - download folder/process tách riêng `nettruyen.tech`, không chung `nettruyen` hay `nettruyenviet10.com`.
+- `nettruyenviet10.com`:
+  - download folder/process tách riêng `nettruyenviet10.com`, không chung `nettruyen` hay `nettruyen.tech`.
+  - AJAX `ProcessChapterList`/`GetListChapter` trả đủ list: gán lại `chapterLinks` bằng kết quả AJAX, không chỉ đổi HTML trung gian.
+- `dilib.vn / thuviensach.vn`:
+  - book slug chứa số: nhận dạng book từ chapter URL chỉ cắt sau marker chapter (`-chap-...` hoặc `/chuong...`), không xóa số cuối book slug.
+  - book URL hợp lệ gồm cả `/{book-slug}.html` và `/truyen-tranh/{book-slug}`; `/truyen-tranh/{book-slug}` không được route nhầm thành category.
+  - scan missing integer chapter: tên `ReaderChapterItem` lấy từ chapter URL/label (`chap 469`), không dùng title chứa tên book (tránh lỗi parse số từ book như `7 Viên...` thành chapter 7).
 - `doctruyen.us`
 
 ### Hentai / ảnh
@@ -210,78 +209,72 @@ Tài liệu này là chuẩn làm việc cho repo hiện tại. Mục tiêu: s�
 - `hako.re`
 - `docln.net`
 
-Nguồn sự thật cho routing: `MainWindow.TabRouting.cs`.
+Nguồn sự thật routing: `MainWindow.TabRouting.cs`.
 
 ## 5. Folder type hiện tại
-- `Single comic`
-  - `root\book name\chapter name\page files`
-- `Multi-comic`
-  - vẫn tạo thư mục theo book, nhưng phần tên chapter/path phải lấy qua flow chung đang dùng trong downloader hiện tại
-  - khi sửa logic folder, phải sửa theo toàn flow đang gọi `GetDownloadChapterFolderName()`, không sửa riêng từng domain
-- Combo UI nằm ở `MainWindow.xaml`
-- State và event xử lý nằm ở `MainWindow.singlemulticomic.cs`
-- Float window phải sync lại folder type khi đổi mode
+- `Single comic`: `root\book name\chapter name\page files`
+- `Multi-comic`:
+  - tạo thư mục theo book, tên chapter/path lấy qua flow chung trong downloader
+  - sửa folder logic: sửa toàn bộ flow gọi `GetDownloadChapterFolderName()`, không sửa riêng từng domain.
+- Combo UI: `MainWindow.xaml`
+- State/event: `MainWindow.singlemulticomic.cs`
+- Float window sync lại folder type khi đổi mode.
 
 ## 6. Quy tắc queue/download
-- Chỉ dừng đúng item/book được thao tác. Không làm rơi các book khác.
-- Nếu untick checkbox:
-  - status có thể về `Stopped`
-  - request đang chạy phải thật sự honor cancel token
-  - tick lại thì book đó mới được tải tiếp
-- `Completed` chỉ set khi book thực sự tải xong.
-- Không set completed chỉ vì queue/error vừa được clear.
-- Không remove book giữa chừng nếu chưa hoàn tất flow.
-- Resume phải tôn trọng file sẵn có và manifest trong `.tmp\.manifest`.
-- File ảnh nhỏ/hỏng phải bị retry, không tính là xong.
-- Domain có profile throttle/retry riêng trong `MainWindow.DownloadPipeline.cs`.
+- Chỉ dừng đúng item/book thao tác; không rơi book khác.
+- Untick checkbox:
+  - status về `Stopped`
+  - request đang chạy honor cancel token
+  - tick lại mới tải tiếp.
+- `Completed` chỉ set khi book tải xong thật (không set do clear queue/error).
+- Không remove book giữa chừng khi chưa hoàn tất flow.
+- Resume tôn trọng file có sẵn và manifest trong `.tmp\.manifest`.
+- Ảnh nhỏ/hỏng phải retry, không tính xong.
+- Profile throttle/retry domain nằm tại `MainWindow.DownloadPipeline.cs`.
 
 ## 7. Browser session / captcha / anti-bot
-- Site bị challenge có thể đi qua WebView2 session hoặc Chrome fallback.
-- Cookie + user-agent lấy về phải được bơm lại vào `_httpClient`.
-- `MainWindow.SystemCaptcha.cs`, `MainWindow.CaptchaGeneral.cs`, `MainWindow.CaptchaSpecial.cs`, `MainWindow.Captchawatchmore.cs` là lane captcha chính.
-- Focus off thì không được ép minimize main window sau captcha/webview nếu flow hiện tại không yêu cầu.
+- Challenge: qua WebView2 session hoặc Chrome fallback.
+- Cookie + user-agent bơm lại vào `_httpClient`.
+- Lane captcha chính (`Partial\Captcha\`): `MainWindow.SystemCaptcha.cs`, `MainWindow.CaptchaGeneral.cs`, `MainWindow.CaptchaSpecial.cs`, `MainWindow.Captchawatchmore.cs`.
+- Focus off: không ép minimize main window sau captcha/webview nếu flow không yêu cầu.
 
 ## 8. Hotkey / toggle / UI state
 - `Ctrl+Shift+F`: bật/tắt float button.
 - `Alt+Shift+G`: bật/tắt global hotkey mode.
-- Các toggle download/retry/copy/focus/global key phải phản ánh đúng state thật, không chỉ đổi label.
-- Khi sửa toggle:
-  - check cả click UI
-  - check hotkey
-  - check sync với floating control
-  - check ENG/VI nếu có text lộ ra UI
+- Toggle download/retry/copy/focus/global key phản ánh đúng state thật.
+- Khi sửa toggle: check click UI, hotkey, sync floating control, ENG/VI.
 
 ## 9. Cách chọn file trước khi sửa
 
 ### Nếu bug thuộc domain
-1. Xem `MainWindow.TabRouting.cs` route vào tab nào.
-2. Mở `MainWindow.Tab<Domain>.cs`.
-3. Nếu lỗi phát sinh lúc tải file/chapter/path, đọc thêm:
-   - `MainWindow.Download.cs`
-   - `MainWindow.DownloadPipeline.cs`
-   - `MainWindow.singlemulticomic.cs`
+1. `Partial\Tabs\MainWindow.TabRouting.cs` xem route tab nào.
+2. Mở `Partial\Tabs\MainWindow.Tab<Domain>.cs`.
+3. Lỗi tải file/chapter/path, đọc thêm:
+   - `Partial\Download\MainWindow.Download.cs`
+   - `Partial\Download\MainWindow.DownloadPipeline.cs`
+   - `Partial\Download\MainWindow.singlemulticomic.cs`
 
 ### Nếu bug thuộc queue, checkbox, stop/resume
-1. Đọc `MainWindow.DownloadState.cs`.
-2. Đọc `MainWindow.Download.cs`.
-3. Chỉ khi cần mới xuống `MainWindow.DownloadPipeline.cs`.
+1. `Partial\Download\MainWindow.DownloadState.cs`
+2. `Partial\Download\MainWindow.Download.cs`
+3. Cần thiết mới đọc `Partial\Download\MainWindow.DownloadPipeline.cs`.
 
 ### Nếu bug thuộc toggle/layout/ngôn ngữ
 1. `MainWindow.xaml`
-2. partial UI tương ứng (`UI*`, `Theme`, `WorkspaceLayout`, `SystemFloatingControlWindow`)
+2. partial UI tương ứng (`Partial\UI\` — `UI*`, `Theme`, `WorkspaceLayout`; `Partial\System\` — `SystemFloatingControlWindow`)
 3. `MainWindow.ENG-VI.md`
 
 ### Nếu bug hoặc feature thuộc hover preview ở extracted gallery list
 1. `MainWindow.xaml`
-2. `MainWindow.SystemProgress-Preview.cs`
-3. partial UI hoặc window đang gắn host hover (`MainWindow.UIResultsGrid.cs`, `DuplicateWindow.xaml`, `DuplicateWindow.xaml.cs`)
-4. partial domain đang cấp dữ liệu preview (`MainWindow.Tab*.cs`)
+2. `Partial\System\MainWindow.SystemProgress-Preview.cs`
+3. partial UI/window gắn host hover (`Partial\UI\MainWindow.UIResultsGrid.cs`, `DuplicateWindow.xaml`, `DuplicateWindow.xaml.cs`)
+4. partial domain cấp dữ liệu preview (`Partial\Tabs\MainWindow.Tab*.cs`)
 
 ### Nếu bug hoặc feature thuộc thumbnail list của extracted gallery links
 1. `MainWindow.xaml`
-2. `MainWindow.UIResultsGrid.cs`
-3. `MainWindow.SystemProgress-Preview.cs`
-4. partial domain đang cấp `HoverPreviewThumbnailUrl` hoặc data preview (`MainWindow.Tab*.cs`)
+2. `Partial\UI\MainWindow.UIResultsGrid.cs`
+3. `Partial\System\MainWindow.SystemProgress-Preview.cs`
+4. partial domain cấp `HoverPreviewThumbnailUrl` hoặc data preview (`Partial\Tabs\MainWindow.Tab*.cs`)
 
 ### Nếu bug thuộc app portable / startup / multi-instance
 1. `App.xaml.cs`
@@ -289,46 +282,32 @@ Nguồn sự thật cho routing: `MainWindow.TabRouting.cs`.
 3. `PortableRuntimeBootstrap.cs`
 4. `PortableArchiveBootstrap.cs`
 
+
 ## 10. Workflow sửa đúng
 1. Đọc `workflow.md`.
-2. Xác định lane:
-   - startup/portable
-   - system/ui
-   - queue/download
-   - domain scraper
-   - novel/reader/watch
+2. Xác định lane (startup/portable, system/ui, queue/download, domain scraper, novel/reader/watch).
 3. Tìm đúng partial/file nguồn sự thật.
 4. Sửa ít file nhất.
-5. Nếu đụng text UI, cập nhật `MainWindow.ENG-VI.md`.
-6. Build bằng `.\build.bat`.
-7. Nếu còn error/warning, sửa tiếp đến sạch.
-8. Kiểm tra `BuildInfo.cs` vì build release sẽ auto stamp.
+5. Đụng text UI: cập nhật `MainWindow.ENG-VI.md`.
+6. Build `.\build.bat`.
+7. Còn error/warning: sửa tiếp đến sạch `0 error, 0 warning`.
+8. Kiểm tra `BuildInfo.cs` (auto stamp khi build release).
 9. Commit đúng scope.
 10. Push `origin main`.
 
 ## 11. Quy tắc build/release
 - Luôn dùng `.\build.bat`.
-- Script sẽ:
-  - kill `Comic-GMTPC.exe`
-  - rebuild Release qua MSBuild
-  - auto stamp `BuildInfo.cs`
-  - publish artifact sang `release\Comic-GMTPC`
-  - auto mở exe mới nếu build thành công
-- Vì `BuildInfo.cs` bị đổi sau mỗi build release, file này thường phải vào commit cuối cùng.
+- Script: kill `Comic-GMTPC.exe`, rebuild Release MSBuild, auto stamp `BuildInfo.cs`, publish `release\Comic-GMTPC`, auto mở exe mới.
+- `BuildInfo.cs` đổi sau build release, đưa vào commit cuối cùng.
 - Không chấp nhận warning mới.
 
 ## 12. Quy tắc git
 - Commit theo thay đổi thật, scope nhỏ.
-- Không kéo file test tạm, dump, html debug, log rác vào commit nếu không cần.
-- Branch làm việc mặc định hiện tại: `main`.
-- Sau khi sửa xong: commit rồi push `origin main`.
+- Không kéo file test tạm, dump, html debug, log rác vào commit.
+- Branch mặc định: `main`.
+- Xong việc: commit, push `origin main`.
 
 ## 13. Ghi nhớ thực chiến
-- Nhiều bug trong repo này không nằm ở parser mà nằm ở state sync giữa:
-  - queue item
-  - checkbox
-  - toggle UI
-  - cancellation token
-  - folder type
-- Khi thấy lỗi "status đúng nhưng hành vi sai", ưu tiên đọc flow state/cancel trước khi sửa parser.
-- Khi thấy lỗi "đúng domain này nhưng sai mọi domain khác", ưu tiên đọc flow chung thay vì vá từng tab.
+- Nhiều bug nằm ở state sync giữa: queue item, checkbox, toggle UI, cancellation token, folder type.
+- Lỗi "status đúng nhưng hành vi sai": ưu tiên đọc flow state/cancel trước khi sửa parser.
+- Lỗi "đúng domain này nhưng sai mọi domain khác": ưu tiên đọc flow chung thay vì vá từng tab.
