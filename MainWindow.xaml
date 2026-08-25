@@ -1035,93 +1035,6 @@
                             </ScrollViewer>
                         </TabItem>
 
-                        <TabItem Header="haibabamanga.somee.com" Style="{StaticResource CyberpunkTabItem}">
-                            <TabItem.Tag>
-                                <SolidColorBrush Color="#7df0ff"/>
-                            </TabItem.Tag>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="True" Background="Transparent" BorderThickness="0" Padding="0">
-                            <Grid Margin="0,6,0,0">
-                                <Border Name="borderHaibabaLeftPanel" Style="{StaticResource CyberpunkCard}" Padding="15">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
-                                        </Grid.RowDefinitions>
-
-                                        <StackPanel Grid.Row="0" Margin="0,0,0,15">
-                                            <TextBlock Text="PARAMETERS CONFIG" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"/>
-                                            <WrapPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                                <Button Name="btnOpenHomepageHaibaba" Tag="haibabamanga.somee.com" Content="HOME" Click="BtnOpenHomepage_Click" Style="{StaticResource CompactCyanButton}" MinWidth="86" Padding="8,0" FontWeight="Bold"/>
-                                                <Button Tag="haibabamanga.somee.com" Content="RESTORE DEFAULT TAG" Click="BtnRestoreDefaultTag_Click" Style="{StaticResource CompactCyanButton}" MinWidth="156" Padding="8,0" FontWeight="Bold"/>
-                                                <Button Content="HISTORY" Click="BtnOpenHistory_Click" Style="{StaticResource CompactCyanButton}" MinWidth="78" Padding="8,0" FontWeight="Bold"/>
-                                                <Button Content="BOOKMARKS" Click="BtnOpenBookmarks_Click" Style="{StaticResource CompactCyanButton}" MinWidth="94" Padding="8,0" FontWeight="Bold"/>
-                                            </WrapPanel>
-                                        </StackPanel>
-
-                                        <StackPanel Grid.Row="1" Margin="0,0,0,12">
-                                            <TextBlock Text="TARGET URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                            <TextBox Name="txtHaibabaTagUrl"
-                                                     Text="http://haibabamanga.somee.com/Home/Category?slug=action"
-                                                     Background="#0e121a"
-                                                     BorderBrush="{StaticResource CyberpunkBorderBrush}"
-                                                     Foreground="{StaticResource CyberpunkTextBrush}"
-                                                     CaretBrush="{StaticResource CyberpunkCyanBrush}"
-                                                     Height="32"
-                                                     PreviewKeyDown="TxtHaibabaTagUrl_PreviewKeyDown"/>
-                                        </StackPanel>
-
-                                        <Grid Grid.Row="2" Margin="0,0,0,15">
-                                            <Button Grid.Column="0" Name="btnHaibabaAnalyze" Content="ANALYZE TARGET PAGE" Click="BtnHaibabaAnalyze_Click" Style="{StaticResource TabFetchPrimaryButton}"/>
-                                        </Grid>
-
-                                        <Grid Grid.Row="3" Margin="0,0,0,15">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="8"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="8"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <StackPanel Grid.Column="0">
-                                                <TextBlock Text="TOTAL PAGES" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtHaibabaTotalPages" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="13" FontWeight="Bold" Height="32" HorizontalContentAlignment="Center" TextChanged="TxtHaibabaTotalPages_TextChanged"/>
-                                            </StackPanel>
-
-                                            <StackPanel Grid.Column="2">
-                                                <TextBlock Text="FROM PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtHaibabaPageFrom" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
-                                            </StackPanel>
-
-                                            <StackPanel Grid.Column="4">
-                                                <TextBlock Text="TO PAGE" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                                <TextBox Name="txtHaibabaPageTo" Text="1" Background="#0e121a" BorderBrush="{StaticResource CyberpunkBorderBrush}" Foreground="{StaticResource CyberpunkTextBrush}" CaretBrush="{StaticResource CyberpunkCyanBrush}" Height="32" HorizontalContentAlignment="Center"/>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <Grid Grid.Row="4" Margin="0,15,0,15">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="10"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="10"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Button Grid.Column="0" Name="btnHaibabaScrape" Content="GET LINK" Click="BtnHaibabaScrape_Click" Style="{StaticResource WideActionButton}"/>
-                                            <Button Grid.Column="2" Name="btnHaibabaCrawlMore" Content="GET MORE" Click="BtnHaibabaCrawlMore_Click" Style="{StaticResource WideActionButton}"/>
-                                            <Button Grid.Column="4" Name="btnHaibabaPasteDirect" Content="PASTE DIRECT LINK" Click="BtnHaibabaPasteDirect_Click" Style="{StaticResource WideActionButton}"/>
-                                        </Grid>
-                                    </Grid>
-                                </Border>
-                            </Grid>
-                            </ScrollViewer>
-                        </TabItem>
-
                         <TabItem x:Name="tabMangadexItem" Header="mangadex.org" Style="{StaticResource CyberpunkTabItem}">
                             <TabItem.Tag>
                                 <SolidColorBrush Color="#7df0ff"/>
@@ -2726,9 +2639,6 @@
                                         </ComboBoxItem>
                                         <ComboBoxItem>
                                             <CheckBox Content="loppytoonn.com" Tag="loppytoonn.com"/>
-                                        </ComboBoxItem>
-                                        <ComboBoxItem>
-                                            <CheckBox Content="haibabamanga.somee.com" Tag="haibabamanga.somee.com"/>
                                         </ComboBoxItem>
                                         <ComboBoxItem>
                                             <CheckBox Content="mangadex" Tag="mangadex"/>

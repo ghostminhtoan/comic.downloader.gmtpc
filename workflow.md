@@ -176,7 +176,6 @@ Chuẩn làm việc repo hiện tại. Mục tiêu: sửa đúng chỗ, ít file
   - preview cover ưu tiên `div.book_avatar img`
   - giữ nguyên query string URL ảnh (`.jpg?...`), không cắt sau `?`
   - `book_avatar` có `src` và `data-ni` hoặc nhiều host ảnh: thử tuần tự từng URL, không fail ngay ở URL đầu.
-- `haibabamanga.somee.com`: preview cover ưu tiên `div.manga-cover-container img.manga-cover`, nhận cả `.jpg` và `.png`.
 - `mangadex.org`:
   - ưu tiên route `tag / title / chapter`
   - dùng API chính chủ lấy chapter list, cover preview, ảnh chapter.

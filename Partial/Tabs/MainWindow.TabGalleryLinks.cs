@@ -4413,26 +4413,6 @@ namespace get_link_manga
 
             try
             {
-                if (url.IndexOf("haibabamanga.somee.com", StringComparison.OrdinalIgnoreCase) >= 0 || url.IndexOf("haibaba", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    string normalized = NormalizeHaibabaUrl(url);
-                    string html = await FetchStringAsync(normalized, token);
-                    List<GalleryItem> chapGalleryItems = ExtractHaibabaChapters(html, normalized);
-                    if (chapGalleryItems != null && chapGalleryItems.Count > 0)
-                    {
-                        List<ReaderChapterItem> result = chapGalleryItems
-                            .Select(chap => new ReaderChapterItem
-                            {
-                                Name = chap.Name,
-                                FolderPath = chap.Link,
-                                Pages = new List<ReaderPageItem>()
-                            })
-                            .ToList();
-                        _downloadChapterItemCache[url] = CloneReaderChapterItems(result);
-                        return result;
-                    }
-                }
-
                 if (IsHakoUrl(url) && TryParseHakoBookUrl(url, out _, out _, out string canonicalBookUrl))
                 {
                     string html = await FetchHakoHtmlAsync(canonicalBookUrl, token);

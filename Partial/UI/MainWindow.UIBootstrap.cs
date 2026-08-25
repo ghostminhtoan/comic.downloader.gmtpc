@@ -636,7 +636,6 @@ namespace get_link_manga
             if (d.Contains("truyengg") || d.Contains("sayhentai")) return "truyengg";
             if (d.Contains("mangadex")) return "mangadex";
             if (d.Contains("dilib") || d.Contains("thuviensach")) return "dilib";
-            if (d.Contains("haibaba")) return "haibaba";
             // Fallback: lấy phần chính domain
             var parts = d.Split('.');
             return parts.Length >= 2 ? parts[parts.Length - 2] : d;

@@ -882,7 +882,6 @@ namespace get_link_manga
             AddCreateSubfolderDomainItem("hentaiforce.net");
             AddCreateSubfolderDomainItem("hentaiera.com");
             AddCreateSubfolderDomainItem("hentai2read.com");
-            AddCreateSubfolderDomainItem("haibabamanga.somee.com");
         }
 
         private void AddCreateSubfolderDomainItem(string domainKey)

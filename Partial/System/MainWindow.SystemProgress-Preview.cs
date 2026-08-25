@@ -723,14 +723,6 @@ namespace get_link_manga
                     AddGalleryHoverPreviewCandidate(imageUrls, candidateUrl);
                 }
             }
-            else if (!string.IsNullOrWhiteSpace(item.Link) && IsHaibabaUrl(item.Link))
-            {
-                string html = await FetchStringAsync(item.Link, token);
-                foreach (string candidateUrl in GetHaibabaPreviewUrlCandidatesFromHtml(html, item.Link))
-                {
-                    AddGalleryHoverPreviewCandidate(imageUrls, candidateUrl);
-                }
-            }
             else if (!string.IsNullOrWhiteSpace(item.Link) && IsDilibUrl(item.Link))
             {
                 string html = await FetchStringAsync(item.Link, token);

@@ -309,7 +309,7 @@ namespace get_link_manga
 
             string lower = url.ToLowerInvariant();
             return lower.Contains("truyenqq") || lower.Contains("nettruyen") ||
-                   lower.Contains("daomeoden") || lower.Contains("dilib.vn") || lower.Contains("thuviensach.vn") || lower.Contains("loppytoonn.com") || lower.Contains("haibabamanga") || lower.Contains("vi-hentai") || lower.Contains("vihentai") ||
+                   lower.Contains("daomeoden") || lower.Contains("dilib.vn") || lower.Contains("thuviensach.vn") || lower.Contains("loppytoonn.com") || lower.Contains("vi-hentai") || lower.Contains("vihentai") ||
                    lower.Contains("sayhentai") || lower.Contains("truyengg") || lower.Contains("hentaiforce") ||
                    lower.Contains("damconuong") ||
                    lower.Contains("mangadex.org") || lower.Contains("www.mangadex.org") ||
@@ -487,15 +487,6 @@ namespace get_link_manga
                 if (txtLoppyTagUrl != null) txtLoppyTagUrl.Text = url;
                 BtnLoppyAnalyze_Click(this, new RoutedEventArgs());
             }
-            else if (lowerUrl.Contains("haibabamanga"))
-            {
-                if (allowUiJump)
-                {
-                    SelectMangaTabByHeader("haibabamanga.somee.com");
-                }
-                if (txtHaibabaTagUrl != null) txtHaibabaTagUrl.Text = url;
-                BtnHaibabaAnalyze_Click(this, new RoutedEventArgs());
-            }
             else if (lowerUrl.Contains("vi-hentai") || lowerUrl.Contains("vihentai"))
             {
                 if (allowUiJump)
@@ -625,7 +616,7 @@ namespace get_link_manga
                         continue;
                     }
 
-                    bool allowUiJump = link.IndexOf("loppytoonn.com", StringComparison.OrdinalIgnoreCase) >= 0 || link.IndexOf("haibabamanga", StringComparison.OrdinalIgnoreCase) >= 0;
+                    bool allowUiJump = link.IndexOf("loppytoonn.com", StringComparison.OrdinalIgnoreCase) >= 0;
                     bool handled = await TryAppendSupportedDirectLinkAsync(link, showMessageBox: false, allowUiJump: allowUiJump);
                     if (handled)
                     {
@@ -853,16 +844,6 @@ namespace get_link_manga
                     SelectMangaTabByHeader("loppytoonn.com");
                 }
                 await ImportLoppyDirectLinksAsync(new List<string> { url }, showMessageBox);
-                return true;
-            }
-
-            if (lowerUrl.Contains("haibabamanga"))
-            {
-                if (allowUiJump)
-                {
-                    SelectMangaTabByHeader("haibabamanga.somee.com");
-                }
-                await ImportHaibabaDirectLinksAsync(new List<string> { url }, showMessageBox);
                 return true;
             }
 

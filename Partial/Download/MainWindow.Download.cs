@@ -363,9 +363,7 @@ namespace get_link_manga
                     siteFolder.IndexOf("daomeoden", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     siteFolder.IndexOf("mangadex", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     siteFolder.IndexOf("ggvn", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    siteFolder.IndexOf("sayhentai", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    siteFolder.IndexOf("haibaba", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    siteFolder.IndexOf("somee", StringComparison.OrdinalIgnoreCase) >= 0
+                    siteFolder.IndexOf("sayhentai", StringComparison.OrdinalIgnoreCase) >= 0
                 ));
 
             if (isChapterSite && identityParts != null && identityParts.Length >= 2)
@@ -493,11 +491,6 @@ namespace get_link_manga
                 if (host.Contains("hentai2read"))
                 {
                     return "hentai2read.com";
-                }
-
-                if (host.Contains("haibabamanga"))
-                {
-                    return "haibabamanga.somee.com";
                 }
             }
             catch
@@ -680,10 +673,6 @@ namespace get_link_manga
             else if (lowerKey.Contains("hentai2read"))
             {
                 siteKey = "hentai2read.com";
-            }
-            else if (lowerKey.Contains("haibabamanga"))
-            {
-                siteKey = "haibabamanga.somee.com";
             }
 
             string subfolder = GetCreateSubfolderPath(siteKey);
@@ -3047,12 +3036,6 @@ namespace get_link_manga
                 return;
             }
 
-            if (IsHaibabaUrl(item.Link))
-            {
-                await DownloadHaibabaGalleryAsync(item, rootFolder, token, queueItem, chapterFilter);
-                return;
-            }
-
             if (IsMangadexUrl(item.Link))
             {
                 await DownloadMangadexGalleryAsync(item, rootFolder, token, queueItem, chapterFilter);
@@ -4807,11 +4790,6 @@ namespace get_link_manga
 
             return _sharedClients.GetOrAdd(host, h => {
                 bool useCookies = true;
-                if (h.IndexOf("haibabamanga.somee.com", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    h.IndexOf("haibaba", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    useCookies = false;
-                }
 
                 var handler = new HttpClientHandler
                 {
@@ -6090,10 +6068,6 @@ namespace get_link_manga
                     if (url.IndexOf("hentai2read.com", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         request.Headers.Referrer = new Uri("https://hentai2read.com/");
-                    }
-                    else if (url.IndexOf("haibabamanga.somee.com", StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        request.Headers.Referrer = new Uri("http://haibabamanga.somee.com/");
                     }
                 }
                 using (var response = await httpClient.SendAsync(request, token))

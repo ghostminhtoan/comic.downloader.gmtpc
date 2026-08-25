@@ -602,7 +602,6 @@ namespace get_link_manga
                    (link.IndexOf("hentaiforce.net/view/", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     IsTruyenqqUrl(link) ||
                     IsDilibUrl(link) ||
-                    IsHaibabaUrl(link) ||
                     IsNettruyenUrl(link) ||
                     IsMangadexUrl(link) ||
                     IsNhentaiUrl(link) ||
@@ -706,12 +705,10 @@ namespace get_link_manga
             string html = await FetchStringAsync(link, CancellationToken.None);
             string coverUrlNonMangadex = link.IndexOf("hentaiforce.net/view/", StringComparison.OrdinalIgnoreCase) >= 0
                 ? ExtractHentaiforceCoverUrl(html, link)
-                : IsHaibabaUrl(link)
-                    ? ExtractHaibabaPreviewUrlFromHtml(html, link)
-                    : IsDilibUrl(link)
-                        ? ExtractDilibPreviewUrlFromHtml(html, link)
-                    : IsNettruyenUrl(link)
-                        ? ExtractNettruyenviet10PreviewUrlFromHtml(html, link)
+                : IsDilibUrl(link)
+                    ? ExtractDilibPreviewUrlFromHtml(html, link)
+                : IsNettruyenUrl(link)
+                    ? ExtractNettruyenviet10PreviewUrlFromHtml(html, link)
                     : IsTruyenqqUrl(link)
                         ? ExtractTruyenqqPreviewUrlFromHtml(html, link)
                     : link.IndexOf("hitomi.la", StringComparison.OrdinalIgnoreCase) >= 0

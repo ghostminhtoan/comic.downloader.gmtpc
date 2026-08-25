@@ -469,8 +469,6 @@ namespace get_link_manga
                     return "https://thuviensach.vn/";
                 case "loppytoonn.com":
                     return "https://loppytoonn.com/";
-                case "haibabamanga.somee.com":
-                    return "http://haibabamanga.somee.com/";
                 case "hako":
                     return "https://ln.hako.vn/";
                 case "vihentai":
@@ -506,8 +504,6 @@ namespace get_link_manga
                     return "https://thuviensach.vn/truyen-tranh/shounen/";
                 case "loppytoonn.com":
                     return "https://loppytoonn.com/the-loai/lang-man";
-                case "haibabamanga.somee.com":
-                    return "http://haibabamanga.somee.com/Home/Category?slug=action";
                 case "daomeoden":
                     return "https://daomeoden.net/the-loai/romance.html";
                 case "vihentai":
@@ -547,8 +543,6 @@ namespace get_link_manga
                     return txtDilibTagUrl;
                 case "loppytoonn.com":
                     return txtLoppyTagUrl;
-                case "haibabamanga.somee.com":
-                    return txtHaibabaTagUrl;
                 case "daomeoden":
                     return txtDaomeodenTagUrl;
                 case "vihentai":

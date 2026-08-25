@@ -167,7 +167,6 @@ namespace get_link_manga
         static MainWindow()
         {
             InitializeHttpClientState();
-            RunHaibabaChapterExtractionSelfCheck();
         }
 
         public MainWindow()
@@ -1033,10 +1032,6 @@ namespace get_link_manga
                 var handler = _scopedHandlers.GetOrAdd(host, k =>
                 {
                     bool useCookies = true;
-                    if (!string.IsNullOrWhiteSpace(urlOrHost) && urlOrHost.IndexOf("haibabamanga.somee.com", StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        useCookies = false;
-                    }
                     if (!string.IsNullOrWhiteSpace(urlOrHost) && urlOrHost.IndexOf("mangadex.org", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         useCookies = false;

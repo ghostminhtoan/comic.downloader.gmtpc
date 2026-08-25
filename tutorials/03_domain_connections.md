@@ -14,7 +14,6 @@ en: Domain Connections & Concurrency
 • **nettruyen.tech**: 2 connection, 2 truyện
 • **thuviensach.vn** (`dilib.vn`): 2 connection, 4 truyện
 • **loppytoonn.com**: 4 connection, 4 truyện
-• **haibabamanga.somee.com**: 2 connection, 2 truyện
 • **mangadex.org**: 2 connection, 2 truyện
 
 ### 🔞 2. Hentai
@@ -46,7 +45,6 @@ To optimize download speed and avoid server rate-limits (HTTP 429 / Cloudflare 4
 • **nettruyen.tech**: 2 connections, 2 books
 • **thuviensach.vn** (`dilib.vn`): 2 connections, 4 books
 • **loppytoonn.com**: 4 connections, 4 books
-• **haibabamanga.somee.com**: 2 connections, 2 books
 • **mangadex.org**: 2 connections, 2 books
 
 ### 🔞 2. Hentai
