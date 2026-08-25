@@ -4205,12 +4205,6 @@ namespace get_link_manga
 
             try
             {
-                if (link.IndexOf("doctruyen.us", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    number = ParseDoctruyenChapterNumber(link);
-                    return number > 0d;
-                }
-
                 if (IsHakoUrl(link))
                 {
                     double? hakoNum = TryExtractHakoChapterNumber(null, link);
@@ -4558,26 +4552,6 @@ namespace get_link_manga
 
                     _downloadChapterItemCache[url] = new List<ReaderChapterItem>();
                     return new List<ReaderChapterItem>();
-                }
-                else if (url.IndexOf("doctruyen.us", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    string normalized = NormalizeDoctruyenUrl(url);
-                    string html = await FetchStringAsync(normalized, token);
-                    List<string> chapterLinks = ExtractDoctruyenChapterLinks(html, normalized);
-                    if (chapterLinks.Count > 0)
-                    {
-                        List<ReaderChapterItem> result = chapterLinks
-                            .OrderBy(ParseChapterNumber)
-                            .Select(link => new ReaderChapterItem
-                            {
-                                Name = BuildDownloadChapterLabel(link),
-                                FolderPath = link,
-                                Pages = new List<ReaderPageItem>()
-                            })
-                            .ToList();
-                        _downloadChapterItemCache[url] = CloneReaderChapterItems(result);
-                        return result;
-                    }
                 }
                 else if (url.IndexOf("loppytoonn.com", StringComparison.OrdinalIgnoreCase) >= 0)
                 {

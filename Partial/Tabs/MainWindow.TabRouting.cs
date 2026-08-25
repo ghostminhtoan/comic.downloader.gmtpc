@@ -309,7 +309,7 @@ namespace get_link_manga
 
             string lower = url.ToLowerInvariant();
             return lower.Contains("truyenqq") || lower.Contains("nettruyen") ||
-                   lower.Contains("daomeoden") || lower.Contains("dilib.vn") || lower.Contains("thuviensach.vn") || lower.Contains("doctruyen.us") || lower.Contains("loppytoonn.com") || lower.Contains("haibabamanga") || lower.Contains("vi-hentai") || lower.Contains("vihentai") ||
+                   lower.Contains("daomeoden") || lower.Contains("dilib.vn") || lower.Contains("thuviensach.vn") || lower.Contains("loppytoonn.com") || lower.Contains("haibabamanga") || lower.Contains("vi-hentai") || lower.Contains("vihentai") ||
                    lower.Contains("sayhentai") || lower.Contains("truyengg") || lower.Contains("hentaiforce") ||
                    lower.Contains("damconuong") ||
                    lower.Contains("mangadex.org") || lower.Contains("www.mangadex.org") ||
@@ -477,12 +477,7 @@ namespace get_link_manga
                 BtnDilibFetchInfo_Click(this, new RoutedEventArgs());
                 await WaitAndScrapeAsync(btnDilibFetchInfo, BtnDilibScrape_Click);
             }
-            else if (lowerUrl.Contains("doctruyen.us"))
-            {
-                if (allowUiJump && tabManga != null) tabManga.SelectedIndex = 4;
-                if (txtDoctruyenTagUrl != null) txtDoctruyenTagUrl.Text = url;
-                BtnDoctruyenAnalyze_Click(this, new RoutedEventArgs());
-            }
+
             else if (lowerUrl.Contains("loppytoonn.com"))
             {
                 if (allowUiJump)
@@ -849,12 +844,7 @@ namespace get_link_manga
                 return true;
             }
 
-            if (lowerUrl.Contains("doctruyen.us"))
-            {
-                if (allowUiJump && tabManga != null) tabManga.SelectedIndex = 4;
-                await ImportDoctruyenDirectLinksAsync(new List<string> { url }, showMessageBox);
-                return true;
-            }
+
 
             if (lowerUrl.Contains("loppytoonn.com"))
             {

@@ -945,66 +945,7 @@
                             </ScrollViewer>
                         </TabItem>
 
-                        <TabItem Header="doctruyen.us (đang bị lỗi server)" Style="{StaticResource CyberpunkTabItem}">
-                            <TabItem.Tag>
-                                <SolidColorBrush Color="#7fe627"/>
-                            </TabItem.Tag>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" CanContentScroll="True" Background="Transparent" BorderThickness="0" Padding="0">
-                            <Grid Margin="0,6,0,0">
-                                <Border Name="borderDoctruyenLeftPanel" Style="{StaticResource CyberpunkCard}" Padding="15">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
-                                        </Grid.RowDefinitions>
 
-                                        <StackPanel Grid.Row="0" Margin="0,0,0,15">
-                                            <TextBlock Text="PARAMETERS CONFIG" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"/>
-                                            <WrapPanel Orientation="Horizontal" Margin="0,10,0,0">
-                                                <Button Name="btnOpenHomepageDoctruyen" Tag="doctruyen.us" Content="HOME" Click="BtnOpenHomepage_Click" Style="{StaticResource CompactCyanButton}" MinWidth="86" Padding="8,0" FontWeight="Bold"/>
-                                                <Button Tag="doctruyen.us" Content="RESTORE DEFAULT TAG" Click="BtnRestoreDefaultTag_Click" Style="{StaticResource CompactCyanButton}" MinWidth="156" Padding="8,0" FontWeight="Bold"/>
-                                                <Button Content="HISTORY" Click="BtnOpenHistory_Click" Style="{StaticResource CompactCyanButton}" MinWidth="78" Padding="8,0" FontWeight="Bold"/>
-                                                <Button Content="BOOKMARKS" Click="BtnOpenBookmarks_Click" Style="{StaticResource CompactCyanButton}" MinWidth="94" Padding="8,0" FontWeight="Bold"/>
-                                            </WrapPanel>
-                                        </StackPanel>
-
-                                        <StackPanel Grid.Row="1" Margin="0,0,0,12">
-                                            <TextBlock Text="TARGET URL" Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,0,6"/>
-                                            <TextBox Name="txtDoctruyenTagUrl"
-                                                     Text="https://doctruyen.us/the-loai/action"
-                                                     Background="#0e121a"
-                                                     BorderBrush="{StaticResource CyberpunkBorderBrush}"
-                                                     Foreground="{StaticResource CyberpunkTextBrush}"
-                                                     CaretBrush="{StaticResource CyberpunkCyanBrush}"
-                                                     Height="32"
-                                                     PreviewKeyDown="TxtDoctruyenTagUrl_PreviewKeyDown"/>
-                                        </StackPanel>
-
-                                        <Grid Grid.Row="2" Margin="0,0,0,15">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="10"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Button Grid.Column="0" Name="btnDoctruyenAnalyze" Content="ANALYZE TARGET PAGE" Click="BtnDoctruyenAnalyze_Click" Style="{StaticResource TabFetchPrimaryButton}"/>
-                                            <Button Grid.Column="2" Name="btnDoctruyenPasteDirect" Content="PASTE DIRECT LINK" Click="BtnDoctruyenPasteDirect_Click" Style="{StaticResource WideActionButton}"/>
-                                        </Grid>
-
-                                        <Border Grid.Row="3" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="12" Margin="0,0,0,15">
-                                            <TextBlock Name="txtDoctruyenPageHintText" Text="Web này không hỗ trợ page number." Foreground="{StaticResource CyberpunkYellowBrush}" FontSize="12" FontWeight="Bold" TextWrapping="Wrap"/>
-                                        </Border>
-
-                                        <Border Grid.Row="4" Background="#06090e" BorderBrush="{StaticResource CyberpunkBorderBrush}" BorderThickness="1" CornerRadius="3" Padding="12" Visibility="Collapsed">
-                                            <TextBlock Text="Hỗ trợ link thể loại, book, chapter. Analyze sẽ tự nhận diện URL doctruyen.us và đưa đúng item vào queue. Chapter chỉ lấy ảnh trong reader-images-container, bỏ base64 và chỉ giữ đuôi ảnh hợp lệ." Foreground="{StaticResource CyberpunkMutedTextBrush}" FontSize="11" TextWrapping="Wrap"/>
-                                        </Border>
-                                    </Grid>
-                                </Border>
-                            </Grid>
-                            </ScrollViewer>
-                        </TabItem>
 
                         <TabItem Header="loppytoonn.com" Style="{StaticResource CyberpunkTabItem}">
                             <TabItem.Tag>

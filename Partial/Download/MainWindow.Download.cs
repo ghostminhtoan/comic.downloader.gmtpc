@@ -347,7 +347,6 @@ namespace get_link_manga
                                  siteFolder == "vi-hentai.pro" ||
                                  siteFolder == "damconuong.shop" ||
                                  siteFolder == "nettruyen" ||
-                siteFolder == "doctruyen.us" ||
                 siteFolder == "loppytoonn.com" ||
                 siteFolder == "mangadex.org" ||
                 siteFolder == "sayhentai.tv" ||
@@ -357,7 +356,6 @@ namespace get_link_manga
                     siteFolder.IndexOf("vi-hentai", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     siteFolder.IndexOf("damconuong", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     siteFolder.IndexOf("nettruyen", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    siteFolder.IndexOf("doctruyen", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     siteFolder.IndexOf("loppytoonn", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     siteFolder.IndexOf("hentai2read", StringComparison.OrdinalIgnoreCase) >= 0 ||
                     siteFolder.IndexOf("dilib", StringComparison.OrdinalIgnoreCase) >= 0 ||
@@ -440,11 +438,6 @@ namespace get_link_manga
                 if (host.Contains("dilib.vn") || host.Contains("thuviensach.vn"))
                 {
                     return "thuviensach.vn";
-                }
-
-                if (host.Contains("doctruyen.us"))
-                {
-                    return "doctruyen.us";
                 }
 
                 if (host.Contains("loppytoonn.com"))
@@ -647,10 +640,6 @@ namespace get_link_manga
             else if (lowerKey.Contains("dilib.vn") || lowerKey.Contains("thuviensach.vn"))
             {
                 siteKey = "thuviensach.vn";
-            }
-            else if (lowerKey.Contains("doctruyen.us"))
-            {
-                siteKey = "doctruyen.us";
             }
             else if (lowerKey.Contains("loppytoonn.com"))
             {
@@ -3052,12 +3041,6 @@ namespace get_link_manga
                 return;
             }
 
-            if (IsDoctruyenUrl(item.Link))
-            {
-                await DownloadDoctruyenGalleryAsync(item, rootFolder, token, queueItem, chapterFilter);
-                return;
-            }
-
             if (IsLoppyUrl(item.Link))
             {
                 await DownloadLoppyGalleryAsync(item, rootFolder, token, queueItem, chapterFilter);
@@ -4773,25 +4756,6 @@ namespace get_link_manga
                     }
                 }
 
-                if (host.Contains("doctruyen.us"))
-                {
-                    var segments = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (segments.Length >= 2 && segments[0].Equals("the-loai", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return "doctruyen.us|the-loai|" + segments[1].ToLowerInvariant();
-                    }
-
-                    if (segments.Length >= 2)
-                    {
-                        return "doctruyen.us|" + segments[0].ToLowerInvariant();
-                    }
-
-                    if (segments.Length == 1)
-                    {
-                        return "doctruyen.us|" + segments[0].ToLowerInvariant();
-                    }
-                }
-
                 if (host.Contains("loppytoonn.com"))
                 {
                     var segments = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
@@ -5551,7 +5515,6 @@ namespace get_link_manga
                 if (host.Contains("hentai2read")) return "hentai2read";
                 if (host.Contains("daomeoden")) return "daomeoden";
                 if (host.Contains("dilib.vn") || host.Contains("thuviensach.vn")) return "thuviensach.vn";
-                if (host.Contains("doctruyen.us")) return "doctruyen.us";
                 if (host.Contains("loppytoonn.com")) return "loppytoonn.com";
 
                 var parts = host.Split('.');

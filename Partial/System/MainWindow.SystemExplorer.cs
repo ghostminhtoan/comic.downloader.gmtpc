@@ -276,8 +276,6 @@ namespace get_link_manga
                 return "nettruyen";
             if (lower.Contains("dilib") || lower.Contains("thuviensach"))
                 return "thuviensach.vn";
-            if (lower.Contains("doctruyen"))
-                return "doctruyen.us";
             if (lower.Contains("loppytoonn"))
                 return "loppytoonn.com";
             if (lower.Contains("daomeoden"))

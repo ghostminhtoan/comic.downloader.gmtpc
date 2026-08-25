@@ -191,7 +191,6 @@ Chuẩn làm việc repo hiện tại. Mục tiêu: sửa đúng chỗ, ít file
   - book slug chứa số: nhận dạng book từ chapter URL chỉ cắt sau marker chapter (`-chap-...` hoặc `/chuong...`), không xóa số cuối book slug.
   - book URL hợp lệ gồm cả `/{book-slug}.html` và `/truyen-tranh/{book-slug}`; `/truyen-tranh/{book-slug}` không được route nhầm thành category.
   - scan missing integer chapter: tên `ReaderChapterItem` lấy từ chapter URL/label (`chap 469`), không dùng title chứa tên book (tránh lỗi parse số từ book như `7 Viên...` thành chapter 7).
-- `doctruyen.us`
 
 ### Hentai / ảnh
 - `daomeoden`

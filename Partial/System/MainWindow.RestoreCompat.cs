@@ -467,8 +467,6 @@ namespace get_link_manga
                 case "dilib.vn":
                 case "thuviensach.vn":
                     return "https://thuviensach.vn/";
-                case "doctruyen.us":
-                    return "https://doctruyen.us/";
                 case "loppytoonn.com":
                     return "https://loppytoonn.com/";
                 case "haibabamanga.somee.com":
@@ -483,10 +481,6 @@ namespace get_link_manga
                     return "https://sayhentai.cx/";
                 case "hentaiforce":
                     return "https://hentaiforce.net/";
-                case "nhentai.net":
-                    return "https://nhentai.net/";
-                case "nhentai":
-                    return "https://nhentai.net/";
                 case "hentaiera":
                     return "https://hentaiera.com/";
                 case "hentai2read":
@@ -510,8 +504,6 @@ namespace get_link_manga
                 case "dilib.vn":
                 case "thuviensach.vn":
                     return "https://thuviensach.vn/truyen-tranh/shounen/";
-                case "doctruyen.us":
-                    return "https://doctruyen.us/the-loai/action";
                 case "loppytoonn.com":
                     return "https://loppytoonn.com/the-loai/lang-man";
                 case "haibabamanga.somee.com":
@@ -526,10 +518,6 @@ namespace get_link_manga
                     return "https://sayhentai.cx/genre/romance";
                 case "hentaiforce":
                     return "https://hentaiforce.net/search?q=%22uncensored%22+%22full+color";
-                case "nhentai.net":
-                    return "https://nhentai.net/tag/raccoon-girl/";
-                case "nhentai":
-                    return "https://nhentai.net/tag/raccoon-girl/";
                 case "hentai2read":
                     return "https://hentai2read.com/";
                 case "hentaiera":
@@ -557,8 +545,6 @@ namespace get_link_manga
                 case "dilib.vn":
                 case "thuviensach.vn":
                     return txtDilibTagUrl;
-                case "doctruyen.us":
-                    return txtDoctruyenTagUrl;
                 case "loppytoonn.com":
                     return txtLoppyTagUrl;
                 case "haibabamanga.somee.com":

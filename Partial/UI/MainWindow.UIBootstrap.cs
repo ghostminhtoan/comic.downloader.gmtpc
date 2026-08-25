@@ -629,14 +629,12 @@ namespace get_link_manga
             if (d.Contains("vi-hentai") || d.Contains("hentaivn")) return "hentaivn";
             if (d.Contains("hentai2read")) return "hentai2read";
             if (d.Contains("daomeoden")) return "daomeoden";
-            if (d.Contains("nhentai")) return "nhentai.net";
             if (d.Contains("hentaiforce")) return "hentaiforce";
             if (d.Contains("hentaiera")) return "hentaiera";
             if (d.Contains("damconuong")) return "damconuong";
             if (d.Contains("hako") || d.Contains("docln")) return "hako";
             if (d.Contains("truyengg") || d.Contains("sayhentai")) return "truyengg";
             if (d.Contains("mangadex")) return "mangadex";
-            if (d.Contains("doctruyen")) return "doctruyen";
             if (d.Contains("dilib") || d.Contains("thuviensach")) return "dilib";
             if (d.Contains("haibaba")) return "haibaba";
             // Fallback: lấy phần chính domain
