@@ -1279,8 +1279,8 @@ namespace get_link_manga
             {
                 Text = headerText,
                 FontWeight = FontWeights.Bold,
-                FontSize = 11.5,
-                Margin = new Thickness(12, 6, 12, 6),
+                FontSize = 13.0,
+                Margin = new Thickness(14, 7, 14, 7),
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             };
@@ -1348,8 +1348,8 @@ namespace get_link_manga
                 BorderBrush = (Brush)TryFindResource("CyberpunkBorderBrush") ?? Brushes.DarkGray,
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(8),
-                Padding = new Thickness(12),
-                Margin = new Thickness(0, 0, 0, 10)
+                Padding = new Thickness(14),
+                Margin = new Thickness(0, 0, 0, 12)
             };
 
             var stack = new StackPanel();
@@ -1361,8 +1361,8 @@ namespace get_link_manga
                     Text = title,
                     Foreground = (Brush)TryFindResource("CyberpunkYellowBrush") ?? Brushes.Gold,
                     FontWeight = FontWeights.Bold,
-                    FontSize = 12.5,
-                    Margin = new Thickness(0, 0, 0, 6)
+                    FontSize = 14.5,
+                    Margin = new Thickness(0, 0, 0, 8)
                 };
                 stack.Children.Add(titleBlock);
             }
@@ -1373,9 +1373,9 @@ namespace get_link_manga
                 {
                     Text = body,
                     Foreground = (Brush)TryFindResource("CyberpunkTextBrush") ?? Brushes.White,
-                    FontSize = 11.5,
+                    FontSize = 13.0,
                     TextWrapping = TextWrapping.Wrap,
-                    LineHeight = 18
+                    LineHeight = 21
                 };
                 stack.Children.Add(bodyBlock);
             }

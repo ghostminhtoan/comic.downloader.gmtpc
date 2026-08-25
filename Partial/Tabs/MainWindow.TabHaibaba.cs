@@ -1103,7 +1103,31 @@ namespace get_link_manga
         {
             string chapterUrl = NormalizeHaibabaUrl(item.Link);
             HaibabaLog($"Đang fetch chapter URL: {chapterUrl}");
-            string html = await FetchStringAsync(chapterUrl, token);
+
+            string html = null;
+            int maxChapterFetchAttempts = 3;
+            for (int attempt = 1; attempt <= maxChapterFetchAttempts; attempt++)
+            {
+                token.ThrowIfCancellationRequested();
+                try
+                {
+                    html = await FetchStringAsync(chapterUrl, token);
+                    if (!string.IsNullOrWhiteSpace(html))
+                    {
+                        break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    HaibabaLog($"Lỗi tải chapter HTML lần {attempt}/{maxChapterFetchAttempts} ({chapterUrl}): {ex.Message}");
+                    if (attempt >= maxChapterFetchAttempts)
+                    {
+                        throw;
+                    }
+                    await Task.Delay(1000 * attempt, token);
+                }
+            }
+
             HaibabaLog($"Fetched chapter html size: {html?.Length ?? 0}");
             string bookTitle = string.IsNullOrWhiteSpace(bookTitleOverride)
                 ? ExtractHaibabaBookTitleFromChapterHtml(html, chapterUrl)

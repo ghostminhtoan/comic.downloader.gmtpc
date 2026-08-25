@@ -6087,13 +6087,13 @@ namespace get_link_manga
             {
                 if (!string.IsNullOrWhiteSpace(url))
                 {
-                    if (url.IndexOf("nhentai.net", StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        request.Headers.Referrer = new Uri("https://nhentai.net/");
-                    }
-                    else if (url.IndexOf("hentai2read.com", StringComparison.OrdinalIgnoreCase) >= 0)
+                    if (url.IndexOf("hentai2read.com", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         request.Headers.Referrer = new Uri("https://hentai2read.com/");
+                    }
+                    else if (url.IndexOf("haibabamanga.somee.com", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        request.Headers.Referrer = new Uri("http://haibabamanga.somee.com/");
                     }
                 }
                 using (var response = await httpClient.SendAsync(request, token))
