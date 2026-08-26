@@ -76,6 +76,106 @@ namespace get_link_manga
             SafeRefreshResultsView();
         }
 
+        private System.Windows.Threading.DispatcherTimer _autoScrollDownloadingTimer;
+
+        private void TglAutoScrollDownloading_Click(object sender, RoutedEventArgs e)
+        {
+            if (tglAutoScrollDownloading?.IsChecked == true)
+            {
+                if (_autoScrollDownloadingTimer == null)
+                {
+                    _autoScrollDownloadingTimer = new System.Windows.Threading.DispatcherTimer
+                    {
+                        Interval = TimeSpan.FromSeconds(5)
+                    };
+                    _autoScrollDownloadingTimer.Tick += AutoScrollDownloadingTimer_Tick;
+                }
+                _autoScrollDownloadingTimer.Start();
+                PerformAutoScrollToLowestDownloadingItem();
+            }
+            else
+            {
+                _autoScrollDownloadingTimer?.Stop();
+            }
+        }
+
+        private void AutoScrollDownloadingTimer_Tick(object sender, EventArgs e)
+        {
+            if (tglAutoScrollDownloading?.IsChecked != true)
+            {
+                _autoScrollDownloadingTimer?.Stop();
+                return;
+            }
+
+            PerformAutoScrollToLowestDownloadingItem();
+        }
+
+        private void PerformAutoScrollToLowestDownloadingItem()
+        {
+            try
+            {
+                GalleryItem lowestDownloadingItem = null;
+
+                if (_isResultsThumbnailViewEnabled && lbResultsThumbnail != null)
+                {
+                    for (int i = lbResultsThumbnail.Items.Count - 1; i >= 0; i--)
+                    {
+                        if (lbResultsThumbnail.Items[i] is GalleryItem gItem && IsGalleryItemDownloading(gItem))
+                        {
+                            lowestDownloadingItem = gItem;
+                            break;
+                        }
+                    }
+
+                    if (lowestDownloadingItem != null)
+                    {
+                        lbResultsThumbnail.ScrollIntoView(lowestDownloadingItem);
+                    }
+                }
+                else if (dgResults != null)
+                {
+                    for (int i = dgResults.Items.Count - 1; i >= 0; i--)
+                    {
+                        if (dgResults.Items[i] is GalleryItem gItem && IsGalleryItemDownloading(gItem))
+                        {
+                            lowestDownloadingItem = gItem;
+                            break;
+                        }
+                    }
+
+                    if (lowestDownloadingItem != null)
+                    {
+                        dgResults.ScrollIntoView(lowestDownloadingItem);
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private static bool IsGalleryItemDownloading(GalleryItem item)
+        {
+            if (item == null) return false;
+            string status = item.Status;
+            if (!string.IsNullOrEmpty(status))
+            {
+                if (status.IndexOf("Downloading", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    status.IndexOf("Đang tải", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.DownloadingChapter) &&
+                !string.Equals(status, "Completed", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(status, "Paused", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(status, "Stopped", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         private bool IsCompactRowsEnabled()
         {
             return chkCompactRows?.IsChecked == true;

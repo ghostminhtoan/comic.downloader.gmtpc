@@ -54,6 +54,8 @@ namespace get_link_manga
             if (btnToolbarSortByName != null) btnToolbarSortByName.Content = "Sắp xếp theo tên";
             if (btnPopupPreviewToggle != null) btnPopupPreviewToggle.ToolTip = "XEM TRƯỚC POPUP";
             if (chkCompactRows != null) chkCompactRows.ToolTip = "NÉN DÒNG";
+            if (tglAutoScrollDownloading != null) tglAutoScrollDownloading.ToolTip = "TỰ CUỘN ĐẾN TRUYỆN ĐANG TẢI";
+            if (lblAutoScrollDownloading != null) lblAutoScrollDownloading.ToolTip = "TỰ CUỘN ĐẾN TRUYỆN ĐANG TẢI";
             if (tglClearCookieAndRetry != null) tglClearCookieAndRetry.ToolTip = "TỰ ĐỘNG TẢI";
             if (lblClearCookieAndRetry != null) lblClearCookieAndRetry.Text = "TỰ ĐỘNG TẢI";
             if (chkHideSettings != null) chkHideSettings.ToolTip = "ẨN THIẾT LẬP";
