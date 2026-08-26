@@ -91,10 +91,17 @@ namespace get_link_manga
             _prefetchCts = new CancellationTokenSource();
             CancellationToken token = _prefetchCts.Token;
 
-            var items = (ResultsView != null)
+            var allItems = (ResultsView != null)
                 ? ResultsView.Cast<object>().OfType<GalleryItem>().Where(SupportsHoverPreview).ToList()
                 : _scrapedItems.Where(SupportsHoverPreview).ToList();
-            if (items.Count == 0) return;
+            if (allItems.Count == 0) return;
+
+            // Sắp xếp ưu tiên: item trong danh sách hiển thị (_thumbnailVisibleItems) hoặc item chưa có cache file lên trước
+            var visibleSet = new HashSet<GalleryItem>(_thumbnailVisibleItems ?? Enumerable.Empty<GalleryItem>());
+            var prioritizedItems = allItems
+                .OrderByDescending(x => visibleSet.Contains(x))
+                .ThenBy(x => x.HasHoverPreviewThumbnailFile)
+                .ToList();
 
             int workerCount = 4;
             if (cmbThumbCacheConnection != null && cmbThumbCacheConnection.SelectedItem is ComboBoxItem selectedItem &&
@@ -105,13 +112,14 @@ namespace get_link_manga
 
             Task.Run(async () =>
             {
-                var queue = new System.Collections.Concurrent.ConcurrentQueue<GalleryItem>(items);
+                var queue = new System.Collections.Concurrent.ConcurrentQueue<GalleryItem>(prioritizedItems);
                 var workers = new List<Task>();
 
                 for (int i = 0; i < workerCount; i++)
                 {
                     workers.Add(Task.Run(async () =>
                     {
+                        int processedCount = 0;
                         while (queue.TryDequeue(out var item))
                         {
                             if (token.IsCancellationRequested) break;
@@ -120,6 +128,12 @@ namespace get_link_manga
                                 // Tải file cache ảnh về ổ cứng (.tmp/preview-cache)
                                 await EnsureGalleryHoverPreviewAsync(item, fetchTags: false);
                                 await EnsureGalleryHoverPreviewFileAsync(item, token, fetchTags: false);
+
+                                processedCount++;
+                                if (processedCount % 4 == 0)
+                                {
+                                    var _ = Dispatcher.BeginInvoke(new Action(UpdateThumbnailsVirtualizationWindow), System.Windows.Threading.DispatcherPriority.Background);
+                                }
                             }
                             catch { }
                         }
@@ -127,6 +141,7 @@ namespace get_link_manga
                 }
 
                 await Task.WhenAll(workers);
+                var __ = Dispatcher.BeginInvoke(new Action(UpdateThumbnailsVirtualizationWindow), System.Windows.Threading.DispatcherPriority.Background);
             }, token);
         }
 
@@ -800,6 +815,11 @@ namespace get_link_manga
             }
 
             AddGalleryHoverPreviewCandidate(imageUrls, item.HoverPreviewThumbnailUrl);
+            if (imageUrls.Count > 0)
+            {
+                return imageUrls;
+            }
+
             if (!string.IsNullOrWhiteSpace(item.Link) && IsTruyenqqUrl(item.Link))
             {
                 foreach (string candidateUrl in await GetCachedGalleryHoverPreviewCandidatesAsync(item.Link, token))
@@ -1421,16 +1441,36 @@ namespace get_link_manga
                 return false;
             }
 
-            originalPath = Path.Combine(directory, fileBaseName + ".webp");
-
-            if (!File.Exists(originalPath))
+            string[] candidateExtensions = { ".webp", ".jpg", ".png", ".jpeg" };
+            foreach (string ext in candidateExtensions)
             {
-                originalPath = null;
-                return false;
+                string testPath = Path.Combine(directory, fileBaseName + ext);
+                if (File.Exists(testPath))
+                {
+                    originalPath = testPath;
+                    thumbnailPath = testPath;
+                    return true;
+                }
             }
 
-            thumbnailPath = originalPath;
-            return true;
+            // Fallback: nếu tên file có [Language] mà không thấy, thử tìm file không có [Language]
+            var langRegex = new Regex(@"\s*\[(english|japanese|korean|chinese|vietnamese|french|spanish|german|russian|italian|portuguese|thai|indonesian|日本語|中文|한국어)\]", RegexOptions.IgnoreCase);
+            if (langRegex.IsMatch(fileBaseName))
+            {
+                string cleanBaseName = langRegex.Replace(fileBaseName, "").Trim();
+                foreach (string ext in candidateExtensions)
+                {
+                    string testPath = Path.Combine(directory, cleanBaseName + ext);
+                    if (File.Exists(testPath))
+                    {
+                        originalPath = testPath;
+                        thumbnailPath = testPath;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private static string GetGalleryHoverPreviewFileExtension(string imageUrl, string contentType)

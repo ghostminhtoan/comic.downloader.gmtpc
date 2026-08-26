@@ -1700,7 +1700,40 @@ namespace get_link_manga
             _thumbnailVisibleItems.Clear();
             for (int i = 0; i < targetCount; i++)
             {
-                _thumbnailVisibleItems.Add(orderedItems[i]);
+                var item = orderedItems[i];
+                if (item != null)
+                {
+                    // Nạp ngay file cache nếu đã có sẵn trên đĩa
+                    if (!item.HasHoverPreviewThumbnailFile && !string.IsNullOrWhiteSpace(item.HoverPreviewThumbnailUrl))
+                    {
+                        string cacheBasePath = GetGalleryHoverPreviewCacheBasePath(item, item.HoverPreviewThumbnailUrl);
+                        if (TryGetGalleryHoverPreviewCacheFiles(cacheBasePath, out string orig, out string thumb))
+                        {
+                            item.HoverPreviewLocalPath = orig;
+                            item.HoverPreviewThumbnailLocalPath = thumb;
+
+                            string txtTagPath = cacheBasePath + ".txt";
+                            if (item.Tag == null && System.IO.File.Exists(txtTagPath))
+                            {
+                                try
+                                {
+                                    string content = System.IO.File.ReadAllText(txtTagPath);
+                                    if (!string.IsNullOrWhiteSpace(content))
+                                    {
+                                        item.Tag = Newtonsoft.Json.Linq.JObject.Parse(content);
+                                    }
+                                }
+                                catch { }
+                            }
+                        }
+                    }
+
+                    if (item.HoverPreviewThumbnailImageSource == null && item.HasHoverPreviewThumbnailFile)
+                    {
+                        item.ResetHoverPreviewCache();
+                    }
+                }
+                _thumbnailVisibleItems.Add(item);
             }
 
             // Chạy Prefetch bất đồng bộ ở background thread để tránh Task.Delay/Jitter chặn UI Thread gây Not Responding

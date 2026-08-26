@@ -144,14 +144,35 @@ namespace get_link_manga
                                 string updatedName = langCheckRegex.Replace(curName, $"[{detectedLanguage}]");
                                 if (updatedName != curName)
                                 {
+                                    string oldName = item.Name;
                                     item.Name = updatedName;
+                                    RenameGalleryHoverPreviewCache(oldName, updatedName, item);
                                 }
                             }
                             else
                             {
-                                item.Name = $"{curName} [{detectedLanguage}]";
+                                string oldName = item.Name;
+                                string updatedName = $"{curName} [{detectedLanguage}]";
+                                item.Name = updatedName;
+                                RenameGalleryHoverPreviewCache(oldName, updatedName, item);
                             }
                         }
+
+                        // Lưu cache tag ra file .txt trong preview-cache
+                        try
+                        {
+                            string cacheBasePath = GetGalleryHoverPreviewCacheBasePath(item, item.HoverPreviewThumbnailUrl);
+                            if (!string.IsNullOrWhiteSpace(cacheBasePath))
+                            {
+                                string dir = System.IO.Path.GetDirectoryName(cacheBasePath);
+                                if (!string.IsNullOrWhiteSpace(dir) && !System.IO.Directory.Exists(dir))
+                                {
+                                    System.IO.Directory.CreateDirectory(dir);
+                                }
+                                System.IO.File.WriteAllText(cacheBasePath + ".txt", jTagsObj.ToString(Newtonsoft.Json.Formatting.None));
+                            }
+                        }
+                        catch { }
 
                         RecalculateDuplicates();
                     });
