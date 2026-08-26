@@ -4534,19 +4534,33 @@ namespace get_link_manga
         {
             if (string.IsNullOrEmpty(name)) return "Unnamed";
             
-            string processedName = name.Replace('[', '［').Replace(']', '］');
+            // 1. Chuyển đổi các dấu ngoặc vuông và ký tự punctuation bị cấm trên Windows thành ký tự an toàn hoặc full-width
+            string processedName = name
+                .Replace('[', '［')
+                .Replace(']', '］')
+                .Replace('?', '？')
+                .Replace('¿', '？')
+                .Replace('*', '＊')
+                .Replace('<', '＜')
+                .Replace('>', '＞')
+                .Replace('"', '＂')
+                .Replace('“', '＂')
+                .Replace('”', '＂');
             
-            var invalid = Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).Distinct();
-            string safeName = Regex.Replace(processedName, @"\s*[:：]\s*", " - ");
-            foreach (var c in invalid)
+            // 2. Chuyển dấu hai chấm và dấu gạch đứng / gạch chéo thành phân cách " - "
+            string safeName = Regex.Replace(processedName, @"\s*[:：|/\\/]\s*", " - ");
+
+            // 3. Lọc bỏ toàn bộ ký tự không hợp lệ còn lại theo Windows FileSystem
+            var invalidChars = Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).Distinct();
+            foreach (var c in invalidChars)
             {
                 safeName = safeName.Replace(c, '-');
             }
 
-            // ponytail: only keep safe folder chars; collapse repeat separators before trim.
+            // 4. Gom các dấu phân cách trùng lặp và chuẩn hóa khoảng trắng
             safeName = Regex.Replace(safeName, @"-+", "-");
             safeName = Regex.Replace(safeName, @"\s+", " ");
-            safeName = safeName.Trim().TrimEnd('.', '-');
+            safeName = safeName.Trim().TrimEnd('.', '-', ' ');
 
             if (maxLength > 8 && safeName.Length > maxLength)
             {
@@ -5070,6 +5084,18 @@ namespace get_link_manga
                 name = fallback;
             }
 
+            name = name
+                .Replace('?', '？')
+                .Replace('¿', '？')
+                .Replace('*', '＊')
+                .Replace('<', '＜')
+                .Replace('>', '＞')
+                .Replace('"', '＂')
+                .Replace(':', '-')
+                .Replace('|', '-')
+                .Replace('/', '-')
+                .Replace('\\', '-');
+
             var invalidChars = Path.GetInvalidFileNameChars();
             var builder = new StringBuilder(name.Length);
             foreach (char ch in name)
@@ -5077,7 +5103,7 @@ namespace get_link_manga
                 builder.Append(invalidChars.Contains(ch) ? '-' : ch);
             }
 
-            name = builder.ToString().Trim(' ', '.');
+            name = builder.ToString().Trim(' ', '.', '-');
             while (name.Contains("--"))
             {
                 name = name.Replace("--", "-");

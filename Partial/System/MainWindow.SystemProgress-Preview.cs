@@ -1270,11 +1270,23 @@ namespace get_link_manga
         private static string GetSanitizedFileName(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+            string sanitized = input
+                .Replace('?', '？')
+                .Replace('¿', '？')
+                .Replace('*', '＊')
+                .Replace('<', '＜')
+                .Replace('>', '＞')
+                .Replace('"', '＂')
+                .Replace(':', '-')
+                .Replace('|', '-')
+                .Replace('/', '-')
+                .Replace('\\', '-');
+
             foreach (char c in Path.GetInvalidFileNameChars())
             {
-                input = input.Replace(c, '_');
+                sanitized = sanitized.Replace(c, '_');
             }
-            return input.Trim();
+            return sanitized.Trim().TrimEnd('.', '_', '-');
         }
 
         private static DateTime _lastCacheLimitCheck = DateTime.MinValue;
