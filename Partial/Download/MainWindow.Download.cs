@@ -6179,10 +6179,10 @@ namespace get_link_manga
 
                 WriteTempProgressLog(tempFolder, item, "Downloading", 0, totalPages, $"0/{totalPages} pages", "Bắt đầu tải E-Hentai (Pipeline Mode)");
 
-                int connectionCap = Math.Max(1, GetCurrentConnectionLimit());
-                int resolveThreads = connectionCap;
-                int downloadThreads = connectionCap;
-                Log($"[E-Hentai Pipeline] Bắt đầu tải {totalPages} trang (Giới hạn kết nối: {downloadThreads} luồng song song)...");
+                int connectionCap = GetCurrentConnectionLimit();
+                int resolveThreads = Math.Max(4, connectionCap);
+                int downloadThreads = Math.Max(8, connectionCap * 2);
+                Log($"[E-Hentai Pipeline] Kích hoạt bứt tốc {totalPages} trang (Resolve: {resolveThreads} luồng, Download: {downloadThreads} luồng)...");
 
                 int completedPages = 0;
                 object lockObj = new object();
@@ -6223,7 +6223,11 @@ namespace get_link_manga
                             bool downloadSuccess = false;
                             try
                             {
-                                await DownloadUrlToFileWithRefererAsync(directImgUrl, readerUrl, finalPath, token);
+                                using (var pageCts = CancellationTokenSource.CreateLinkedTokenSource(token))
+                                {
+                                    pageCts.CancelAfter(8000); // 8s timeout cho mỗi lượt tải ảnh CDN trực tiếp
+                                    await DownloadUrlToFileWithRefererAsync(directImgUrl, readerUrl, finalPath, pageCts.Token);
+                                }
                                 downloadSuccess = File.Exists(finalPath) && new FileInfo(finalPath).Length > 0;
                             }
                             catch (Exception ex)
@@ -6231,7 +6235,7 @@ namespace get_link_manga
                                 Log($"[E-Hentai Warning] Lỗi tải ảnh trang {pageNum}: {ex.Message}");
                             }
 
-                            // Nếu tải thất bại hoặc sinh ra file rác 0KB, xóa file và thử fallback sang URL server CDN mới qua tham số nl(...)
+                            // Nếu tải thất bại hoặc sinh ra file rác 0KB, xóa file và lập tức thử fallback sang URL server CDN mới qua tham số nl(...)
                             if (!downloadSuccess)
                             {
                                 try { if (File.Exists(finalPath)) File.Delete(finalPath); } catch { }
@@ -6249,7 +6253,11 @@ namespace get_link_manga
                                                 fallbackExt = actualExt;
                                             }
                                             string fallbackFinalPath = Path.Combine(tempFolder, BuildOrderedImageFilename(pageNum, fallbackDirectUrl, fallbackExt, $"page-{pageNum}"));
-                                            await DownloadUrlToFileWithRefererAsync(fallbackDirectUrl, readerUrl, fallbackFinalPath, token);
+                                            using (var fbCts = CancellationTokenSource.CreateLinkedTokenSource(token))
+                                            {
+                                                fbCts.CancelAfter(8000); // 8s timeout cho server fallback
+                                                await DownloadUrlToFileWithRefererAsync(fallbackDirectUrl, readerUrl, fallbackFinalPath, fbCts.Token);
+                                            }
                                             finalPath = fallbackFinalPath;
                                         }
                                     }
@@ -6325,7 +6333,22 @@ namespace get_link_manga
                             await resolveSemaphore.WaitAsync(token);
                             try
                             {
-                                string readerHtml = await FetchStringAsync(readerUrl, token);
+                                string readerHtml = null;
+                                // Thử resolve tối đa 2 lần với timeout 6 giây để không bao giờ bị nghẽn ở các trang cuối
+                                for (int resolveAttempt = 1; resolveAttempt <= 2; resolveAttempt++)
+                                {
+                                    try
+                                    {
+                                        readerHtml = await FetchStringAsync(readerUrl, token, timeoutSeconds: 6);
+                                        if (!string.IsNullOrWhiteSpace(readerHtml)) break;
+                                    }
+                                    catch (Exception)
+                                    {
+                                        if (resolveAttempt >= 2) throw;
+                                        await Task.Delay(200, token);
+                                    }
+                                }
+
                                 string imgUrl = ExtractEHentaiDirectImageUrl(readerHtml);
                                 string nlParam = ExtractEHentaiNlParam(readerHtml);
                                 if (!string.IsNullOrWhiteSpace(imgUrl))
@@ -6409,7 +6432,7 @@ namespace get_link_manga
             {
                 string sep = readerUrl.Contains("?") ? "&" : "?";
                 string fallbackUrl = $"{readerUrl}{sep}nl={Uri.EscapeDataString(nlParam)}";
-                string fallbackHtml = await FetchStringAsync(fallbackUrl, token);
+                string fallbackHtml = await FetchStringAsync(fallbackUrl, token, timeoutSeconds: 6);
                 string imgUrl = ExtractEHentaiDirectImageUrl(fallbackHtml);
                 return !string.IsNullOrWhiteSpace(imgUrl) ? WebUtility.HtmlDecode(imgUrl) : null;
             }
@@ -6456,11 +6479,17 @@ namespace get_link_manga
             return null;
         }
 
-        private async Task<string> FetchStringAsync(string url, CancellationToken token)
+        private async Task<string> FetchStringAsync(string url, CancellationToken token, int timeoutSeconds = 30)
         {
             using (var httpClient = CreateScopedHttpClient(url))
             using (var request = new HttpRequestMessage(HttpMethod.Get, url))
+            using (var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(token))
             {
+                if (timeoutSeconds > 0 && timeoutSeconds < 300)
+                {
+                    timeoutCts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
+                }
+
                 if (!string.IsNullOrWhiteSpace(url))
                 {
                     if (url.IndexOf("hentai2read.com", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -6468,7 +6497,7 @@ namespace get_link_manga
                         request.Headers.Referrer = new Uri("https://hentai2read.com/");
                     }
                 }
-                using (var response = await httpClient.SendAsync(request, token))
+                using (var response = await httpClient.SendAsync(request, timeoutCts.Token))
                 {
                     response.EnsureSuccessStatusCode();
                     return await response.Content.ReadAsStringAsync();
