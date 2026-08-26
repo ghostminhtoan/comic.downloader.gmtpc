@@ -6177,23 +6177,109 @@ namespace get_link_manga
                     });
                 }
 
-                WriteTempProgressLog(tempFolder, item, "Downloading", 0, totalPages, $"0/{totalPages} pages", "Bắt đầu tải E-Hentai");
+                WriteTempProgressLog(tempFolder, item, "Downloading", 0, totalPages, $"0/{totalPages} pages", "Bắt đầu tải E-Hentai (Pipeline Mode)");
 
-                int maxThreads = GetCurrentConnectionLimit();
-                Log($"[E-Hentai] Bắt đầu tải {totalPages} trang với tối đa {maxThreads} kết nối song song...");
+                int connectionCap = GetCurrentConnectionLimit();
+                int resolveThreads = Math.Max(4, connectionCap);
+                int downloadThreads = Math.Max(8, connectionCap * 2);
+                Log($"[E-Hentai Pipeline] Kích hoạt bứt tốc {totalPages} trang (Resolve: {resolveThreads} luồng, Download: {downloadThreads} luồng)...");
 
-                using (var semaphore = new DynamicSemaphore(maxThreads, GetCurrentConnectionLimit))
+                int completedPages = 0;
+                object lockObj = new object();
+                string[] extensions = new string[] { ".jpg", ".png", ".jpeg", ".webp", ".gif", ".bmp" };
+
+                // Pipeline channel để chuyển tiếp work item giữa Resolver và Binary Downloader
+                var downloadChannel = new System.Collections.Concurrent.BlockingCollection<Tuple<int, string, string>>();
+
+                // 1. Consumer: Các luồng tải binary ảnh trực tiếp từ CDN
+                var consumerTasks = new List<Task>();
+                for (int c = 0; c < downloadThreads; c++)
                 {
-                    var tasks = new List<Task>();
-                    int completedPages = 0;
-                    object lockObj = new object();
+                    consumerTasks.Add(Task.Run(async () =>
+                    {
+                        foreach (var work in downloadChannel.GetConsumingEnumerable())
+                        {
+                            token.ThrowIfCancellationRequested();
+                            while (_isDownloadPaused || item.IsPaused)
+                            {
+                                token.ThrowIfCancellationRequested();
+                                if (item.IsStopped) throw new OperationCanceledException();
+                                await Task.Delay(200, token);
+                            }
+
+                            int pageNum = work.Item1;
+                            string directImgUrl = work.Item2;
+                            string readerUrl = work.Item3;
+
+                            var pageWatch = Stopwatch.StartNew();
+                            string actualExt = GetSafeImageExtensionFromUrl(directImgUrl);
+                            if (string.IsNullOrWhiteSpace(actualExt) || !extensions.Contains(actualExt, StringComparer.OrdinalIgnoreCase))
+                            {
+                                actualExt = ".webp";
+                            }
+                            string finalPath = Path.Combine(tempFolder, BuildOrderedImageFilename(pageNum, directImgUrl, actualExt, $"page-{pageNum}"));
+
+                            try
+                            {
+                                await DownloadUrlToFileWithRefererAsync(directImgUrl, readerUrl, finalPath, token);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log($"[E-Hentai Warning] Lỗi tải ảnh trang {pageNum}: {ex.Message}");
+                            }
+
+                            pageWatch.Stop();
+                            lock (lockObj)
+                            {
+                                completedPages++;
+                                long downloadedBytes = File.Exists(finalPath) ? new FileInfo(finalPath).Length : 0;
+                                UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, $"{completedPages}/{totalPages} pages", downloadedBytes, pageWatch.ElapsedMilliseconds);
+                                WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} completed");
+                            }
+                        }
+                    }, token));
+                }
+
+                // 2. Producer: Các luồng bóc tách HTML để lấy direct image URLs
+                using (var resolveSemaphore = new SemaphoreSlim(resolveThreads, resolveThreads))
+                {
+                    var producerTasks = new List<Task>();
 
                     for (int i = 0; i < readerUrls.Count; i++)
                     {
                         int pageNum = i + 1;
                         string readerUrl = readerUrls[i];
 
-                        tasks.Add(Task.Run(async () =>
+                        // Smart Resume kiểm tra sớm trước khi fetch HTML
+                        bool exists = false;
+                        string pattern = $"{pageNum:D4}-*";
+                        foreach (string folder in new[] { tempFolder, targetFolder })
+                        {
+                            if (!Directory.Exists(folder)) continue;
+                            foreach (string existingPath in Directory.GetFiles(folder, pattern))
+                            {
+                                if (extensions.Contains(Path.GetExtension(existingPath), StringComparer.OrdinalIgnoreCase) &&
+                                    new FileInfo(existingPath).Length > 1024)
+                                {
+                                    exists = true;
+                                    break;
+                                }
+                            }
+                            if (exists) break;
+                        }
+
+                        if (exists)
+                        {
+                            lock (lockObj)
+                            {
+                                completedPages++;
+                                UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, $"{completedPages}/{totalPages} pages", 0, 0);
+                                WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} existed");
+                            }
+                            continue;
+                        }
+
+                        producerTasks.Add(Task.Run(async () =>
                         {
                             while (_isDownloadPaused || item.IsPaused)
                             {
@@ -6203,83 +6289,39 @@ namespace get_link_manga
                             }
                             token.ThrowIfCancellationRequested();
 
-                            await semaphore.WaitAsync(token);
+                            await resolveSemaphore.WaitAsync(token);
                             try
                             {
-                                while (_isDownloadPaused || item.IsPaused)
+                                string readerHtml = await FetchStringAsync(readerUrl, token);
+                                string imgUrl = ExtractEHentaiDirectImageUrl(readerHtml);
+                                if (!string.IsNullOrWhiteSpace(imgUrl))
                                 {
-                                    token.ThrowIfCancellationRequested();
-                                    if (item.IsStopped) throw new OperationCanceledException();
-                                    await Task.Delay(200, token);
+                                    downloadChannel.Add(Tuple.Create(pageNum, WebUtility.HtmlDecode(imgUrl), readerUrl));
                                 }
-                                token.ThrowIfCancellationRequested();
-
-                                string downloadedPath = null;
-                                var pageWatch = Stopwatch.StartNew();
-
-                                bool exists = false;
-                                string[] extensions = new string[] { ".jpg", ".png", ".jpeg", ".webp", ".gif", ".bmp" };
-                                string[] searchPatterns = new[]
+                                else
                                 {
-                                    $"{pageNum:D4}-*"
-                                };
-                                foreach (string pattern in searchPatterns)
-                                {
-                                    foreach (string folder in new[] { tempFolder, targetFolder })
-                                    {
-                                        if (!Directory.Exists(folder)) continue;
-                                        foreach (string existingPath in Directory.GetFiles(folder, pattern))
-                                        {
-                                            if (extensions.Contains(Path.GetExtension(existingPath), StringComparer.OrdinalIgnoreCase) &&
-                                                new FileInfo(existingPath).Length > 1024)
-                                            {
-                                                exists = true;
-                                                downloadedPath = existingPath;
-                                                break;
-                                            }
-                                        }
-
-                                        if (exists) break;
-                                    }
-
-                                    if (exists) break;
+                                    Log($"[E-Hentai Error] Không tìm thấy link ảnh cho trang {pageNum}: {readerUrl}");
                                 }
-
-                                if (exists)
-                                {
-                                    pageWatch.Stop();
-                                    lock (lockObj)
-                                    {
-                                        completedPages++;
-                                        UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, $"{completedPages}/{totalPages} pages", 0, 0);
-                                        WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} existed");
-                                    }
-                                    return;
-                                }
-
-                                downloadedPath = await DownloadEHentaiPageAsync(item, readerUrl, pageNum, tempFolder, token);
-
-                                lock (lockObj)
-                                {
-                                    completedPages++;
-                                    pageWatch.Stop();
-                                    long downloadedBytes = !string.IsNullOrWhiteSpace(downloadedPath) && File.Exists(downloadedPath) ? new FileInfo(downloadedPath).Length : 0;
-                                    UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, $"{completedPages}/{totalPages} pages", downloadedBytes, pageWatch.ElapsedMilliseconds);
-                                    WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} completed");
-                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Log($"[E-Hentai Error] Lỗi resolve trang {pageNum}: {ex.Message}");
                             }
                             finally
                             {
-                                semaphore.Release();
+                                resolveSemaphore.Release();
                             }
                         }, token));
                     }
 
-                    await Task.WhenAll(tasks);
-
-                    WriteTempProgressLog(tempFolder, item, "Done", totalPages, totalPages, $"{totalPages}/{totalPages} pages", "Download completed");
-                    MoveTempFolderToTarget(tempFolder, targetFolder, "E-Hentai");
+                    await Task.WhenAll(producerTasks);
+                    downloadChannel.CompleteAdding();
                 }
+
+                await Task.WhenAll(consumerTasks);
+
+                WriteTempProgressLog(tempFolder, item, "Done", totalPages, totalPages, $"{totalPages}/{totalPages} pages", "Download completed");
+                MoveTempFolderToTarget(tempFolder, targetFolder, "E-Hentai");
 
                 ValidateDownloadedFiles(targetFolder, totalPages, queueItem, "Pages");
             }
@@ -6302,20 +6344,11 @@ namespace get_link_manga
             }
         }
 
-        private async Task<string> DownloadEHentaiPageAsync(GalleryItem item, string readerUrl, int pageNum, string targetFolder, CancellationToken token)
+        private string ExtractEHentaiDirectImageUrl(string readerHtml)
         {
-            while (_isDownloadPaused || item.IsPaused)
-            {
-                token.ThrowIfCancellationRequested();
-                if (item.IsStopped) throw new OperationCanceledException();
-                await Task.Delay(200, token);
-            }
-            token.ThrowIfCancellationRequested();
-
-            string readerHtml = await FetchStringAsync(readerUrl, token);
+            if (string.IsNullOrWhiteSpace(readerHtml)) return null;
 
             // 1. Extract direct image URL from <img id="img" src="...">
-            string imgUrl = null;
             var imgTagMatch = Regex.Match(readerHtml, @"<img[^>]+id=""img""[^>]*>", RegexOptions.IgnoreCase);
             if (imgTagMatch.Success)
             {
@@ -6323,56 +6356,18 @@ namespace get_link_manga
                 var srcMatch = Regex.Match(tag, @"src=['""](?<url>[^'""]+?)['""]", RegexOptions.IgnoreCase);
                 if (srcMatch.Success)
                 {
-                    imgUrl = srcMatch.Groups["url"].Value;
+                    return srcMatch.Groups["url"].Value;
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(imgUrl))
+            // 2. Fallback: look for hath.network or e-hentai image cdn url pattern
+            var genMatch = Regex.Match(readerHtml, @"['""](?<url>https?://[^'""]*?\.(?:hath\.network|ehgt\.org)[^'""]*?\.(?:jpg|png|jpeg|webp|gif|bmp)[^'""]*)['""]", RegexOptions.IgnoreCase);
+            if (genMatch.Success)
             {
-                // Fallback: look for hath.network or e-hentai image cdn url pattern
-                var genMatch = Regex.Match(readerHtml, @"['""](?<url>https?://[^'""]*?\.(?:hath\.network|ehgt\.org)[^'""]*?\.(?:jpg|png|jpeg|webp|gif|bmp)[^'""]*)['""]", RegexOptions.IgnoreCase);
-                if (genMatch.Success)
-                {
-                    imgUrl = genMatch.Groups["url"].Value;
-                }
+                return genMatch.Groups["url"].Value;
             }
 
-            if (!string.IsNullOrWhiteSpace(imgUrl))
-            {
-                imgUrl = WebUtility.HtmlDecode(imgUrl);
-                string actualExt = GetSafeImageExtensionFromUrl(imgUrl);
-                string[] allowedExts = new string[] { ".jpg", ".png", ".jpeg", ".bmp", ".gif", ".webp" };
-                bool isAllowed = false;
-                foreach (var ext in allowedExts)
-                {
-                    if (actualExt.Equals(ext, StringComparison.OrdinalIgnoreCase))
-                    {
-                        isAllowed = true;
-                        break;
-                    }
-                }
-                if (!isAllowed)
-                {
-                    actualExt = ".webp";
-                }
-
-                string finalPath = Path.Combine(targetFolder, BuildOrderedImageFilename(pageNum, imgUrl, actualExt, $"page-{pageNum}"));
-
-                while (_isDownloadPaused || item.IsPaused)
-                {
-                    token.ThrowIfCancellationRequested();
-                    if (item.IsStopped) throw new OperationCanceledException();
-                    await Task.Delay(200, token);
-                }
-                token.ThrowIfCancellationRequested();
-
-                await DownloadUrlToFileWithRefererAsync(imgUrl, readerUrl, finalPath, token);
-                return finalPath;
-            }
-            else
-            {
-                throw new Exception($"Không thể trích xuất địa chỉ ảnh từ trang đọc E-Hentai {pageNum}: {readerUrl}");
-            }
+            return null;
         }
 
         private async Task<string> FetchStringAsync(string url, CancellationToken token)
