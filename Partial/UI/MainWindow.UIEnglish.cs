@@ -977,6 +977,8 @@ namespace get_link_manga
             if (btnSubDuplicateName != null) btnSubDuplicateName.Content = "Duplicate names";
             if (lblSubAutoDownload != null) lblSubAutoDownload.Text = "AUTO DOWNLOAD";
             if (tglSubClearCookieAndRetry != null) tglSubClearCookieAndRetry.ToolTip = "AUTO DOWNLOAD";
+            if (tglSubAutoScrollDownloading != null) tglSubAutoScrollDownloading.ToolTip = "AUTO SCROLL TO DOWNLOADING";
+            if (lblSubAutoScrollDownloading != null) lblSubAutoScrollDownloading.ToolTip = "AUTO SCROLL TO DOWNLOADING";
             if (btnDuplicateName != null) btnDuplicateName.Content = "Duplicate names";
             // if (btnNoLinkViHentai != null) btnNoLinkViHentai.Content = "No chapters";
             if (btnReverseOrder != null) btnReverseOrder.Content = "Reverse order";

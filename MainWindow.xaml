@@ -3360,6 +3360,13 @@
                                     <TextBlock Name="lblSubAutoDownload" Text="AUTO DOWNLOAD" Foreground="White" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                     <ToggleButton Name="tglSubClearCookieAndRetry" Click="TglClearCookieAndRetry_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="{Binding IsChecked, ElementName=tglClearCookieAndRetry, Mode=TwoWay}" ToolTip="AUTO DOWNLOAD"/>
                                 </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,14,4" VerticalAlignment="Center">
+                                    <StackPanel.LayoutTransform>
+                                        <ScaleTransform ScaleX="0.75" ScaleY="0.75"/>
+                                    </StackPanel.LayoutTransform>
+                                    <TextBlock Name="lblSubAutoScrollDownloading" Text="&#xE896;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource CyberpunkPinkBrush}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,6,0" ToolTip="AUTO SCROLL TO DOWNLOADING"/>
+                                    <ToggleButton Name="tglSubAutoScrollDownloading" Click="TglAutoScrollDownloading_Click" Style="{StaticResource FloatSwitchToggle}" IsChecked="{Binding IsChecked, ElementName=tglAutoScrollDownloading, Mode=TwoWay}" ToolTip="AUTO SCROLL TO DOWNLOADING"/>
+                                </StackPanel>
                             </WrapPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,4">
                                 <TextBlock Name="txtSubSearchLabel" Text="SEARCH" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>

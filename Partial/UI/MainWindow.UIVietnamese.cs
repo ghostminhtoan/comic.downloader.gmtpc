@@ -69,6 +69,8 @@ namespace get_link_manga
             if (btnSubDuplicateName != null) btnSubDuplicateName.Content = "Tên trùng";
             if (lblSubAutoDownload != null) lblSubAutoDownload.Text = "TỰ ĐỘNG TẢI";
             if (tglSubClearCookieAndRetry != null) tglSubClearCookieAndRetry.ToolTip = "TỰ ĐỘNG TẢI";
+            if (tglSubAutoScrollDownloading != null) tglSubAutoScrollDownloading.ToolTip = "TỰ CUỘN ĐẾN TRUYỆN ĐANG TẢI";
+            if (lblSubAutoScrollDownloading != null) lblSubAutoScrollDownloading.ToolTip = "TỰ CUỘN ĐẾN TRUYỆN ĐANG TẢI";
             if (btnDuplicateName != null) btnDuplicateName.Content = "Tên trùng";
             // if (btnNoLinkViHentai != null) btnNoLinkViHentai.Content = "Không có chapter";
             if (btnReverseOrder != null) btnReverseOrder.Content = "Đảo thứ tự";
