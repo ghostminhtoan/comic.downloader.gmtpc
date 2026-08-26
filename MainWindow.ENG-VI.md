@@ -41,7 +41,7 @@ Mục tiêu: tìm chuỗi UI còn lệch giữa ENG và VI trong `MainWindow.*`.
 | `Split Chapters to Parallel Tasks` | `Split Chapters to Parallel Tasks` | `MainWindow.xaml` | OK |
 | `Gaming-style comic scraper: paste source links, group chapters, check queue, then bulk download.` | `Gaming-style comic scraper: dán link nguồn, gom chapter, kiểm tra queue, rồi tải hàng loạt.` | `MainWindow.xaml` / `MainWindow.WorkspaceLayout.cs` | OK |
 | `Shutdown options` | `Tùy chọn tắt máy` | `MainWindow.xaml` / `MainWindow.UIVietnamese.cs` | OK |
-| `Search book name, link, or chapter in queue...` | `Tìm kiếm tên truyện, link hoặc chapter trong hàng chờ...` | `MainWindow.xaml` | OK |
+| `Search book name, link, chapter, or tag in queue...` | `Tìm kiếm tên truyện, link, chapter hoặc tag trong hàng chờ...` | `MainWindow.xaml` | OK |
 | `Shutdown after done` | `Tắt máy sau khi tải xong toàn bộ và không còn công việc chờ.` | `MainWindow.xaml` | OK |
 | `RESTORE DEFAULT TAG` | `RESTORE DEFAULT TAG` | `MainWindow.xaml` | OK |
 | `Tutorial` | `Hướng dẫn` | `MainWindow.WorkspaceLayout.cs` | OK |

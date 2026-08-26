@@ -297,14 +297,129 @@ namespace get_link_manga
             });
         }
 
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<object, string> _itemTagsSearchCache =
+            new System.Runtime.CompilerServices.ConditionalWeakTable<object, string>();
+
+        private static string GetGalleryItemTagsSearchText(GalleryItem item)
+        {
+            if (item == null) return string.Empty;
+
+            if (item.Tag == null)
+            {
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(item.HoverPreviewThumbnailUrl))
+                    {
+                        string cacheBasePath = GetGalleryHoverPreviewCacheBasePath(item, item.HoverPreviewThumbnailUrl);
+                        string txtTagPath = cacheBasePath + ".txt";
+                        if (System.IO.File.Exists(txtTagPath))
+                        {
+                            string content = System.IO.File.ReadAllText(txtTagPath);
+                            if (!string.IsNullOrWhiteSpace(content))
+                            {
+                                item.Tag = Newtonsoft.Json.Linq.JObject.Parse(content);
+                            }
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            if (item.Tag == null) return string.Empty;
+
+            if (_itemTagsSearchCache.TryGetValue(item.Tag, out string cachedText))
+            {
+                return cachedText;
+            }
+
+            var tokens = new System.Collections.Generic.List<string>();
+            try
+            {
+                Newtonsoft.Json.Linq.JToken jToken = null;
+                if (item.Tag is string tagStr)
+                {
+                    string trimmed = tagStr.Trim();
+                    if ((trimmed.StartsWith("{") && trimmed.EndsWith("}")) || (trimmed.StartsWith("[") && trimmed.EndsWith("]")))
+                    {
+                        jToken = Newtonsoft.Json.Linq.JToken.Parse(trimmed);
+                    }
+                    else
+                    {
+                        tokens.Add(trimmed);
+                    }
+                }
+                else if (item.Tag is Newtonsoft.Json.Linq.JToken tokenObj)
+                {
+                    jToken = tokenObj;
+                }
+                else if (item.Tag is System.Collections.IEnumerable enumerable && !(item.Tag is string))
+                {
+                    foreach (var elem in enumerable)
+                    {
+                        if (elem != null) tokens.Add(elem.ToString());
+                    }
+                }
+
+                if (jToken != null)
+                {
+                    ExtractJsonTagTokens(jToken, null, tokens);
+                }
+            }
+            catch { }
+
+            string result = string.Join(" | ", tokens.Where(t => !string.IsNullOrWhiteSpace(t)).Distinct(StringComparer.OrdinalIgnoreCase));
+
+            _itemTagsSearchCache.Remove(item.Tag);
+            _itemTagsSearchCache.Add(item.Tag, result);
+            return result;
+        }
+
+        private static void ExtractJsonTagTokens(Newtonsoft.Json.Linq.JToken token, string currentKey, System.Collections.Generic.List<string> tokens)
+        {
+            if (token == null) return;
+
+            if (token is Newtonsoft.Json.Linq.JValue val)
+            {
+                string strVal = val.ToString()?.Trim();
+                if (!string.IsNullOrWhiteSpace(strVal))
+                {
+                    tokens.Add(strVal);
+                    if (!string.IsNullOrWhiteSpace(currentKey) &&
+                        !string.Equals(currentKey, "tag", StringComparison.OrdinalIgnoreCase) &&
+                        !string.Equals(currentKey, "name", StringComparison.OrdinalIgnoreCase) &&
+                        !string.Equals(currentKey, "tags", StringComparison.OrdinalIgnoreCase))
+                    {
+                        tokens.Add($"{currentKey}:{strVal}");
+                    }
+                }
+            }
+            else if (token is Newtonsoft.Json.Linq.JArray arr)
+            {
+                foreach (var child in arr)
+                {
+                    ExtractJsonTagTokens(child, currentKey, tokens);
+                }
+            }
+            else if (token is Newtonsoft.Json.Linq.JObject obj)
+            {
+                foreach (var prop in obj.Properties())
+                {
+                    ExtractJsonTagTokens(prop.Value, prop.Name, tokens);
+                }
+            }
+        }
+
         private bool IsGalleryItemMatchKeyword(GalleryItem galleryItem, string keyword, bool exactWordMatch = false)
         {
             if (galleryItem == null || string.IsNullOrWhiteSpace(keyword)) return false;
+
+            string tagsText = GetGalleryItemTagsSearchText(galleryItem);
 
             if (!exactWordMatch)
             {
                 return (galleryItem.Name != null && galleryItem.Name.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
                        (galleryItem.Link != null && galleryItem.Link.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                       (!string.IsNullOrEmpty(tagsText) && tagsText.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
                        (galleryItem.MissingChapterStatusText != null && galleryItem.MissingChapterStatusText.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
                        (galleryItem.Status != null && galleryItem.Status.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
                        (galleryItem.CurrentProcess != null && galleryItem.CurrentProcess.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
@@ -318,6 +433,7 @@ namespace get_link_manga
 
                 return (galleryItem.Name != null && regex.IsMatch(galleryItem.Name)) ||
                        (galleryItem.Link != null && regex.IsMatch(galleryItem.Link)) ||
+                       (!string.IsNullOrEmpty(tagsText) && regex.IsMatch(tagsText)) ||
                        (galleryItem.MissingChapterStatusText != null && regex.IsMatch(galleryItem.MissingChapterStatusText)) ||
                        (galleryItem.Status != null && regex.IsMatch(galleryItem.Status)) ||
                        (galleryItem.CurrentProcess != null && regex.IsMatch(galleryItem.CurrentProcess)) ||
