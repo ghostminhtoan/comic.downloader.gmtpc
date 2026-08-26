@@ -505,27 +505,21 @@ namespace get_link_manga
                 }
             });
 
-            // 2. Xóa trực tiếp khỏi _scrapedItems
+            // 2. Lưu vào undo stack và xóa các hàng missing chapter liên quan
+            _undoDeleteStack.Push(toRemove);
+            _redoDeleteStack.Clear();
+            RemoveDownloadMissingChapterRows(toRemove);
+
+            // 3. Xóa trực tiếp khỏi _scrapedItems (ObservableCollection tự cập nhật View mà không làm mất Sort)
             foreach (var item in toRemove)
             {
                 _scrapedItems.Remove(item);
             }
 
-            // 3. Khôi phục lại binding và refresh view
-            dgResults.ItemsSource = null;
-            dgResults.ItemsSource = _scrapedItems;
-            if (lbResultsThumbnail != null)
-            {
-                lbResultsThumbnail.ItemsSource = null;
-                lbResultsThumbnail.ItemsSource = _thumbnailVisibleItems;
-            }
-
             Log($"Đã xóa {toRemove.Count} truyện hoàn thành khỏi danh sách.");
             lblLinkCount.Text = _scrapedItems.Count.ToString();
 
-            RenumberResultOrder();
             SafeRefreshResultsView();
-            EnsureDownloadMissingChapterRowsFromGallery(forceSyncOrder: true);
             SyncAllGalleryMissingChapterStatuses();
             RecalculateDuplicates();
             UpdateStats();
