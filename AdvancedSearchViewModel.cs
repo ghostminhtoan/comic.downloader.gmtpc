@@ -14,6 +14,7 @@ namespace get_link_manga
         public string NonNegative { get; set; } = string.Empty;
         public string NonPositive { get; set; } = string.Empty;
         public string Negative { get; set; } = string.Empty;
+        public bool IsExactWord { get; set; } = false;
     }
 
     public class AdvancedSearchViewModel : INotifyPropertyChanged
@@ -85,6 +86,34 @@ namespace get_link_manga
             }
         }
 
+        private bool _isExactWord;
+        public bool IsExactWord
+        {
+            get => _isExactWord;
+            set
+            {
+                if (_isExactWord != value)
+                {
+                    _isExactWord = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsContainsMode));
+                    OnTextChanged();
+                }
+            }
+        }
+
+        public bool IsContainsMode
+        {
+            get => !_isExactWord;
+            set
+            {
+                if (value)
+                {
+                    IsExactWord = false;
+                }
+            }
+        }
+
         private bool _isActive;
         public bool IsActive
         {
@@ -152,7 +181,8 @@ namespace get_link_manga
                 Positive = PositiveText ?? string.Empty,
                 NonNegative = NonNegativeText ?? string.Empty,
                 NonPositive = NonPositiveText ?? string.Empty,
-                Negative = NegativeText ?? string.Empty
+                Negative = NegativeText ?? string.Empty,
+                IsExactWord = IsExactWord
             };
         }
 
@@ -173,12 +203,13 @@ namespace get_link_manga
                 NonNegativeText = state.NonNegative;
                 NonPositiveText = state.NonPositive;
                 NegativeText = state.Negative;
+                IsExactWord = state.IsExactWord;
 
                 var pos = GetActivePositiveKeywords();
                 var nonNeg = GetActiveNonNegativeKeywords();
                 var nonPos = GetActiveNonPositiveKeywords();
                 var neg = GetActiveNegativeKeywords();
-                IsActive = pos.Any() || nonNeg.Any() || nonPos.Any() || neg.Any();
+                IsActive = pos.Any() || nonNeg.Any() || nonPos.Any() || neg.Any() || IsExactWord;
 
                 _applyCallback?.Invoke();
             }
@@ -199,6 +230,7 @@ namespace get_link_manga
                 NonNegativeText = string.Empty;
                 NonPositiveText = string.Empty;
                 NegativeText = string.Empty;
+                IsExactWord = false;
                 IsActive = false;
                 _applyCallback?.Invoke();
             }
@@ -246,7 +278,7 @@ namespace get_link_manga
             var nonNeg = GetActiveNonNegativeKeywords();
             var nonPos = GetActiveNonPositiveKeywords();
             var neg = GetActiveNegativeKeywords();
-            IsActive = pos.Any() || nonNeg.Any() || nonPos.Any() || neg.Any();
+            IsActive = pos.Any() || nonNeg.Any() || nonPos.Any() || neg.Any() || IsExactWord;
 
             _applyCallback?.Invoke();
         }

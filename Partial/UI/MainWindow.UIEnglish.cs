@@ -86,6 +86,11 @@ namespace get_link_manga
             ["CAN HAVE (OR)"] = "CÓ THỂ CÓ (OR)",
             ["MUST NOT HAVE (-)"] = "BẮT BUỘC KHÔNG CÓ (-)",
             ["EXCLUDE (-)"] = "LOẠI TRỪ (-)",
+            ["MATCH MODE:"] = "CHẾ ĐỘ TÌM:",
+            ["Contains"] = "Chứa từ",
+            ["Exact Word"] = "Từ chính xác",
+            ["Substring match (contains keyword anywhere)"] = "Khớp chuỗi con (chứa từ khóa ở bất kỳ đâu)",
+            ["Exact word match (separated by spaces, brackets, or punctuation)"] = "Khớp từ chính xác (phân cách bởi dấu cách, dấu ngoặc hoặc dấu câu)",
             ["Must contain ALL of these keywords (separated by semicolon, e.g. tags;genre)"] = "Tìm kiếm chứa TẤT CẢ các từ này (ngăn cách bằng dấu chấm phẩy, ví dụ: english;full color)",
             ["Must contain AT LEAST ONE of these keywords (separated by semicolon)"] = "Tìm kiếm chứa ÍT NHẤT MỘT trong các từ này (ngăn cách bằng dấu chấm phẩy)",
             ["Must NOT contain any of these keywords (separated by semicolon)"] = "Bắt buộc KHÔNG chứa từ nào trong các từ này (ngăn cách bằng dấu chấm phẩy)",
@@ -1000,6 +1005,11 @@ namespace get_link_manga
         {
             ApplyUiTextMappingsRecursive(this, vietnamese);
 
+            if (popAdvancedFilter?.Child != null)
+            {
+                ApplyUiTextMappingsRecursive(popAdvancedFilter.Child, vietnamese);
+            }
+
             if (dgResults?.ContextMenu != null)
             {
                 ApplyUiTextMappingsRecursive(dgResults.ContextMenu, vietnamese);
@@ -1051,6 +1061,14 @@ namespace get_link_manga
                 if (button.ToolTip is string buttonToolTip)
                 {
                     button.ToolTip = TranslateUiText(buttonToolTip, vietnamese);
+                }
+            }
+            else if (node is RadioButton radioButton && radioButton.Content is string radioText)
+            {
+                radioButton.Content = TranslateUiText(radioText, vietnamese);
+                if (radioButton.ToolTip is string radioToolTip)
+                {
+                    radioButton.ToolTip = TranslateUiText(radioToolTip, vietnamese);
                 }
             }
             else if (node is MenuItem menuItem && menuItem.Header is string headerText)

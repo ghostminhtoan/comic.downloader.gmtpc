@@ -279,16 +279,51 @@ namespace get_link_manga
             PrefetchAllThumbnailResults();
         }
 
-        private bool IsGalleryItemMatchKeyword(GalleryItem galleryItem, string keyword)
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, System.Text.RegularExpressions.Regex> _exactWordRegexCache =
+            new System.Collections.Concurrent.ConcurrentDictionary<string, System.Text.RegularExpressions.Regex>(StringComparer.OrdinalIgnoreCase);
+
+        private static System.Text.RegularExpressions.Regex GetExactWordRegex(string keyword)
         {
-            if (galleryItem == null || string.IsNullOrEmpty(keyword)) return false;
-            return (galleryItem.Name != null && galleryItem.Name.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                   (galleryItem.Link != null && galleryItem.Link.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                   (galleryItem.MissingChapterStatusText != null && galleryItem.MissingChapterStatusText.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                   (galleryItem.Status != null && galleryItem.Status.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                   (galleryItem.CurrentProcess != null && galleryItem.CurrentProcess.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                   (galleryItem.DownloadingChapter != null && galleryItem.DownloadingChapter.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                   (galleryItem.DownloadingPageProgress != null && galleryItem.DownloadingPageProgress.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0);
+            if (string.IsNullOrWhiteSpace(keyword)) return null;
+            if (_exactWordRegexCache.Count > 500) _exactWordRegexCache.Clear();
+
+            return _exactWordRegexCache.GetOrAdd(keyword, kw =>
+            {
+                bool startWord = char.IsLetterOrDigit(kw[0]) || kw[0] == '_';
+                bool endWord = char.IsLetterOrDigit(kw[kw.Length - 1]) || kw[kw.Length - 1] == '_';
+
+                string pattern = (startWord ? @"\b" : "") + System.Text.RegularExpressions.Regex.Escape(kw) + (endWord ? @"\b" : "");
+                return new System.Text.RegularExpressions.Regex(pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+            });
+        }
+
+        private bool IsGalleryItemMatchKeyword(GalleryItem galleryItem, string keyword, bool exactWordMatch = false)
+        {
+            if (galleryItem == null || string.IsNullOrWhiteSpace(keyword)) return false;
+
+            if (!exactWordMatch)
+            {
+                return (galleryItem.Name != null && galleryItem.Name.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                       (galleryItem.Link != null && galleryItem.Link.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                       (galleryItem.MissingChapterStatusText != null && galleryItem.MissingChapterStatusText.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                       (galleryItem.Status != null && galleryItem.Status.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                       (galleryItem.CurrentProcess != null && galleryItem.CurrentProcess.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                       (galleryItem.DownloadingChapter != null && galleryItem.DownloadingChapter.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                       (galleryItem.DownloadingPageProgress != null && galleryItem.DownloadingPageProgress.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            else
+            {
+                var regex = GetExactWordRegex(keyword.Trim());
+                if (regex == null) return false;
+
+                return (galleryItem.Name != null && regex.IsMatch(galleryItem.Name)) ||
+                       (galleryItem.Link != null && regex.IsMatch(galleryItem.Link)) ||
+                       (galleryItem.MissingChapterStatusText != null && regex.IsMatch(galleryItem.MissingChapterStatusText)) ||
+                       (galleryItem.Status != null && regex.IsMatch(galleryItem.Status)) ||
+                       (galleryItem.CurrentProcess != null && regex.IsMatch(galleryItem.CurrentProcess)) ||
+                       (galleryItem.DownloadingChapter != null && regex.IsMatch(galleryItem.DownloadingChapter)) ||
+                       (galleryItem.DownloadingPageProgress != null && regex.IsMatch(galleryItem.DownloadingPageProgress));
+            }
         }
 
         private void ApplyResultsFilter(ICollectionView view, string filterText)
@@ -302,6 +337,7 @@ namespace get_link_manga
             var nonNegKeywords = AdvancedSearch?.GetActiveNonNegativeKeywords() ?? new System.Collections.Generic.List<string>();
             var nonPosKeywords = AdvancedSearch?.GetActiveNonPositiveKeywords() ?? new System.Collections.Generic.List<string>();
             var negKeywords = AdvancedSearch?.GetActiveNegativeKeywords() ?? new System.Collections.Generic.List<string>();
+            bool exactWordMatch = AdvancedSearch?.IsExactWord ?? false;
 
             view.Filter = item =>
             {
@@ -313,7 +349,7 @@ namespace get_link_manga
                 // 1. Kiểm tra bộ lọc tìm kiếm nhanh chính (txtFilter)
                 if (!string.IsNullOrEmpty(filterText))
                 {
-                    if (!IsGalleryItemMatchKeyword(galleryItem, filterText))
+                    if (!IsGalleryItemMatchKeyword(galleryItem, filterText, exactWordMatch))
                     {
                         return false;
                     }
@@ -324,7 +360,7 @@ namespace get_link_manga
                 {
                     foreach (var k in posKeywords)
                     {
-                        if (!IsGalleryItemMatchKeyword(galleryItem, k))
+                        if (!IsGalleryItemMatchKeyword(galleryItem, k, exactWordMatch))
                         {
                             return false;
                         }
@@ -337,7 +373,7 @@ namespace get_link_manga
                     bool matchAny = false;
                     foreach (var k in nonNegKeywords)
                     {
-                        if (IsGalleryItemMatchKeyword(galleryItem, k))
+                        if (IsGalleryItemMatchKeyword(galleryItem, k, exactWordMatch))
                         {
                             matchAny = true;
                             break;
@@ -354,7 +390,7 @@ namespace get_link_manga
                 {
                     foreach (var k in nonPosKeywords)
                     {
-                        if (IsGalleryItemMatchKeyword(galleryItem, k))
+                        if (IsGalleryItemMatchKeyword(galleryItem, k, exactWordMatch))
                         {
                             return false;
                         }
@@ -366,7 +402,7 @@ namespace get_link_manga
                 {
                     foreach (var k in negKeywords)
                     {
-                        if (IsGalleryItemMatchKeyword(galleryItem, k))
+                        if (IsGalleryItemMatchKeyword(galleryItem, k, exactWordMatch))
                         {
                             return false;
                         }

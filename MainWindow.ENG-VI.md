@@ -46,6 +46,9 @@ Mục tiêu: tìm chuỗi UI còn lệch giữa ENG và VI trong `MainWindow.*`.
 | `RESTORE DEFAULT TAG` | `RESTORE DEFAULT TAG` | `MainWindow.xaml` | OK |
 | `Tutorial` | `Hướng dẫn` | `MainWindow.WorkspaceLayout.cs` | OK |
 | `Tutorial & Config` | `Hướng dẫn & Cấu hình` | `MainWindow.WorkspaceLayout.cs` | OK |
+| `MATCH MODE:` | `CHẾ ĐỘ TÌM:` | `MainWindow.xaml` / `MainWindow.UIEnglish.cs` | OK |
+| `Contains` | `Chứa từ` | `MainWindow.xaml` / `MainWindow.UIEnglish.cs` | OK |
+| `Exact Word` | `Từ chính xác` | `MainWindow.xaml` / `MainWindow.UIEnglish.cs` | OK |
 
 Ghi chú:
 - Bảng này chỉ trace chỗ đang lộ trên UI.

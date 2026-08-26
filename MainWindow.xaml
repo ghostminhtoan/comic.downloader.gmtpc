@@ -4837,17 +4837,23 @@
                                                 
                                                 <!-- Cá»™t 4: Negative Keywords (Exclude 2) -->
                                                 <TextBox Grid.Column="3" Text="{Binding NegativeText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SurfaceTextBox}" Height="26" FontSize="11" Margin="5,0,0,0" ToolTip="Exclude these keywords (separated by semicolon)"/>
-                                            </Grid><!-- HÃ ng dÆ°á»›i cÃ¹ng: Äiá»u khiá»ƒn (Undo/Redo/Clear) -->
-                                            <Grid Grid.Row="3" Margin="0,4,0,0">
+                                            </Grid><!-- HÃ ng dÆ°á»›i cÃ¹ng: Ä iá» u khiá»ƒn (Undo/Redo/Match Mode/Clear) -->
+                                            <Grid Grid.Row="3" Margin="0,6,0,0">
                                                 <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                                    <Button Command="{Binding UndoCommand}" Content="â†¶ Undo" Style="{StaticResource CompactCyanButton}" Width="65" Height="24" FontSize="11" Margin="0,0,6,0"/>
-                                                    <Button Command="{Binding RedoCommand}" Content="â†· Redo" Style="{StaticResource CompactCyanButton}" Width="65" Height="24" FontSize="11"/>
+                                                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button Command="{Binding UndoCommand}" Content="↶ Undo" Style="{StaticResource CompactCyanButton}" Width="65" Height="24" FontSize="11" Margin="0,0,6,0"/>
+                                                    <Button Command="{Binding RedoCommand}" Content="↷ Redo" Style="{StaticResource CompactCyanButton}" Width="65" Height="24" FontSize="11"/>
                                                 </StackPanel>
-                                                <Button Grid.Column="1" Command="{Binding ClearCommand}" Content="ðŸ—‘ï¸ CLEAR" Style="{StaticResource CompactPinkButton}" Width="85" Height="24" FontSize="11"/>
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock Name="txtFilterModeLabel" Text="MATCH MODE:" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="11"/>
+                                                    <RadioButton Name="rbFilterContains" GroupName="AdvancedSearchMatchMode" Content="Contains" IsChecked="{Binding IsContainsMode, Mode=TwoWay}" Foreground="{StaticResource CyberpunkTextBrush}" VerticalContentAlignment="Center" Margin="0,0,16,0" FontSize="11" Cursor="Hand" ToolTip="Substring match (contains keyword anywhere)"/>
+                                                    <RadioButton Name="rbFilterExactWord" GroupName="AdvancedSearchMatchMode" Content="Exact Word" IsChecked="{Binding IsExactWord, Mode=TwoWay}" Foreground="{StaticResource CyberpunkCyanBrush}" FontWeight="SemiBold" VerticalContentAlignment="Center" FontSize="11" Cursor="Hand" ToolTip="Exact word match (separated by spaces, brackets, or punctuation)"/>
+                                                </StackPanel>
+                                                <Button Grid.Column="2" Command="{Binding ClearCommand}" Content="🗑️ CLEAR" Style="{StaticResource CompactPinkButton}" Width="85" Height="24" FontSize="11" VerticalAlignment="Center"/>
                                             </Grid>
                                         </Grid>
                                     </Border>
