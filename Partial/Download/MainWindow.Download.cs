@@ -6179,10 +6179,10 @@ namespace get_link_manga
 
                 WriteTempProgressLog(tempFolder, item, "Downloading", 0, totalPages, $"0/{totalPages} pages", "Bắt đầu tải E-Hentai (Pipeline Mode)");
 
-                int connectionCap = GetCurrentConnectionLimit();
-                int resolveThreads = Math.Max(4, connectionCap);
-                int downloadThreads = Math.Max(8, connectionCap * 2);
-                Log($"[E-Hentai Pipeline] Kích hoạt bứt tốc {totalPages} trang (Resolve: {resolveThreads} luồng, Download: {downloadThreads} luồng)...");
+                int connectionCap = Math.Max(1, GetCurrentConnectionLimit());
+                int resolveThreads = connectionCap;
+                int downloadThreads = connectionCap;
+                Log($"[E-Hentai Pipeline] Bắt đầu tải {totalPages} trang (Giới hạn kết nối: {downloadThreads} luồng song song)...");
 
                 int completedPages = 0;
                 object lockObj = new object();
