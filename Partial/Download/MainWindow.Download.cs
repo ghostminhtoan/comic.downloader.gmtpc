@@ -6360,23 +6360,43 @@ namespace get_link_manga
                             try
                             {
                                 string readerHtml = null;
-                                // Thử resolve tối đa 2 lần với timeout 6 giây để không bao giờ bị nghẽn ở các trang cuối
-                                for (int resolveAttempt = 1; resolveAttempt <= 2; resolveAttempt++)
+                                string imgUrl = null;
+                                string nlParam = null;
+
+                                // Thử resolve tối đa 3 lần với timeout tăng dần để lấy HTML và direct image link
+                                for (int resolveAttempt = 1; resolveAttempt <= 3; resolveAttempt++)
                                 {
                                     try
                                     {
-                                        readerHtml = await FetchStringAsync(readerUrl, token, timeoutSeconds: 6);
-                                        if (!string.IsNullOrWhiteSpace(readerHtml)) break;
+                                        int timeout = resolveAttempt == 1 ? 6 : (resolveAttempt == 2 ? 10 : 15);
+                                        readerHtml = await FetchStringAsync(readerUrl, token, timeoutSeconds: timeout);
+                                        if (!string.IsNullOrWhiteSpace(readerHtml))
+                                        {
+                                            imgUrl = ExtractEHentaiDirectImageUrl(readerHtml);
+                                            nlParam = ExtractEHentaiNlParam(readerHtml);
+                                            if (!string.IsNullOrWhiteSpace(imgUrl))
+                                            {
+                                                break;
+                                            }
+
+                                            // Nếu HTML lấy được nhưng parse ảnh thất bại mà có nlParam, thử fetch fallback ngay lập tức
+                                            if (!string.IsNullOrWhiteSpace(nlParam))
+                                            {
+                                                imgUrl = await TryFetchEHentaiFallbackImageUrlAsync(readerUrl, nlParam, token);
+                                                if (!string.IsNullOrWhiteSpace(imgUrl))
+                                                {
+                                                    break;
+                                                }
+                                            }
+                                        }
                                     }
                                     catch (Exception)
                                     {
-                                        if (resolveAttempt >= 2) throw;
-                                        await Task.Delay(200, token);
+                                        if (resolveAttempt >= 3) throw;
+                                        await Task.Delay(400 * resolveAttempt, token);
                                     }
                                 }
 
-                                string imgUrl = ExtractEHentaiDirectImageUrl(readerHtml);
-                                string nlParam = ExtractEHentaiNlParam(readerHtml);
                                 if (!string.IsNullOrWhiteSpace(imgUrl))
                                 {
                                     downloadChannel.Add(Tuple.Create(pageNum, WebUtility.HtmlDecode(imgUrl), readerUrl, nlParam));
@@ -6458,7 +6478,7 @@ namespace get_link_manga
             {
                 string sep = readerUrl.Contains("?") ? "&" : "?";
                 string fallbackUrl = $"{readerUrl}{sep}nl={Uri.EscapeDataString(nlParam)}";
-                string fallbackHtml = await FetchStringAsync(fallbackUrl, token, timeoutSeconds: 6);
+                string fallbackHtml = await FetchStringAsync(fallbackUrl, token, timeoutSeconds: 10);
                 string imgUrl = ExtractEHentaiDirectImageUrl(fallbackHtml);
                 return !string.IsNullOrWhiteSpace(imgUrl) ? WebUtility.HtmlDecode(imgUrl) : null;
             }
@@ -6495,7 +6515,14 @@ namespace get_link_manga
                 }
             }
 
-            // 2. Fallback: look for hath.network or e-hentai image cdn url pattern
+            // 2. Extract from any <img> tag with src containing hath.network or ehgt.org or .jpg/.png/.webp
+            var anyImgMatch = Regex.Match(readerHtml, @"<img[^>]+src=['""](?<url>https?://[^'""]*?\.(?:hath\.network|ehgt\.org)[^'""]*)['""]", RegexOptions.IgnoreCase);
+            if (anyImgMatch.Success)
+            {
+                return anyImgMatch.Groups["url"].Value;
+            }
+
+            // 3. Fallback: look for hath.network or e-hentai image cdn url pattern
             var genMatch = Regex.Match(readerHtml, @"['""](?<url>https?://[^'""]*?\.(?:hath\.network|ehgt\.org)[^'""]*?\.(?:jpg|png|jpeg|webp|gif|bmp)[^'""]*)['""]", RegexOptions.IgnoreCase);
             if (genMatch.Success)
             {
