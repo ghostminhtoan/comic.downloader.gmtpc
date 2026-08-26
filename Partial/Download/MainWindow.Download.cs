@@ -4918,13 +4918,20 @@ namespace get_link_manga
                 return; // skip duplicate
             }
 
-            // Introduce a short jittered delay to avoid hitting the server with multiple requests simultaneously
-            try
+            // Introduce a short jittered delay for sensitive sites to avoid hitting the server simultaneously
+            bool isEHentai = url != null && (url.IndexOf("ehgt.org", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                             url.IndexOf("hath.network", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                             url.IndexOf("e-hentai.org", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                             url.IndexOf("exhentai.org", StringComparison.OrdinalIgnoreCase) >= 0);
+            if (!isEHentai)
             {
-                int jitter = _delayRandom.Next(150, 450);
-                await Task.Delay(jitter, token);
+                try
+                {
+                    int jitter = _delayRandom.Next(100, 300);
+                    await Task.Delay(jitter, token);
+                }
+                catch {}
             }
-            catch {}
 
             int delayMs = isViHentai ? 800 : (isTruyenqq ? 600 : 500);
             int maxAttempts = 3;
@@ -6123,22 +6130,39 @@ namespace get_link_manga
                     }
                 }
 
-                // If gallery has multiple index pages, fetch each page index (?p=1, ?p=2, ...) to collect all reader page URLs
+                // If gallery has multiple index pages, fetch remaining pages in parallel batches
                 string baseGalleryUrl = Regex.Replace(item.Link, @"([?&])p=\d+(&|$)", "$1", RegexOptions.IgnoreCase).TrimEnd('&', '?');
                 string sep = baseGalleryUrl.Contains("?") ? "&" : "?";
 
-                for (int p = 1; p <= maxPIndex; p++)
+                if (maxPIndex >= 1)
                 {
-                    token.ThrowIfCancellationRequested();
-                    string nextGalleryPageUrl = $"{baseGalleryUrl}{sep}p={p}";
-                    try
+                    var pageIndexTasks = new List<Task<string>>();
+                    for (int p = 1; p <= maxPIndex; p++)
                     {
-                        string nextHtml = await FetchStringAsync(nextGalleryPageUrl, token);
-                        HarvestReaderUrlsFromHtml(nextHtml);
+                        int pNum = p;
+                        pageIndexTasks.Add(Task.Run(async () =>
+                        {
+                            token.ThrowIfCancellationRequested();
+                            string nextGalleryPageUrl = $"{baseGalleryUrl}{sep}p={pNum}";
+                            try
+                            {
+                                return await FetchStringAsync(nextGalleryPageUrl, token);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log($"[E-Hentai Warning] Không thể lấy danh sách trang tại index p={pNum}: {ex.Message}");
+                                return null;
+                            }
+                        }, token));
                     }
-                    catch (Exception ex)
+
+                    string[] pageHtmls = await Task.WhenAll(pageIndexTasks);
+                    foreach (var pHtml in pageHtmls)
                     {
-                        Log($"[E-Hentai Warning] Không thể lấy danh sách trang tại index p={p}: {ex.Message}");
+                        if (!string.IsNullOrWhiteSpace(pHtml))
+                        {
+                            HarvestReaderUrlsFromHtml(pHtml);
+                        }
                     }
                 }
 

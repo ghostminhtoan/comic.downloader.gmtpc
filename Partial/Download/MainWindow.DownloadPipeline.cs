@@ -121,6 +121,18 @@ namespace get_link_manga
             },
             new SiteDownloadProfile
             {
+                Id = "e-hentai",
+                HostAliases = new[] { "e-hentai.org", "exhentai.org", "ehgt.org", "hath.network" },
+                BrowserSessionPreferred = false,
+                ChromeFallbackPreferred = false,
+                DefaultConcurrencyCap = 6,
+                InterRequestDelayMs = 50,
+                AllowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp" },
+                ChallengeMarkers = new[] { "Just a moment...", "cloudflare", "cf-challenge", "captcha" },
+                RetryPolicy = new RetryPolicyProfile { MaxAttempts = 4, BaseDelayMs = 500, MaxDelayMs = 8000, BrowserChallengeNeedsSessionRefresh = false }
+            },
+            new SiteDownloadProfile
+            {
                 Id = "default",
                 HostAliases = new string[0],
                 BrowserSessionPreferred = false,

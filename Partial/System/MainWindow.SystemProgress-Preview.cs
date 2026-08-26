@@ -1257,10 +1257,18 @@ namespace get_link_manga
             return input.Trim();
         }
 
+        private static DateTime _lastCacheLimitCheck = DateTime.MinValue;
+
         private static void EnsureCacheSizeLimit()
         {
             try
             {
+                if ((DateTime.UtcNow - _lastCacheLimitCheck).TotalSeconds < 60)
+                {
+                    return;
+                }
+                _lastCacheLimitCheck = DateTime.UtcNow;
+
                 string previewRoot = Path.Combine(PortablePaths.PortableTempRoot, "preview-cache");
                 if (!Directory.Exists(previewRoot))
                 {
