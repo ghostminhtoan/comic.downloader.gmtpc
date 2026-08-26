@@ -6189,7 +6189,7 @@ namespace get_link_manga
                 string[] extensions = new string[] { ".jpg", ".png", ".jpeg", ".webp", ".gif", ".bmp" };
 
                 // Pipeline channel để chuyển tiếp work item giữa Resolver và Binary Downloader
-                var downloadChannel = new System.Collections.Concurrent.BlockingCollection<Tuple<int, string, string>>();
+                var downloadChannel = new System.Collections.Concurrent.BlockingCollection<Tuple<int, string, string, string>>();
 
                 // 1. Consumer: Các luồng tải binary ảnh trực tiếp từ CDN
                 var consumerTasks = new List<Task>();
@@ -6210,6 +6210,7 @@ namespace get_link_manga
                             int pageNum = work.Item1;
                             string directImgUrl = work.Item2;
                             string readerUrl = work.Item3;
+                            string nlParam = work.Item4;
 
                             var pageWatch = Stopwatch.StartNew();
                             string actualExt = GetSafeImageExtensionFromUrl(directImgUrl);
@@ -6219,20 +6220,52 @@ namespace get_link_manga
                             }
                             string finalPath = Path.Combine(tempFolder, BuildOrderedImageFilename(pageNum, directImgUrl, actualExt, $"page-{pageNum}"));
 
+                            bool downloadSuccess = false;
                             try
                             {
                                 await DownloadUrlToFileWithRefererAsync(directImgUrl, readerUrl, finalPath, token);
+                                downloadSuccess = File.Exists(finalPath) && new FileInfo(finalPath).Length > 0;
                             }
                             catch (Exception ex)
                             {
                                 Log($"[E-Hentai Warning] Lỗi tải ảnh trang {pageNum}: {ex.Message}");
                             }
 
+                            // Nếu tải thất bại hoặc sinh ra file rác 0KB, xóa file và thử fallback sang URL server CDN mới qua tham số nl(...)
+                            if (!downloadSuccess)
+                            {
+                                try { if (File.Exists(finalPath)) File.Delete(finalPath); } catch { }
+
+                                if (!string.IsNullOrWhiteSpace(nlParam) && !string.IsNullOrWhiteSpace(readerUrl))
+                                {
+                                    try
+                                    {
+                                        string fallbackDirectUrl = await TryFetchEHentaiFallbackImageUrlAsync(readerUrl, nlParam, token);
+                                        if (!string.IsNullOrWhiteSpace(fallbackDirectUrl))
+                                        {
+                                            string fallbackExt = GetSafeImageExtensionFromUrl(fallbackDirectUrl);
+                                            if (string.IsNullOrWhiteSpace(fallbackExt) || !extensions.Contains(fallbackExt, StringComparer.OrdinalIgnoreCase))
+                                            {
+                                                fallbackExt = actualExt;
+                                            }
+                                            string fallbackFinalPath = Path.Combine(tempFolder, BuildOrderedImageFilename(pageNum, fallbackDirectUrl, fallbackExt, $"page-{pageNum}"));
+                                            await DownloadUrlToFileWithRefererAsync(fallbackDirectUrl, readerUrl, fallbackFinalPath, token);
+                                            finalPath = fallbackFinalPath;
+                                        }
+                                    }
+                                    catch (Exception fallbackEx)
+                                    {
+                                        Log($"[E-Hentai Fallback Warning] Thử tải lại trang {pageNum} qua server dự phòng thất bại: {fallbackEx.Message}");
+                                        try { if (File.Exists(finalPath)) File.Delete(finalPath); } catch { }
+                                    }
+                                }
+                            }
+
                             pageWatch.Stop();
                             lock (lockObj)
                             {
                                 completedPages++;
-                                long downloadedBytes = File.Exists(finalPath) ? new FileInfo(finalPath).Length : 0;
+                                long downloadedBytes = (File.Exists(finalPath) && new FileInfo(finalPath).Length > 0) ? new FileInfo(finalPath).Length : 0;
                                 UpdateDownloadRowMetrics(queueItem, completedPages, totalPages, $"{completedPages}/{totalPages} pages", downloadedBytes, pageWatch.ElapsedMilliseconds);
                                 WriteTempProgressLog(tempFolder, item, "Downloading", completedPages, totalPages, $"{completedPages}/{totalPages} pages", $"Page {pageNum} completed");
                             }
@@ -6294,9 +6327,10 @@ namespace get_link_manga
                             {
                                 string readerHtml = await FetchStringAsync(readerUrl, token);
                                 string imgUrl = ExtractEHentaiDirectImageUrl(readerHtml);
+                                string nlParam = ExtractEHentaiNlParam(readerHtml);
                                 if (!string.IsNullOrWhiteSpace(imgUrl))
                                 {
-                                    downloadChannel.Add(Tuple.Create(pageNum, WebUtility.HtmlDecode(imgUrl), readerUrl));
+                                    downloadChannel.Add(Tuple.Create(pageNum, WebUtility.HtmlDecode(imgUrl), readerUrl, nlParam));
                                 }
                                 else
                                 {
@@ -6320,6 +6354,9 @@ namespace get_link_manga
 
                 await Task.WhenAll(consumerTasks);
 
+                // Dọn dẹp triệt để bất kỳ file rác 0KB nào còn sót trong tempFolder trước khi Move
+                CleanZeroByteFilesInDirectory(tempFolder);
+
                 WriteTempProgressLog(tempFolder, item, "Done", totalPages, totalPages, $"{totalPages}/{totalPages} pages", "Download completed");
                 MoveTempFolderToTarget(tempFolder, targetFolder, "E-Hentai");
 
@@ -6342,6 +6379,55 @@ namespace get_link_manga
 
                 UnregisterTempFolder(tempFolder);
             }
+        }
+
+        private static void CleanZeroByteFilesInDirectory(string folderPath)
+        {
+            if (string.IsNullOrWhiteSpace(folderPath) || !Directory.Exists(folderPath)) return;
+            try
+            {
+                foreach (string file in Directory.GetFiles(folderPath))
+                {
+                    try
+                    {
+                        var fi = new FileInfo(file);
+                        if (fi.Exists && fi.Length == 0)
+                        {
+                            File.Delete(file);
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        private async Task<string> TryFetchEHentaiFallbackImageUrlAsync(string readerUrl, string nlParam, CancellationToken token)
+        {
+            if (string.IsNullOrWhiteSpace(readerUrl) || string.IsNullOrWhiteSpace(nlParam)) return null;
+            try
+            {
+                string sep = readerUrl.Contains("?") ? "&" : "?";
+                string fallbackUrl = $"{readerUrl}{sep}nl={Uri.EscapeDataString(nlParam)}";
+                string fallbackHtml = await FetchStringAsync(fallbackUrl, token);
+                string imgUrl = ExtractEHentaiDirectImageUrl(fallbackHtml);
+                return !string.IsNullOrWhiteSpace(imgUrl) ? WebUtility.HtmlDecode(imgUrl) : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private string ExtractEHentaiNlParam(string readerHtml)
+        {
+            if (string.IsNullOrWhiteSpace(readerHtml)) return null;
+            var match = Regex.Match(readerHtml, @"nl\(['""](?<nl>[^'""]+)['""]\)", RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                return match.Groups["nl"].Value;
+            }
+            return null;
         }
 
         private string ExtractEHentaiDirectImageUrl(string readerHtml)
