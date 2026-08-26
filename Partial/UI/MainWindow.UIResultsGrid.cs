@@ -176,6 +176,33 @@ namespace get_link_manga
             return false;
         }
 
+        private void ScrollResultsToTop()
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    if (_isResultsThumbnailViewEnabled && lbResultsThumbnail != null)
+                    {
+                        if (lbResultsThumbnail.Items.Count > 0)
+                        {
+                            lbResultsThumbnail.SelectedIndex = 0;
+                            lbResultsThumbnail.ScrollIntoView(lbResultsThumbnail.Items[0]);
+                        }
+                    }
+                    else if (dgResults != null)
+                    {
+                        if (dgResults.Items.Count > 0)
+                        {
+                            dgResults.SelectedIndex = 0;
+                            dgResults.ScrollIntoView(dgResults.Items[0]);
+                        }
+                    }
+                }
+                catch { }
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
         private bool IsCompactRowsEnabled()
         {
             return chkCompactRows?.IsChecked == true;

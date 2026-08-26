@@ -528,6 +528,8 @@ namespace get_link_manga
             {
                 RebuildThumbnailResultsView();
             }
+
+            ScrollResultsToTop();
         }
 
         private void BtnExtractClearCookie_Click(object sender, RoutedEventArgs e)
