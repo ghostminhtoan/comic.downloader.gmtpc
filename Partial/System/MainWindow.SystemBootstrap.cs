@@ -902,6 +902,10 @@ namespace get_link_manga
                     return "nhentai.net";
                 if (host.EndsWith(".nhentaimg.com", StringComparison.OrdinalIgnoreCase))
                     return "nhentaimg.com";
+                if (host.EndsWith("e-hentai.org", StringComparison.OrdinalIgnoreCase))
+                    return "e-hentai.org";
+                if (host.EndsWith("exhentai.org", StringComparison.OrdinalIgnoreCase))
+                    return "exhentai.org";
                 return host;
             }
             catch
@@ -918,7 +922,29 @@ namespace get_link_manga
                 return _cookieContainer;
             }
 
-            return _cookieContainersByHost.GetOrAdd(host, _ => new CookieContainer());
+            return _cookieContainersByHost.GetOrAdd(host, h =>
+            {
+                var container = new CookieContainer();
+                if (h.Equals("e-hentai.org", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        container.Add(new Uri("https://e-hentai.org/"), new Cookie("nw", "1", "/", "e-hentai.org"));
+                        container.Add(new Uri("https://e-hentai.org/"), new Cookie("nw", "1", "/", ".e-hentai.org"));
+                    }
+                    catch { }
+                }
+                else if (h.Equals("exhentai.org", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        container.Add(new Uri("https://exhentai.org/"), new Cookie("nw", "1", "/", "exhentai.org"));
+                        container.Add(new Uri("https://exhentai.org/"), new Cookie("nw", "1", "/", ".exhentai.org"));
+                    }
+                    catch { }
+                }
+                return container;
+            });
         }
 
         private void RememberScopedUserAgent(string urlOrHost, string userAgent)

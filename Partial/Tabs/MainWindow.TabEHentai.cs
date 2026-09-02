@@ -76,6 +76,38 @@ namespace get_link_manga
             }
         }
 
+        private async Task<string> FetchEHentaiHtmlAsync(string url, CancellationToken token, int timeoutSeconds = 30)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return string.Empty;
+            url = NormalizeEHentaiUrl(url);
+
+            try
+            {
+                var container = GetScopedCookieContainer("e-hentai.org");
+                container.Add(new Uri("https://e-hentai.org/"), new Cookie("nw", "1", "/", "e-hentai.org"));
+                container.Add(new Uri("https://e-hentai.org/"), new Cookie("nw", "1", "/", ".e-hentai.org"));
+            }
+            catch { }
+
+            string html = await FetchStringAsync(url, token, timeoutSeconds);
+            if (!string.IsNullOrWhiteSpace(html) && (html.Contains("Content Warning") || html.Contains("Offensive For Everyone")))
+            {
+                string sep = url.Contains("?") ? "&" : "?";
+                string bypassUrl = url + sep + "nw=always";
+                try
+                {
+                    string bypassHtml = await FetchStringAsync(bypassUrl, token, timeoutSeconds);
+                    if (!string.IsNullOrWhiteSpace(bypassHtml) && !bypassHtml.Contains("Content Warning"))
+                    {
+                        return bypassHtml;
+                    }
+                }
+                catch { }
+            }
+
+            return html;
+        }
+
         private async void BtnEHentaiFetchInfo_Click(object sender, RoutedEventArgs e)
         {
             string url = txtEHentaiTagUrl.Text.Trim();
@@ -95,7 +127,7 @@ namespace get_link_manga
 
             try
             {
-                string html = await FetchStringAsync(url, _downloadCts?.Token ?? CancellationToken.None);
+                string html = await FetchEHentaiHtmlAsync(url, _downloadCts?.Token ?? CancellationToken.None);
                 int maxPage = 1;
 
                 if (IsEHentaiGalleryUrl(url))
@@ -306,7 +338,7 @@ namespace get_link_manga
                 // If user entered a single gallery URL directly
                 if (IsEHentaiGalleryUrl(baseUrl))
                 {
-                    string html = await FetchStringAsync(baseUrl, token);
+                    string html = await FetchEHentaiHtmlAsync(baseUrl, token);
                     string title = ExtractEHentaiTitle(html, baseUrl);
                     string coverUrl = ExtractEHentaiCoverUrl(html, baseUrl);
 
@@ -346,7 +378,7 @@ namespace get_link_manga
                 {
                     token.ThrowIfCancellationRequested();
                     EHentaiLog($"Đang tua đến trang {pageFrom} (bước qua trang {p})...");
-                    string seekHtml = await FetchStringAsync(currentUrl, token);
+                    string seekHtml = await FetchEHentaiHtmlAsync(currentUrl, token);
                     string nextUrl = ExtractEHentaiNextUrl(seekHtml, currentUrl);
                     if (string.IsNullOrWhiteSpace(nextUrl))
                     {
@@ -362,7 +394,7 @@ namespace get_link_manga
 
                     EHentaiLog($"Đang tải trang {page}: {currentUrl}");
 
-                    string html = await FetchStringAsync(currentUrl, token);
+                    string html = await FetchEHentaiHtmlAsync(currentUrl, token);
                     if (string.IsNullOrWhiteSpace(html))
                     {
                         break;
@@ -545,7 +577,7 @@ namespace get_link_manga
                             continue;
                         }
 
-                        string html = await FetchStringAsync(link, _downloadCts?.Token ?? CancellationToken.None);
+                        string html = await FetchEHentaiHtmlAsync(link, _downloadCts?.Token ?? CancellationToken.None);
                         string title = ExtractEHentaiTitle(html, link);
                         string coverUrl = ExtractEHentaiCoverUrl(html, link);
 
