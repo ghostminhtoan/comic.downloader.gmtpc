@@ -540,6 +540,17 @@ namespace get_link_manga
         {
             if (token == null) return;
 
+            if (!string.IsNullOrWhiteSpace(currentKey))
+            {
+                string lowerKey = currentKey.ToLowerInvariant();
+                if (lowerKey == "related" || lowerKey == "languages" || lowerKey == "similar" || 
+                    lowerKey == "url" || lowerKey == "href" || lowerKey == "files" || 
+                    lowerKey == "comments" || lowerKey.EndsWith("_url") || lowerKey.EndsWith("_link"))
+                {
+                    return; // Skip properties that commonly pollute search results with other languages or random words
+                }
+            }
+
             if (token is Newtonsoft.Json.Linq.JValue val)
             {
                 string strVal = val.ToString()?.Trim();
@@ -571,37 +582,80 @@ namespace get_link_manga
             }
         }
 
+        private static string RemoveDiacritics(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+            var normalizedString = text.Normalize(System.Text.NormalizationForm.FormD);
+            var stringBuilder = new System.Text.StringBuilder(text.Length);
+
+            foreach (var c in normalizedString)
+            {
+                if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(System.Text.NormalizationForm.FormC);
+        }
+
+        private static bool ContainsKeyword(string source, string keyword, bool exactWord, System.Text.RegularExpressions.Regex regexExact)
+        {
+            if (string.IsNullOrEmpty(source)) return false;
+
+            if (!exactWord)
+            {
+                var compareInfo = System.Globalization.CultureInfo.InvariantCulture.CompareInfo;
+                return compareInfo.IndexOf(source, keyword, System.Globalization.CompareOptions.IgnoreCase | System.Globalization.CompareOptions.IgnoreNonSpace) >= 0;
+            }
+            else
+            {
+                if (regexExact == null) return false;
+                string normalizedSource = RemoveDiacritics(source);
+                return regexExact.IsMatch(normalizedSource);
+            }
+        }
+
         private bool IsGalleryItemMatchKeyword(GalleryItem galleryItem, string keyword, bool exactWordMatch = false)
         {
             if (galleryItem == null || string.IsNullOrWhiteSpace(keyword)) return false;
 
+            string normalizedKeyword = keyword.Trim();
+            string searchPrefix = null;
+
+            int colonIndex = normalizedKeyword.IndexOf(':');
+            if (colonIndex > 0 && colonIndex < normalizedKeyword.Length - 1)
+            {
+                string prefix = normalizedKeyword.Substring(0, colonIndex).ToLowerInvariant();
+                if (prefix == "name" || prefix == "link" || prefix == "tag")
+                {
+                    searchPrefix = prefix;
+                    normalizedKeyword = normalizedKeyword.Substring(colonIndex + 1).Trim();
+                }
+            }
+
             string tagsText = GetGalleryItemTagsSearchText(galleryItem);
+            System.Text.RegularExpressions.Regex regexExact = null;
 
-            if (!exactWordMatch)
+            if (exactWordMatch)
             {
-                return (galleryItem.Name != null && galleryItem.Name.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                       (galleryItem.Link != null && galleryItem.Link.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                       (!string.IsNullOrEmpty(tagsText) && tagsText.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                       (galleryItem.MissingChapterStatusText != null && galleryItem.MissingChapterStatusText.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                       (galleryItem.Status != null && galleryItem.Status.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                       (galleryItem.CurrentProcess != null && galleryItem.CurrentProcess.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                       (galleryItem.DownloadingChapter != null && galleryItem.DownloadingChapter.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                       (galleryItem.DownloadingPageProgress != null && galleryItem.DownloadingPageProgress.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0);
+                string noDiacriticsKeyword = RemoveDiacritics(normalizedKeyword);
+                regexExact = GetExactWordRegex(noDiacriticsKeyword);
+                if (regexExact == null) return false;
             }
-            else
-            {
-                var regex = GetExactWordRegex(keyword.Trim());
-                if (regex == null) return false;
 
-                return (galleryItem.Name != null && regex.IsMatch(galleryItem.Name)) ||
-                       (galleryItem.Link != null && regex.IsMatch(galleryItem.Link)) ||
-                       (!string.IsNullOrEmpty(tagsText) && regex.IsMatch(tagsText)) ||
-                       (galleryItem.MissingChapterStatusText != null && regex.IsMatch(galleryItem.MissingChapterStatusText)) ||
-                       (galleryItem.Status != null && regex.IsMatch(galleryItem.Status)) ||
-                       (galleryItem.CurrentProcess != null && regex.IsMatch(galleryItem.CurrentProcess)) ||
-                       (galleryItem.DownloadingChapter != null && regex.IsMatch(galleryItem.DownloadingChapter)) ||
-                       (galleryItem.DownloadingPageProgress != null && regex.IsMatch(galleryItem.DownloadingPageProgress));
-            }
+            if (searchPrefix == "name") return ContainsKeyword(galleryItem.Name, normalizedKeyword, exactWordMatch, regexExact);
+            if (searchPrefix == "link") return ContainsKeyword(galleryItem.Link, normalizedKeyword, exactWordMatch, regexExact);
+            if (searchPrefix == "tag") return ContainsKeyword(tagsText, normalizedKeyword, exactWordMatch, regexExact);
+
+            return ContainsKeyword(galleryItem.Name, normalizedKeyword, exactWordMatch, regexExact) ||
+                   ContainsKeyword(galleryItem.Link, normalizedKeyword, exactWordMatch, regexExact) ||
+                   ContainsKeyword(tagsText, normalizedKeyword, exactWordMatch, regexExact) ||
+                   ContainsKeyword(galleryItem.MissingChapterStatusText, normalizedKeyword, exactWordMatch, regexExact) ||
+                   ContainsKeyword(galleryItem.Status, normalizedKeyword, exactWordMatch, regexExact) ||
+                   ContainsKeyword(galleryItem.CurrentProcess, normalizedKeyword, exactWordMatch, regexExact) ||
+                   ContainsKeyword(galleryItem.DownloadingChapter, normalizedKeyword, exactWordMatch, regexExact) ||
+                   ContainsKeyword(galleryItem.DownloadingPageProgress, normalizedKeyword, exactWordMatch, regexExact);
         }
 
         private void ApplyResultsFilter(ICollectionView view, string filterText)
