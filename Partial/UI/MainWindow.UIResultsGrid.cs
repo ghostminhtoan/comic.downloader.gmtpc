@@ -404,6 +404,41 @@ namespace get_link_manga
             ApplyResultsFilter(CollectionViewSource.GetDefaultView(_lightNovelItems), string.Empty);
             SafeRefreshResultsView();
             PrefetchAllThumbnailResults();
+            UpdateSearchResultsCount();
+        }
+
+        private void UpdateSearchResultsCount()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action(UpdateSearchResultsCount));
+                return;
+            }
+
+            if (lblSearchBooksCount == null || txtSearchBooksLabel == null) return;
+
+            string filterText = txtFilter?.Text?.Trim() ?? string.Empty;
+            bool hasAdvancedFilters = (AdvancedSearch?.GetActivePositiveKeywords().Count ?? 0) > 0 ||
+                                      (AdvancedSearch?.GetActiveNegativeKeywords().Count ?? 0) > 0 ||
+                                      (AdvancedSearch?.GetActiveNonNegativeKeywords().Count ?? 0) > 0 ||
+                                      (AdvancedSearch?.GetActiveNonPositiveKeywords().Count ?? 0) > 0;
+
+            if (string.IsNullOrEmpty(filterText) && !hasAdvancedFilters)
+            {
+                lblSearchBooksCount.Visibility = Visibility.Collapsed;
+                txtSearchBooksLabel.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                int count = 0;
+                if (ResultsView != null)
+                {
+                    foreach (var item in ResultsView) count++;
+                }
+                lblSearchBooksCount.Text = count.ToString();
+                lblSearchBooksCount.Visibility = Visibility.Visible;
+                txtSearchBooksLabel.Visibility = Visibility.Visible;
+            }
         }
 
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, System.Text.RegularExpressions.Regex> _exactWordRegexCache =

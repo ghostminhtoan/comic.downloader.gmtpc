@@ -928,6 +928,7 @@ namespace get_link_manga
             if (txtLanguageLabel != null) txtLanguageLabel.Text = "ENG";
             if (txtLanguageTarget != null) txtLanguageTarget.Text = "VI";
             if (txtTotalBooksLabel != null) txtTotalBooksLabel.Text = "Total books: ";
+            if (txtSearchBooksLabel != null) txtSearchBooksLabel.Text = "Search results: ";
             if (txtBooksCompleteLabel != null) txtBooksCompleteLabel.Text = "Books complete: ";
             if (txtErrorBooksLabel != null) txtErrorBooksLabel.Text = "Error books: ";
             if (txtResultsHeader != null) txtResultsHeader.Text = "EXTRACTED GALLERY LINKS";

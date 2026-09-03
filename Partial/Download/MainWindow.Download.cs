@@ -6701,7 +6701,11 @@ namespace get_link_manga
                 // Dọn dẹp triệt để bất kỳ file rác 0KB nào còn sót trong tempFolder trước khi Move
                 CleanZeroByteFilesInDirectory(tempFolder);
 
-                WriteTempProgressLog(tempFolder, item, "Done", totalPages, totalPages, $"{totalPages}/{totalPages} pages", "Download completed");
+                int actualValidFiles = Directory.Exists(tempFolder) ? Directory.GetFiles(tempFolder).Count(f => extensions.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase) && new FileInfo(f).Length > 1024) : 0;
+                int finalPages = Math.Max(completedPages, actualValidFiles);
+                UpdateDownloadRowMetrics(queueItem, finalPages, totalPages, $"{finalPages}/{totalPages} pages", 0, 0);
+
+                WriteTempProgressLog(tempFolder, item, "Done", finalPages, totalPages, $"{finalPages}/{totalPages} pages", "Download completed");
                 MoveTempFolderToTarget(tempFolder, targetFolder, "E-Hentai");
 
                 ValidateDownloadedFiles(targetFolder, totalPages, queueItem, "Pages");
