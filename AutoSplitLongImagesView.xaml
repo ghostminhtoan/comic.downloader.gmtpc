@@ -1,0 +1,89 @@
+<UserControl x:Class="get_link_manga.AutoSplitLongImagesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/MainWindowStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
+    <Grid Margin="0,10,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource CyberpunkCard}" Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="12"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="14"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="AUTO SPLIT LONG IMAGES IN FOLDER" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold"/>
+                
+                <TextBlock Grid.Row="2"
+                           Text="Quét toàn bộ ảnh trong thư mục và tự động cắt các ảnh dài thành nhiều phần nhỏ (ví dụ truyện tranh kéo xuống). Các file gốc sẽ bị xóa sau khi cắt thành công."
+                           Foreground="{StaticResource CyberpunkMutedTextBrush}"
+                           FontSize="11"
+                           TextWrapping="Wrap"/>
+
+                <Grid Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="Thư mục quét:" Foreground="{StaticResource CyberpunkTextBrush}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    <TextBox Grid.Column="2" Name="txtSplitFolderPath" Height="32" Style="{StaticResource SurfaceTextBox}"/>
+
+                    <Button Grid.Column="4" Name="btnBrowseSplitFolder" Content="DUYỆT" Click="BtnBrowseSplitFolder_Click" Style="{StaticResource CyberpunkButtonCyan}" Width="80"/>
+
+                    <TextBlock Grid.Column="6" Text="Height:" Foreground="{StaticResource CyberpunkTextBrush}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    <TextBox Grid.Column="8" Name="txtSplitHeight" Text="5000" Width="60" Height="32" HorizontalContentAlignment="Center" Style="{StaticResource SurfaceTextBox}"/>
+
+                    <TextBlock Grid.Column="10" Text="Quality:" Foreground="{StaticResource CyberpunkTextBrush}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    <TextBox Grid.Column="12" Name="txtSplitQuality" Text="75" Width="50" Height="32" HorizontalContentAlignment="Center" Style="{StaticResource SurfaceTextBox}"/>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource CyberpunkCard}" Padding="16">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="12"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="12"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Button Grid.Row="0" Name="btnStartSplit" Content="BẮT ĐẦU QUÉT VÀ CẮT ẢNH" Click="BtnStartSplit_Click" Style="{StaticResource CyberpunkButtonCyan}" Height="40" FontWeight="Bold"/>
+
+                <ProgressBar Grid.Row="2" Name="pbSplitProgress" Height="8" Background="#0f141e" Foreground="{StaticResource CyberpunkCyanBrush}" BorderThickness="0" Minimum="0" Maximum="100"/>
+                
+                <TextBox Grid.Row="4" Name="txtSplitLog" Style="{StaticResource SurfaceTextBox}" IsReadOnly="True" VerticalScrollBarVisibility="Auto" TextWrapping="NoWrap" FontFamily="Consolas" FontSize="11"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

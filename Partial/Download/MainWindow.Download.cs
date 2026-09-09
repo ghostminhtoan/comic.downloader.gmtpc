@@ -3455,16 +3455,20 @@ namespace get_link_manga
                             {
                                 string testPathTemp = Path.ChangeExtension(localFilePath, checkExt);
                                 string testPathFinal = Path.ChangeExtension(finalFilePath, checkExt);
-                                if (File.Exists(testPathTemp) && new FileInfo(testPathTemp).Length > 1024)
+                                string testSplitTemp = Path.ChangeExtension(localFilePath, null) + "-split-1." + checkExt;
+                                string testSplitFinal = Path.ChangeExtension(finalFilePath, null) + "-split-1." + checkExt;
+                                if ((File.Exists(testPathTemp) && new FileInfo(testPathTemp).Length > 1024) ||
+                                    (File.Exists(testSplitTemp) && new FileInfo(testSplitTemp).Length > 1024))
                                 {
                                     alreadyExists = true;
-                                    existingFile = testPathTemp;
+                                    existingFile = File.Exists(testPathTemp) ? testPathTemp : testSplitTemp;
                                     break;
                                 }
-                                if (File.Exists(testPathFinal) && new FileInfo(testPathFinal).Length > 1024)
+                                if ((File.Exists(testPathFinal) && new FileInfo(testPathFinal).Length > 1024) ||
+                                    (File.Exists(testSplitFinal) && new FileInfo(testSplitFinal).Length > 1024))
                                 {
                                     alreadyExists = true;
-                                    existingFile = testPathFinal;
+                                    existingFile = File.Exists(testPathFinal) ? testPathFinal : testSplitFinal;
                                     break;
                                 }
                             }
@@ -4926,6 +4930,99 @@ namespace get_link_manga
 
         private async Task DownloadUrlToFileWithRefererAsync(string url, string referer, string filePath, CancellationToken token, bool isViHentai = false, bool isTruyenqq = false)
         {
+            await DownloadUrlToFileWithRefererInternalAsync(url, referer, filePath, token, isViHentai, isTruyenqq);
+
+            bool autoSplit = false;
+            int splitHeight = 5000;
+            int splitQuality = 75;
+            if (System.Windows.Application.Current != null && System.Windows.Application.Current.Dispatcher != null)
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    foreach (System.Windows.Window window in System.Windows.Application.Current.Windows)
+                    {
+                        if (window is MainWindow main)
+                        {
+                            autoSplit = main.chkAutoSplitLongImages?.IsChecked == true;
+                            if (autoSplit)
+                            {
+                                if (int.TryParse(main.txtSplitHeight?.Text, out int parsedHeight) && parsedHeight > 100)
+                                    splitHeight = parsedHeight;
+                                if (main.txtSplitQuality != null && int.TryParse(main.txtSplitQuality.Text, out int parsedQuality) && parsedQuality > 10 && parsedQuality <= 100)
+                                    splitQuality = parsedQuality;
+                            }
+                            break;
+                        }
+                    }
+                });
+            }
+
+            if (autoSplit && File.Exists(filePath))
+            {
+                TrySplitImageFile(filePath, splitHeight, splitQuality);
+            }
+        }
+
+        internal static bool TrySplitImageFile(string filePath, int splitHeight, int quality)
+        {
+            if (!File.Exists(filePath)) return false;
+            try
+            {
+                bool wasSplit = false;
+
+                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    var decoder = System.Windows.Media.Imaging.BitmapDecoder.Create(fs, System.Windows.Media.Imaging.BitmapCreateOptions.PreservePixelFormat, System.Windows.Media.Imaging.BitmapCacheOption.Default);
+                    var frame = decoder.Frames[0];
+                    if (frame.PixelHeight > splitHeight)
+                    {
+                        wasSplit = true;
+                        int width = frame.PixelWidth;
+                        int height = frame.PixelHeight;
+                        int count = (int)Math.Ceiling((double)height / splitHeight);
+                        string dir = Path.GetDirectoryName(filePath);
+                        string nameWithoutExt = Path.GetFileNameWithoutExtension(filePath);
+                        string ext = Path.GetExtension(filePath);
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            int h = splitHeight;
+                            if (i == count - 1) h = height - (i * splitHeight);
+
+                            var cropped = new System.Windows.Media.Imaging.CroppedBitmap(frame, new System.Windows.Int32Rect(0, i * splitHeight, width, h));
+                            
+                            System.Windows.Media.Imaging.BitmapEncoder enc;
+                            if (ext.Equals(".png", StringComparison.OrdinalIgnoreCase))
+                                enc = new System.Windows.Media.Imaging.PngBitmapEncoder();
+                            else
+                                enc = new System.Windows.Media.Imaging.JpegBitmapEncoder() { QualityLevel = quality };
+
+                            enc.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(cropped));
+                            string outPath = Path.Combine(dir, $"{nameWithoutExt}-split-{i + 1}{ext}");
+
+                            using (var fsOut = new FileStream(outPath, FileMode.Create, FileAccess.Write))
+                            {
+                                enc.Save(fsOut);
+                            }
+                        }
+                    }
+                }
+
+                if (wasSplit)
+                {
+                    try { File.Delete(filePath); } catch { }
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SplitError] {filePath}: {ex.Message}");
+            }
+            return false;
+        }
+
+        private async Task DownloadUrlToFileWithRefererInternalAsync(string url, string referer, string filePath, CancellationToken token, bool isViHentai = false, bool isTruyenqq = false)
+        {
             long minSize = 1024; // Smart Resume: >1KB mới skip, tránh skip ảnh thật dung lượng thấp
             if (File.Exists(filePath) && new FileInfo(filePath).Length > minSize)
             {
@@ -4957,23 +5054,38 @@ namespace get_link_manga
                     token.ThrowIfCancellationRequested();
                     try
                     {
-                        if (url != null &&
-                            (url.IndexOf("mangadex.network", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                             url.IndexOf("uploads.mangadex.org", StringComparison.OrdinalIgnoreCase) >= 0))
+                        if (url != null && url.IndexOf("mangadex.network", StringComparison.OrdinalIgnoreCase) >= 0)
                         {
-                            await DownloadMangadexImageWithCurlAsync(url, referer, filePath, token);
-                            return;
+                            try
+                            {
+                                await DownloadMangadexImageWithCurlAsync(url, referer, filePath, token);
+                                return;
+                            }
+                            catch (Exception curlEx)
+                            {
+                                Log($"[mangadex.org] curl lỗi ảnh ({curlEx.Message}). Thử fallback...");
+                            }
                         }
 
                         if (IsMangadexBrowserFetchUrl(url))
                         {
-                            byte[] browserBytes = await FetchMangadexBytesViaBrowserAsync(url, referer, token);
-                            using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
+                            try
                             {
-                                await fileStream.WriteAsync(browserBytes, 0, browserBytes.Length, token);
-                            }
+                                byte[] browserBytes = await FetchMangadexBytesViaBrowserAsync(url, referer, token);
+                                if (browserBytes != null && browserBytes.Length > 0)
+                                {
+                                    using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
+                                    {
+                                        await fileStream.WriteAsync(browserBytes, 0, browserBytes.Length, token);
+                                    }
 
-                            return;
+                                    return;
+                                }
+                            }
+                            catch (Exception browserEx)
+                            {
+                                Log($"[mangadex.org] WebView2 tải ảnh lỗi ({browserEx.Message}). Thử HttpClient...");
+                            }
                         }
 
                         var httpClient = GetSharedHttpClient(url);
@@ -7003,12 +7115,16 @@ namespace get_link_manga
                             {
                                 string testPathTemp = Path.ChangeExtension(localFilePath, checkExt);
                                 string testPathFinal = Path.ChangeExtension(finalFilePath, checkExt);
-                                if (File.Exists(testPathTemp) && new FileInfo(testPathTemp).Length > 1024)
+                                string testSplitTemp = Path.ChangeExtension(localFilePath, null) + "-split-1." + checkExt;
+                                string testSplitFinal = Path.ChangeExtension(finalFilePath, null) + "-split-1." + checkExt;
+                                if ((File.Exists(testPathTemp) && new FileInfo(testPathTemp).Length > 1024) ||
+                                    (File.Exists(testSplitTemp) && new FileInfo(testSplitTemp).Length > 1024))
                                 {
                                     alreadyExists = true;
                                     break;
                                 }
-                                if (File.Exists(testPathFinal) && new FileInfo(testPathFinal).Length > 1024)
+                                if ((File.Exists(testPathFinal) && new FileInfo(testPathFinal).Length > 1024) ||
+                                    (File.Exists(testSplitFinal) && new FileInfo(testSplitFinal).Length > 1024))
                                 {
                                     alreadyExists = true;
                                     break;

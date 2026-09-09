@@ -63,12 +63,13 @@ namespace get_link_manga
 
         private bool IsNovelDownloadTabSelected()
         {
-            return tabDownloadRoot?.SelectedIndex == 2;
+            return (tabDownloadRoot?.SelectedItem as TabItem)?.Content is LightNovelPreviewPanel;
         }
 
         private bool IsSplitMergeFolderTabSelected()
         {
-            return tabDownloadRoot?.SelectedIndex == 3;
+            object content = (tabDownloadRoot?.SelectedItem as TabItem)?.Content;
+            return content is SingleComicFolderToolsView || content is AutoSplitLongImagesView;
         }
 
         private void InitializeWorkspaceShell()
@@ -1820,31 +1821,33 @@ namespace get_link_manga
             {
                 tabPasswordRootItem.Header = _isVietnameseUi ? "Mật khẩu" : "Password";
             }
-            if (tabDownloadRoot != null && tabDownloadRoot.Items.Count >= 2)
+            if (tabDownloadRoot != null)
             {
-                if (tabDownloadRoot.Items[0] is TabItem mangaTab)
+                foreach (object item in tabDownloadRoot.Items)
                 {
-                    mangaTab.Header = _isVietnameseUi ? "Tải Manga" : "Download Manga";
-                }
-
-                if (tabDownloadRoot.Items.Count >= 3)
-                {
-                    if (tabDownloadRoot.Items[1] is TabItem missingTab)
+                    if (item is TabItem tabItem)
                     {
-                        missingTab.Header = _isVietnameseUi ? "Check thiếu chap tải" : "Check download missing chapter";
+                        if (ReferenceEquals(tabItem, _downloadMissingChapterTab))
+                        {
+                            tabItem.Header = _isVietnameseUi ? "Scan chap số nguyên thiếu" : "Scan missing integer chapter";
+                        }
+                        else if (tabItem.Content is LightNovelPreviewPanel)
+                        {
+                            tabItem.Header = _isVietnameseUi ? "Tải Novel" : "Download Novel";
+                        }
+                        else if (tabItem.Content is SingleComicFolderToolsView)
+                        {
+                            tabItem.Header = "split / merge folder";
+                        }
+                        else if (tabItem.Content is AutoSplitLongImagesView)
+                        {
+                            tabItem.Header = "split long images";
+                        }
+                        else if (tabDownloadRoot.Items.IndexOf(tabItem) == 0)
+                        {
+                            tabItem.Header = _isVietnameseUi ? "Tải Manga" : "Download Manga";
+                        }
                     }
-                    if (tabDownloadRoot.Items[2] is TabItem novelTab)
-                    {
-                        novelTab.Header = _isVietnameseUi ? "Tải Novel" : "Download Novel";
-                    }
-                    if (tabDownloadRoot.Items.Count >= 4 && tabDownloadRoot.Items[3] is TabItem splitMergeTab)
-                    {
-                        splitMergeTab.Header = _isVietnameseUi ? "split / merge folder" : "split / merge folder";
-                    }
-                }
-                else if (tabDownloadRoot.Items[1] is TabItem novelTab)
-                {
-                    novelTab.Header = _isVietnameseUi ? "Tải Novel" : "Download Novel";
                 }
             }
 

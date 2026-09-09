@@ -38,3 +38,4 @@ replace*.ps1
 test*.ps1
 test*.py
 test*.js
+*.log

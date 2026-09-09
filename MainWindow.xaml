@@ -4765,6 +4765,13 @@
                                         </ContextMenu>
                                     </Button.ContextMenu>
                                 </Button>
+                                <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                                    <CheckBox Name="chkAutoSplitLongImages" Content="AUTO SPLIT LONG IMAGES" IsChecked="False" Foreground="{StaticResource CyberpunkTextBrush}" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" ToolTip="Tự động cắt ảnh dài hơn chiều cao quy định thành nhiều file nhỏ"/>
+                                    <TextBlock Text="Height:" Foreground="{StaticResource CyberpunkTextBrush}" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" Margin="5,0,2,0"/>
+                                    <TextBox Name="txtSplitHeight" Text="5000" Width="45" Background="#0e121a" Foreground="{StaticResource CyberpunkTextBrush}" BorderBrush="{StaticResource CyberpunkCyanBrush}" BorderThickness="1" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
+                                    <TextBlock Text="Quality:" Foreground="{StaticResource CyberpunkTextBrush}" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,2,0"/>
+                                    <TextBox Name="txtSplitQuality" Text="75" Width="35" Background="#0e121a" Foreground="{StaticResource CyberpunkTextBrush}" BorderBrush="{StaticResource CyberpunkCyanBrush}" BorderThickness="1" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
+                                </StackPanel>
                                 <Button Name="btnRefreshStatus" Content="LÀM MỚI TRẠNG THÁI" Click="BtnRefreshStatus_Click" Style="{StaticResource CompactCyanButton}" MinWidth="140" FontWeight="Bold" Margin="6,0,0,0" Visibility="Collapsed"/>
                                 <Button Name="btnClearResults" Content="XÓA HÀNG ĐỢI" Click="BtnClear_Click" Style="{StaticResource CompactPinkButton}" MinWidth="100" FontWeight="Bold" Margin="6,0,0,0"/>
                                 <Button Name="btnRescanThumbnail" Content="QUÉT LẠI THUMBNAIL" Click="BtnRescanThumbnail_Click" Style="{StaticResource CompactCyanButton}" MinWidth="140" FontWeight="Bold" Margin="6,0,0,0"/>
@@ -5106,6 +5113,9 @@
                 </TabItem>
                 <TabItem Header="split / merge folder" Style="{StaticResource CyberpunkTabItem}" Tag="{StaticResource CyberpunkCyanBrush}">
                     <local:SingleComicFolderToolsView x:Name="singleComicFolderToolsView"/>
+                </TabItem>
+                <TabItem Header="split long images" Style="{StaticResource CyberpunkTabItem}" Tag="{StaticResource CyberpunkPinkBrush}">
+                    <local:AutoSplitLongImagesView x:Name="autoSplitLongImagesView"/>
                 </TabItem>
             </TabControl>
             </Border>

@@ -108,6 +108,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="AutoSplitLongImagesView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Resources\MainWindowStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -430,6 +434,10 @@
     </Compile>
     <Compile Include="SingleComicFolderToolsView.xaml.cs">
       <DependentUpon>SingleComicFolderToolsView.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AutoSplitLongImagesView.xaml.cs">
+      <DependentUpon>AutoSplitLongImagesView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GreaterThanZeroConverter.cs">

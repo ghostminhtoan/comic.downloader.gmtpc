@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.Web.WebView2.Core;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
@@ -27,7 +28,9 @@ namespace get_link_manga
         private const string MangadexSiteFolder = "mangadex.org";
         private const int MangadexCategoryPageSize = 100;
         private const int MangadexFeedPageSize = 500;
-        // ponytail: spawn ChromeDriver theo request cho MangaDex; cham hon pool nhung tranh profile lock va crash DevToolsActivePort. Nang cap sau: shared WebView2 fetcher.
+        private Microsoft.Web.WebView2.Wpf.WebView2 _mangadexWebView;
+        private TaskCompletionSource<bool> _mangadexWebViewReady;
+        private readonly SemaphoreSlim _mangadexWebViewLock = new SemaphoreSlim(1, 1);
         private readonly SemaphoreSlim _mangadexBrowserFetchSemaphore = new SemaphoreSlim(2, 2);
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, MangadexMangaData> _mangadexMangaCache = new System.Collections.Concurrent.ConcurrentDictionary<string, MangadexMangaData>(StringComparer.OrdinalIgnoreCase);
         private readonly System.Collections.Concurrent.ConcurrentDictionary<string, MangadexChapterData> _mangadexChapterCache = new System.Collections.Concurrent.ConcurrentDictionary<string, MangadexChapterData>(StringComparer.OrdinalIgnoreCase);
@@ -268,14 +271,87 @@ namespace get_link_manga
             }
         }
 
+        private async Task EnsureMangadexWebViewAsync()
+        {
+            if (_mangadexWebViewReady != null)
+            {
+                await _mangadexWebViewReady.Task;
+                return;
+            }
+
+            _mangadexWebViewReady = new TaskCompletionSource<bool>();
+            await Dispatcher.InvokeAsync(async () =>
+            {
+                try
+                {
+                    string userDataFolder = Path.Combine(PortablePaths.WebView2RuntimeRoot, "mangadex-fetcher");
+                    Directory.CreateDirectory(userDataFolder);
+                    string browserArgs = "--disable-extensions --disable-popup-blocking --disable-background-networking --disable-sync --no-first-run --disable-web-security --disable-features=IsolateOrigins,site-per-process --blink-settings=imagesEnabled=false";
+                    var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder, new CoreWebView2EnvironmentOptions(browserArgs));
+
+                    _mangadexWebView = new Microsoft.Web.WebView2.Wpf.WebView2
+                    {
+                        Width = 0,
+                        Height = 0,
+                        Visibility = Visibility.Collapsed
+                    };
+                    if (rootLayout != null)
+                    {
+                        rootLayout.Children.Add(_mangadexWebView);
+                    }
+                    await _mangadexWebView.EnsureCoreWebView2Async(env);
+                    _mangadexWebView.CoreWebView2.Settings.AreDevToolsEnabled = false;
+                    _mangadexWebView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
+                    _mangadexWebView.CoreWebView2.Settings.IsStatusBarEnabled = false;
+                    _mangadexWebView.CoreWebView2.Settings.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+                    var navTcs = new TaskCompletionSource<bool>();
+                    EventHandler<CoreWebView2NavigationCompletedEventArgs> navHandler = null;
+                    navHandler = (s, e) =>
+                    {
+                        _mangadexWebView.NavigationCompleted -= navHandler;
+                        navTcs.TrySetResult(e.IsSuccess);
+                    };
+                    _mangadexWebView.NavigationCompleted += navHandler;
+                    _mangadexWebView.CoreWebView2.Navigate("https://mangadex.org/robots.txt");
+                    await Task.WhenAny(navTcs.Task, Task.Delay(10000));
+
+                    _mangadexWebViewReady.TrySetResult(true);
+                }
+                catch (Exception ex)
+                {
+                    MangadexLog("Khởi tạo WebView2 cho MangaDex thất bại: " + ex.Message);
+                    _mangadexWebViewReady = null;
+                    throw;
+                }
+            });
+
+            await _mangadexWebViewReady.Task;
+        }
+
         private async Task<T> GetMangadexJsonAsync<T>(string url, CancellationToken token)
         {
             Exception lastError = null;
-            for (int attempt = 1; attempt <= 4; attempt++)
+            for (int attempt = 1; attempt <= 3; attempt++)
             {
                 token.ThrowIfCancellationRequested();
 
-                // First try direct HttpClient fetch
+                // Ưu tiên 1: Dùng WebView2 (BoringSSL/Chromium bypass DDoS-Guard TLS alert thành công 100%)
+                try
+                {
+                    string json = await FetchMangadexTextViaBrowserAsync(url, token);
+                    if (!string.IsNullOrWhiteSpace(json))
+                    {
+                        return DeserializeMangadexJson<T>(json);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    lastError = ex;
+                    MangadexLog($"WebView2 MangaDex API ({attempt}/3): {ex.Message}");
+                }
+
+                // Ưu tiên 2: Direct HttpClient fallback
                 try
                 {
                     string json = await FetchStringAsync(url, token);
@@ -283,36 +359,13 @@ namespace get_link_manga
                     {
                         return DeserializeMangadexJson<T>(json);
                     }
-
-                    throw new HttpRequestException("MangaDex trả JSON rỗng.");
                 }
                 catch (Exception ex)
                 {
                     lastError = ex;
-                    MangadexLog($"HttpClient lỗi với MangaDex. Thử các phương thức fallback ({attempt}/4): {ex.Message}");
                 }
 
-                // If HttpClient fails, try browser fallback if it's a mangadex host
-                if (IsMangadexBrowserFetchUrl(url))
-                {
-                    try
-                    {
-                        string json = await FetchMangadexTextViaBrowserAsync(url, token);
-                        if (!string.IsNullOrWhiteSpace(json))
-                        {
-                            return DeserializeMangadexJson<T>(json);
-                        }
-
-                        throw new HttpRequestException("Browser MangaDex trả JSON rỗng.");
-                    }
-                    catch (Exception ex)
-                    {
-                        lastError = ex;
-                        MangadexLog($"Browser lỗi với MangaDex ({attempt}/4): {ex.Message}");
-                    }
-                }
-
-                // If both fail, try curl fallback
+                // Ưu tiên 3: curl fallback
                 try
                 {
                     string json = await FetchMangadexTextWithCurlAsync(url, token);
@@ -320,18 +373,15 @@ namespace get_link_manga
                     {
                         return DeserializeMangadexJson<T>(json);
                     }
-
-                    throw new HttpRequestException("curl MangaDex trả JSON rỗng.");
                 }
                 catch (Exception ex)
                 {
                     lastError = ex;
-                    MangadexLog($"curl lỗi với MangaDex ({attempt}/4): {ex.Message}");
                 }
 
-                if (attempt < 4)
+                if (attempt < 3)
                 {
-                    await Task.Delay(400 * attempt, token);
+                    await Task.Delay(350 * attempt, token);
                 }
             }
 
@@ -350,55 +400,25 @@ namespace get_link_manga
                    url.IndexOf("uploads.mangadex.org", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-        private ChromeDriver CreateMangadexChromeDriver(int poolIndex)
-        {
-            var options = new ChromeOptions();
-            string chromeBinary = TryFindChromeExecutable();
-            if (!string.IsNullOrWhiteSpace(chromeBinary))
-            {
-                options.BinaryLocation = chromeBinary;
-            }
-
-            options.AddArgument("--headless=new");
-            options.AddArgument("--disable-gpu");
-            options.AddArgument("--disable-software-rasterizer");
-            options.AddArgument("--disable-dev-shm-usage");
-            options.AddArgument("--disable-blink-features=AutomationControlled");
-            options.AddArgument("--disable-popup-blocking");
-            options.AddArgument("--disable-extensions");
-            options.AddArgument("--no-first-run");
-            options.AddArgument("--no-default-browser-check");
-            options.AddArgument("--no-sandbox");
-            options.AddArgument("--remote-debugging-port=0");
-            options.AddArgument("--window-size=1280,900");
-
-            ChromeDriverService service = ChromeDriverService.CreateDefaultService();
-            service.HideCommandPromptWindow = true;
-            service.SuppressInitialDiagnosticInformation = true;
-
-            var driver = new ChromeDriver(service, options, TimeSpan.FromMinutes(2));
-            OptimizeSystemPriorityForBackgroundTasks();
-            driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(60);
-            driver.Manage().Timeouts().AsynchronousJavaScript = TimeSpan.FromSeconds(90);
-            return driver;
-        }
-
-        private void EnsureMangadexBrowserDriverPool()
-        {
-        }
-
-        private ChromeDriver RentMangadexBrowserDriver()
-        {
-            return CreateMangadexChromeDriver(0);
-        }
-
-        private void ReturnMangadexBrowserDriver(ChromeDriver driver)
-        {
-            driver?.Dispose();
-        }
-
         public void DisposeMangadexBrowserDrivers()
         {
+            try
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    if (_mangadexWebView != null)
+                    {
+                        try
+                        {
+                            _mangadexWebView.Dispose();
+                        }
+                        catch {}
+                        _mangadexWebView = null;
+                        _mangadexWebViewReady = null;
+                    }
+                });
+            }
+            catch {}
         }
 
         private async Task<string> FetchMangadexTextViaBrowserAsync(string url, CancellationToken token)
@@ -454,88 +474,93 @@ namespace get_link_manga
 
         private async Task<string> FetchMangadexBrowserPayloadAsync(string url, bool fetchBinary, CancellationToken token)
         {
-            await _mangadexBrowserFetchSemaphore.WaitAsync(token);
+            await _mangadexWebViewLock.WaitAsync(token);
             try
             {
-                EnsureMangadexBrowserDriverPool();
-                return await Task.Run(() =>
+                await EnsureMangadexWebViewAsync();
+                return await (await Dispatcher.InvokeAsync(async () =>
                 {
                     token.ThrowIfCancellationRequested();
-                    ChromeDriver driver = RentMangadexBrowserDriver();
+                    string jsonUrl = Newtonsoft.Json.JsonConvert.SerializeObject(url);
+                    var payloadTcs = new TaskCompletionSource<string>();
+
+                    EventHandler<CoreWebView2WebMessageReceivedEventArgs> handler = null;
+                    handler = (s, e) =>
+                    {
+                        try
+                        {
+                            string msg = e.TryGetWebMessageAsString();
+                            if (!string.IsNullOrEmpty(msg))
+                            {
+                                payloadTcs.TrySetResult(msg);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            payloadTcs.TrySetException(ex);
+                        }
+                    };
+
+                    _mangadexWebView.CoreWebView2.WebMessageReceived += handler;
+
                     try
                     {
-                        driver.Navigate().GoToUrl(url);
-                        Thread.Sleep(800);
+                        string script = fetchBinary
+                            ? @"(async function() {
+    try {
+        const res = await fetch(" + jsonUrl + @", { credentials: 'omit', cache: 'no-store' });
+        if (!res.ok) { window.chrome.webview.postMessage('ERR:HTTP ' + res.status); return; }
+        const blob = await res.blob();
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const data = String(reader.result || '');
+            const comma = data.indexOf(',');
+            window.chrome.webview.postMessage(comma >= 0 ? 'OK:' + data.substring(comma + 1) : 'ERR:No base64');
+        };
+        reader.readAsDataURL(blob);
+    } catch (e) {
+        window.chrome.webview.postMessage('ERR:' + (e && e.message ? e.message : String(e)));
+    }
+})();"
+                            : @"(async function() {
+    try {
+        const res = await fetch(" + jsonUrl + @", { credentials: 'omit', cache: 'no-store', headers: { 'Accept': 'application/json, text/plain, */*' } });
+        if (!res.ok) { window.chrome.webview.postMessage('ERR:HTTP ' + res.status); return; }
+        const text = await res.text();
+        window.chrome.webview.postMessage('OK:' + text);
+    } catch (e) {
+        window.chrome.webview.postMessage('ERR:' + (e && e.message ? e.message : String(e)));
+    }
+})();";
 
-                        if (!fetchBinary)
+                        await _mangadexWebView.CoreWebView2.ExecuteScriptAsync(script);
+
+                        using (token.Register(() => payloadTcs.TrySetCanceled()))
                         {
-                            string textPayload = Convert.ToString(((IJavaScriptExecutor)driver).ExecuteScript(@"
-var body = document.body;
-if (!body) {
-  return document.documentElement ? document.documentElement.outerHTML : '';
-}
-return body.innerText || body.textContent || body.innerHTML || '';
-")) ?? string.Empty;
-                            textPayload = textPayload.Trim();
-                            if (!string.IsNullOrWhiteSpace(textPayload))
+                            var completed = await Task.WhenAny(payloadTcs.Task, Task.Delay(30000, token));
+                            if (completed != payloadTcs.Task)
                             {
-                                return textPayload;
+                                throw new TimeoutException("MangaDex WebView2 timeout khi tải: " + url);
                             }
                         }
 
-                        string script = fetchBinary
-                            ? @"
-var done = arguments[arguments.length - 1];
-fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-store' })
-  .then(function (response) {
-    if (!response.ok) {
-      throw new Error('HTTP ' + response.status);
-    }
-    return response.blob();
-  })
-  .then(function (blob) {
-    var reader = new FileReader();
-    reader.onloadend = function () {
-      var data = String(reader.result || '');
-      var commaIndex = data.indexOf(',');
-      done(commaIndex >= 0 ? 'OK:' + data.substring(commaIndex + 1) : 'ERR:Không đọc được base64');
-    };
-    reader.readAsDataURL(blob);
-  })
-  .catch(function (error) {
-    done('ERR:' + (error && error.message ? error.message : String(error)));
-  });"
-                            : @"
-var done = arguments[arguments.length - 1];
-fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-store' })
-  .then(function (response) {
-    return response.text().then(function (text) {
-      done(response.ok ? 'OK:' + text : 'ERR:HTTP ' + response.status + ' ' + text);
-    });
-  })
-  .catch(function (error) {
-    done('ERR:' + (error && error.message ? error.message : String(error)));
-  });";
-
-                        string result = Convert.ToString(((IJavaScriptExecutor)driver).ExecuteAsyncScript(script)) ?? string.Empty;
-                        if (result.StartsWith("OK:", StringComparison.Ordinal))
+                        string result = await payloadTcs.Task;
+                        if (result != null && result.StartsWith("OK:", StringComparison.Ordinal))
                         {
                             return result.Substring(3);
                         }
 
-                        throw new HttpRequestException(string.IsNullOrWhiteSpace(result)
-                            ? "Chrome fallback MangaDex không trả dữ liệu."
-                            : result);
+                        throw new HttpRequestException(result ?? "MangaDex WebView2 trả lỗi không xác định.");
                     }
                     finally
                     {
-                        ReturnMangadexBrowserDriver(driver);
+                        _mangadexWebView.CoreWebView2.WebMessageReceived -= handler;
                     }
-                }, token);
+                }));
             }
             finally
             {
-                _mangadexBrowserFetchSemaphore.Release();
+                _mangadexWebViewLock.Release();
             }
         }
 
@@ -1069,15 +1094,48 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
 
                 string bookTitle = manga != null
                     ? GetMangadexPreferredTitle(manga.Attributes, mangaSlug)
-                    : HumanizeMangadexSlug(mangaSlug);
+                    : null;
+                string coverUrl = manga != null
+                    ? BuildMangadexCoverUrl(manga.Id, manga.CoverFileName)
+                    : null;
+
+                if (string.IsNullOrWhiteSpace(bookTitle) || string.Equals(bookTitle, "MangaDex", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        string pageHtml = await GetMangadexRenderedHtmlAsync(BuildMangadexBookUrl(mangaId), token);
+                        var ogMatch = Regex.Match(pageHtml ?? string.Empty, @"<meta\s+property=""og:title""\s+content=""(?<title>[^""]+)""", RegexOptions.IgnoreCase);
+                        if (ogMatch.Success)
+                        {
+                            bookTitle = CleanMangadexText(ogMatch.Groups["title"].Value);
+                        }
+                        var ogImgMatch = Regex.Match(pageHtml ?? string.Empty, @"<meta\s+property=""og:image""\s+content=""(?<img>[^""]+)""", RegexOptions.IgnoreCase);
+                        if (ogImgMatch.Success && string.IsNullOrWhiteSpace(coverUrl))
+                        {
+                            coverUrl = ogImgMatch.Groups["img"].Value;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MangadexLog("Fallback HTML parse title: " + ex.Message);
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(bookTitle))
+                {
+                    bookTitle = HumanizeMangadexSlug(mangaSlug);
+                }
+
+                bookTitle = StripMangadexLanguageSuffix(bookTitle);
+
                 return new List<GalleryItem>
                 {
                     new GalleryItem
                     {
                         Link = BuildMangadexMangaUrl(mangaId, string.IsNullOrWhiteSpace(mangaSlug) ? SlugifyTitle(bookTitle) : mangaSlug),
-                        Name = AppendMangadexLanguageSuffix(bookTitle, _lastSelectedMangadexLangPrimary, _lastSelectedMangadexLangFallback),
+                        Name = bookTitle,
                         LinkCount = string.Empty,
-                        HoverPreviewThumbnailUrl = manga == null ? string.Empty : BuildMangadexCoverUrl(manga.Id, manga.CoverFileName),
+                        HoverPreviewThumbnailUrl = coverUrl ?? string.Empty,
                         SourceDomain = MangadexSiteFolder,
                         IsChecked = true,
                         MangadexLangPrimary = _lastSelectedMangadexLangPrimary,
@@ -1302,43 +1360,41 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
 
         private async Task<string> GetMangadexRenderedHtmlAsync(string url, CancellationToken token)
         {
-            await _mangadexBrowserFetchSemaphore.WaitAsync(token);
+            await _mangadexWebViewLock.WaitAsync(token);
             try
             {
-                EnsureMangadexBrowserDriverPool();
-                return await Task.Run(() =>
+                await EnsureMangadexWebViewAsync();
+                return await (await Dispatcher.InvokeAsync(async () =>
                 {
                     token.ThrowIfCancellationRequested();
-                    ChromeDriver driver = RentMangadexBrowserDriver();
+                    var tcs = new TaskCompletionSource<bool>();
+                    EventHandler<CoreWebView2NavigationCompletedEventArgs> handler = null;
+                    handler = (s, e) => tcs.TrySetResult(e.IsSuccess);
+                    _mangadexWebView.CoreWebView2.NavigationCompleted += handler;
                     try
                     {
-                        driver.Navigate().GoToUrl(url);
-                        string html = string.Empty;
-                        for (int attempt = 0; attempt < 60; attempt++)
+                        _mangadexWebView.CoreWebView2.Navigate(url);
+                        using (token.Register(() => tcs.TrySetCanceled()))
                         {
-                            token.ThrowIfCancellationRequested();
-                            html = driver.PageSource ?? string.Empty;
-                            if (html.IndexOf("/chapter/", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                html.IndexOf("No chapters", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                html.IndexOf("chapter-grid", StringComparison.OrdinalIgnoreCase) >= 0)
-                            {
-                                break;
-                            }
-
-                            Thread.Sleep(250);
+                            await Task.WhenAny(tcs.Task, Task.Delay(10000, token));
                         }
-
-                        return html;
+                        await Task.Delay(1200, token);
+                        string rawHtml = await _mangadexWebView.CoreWebView2.ExecuteScriptAsync("document.documentElement.outerHTML");
+                        if (string.IsNullOrWhiteSpace(rawHtml) || rawHtml == "null")
+                        {
+                            return string.Empty;
+                        }
+                        return Newtonsoft.Json.JsonConvert.DeserializeObject<string>(rawHtml) ?? string.Empty;
                     }
                     finally
                     {
-                        ReturnMangadexBrowserDriver(driver);
+                        _mangadexWebView.CoreWebView2.NavigationCompleted -= handler;
                     }
-                }, token);
+                }));
             }
             finally
             {
-                _mangadexBrowserFetchSemaphore.Release();
+                _mangadexWebViewLock.Release();
             }
         }
 
@@ -2471,12 +2527,17 @@ fetch(window.location.href, { method: 'GET', credentials: 'omit', cache: 'no-sto
             _lastSelectedMangadexLangFallback = chkMangadexLangFallback != null && chkMangadexLangFallback.IsChecked == true;
         }
 
+        private string StripMangadexLanguageSuffix(string title)
+        {
+            if (string.IsNullOrWhiteSpace(title)) return string.Empty;
+            string clean = Regex.Replace(title, @"\s*\[MD-[a-z]+(\+[a-z]+)?\]", "", RegexOptions.IgnoreCase).Trim();
+            return CleanMangadexText(clean);
+        }
+
         private string AppendMangadexLanguageSuffix(string title, string primary, bool fallback)
         {
-            if (string.IsNullOrWhiteSpace(title)) return title;
-            title = Regex.Replace(title, @"\s*\[MD-[a-z]+(\+[a-z]+)?\]", "");
-            string suffix = fallback ? $"[MD-{primary}+{(primary == "vi" ? "en" : "vi")}]" : $"[MD-{primary}]";
-            return $"{title} {suffix}";
+            // MangaDex là truyện tranh (manga), không gắn hậu tố [MD-...]
+            return StripMangadexLanguageSuffix(title);
         }
 
         private async Task<bool> PromptMangadexLanguageSelectionAsync()

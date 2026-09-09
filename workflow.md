@@ -16,6 +16,7 @@ Chuẩn làm việc repo hiện tại. Mục tiêu: sửa đúng chỗ, ít file
 - UI song ngữ: check ENG/VI, trace `MainWindow.ENG-VI.md`.
 - Không revert thay đổi của user nếu không yêu cầu.
 - Xong việc: đánh giá, gợi ý file cần sửa/kiểm tra, rà soát EN/VI.
+- Luôn luôn test build 2 bước: bước 1 là tự tải khởi tạo thư viện, bước 2 là app mở lên, có UI hoàn tất thì mới xem như là build thành công.
 - Luôn đánh giá, cập nhật `workflow.md`.
 - Đánh giá prompt, gợi ý tính năng/file thiết kế mới; cập nhật workflow.md/prompt.md khi cần.
 
@@ -177,8 +178,11 @@ Chuẩn làm việc repo hiện tại. Mục tiêu: sửa đúng chỗ, ít file
   - giữ nguyên query string URL ảnh (`.jpg?...`), không cắt sau `?`
   - `book_avatar` có `src` và `data-ni` hoặc nhiều host ảnh: thử tuần tự từng URL, không fail ngay ở URL đầu.
 - `mangadex.org`:
-  - ưu tiên route `tag / title / chapter`
+  - ưu tiên route `tag / title / chapter`.
   - dùng API chính chủ lấy chapter list, cover preview, ảnh chapter.
+  - MangaDex là truyện tranh (manga), cấm gắn hậu tố `[MD-...]` hay sinh file `.md` vào tên truyện hoặc thư mục.
+  - Dùng WebView2 fetcher ngầm xử lý API MangaDex để vượt qua lỗi SSL/TLS Schannel của Windows. Fallback OpenGraph HTML khi URL thiếu slug.
+  - Tải ảnh qua `mangadex.network` hỗ trợ đa luồng curl và HttpClient song song, có WebView2 fallback an toàn.
 - `nettruyen`
 - `nettruyen.tech`:
   - preview cover từ `div.col-image img` (`.jpg`, `.png`, `.webp`); hover book hiện badge trắng `preview` khi tích hợp thành công.
