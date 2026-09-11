@@ -13,6 +13,7 @@ namespace get_link_manga
         internal TextBox SplitSingleComicRootTextBox => txtSplitSingleComicRoot;
         internal ComboBox SplitChapterGroupSizeComboBox => cmbSplitChapterGroupSize;
         internal ComboBox SplitSingleComicFolderTypeComboBox => cmbSplitSingleComicFolderType;
+        internal CheckBox MergeRemainderFolderCheckBox => chkMergeRemainderFolder;
         internal TextBox MergeSingleComicRootTextBox => txtMergeSingleComicRoot;
 
         private MainWindow GetOwnerWindow()

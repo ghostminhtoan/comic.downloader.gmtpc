@@ -1017,9 +1017,54 @@ namespace get_link_manga
                         continue;
                     }
 
-                    foreach (var bucketGroup in chapterFolders.GroupBy(item => (Math.Max(1, item.ChapterNumber) - 1) / groupSize))
+                    var rawBuckets = chapterFolders
+                        .GroupBy(item => (Math.Max(1, item.ChapterNumber) - 1) / groupSize)
+                        .OrderBy(g => g.Key)
+                        .Select(g => new
+                        {
+                            Key = g.Key,
+                            Items = g.OrderBy(item => item.ChapterNumber)
+                                     .ThenBy(item => item.FolderName, StringComparer.OrdinalIgnoreCase)
+                                     .ThenBy(item => item.SourcePath, StringComparer.OrdinalIgnoreCase)
+                                     .ToList()
+                        })
+                        .Where(b => b.Items.Count > 0)
+                        .ToList();
+
+                    if (rawBuckets.Count == 0)
                     {
-                        List<SplitSingleComicChapterItem> bucketItems = bucketGroup
+                        continue;
+                    }
+
+                    var bucketList = new List<List<SplitSingleComicChapterItem>>();
+                    var bucketKeys = new List<int>();
+                    foreach (var b in rawBuckets)
+                    {
+                        bucketList.Add(new List<SplitSingleComicChapterItem>(b.Items));
+                        bucketKeys.Add(b.Key);
+                    }
+
+                    bool shouldMergeRemainder = chkMergeRemainderFolder?.IsChecked == true;
+                    if (bucketList.Count > 1 && shouldMergeRemainder)
+                    {
+                        int lastIndex = bucketList.Count - 1;
+                        var lastBucket = bucketList[lastIndex];
+                        int lastBucketKey = bucketKeys[lastIndex];
+                        int lastEnd = lastBucket.Max(item => Math.Max(1, item.ChapterNumber));
+                        int expectedEnd = (lastBucketKey + 1) * groupSize;
+
+                        if (lastEnd < expectedEnd)
+                        {
+                            // Bucket cuối không đủ số chap đã quy định, gộp với bucket liền kề trước đó
+                            bucketList[lastIndex - 1].AddRange(lastBucket);
+                            bucketList.RemoveAt(lastIndex);
+                            bucketKeys.RemoveAt(lastIndex);
+                        }
+                    }
+
+                    foreach (var bucketItemsRaw in bucketList)
+                    {
+                        List<SplitSingleComicChapterItem> bucketItems = bucketItemsRaw
                             .OrderBy(item => item.ChapterNumber)
                             .ThenBy(item => item.FolderName, StringComparer.OrdinalIgnoreCase)
                             .ThenBy(item => item.SourcePath, StringComparer.OrdinalIgnoreCase)
@@ -1039,18 +1084,18 @@ namespace get_link_manga
                         {
                             string destinationPath = Path.Combine(groupFolderPath, chapter.FolderName);
 
-                        try
-                        {
-                            if (string.Equals(chapter.SourcePath, destinationPath, StringComparison.OrdinalIgnoreCase))
+                            try
                             {
-                                continue;
-                            }
+                                if (string.Equals(chapter.SourcePath, destinationPath, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    continue;
+                                }
 
-                            Directory.CreateDirectory(groupFolderPath);
-                            if (!Directory.Exists(destinationPath))
-                            {
-                                Directory.Move(chapter.SourcePath, destinationPath);
-                            }
+                                Directory.CreateDirectory(groupFolderPath);
+                                if (!Directory.Exists(destinationPath))
+                                {
+                                    Directory.Move(chapter.SourcePath, destinationPath);
+                                }
                                 else
                                 {
                                     MergeDirectoryContents(chapter.SourcePath, destinationPath);
@@ -1065,6 +1110,8 @@ namespace get_link_manga
                             }
                         }
                     }
+
+                    DeleteEmptyDirectoriesBottomUp(bookFolder);
                 }
 
                 return splitCount;
@@ -1169,17 +1216,38 @@ namespace get_link_manga
                     continue;
                 }
 
+                string bookFolderPath = parent;
+                string parentName = Path.GetFileName(parent);
+                if (IsSplitSingleComicGroupFolderName(parentName))
+                {
+                    string grandParent = Path.GetDirectoryName(parent);
+                    if (!string.IsNullOrWhiteSpace(grandParent))
+                    {
+                        bookFolderPath = grandParent;
+                    }
+                }
+
                 items.Add(new SplitSingleComicChapterItem
                 {
                     SourcePath = folder,
                     FolderName = folderName,
-                    BookFolderPath = parent,
+                    BookFolderPath = bookFolderPath,
                     ChapterNumber = Math.Max(1, (int)Math.Floor(chapterNumber)),
                     Depth = folder.Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).Length
                 });
             }
 
             return items;
+        }
+
+        private static bool IsSplitSingleComicGroupFolderName(string folderName)
+        {
+            if (string.IsNullOrWhiteSpace(folderName))
+            {
+                return false;
+            }
+
+            return System.Text.RegularExpressions.Regex.IsMatch(folderName, @"(^|-)chap\s+\d{4}-\d{4}$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         }
 
         private IEnumerable<string> EnumerateSingleComicCandidateFolders(string rootFolder)

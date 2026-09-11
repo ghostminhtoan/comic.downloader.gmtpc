@@ -26,6 +26,8 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="14"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="12"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Text="SPLIT SINGLE COMIC FOLDERS" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold"/>
@@ -124,6 +126,17 @@
                             Width="124"
                             Margin="0"/>
                 </Grid>
+
+                <StackPanel Grid.Row="6" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,2,0,0">
+                    <CheckBox x:Name="chkMergeRemainderFolder"
+                              Content="Gộp folder thừa vào folder trước đó (Merge remainder into previous folder)"
+                              IsChecked="True"
+                              Foreground="{StaticResource CyberpunkTextBrush}"
+                              FontSize="11"
+                              FontWeight="SemiBold"
+                              VerticalAlignment="Center"
+                              ToolTip="Khi nhóm chapter cuối cùng không đủ số lượng chap quy định, tự động gộp vào nhóm liền kề trước đó thay vì tạo folder riêng."/>
+                </StackPanel>
             </Grid>
         </Border>
 

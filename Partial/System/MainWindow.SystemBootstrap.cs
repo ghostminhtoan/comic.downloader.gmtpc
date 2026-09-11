@@ -69,6 +69,7 @@ namespace get_link_manga
         private TextBox txtSplitSingleComicRoot => singleComicFolderToolsView?.SplitSingleComicRootTextBox;
         private ComboBox cmbSplitChapterGroupSize => singleComicFolderToolsView?.SplitChapterGroupSizeComboBox;
         private ComboBox cmbSplitSingleComicFolderType => singleComicFolderToolsView?.SplitSingleComicFolderTypeComboBox;
+        private CheckBox chkMergeRemainderFolder => singleComicFolderToolsView?.MergeRemainderFolderCheckBox;
         private TextBox txtMergeSingleComicRoot => singleComicFolderToolsView?.MergeSingleComicRootTextBox;
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
