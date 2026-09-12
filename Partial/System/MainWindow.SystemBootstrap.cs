@@ -303,6 +303,25 @@ namespace get_link_manga
 
                 GetCurrentConnectionLimit();
                 GetCurrentMultiDownloadLimit();
+                UpdateCachedImageSettings();
+                if (chkAutoSplitLongImages != null)
+                {
+                    chkAutoSplitLongImages.Checked += (senderObj, argsObj) => UpdateCachedImageSettings();
+                    chkAutoSplitLongImages.Unchecked += (senderObj, argsObj) => UpdateCachedImageSettings();
+                }
+                if (txtSplitHeight != null)
+                {
+                    txtSplitHeight.TextChanged += (senderObj, argsObj) => UpdateCachedImageSettings();
+                }
+                if (txtSplitQuality != null)
+                {
+                    txtSplitQuality.TextChanged += (senderObj, argsObj) => UpdateCachedImageSettings();
+                }
+                if (chkAutoZipCbz != null)
+                {
+                    chkAutoZipCbz.Checked += (senderObj, argsObj) => UpdateCachedImageSettings();
+                    chkAutoZipCbz.Unchecked += (senderObj, argsObj) => UpdateCachedImageSettings();
+                }
             };
 
             Closing += (s, e) =>

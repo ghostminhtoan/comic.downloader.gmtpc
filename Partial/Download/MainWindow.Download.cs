@@ -40,6 +40,27 @@ namespace get_link_manga
         private readonly ConcurrentDictionary<GalleryItem, DateTime> _lastMetricUpdateTimes = new ConcurrentDictionary<GalleryItem, DateTime>();
         private volatile int _cachedConnectionLimit = 4;
         private volatile int _cachedMultiDownloadLimit = 2;
+        private static volatile bool _cachedAutoSplitLongImages = false;
+        private static volatile int _cachedSplitHeight = 5000;
+        private static volatile int _cachedSplitQuality = 75;
+        private static volatile bool _cachedAutoZipCbz = false;
+
+        private void UpdateCachedImageSettings()
+        {
+            if (Dispatcher.CheckAccess())
+            {
+                _cachedAutoSplitLongImages = chkAutoSplitLongImages?.IsChecked == true;
+                if (int.TryParse(txtSplitHeight?.Text, out int parsedHeight) && parsedHeight > 100)
+                    _cachedSplitHeight = parsedHeight;
+                if (txtSplitQuality != null && int.TryParse(txtSplitQuality.Text, out int parsedQuality) && parsedQuality > 10 && parsedQuality <= 100)
+                    _cachedSplitQuality = parsedQuality;
+                _cachedAutoZipCbz = chkAutoZipCbz?.IsChecked == true;
+            }
+            else
+            {
+                Dispatcher.BeginInvoke(new Action(UpdateCachedImageSettings));
+            }
+        }
 
         public static string GetDoneProcessText(GalleryItem item, bool hasErrors)
         {
@@ -550,13 +571,15 @@ namespace get_link_manga
             }
 
             // Throttle UI thread updates to prevent freezing (UI thread starvation)
-            bool isFinalUpdate = (completedPages == totalPages) || (percent >= 100d) || (completedPages == 0);
+            // Fix: Cập nhật tức thì nếu là trang đầu, trang cuối, hoặc 1-3 trang cuối (totalPages - completedPages <= 3) để UI không bị đơ/chậm ở các ảnh cuối!
+            bool isNearEnd = totalPages > 0 && (totalPages - completedPages <= 3);
+            bool isFinalUpdate = (completedPages == totalPages) || (percent >= 100d) || (completedPages == 0) || isNearEnd;
             DateTime now = DateTime.UtcNow;
             if (!isFinalUpdate)
             {
                 if (_lastMetricUpdateTimes.TryGetValue(item, out DateTime lastUpdate))
                 {
-                    if ((now - lastUpdate).TotalMilliseconds < 800)
+                    if ((now - lastUpdate).TotalMilliseconds < 250)
                     {
                         return; // Skip this UI update
                     }
@@ -940,10 +963,12 @@ namespace get_link_manga
                 }
 
                 // Auto Zip CBZ Logic
-                bool autoZip = false;
-                Dispatcher.Invoke(() => {
-                    autoZip = chkAutoZipCbz != null && chkAutoZipCbz.IsChecked == true;
-                });
+                bool autoZip = _cachedAutoZipCbz;
+                if (Dispatcher.CheckAccess() && chkAutoZipCbz != null)
+                {
+                    autoZip = chkAutoZipCbz.IsChecked == true;
+                    _cachedAutoZipCbz = autoZip;
+                }
                 if (autoZip && Directory.Exists(targetFolder))
                 {
                     try
@@ -1699,7 +1724,7 @@ namespace get_link_manga
             }
         }
 
-        private async Task CopyToAsyncWithTimeout(Stream source, Stream destination, int bufferSize, CancellationToken token, int timeoutMs = 25000)
+        private async Task CopyToAsyncWithTimeout(Stream source, Stream destination, int bufferSize, CancellationToken token, int timeoutMs = 12000)
         {
             byte[] buffer = new byte[bufferSize];
             int bytesRead;
@@ -4589,13 +4614,7 @@ namespace get_link_manga
             }
             else
             {
-                int selected = 4;
-                Dispatcher.Invoke(() =>
-                {
-                    selected = GetComboBoxSelectedInt(cmbConnections, 4);
-                });
-                _cachedConnectionLimit = selected;
-                return selected;
+                return _cachedConnectionLimit > 0 ? _cachedConnectionLimit : 4;
             }
         }
 
@@ -4623,26 +4642,7 @@ namespace get_link_manga
             }
             else
             {
-                int limit = 2;
-                Dispatcher.Invoke(() =>
-                {
-                    int selectedMulti = GetComboBoxSelectedInt(cmbMultiDownload, 2);
-                    int selectedConn = GetComboBoxSelectedInt(cmbConnections, 4);
-                    if (selectedConn == 16)
-                    {
-                        limit = Math.Max(selectedMulti, 4);
-                    }
-                    else if (selectedConn == 32)
-                    {
-                        limit = Math.Max(selectedMulti, 8);
-                    }
-                    else
-                    {
-                        limit = selectedMulti;
-                    }
-                });
-                _cachedMultiDownloadLimit = limit;
-                return limit;
+                return _cachedMultiDownloadLimit > 0 ? _cachedMultiDownloadLimit : 2;
             }
         }
 
@@ -4937,34 +4937,9 @@ namespace get_link_manga
         {
             await DownloadUrlToFileWithRefererInternalAsync(url, referer, filePath, token, isViHentai, isTruyenqq);
 
-            bool autoSplit = false;
-            int splitHeight = 5000;
-            int splitQuality = 75;
-            if (System.Windows.Application.Current != null && System.Windows.Application.Current.Dispatcher != null)
+            if (_cachedAutoSplitLongImages && File.Exists(filePath))
             {
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    foreach (System.Windows.Window window in System.Windows.Application.Current.Windows)
-                    {
-                        if (window is MainWindow main)
-                        {
-                            autoSplit = main.chkAutoSplitLongImages?.IsChecked == true;
-                            if (autoSplit)
-                            {
-                                if (int.TryParse(main.txtSplitHeight?.Text, out int parsedHeight) && parsedHeight > 100)
-                                    splitHeight = parsedHeight;
-                                if (main.txtSplitQuality != null && int.TryParse(main.txtSplitQuality.Text, out int parsedQuality) && parsedQuality > 10 && parsedQuality <= 100)
-                                    splitQuality = parsedQuality;
-                            }
-                            break;
-                        }
-                    }
-                });
-            }
-
-            if (autoSplit && File.Exists(filePath))
-            {
-                TrySplitImageFile(filePath, splitHeight, splitQuality);
+                TrySplitImageFile(filePath, _cachedSplitHeight, _cachedSplitQuality);
             }
         }
 
@@ -5034,22 +5009,9 @@ namespace get_link_manga
                 return; // skip duplicate
             }
 
-            // Introduce a short jittered delay for sensitive sites to avoid hitting the server simultaneously
-            bool isEHentai = url != null && (url.IndexOf("ehgt.org", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                             url.IndexOf("hath.network", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                             url.IndexOf("e-hentai.org", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                             url.IndexOf("exhentai.org", StringComparison.OrdinalIgnoreCase) >= 0);
-            if (!isEHentai)
-            {
-                try
-                {
-                    int jitter = _delayRandom.Next(100, 300);
-                    await Task.Delay(jitter, token);
-                }
-                catch {}
-            }
+            // Không delay jitter mặc định để tránh làm chậm 1-3 ảnh cuối cùng của chapter
 
-            int delayMs = isViHentai ? 800 : (isTruyenqq ? 600 : 500);
+            int delayMs = isViHentai ? 500 : (isTruyenqq ? 300 : 250);
             int maxAttempts = 3;
 
             try
@@ -5096,7 +5058,7 @@ namespace get_link_manga
                         var httpClient = GetSharedHttpClient(url);
                         using (var sendCts = CancellationTokenSource.CreateLinkedTokenSource(token))
                         {
-                            sendCts.CancelAfter(20000); // 20 giây timeout cho HTTP response headers
+                            sendCts.CancelAfter(8000); // 8 giây timeout cho HTTP response headers (phát hiện kết nối treo sớm và retry nhanh)
                             using (var request = new HttpRequestMessage(HttpMethod.Get, url))
                             {
                                 if (!string.IsNullOrEmpty(referer))
@@ -5821,65 +5783,63 @@ namespace get_link_manga
 
     public class DynamicSemaphore : IDisposable
     {
-        private readonly object _syncLock = new object();
-        private int _currentLimit;
-        private int _activeCount;
+        private readonly SemaphoreSlim _semaphore;
         private readonly Func<int> _limitProvider;
+        private int _currentLimit;
+        private readonly object _adjustLock = new object();
 
         public DynamicSemaphore(int initialLimit, Func<int> limitProvider)
         {
             _currentLimit = Math.Max(1, initialLimit);
             _limitProvider = limitProvider;
+            _semaphore = new SemaphoreSlim(_currentLimit, int.MaxValue);
         }
 
         public async Task WaitAsync(CancellationToken token)
         {
-            while (true)
-            {
-                token.ThrowIfCancellationRequested();
-
-                lock (_syncLock)
-                {
-                    RefreshLimitUnsafe();
-                    if (_activeCount < _currentLimit)
-                    {
-                        _activeCount++;
-                        return;
-                    }
-                }
-
-                await Task.Delay(150, token);
-            }
+            AdjustLimit();
+            await _semaphore.WaitAsync(token);
         }
 
         public void Release()
         {
-            lock (_syncLock)
-            {
-                if (_activeCount > 0)
-                {
-                    _activeCount--;
-                }
-
-                RefreshLimitUnsafe();
-            }
+            _semaphore.Release();
         }
 
         public void AdjustLimit()
         {
-            lock (_syncLock)
-            {
-                RefreshLimitUnsafe();
-            }
-        }
+            if (_limitProvider == null) return;
+            int targetLimit = Math.Max(1, _limitProvider());
+            if (targetLimit == _currentLimit) return;
 
-        private void RefreshLimitUnsafe()
-        {
-            _currentLimit = Math.Max(1, _limitProvider?.Invoke() ?? _currentLimit);
+            lock (_adjustLock)
+            {
+                int diff = targetLimit - _currentLimit;
+                if (diff > 0)
+                {
+                    _semaphore.Release(diff);
+                    _currentLimit = targetLimit;
+                }
+                else if (diff < 0)
+                {
+                    for (int i = 0; i < -diff; i++)
+                    {
+                        if (_semaphore.Wait(0))
+                        {
+                            _currentLimit--;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         public void Dispose()
         {
+            _semaphore?.Dispose();
         }
     }
 
