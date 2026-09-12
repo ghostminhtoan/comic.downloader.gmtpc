@@ -136,6 +136,9 @@ namespace get_link_manga
 
             [DataMember(Order = 39)]
             public string Tag { get; set; }
+
+            [DataMember(Order = 40)]
+            public double DownloadProgressPercent { get; set; }
         }
 
         [DataContract]
@@ -804,6 +807,7 @@ namespace get_link_manga
                 MangadexLangFallback = item.MangadexLangFallback,
                 HoverPreviewThumbnailUrl = item.HoverPreviewThumbnailUrl,
                 Tag = item.Tag as string,
+                DownloadProgressPercent = item.DownloadProgressPercent,
                 Errors = item.GetUniqueErrors().Select(error => new ErrorState
                 {
                     ChapterName = error.ChapterName,
@@ -906,6 +910,14 @@ namespace get_link_manga
                 restoredProcess = $"{state.DownloadingChapter} ({state.DownloadingPageProgress.ToLowerInvariant()})";
             }
 
+            double progressPercent = state.ProgressPercent;
+            double downloadProgress = state.DownloadProgressPercent > 0 ? state.DownloadProgressPercent : progressPercent;
+            if (string.Equals(state.Status, "Completed", StringComparison.OrdinalIgnoreCase))
+            {
+                progressPercent = 100d;
+                downloadProgress = 100d;
+            }
+
             var item = new GalleryItem
             {
                 OriginalIndex = state.OriginalIndex,
@@ -921,7 +933,8 @@ namespace get_link_manga
                 Status = state.Status,
                 CurrentProcess = restoredProcess,
                 DownloadPath = state.DownloadPath,
-                ProgressPercent = state.ProgressPercent,
+                ProgressPercent = progressPercent,
+                DownloadProgressPercent = downloadProgress,
                 ConnectionCount = state.ConnectionCount > 0 ? Math.Min(16, Math.Max(1, state.ConnectionCount)) : GetCurrentConnectionLimit(),
                 MultiDownloadCount = state.MultiDownloadCount,
                 IsPaused = state.IsPaused,

@@ -3955,34 +3955,14 @@
                                                                   <DataTrigger Binding="{Binding Status}" Value="Downloading">
                                                                       <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkCyanBrush}"/>
                                                                   </DataTrigger>
-                                                                   <MultiDataTrigger>
-                                                                       <MultiDataTrigger.Conditions>
-                                                                           <Condition Binding="{Binding Status}" Value="Completed"/>
-                                                                           <Condition Binding="{Binding DownloadingPageProgress}" Value=""/>
-                                                                       </MultiDataTrigger.Conditions>
-                                                                       <Setter Property="Foreground" Value="#888888"/><Setter Property="BorderBrush" Value="#888888"/>
-                                                                       <Setter Property="Value" Value="100"/>
-                                                                   </MultiDataTrigger>
-                                                                   <MultiDataTrigger>
-                                                                       <MultiDataTrigger.Conditions>
-                                                                           <Condition Binding="{Binding Status}" Value="Completed"/>
-                                                                           <Condition Binding="{Binding DownloadingPageProgress}" Value="Done"/>
-                                                                       </MultiDataTrigger.Conditions>
-                                                                       <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                                       <Setter Property="Value" Value="100"/>
-                                                                   </MultiDataTrigger>
-                                                                   <MultiDataTrigger>
-                                                                       <MultiDataTrigger.Conditions>
-                                                                           <Condition Binding="{Binding Status}" Value="Completed"/>
-                                                                           <Condition Binding="{Binding DownloadingPageProgress}" Value="Complete"/>
-                                                                       </MultiDataTrigger.Conditions>
-                                                                       <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                                       <Setter Property="Value" Value="100"/>
-                                                                   </MultiDataTrigger>
-                                                                   <DataTrigger Binding="{Binding DownloadingPageProgress}" Value="Done">
-                                                                       <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                                       <Setter Property="Value" Value="100"/>
-                                                                   </DataTrigger>
+                                                                  <DataTrigger Binding="{Binding Status}" Value="Completed">
+                                                                      <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                      <Setter Property="Value" Value="100"/>
+                                                                  </DataTrigger>
+                                                                  <DataTrigger Binding="{Binding DownloadingPageProgress}" Value="Done">
+                                                                      <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
+                                                                      <Setter Property="Value" Value="100"/>
+                                                                  </DataTrigger>
                                                                   <DataTrigger Binding="{Binding Status}" Value="Paused">
                                                                       <Setter Property="Foreground" Value="#FF8C00"/><Setter Property="BorderBrush" Value="#FF8C00"/>
                                                                   </DataTrigger>
@@ -4594,30 +4574,6 @@
                                                              <DataTrigger Binding="{Binding Status}" Value="Downloading">
                                                                  <Setter Property="Foreground" Value="{StaticResource CyberpunkCyanBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkCyanBrush}"/>
                                                              </DataTrigger>
-                                                             <MultiDataTrigger>
-                                                                  <MultiDataTrigger.Conditions>
-                                                                      <Condition Binding="{Binding Status}" Value="Completed"/>
-                                                                      <Condition Binding="{Binding DownloadingPageProgress}" Value=""/>
-                                                                  </MultiDataTrigger.Conditions>
-                                                                  <Setter Property="Foreground" Value="#888888"/><Setter Property="BorderBrush" Value="#888888"/>
-                                                                  <Setter Property="Value" Value="100"/>
-                                                              </MultiDataTrigger>
-                                                              <MultiDataTrigger>
-                                                                  <MultiDataTrigger.Conditions>
-                                                                      <Condition Binding="{Binding Status}" Value="Completed"/>
-                                                                      <Condition Binding="{Binding DownloadingPageProgress}" Value="Done"/>
-                                                                  </MultiDataTrigger.Conditions>
-                                                                  <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                                  <Setter Property="Value" Value="100"/>
-                                                              </MultiDataTrigger>
-                                                              <MultiDataTrigger>
-                                                                  <MultiDataTrigger.Conditions>
-                                                                      <Condition Binding="{Binding Status}" Value="Completed"/>
-                                                                      <Condition Binding="{Binding DownloadingPageProgress}" Value="Complete"/>
-                                                                  </MultiDataTrigger.Conditions>
-                                                                  <Setter Property="Foreground" Value="{StaticResource CyberpunkYellowBrush}"/><Setter Property="BorderBrush" Value="{StaticResource CyberpunkYellowBrush}"/>
-                                                                  <Setter Property="Value" Value="100"/>
-                                                              </MultiDataTrigger>
                                                              <DataTrigger Binding="{Binding Status}" Value="Paused">
                                                                  <Setter Property="Foreground" Value="#FF8C00"/><Setter Property="BorderBrush" Value="#FF8C00"/>
                                                              </DataTrigger>

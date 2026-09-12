@@ -485,6 +485,14 @@ namespace get_link_manga
                     {
                         DownloadSpeedBytesPerSecond = 0;
                     }
+                    if (string.Equals(value, "Completed", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _downloadProgressPercent = 100d;
+                        _progressPercent = 100d;
+                        OnPropertyChanged(nameof(DownloadProgressPercent));
+                        OnPropertyChanged(nameof(ProgressPercent));
+                        OnPropertyChanged(nameof(DownloadProgressText));
+                    }
                 }
             }
         }
@@ -952,9 +960,13 @@ namespace get_link_manga
 
         public double ProgressPercent
         {
-            get => _progressPercent;
+            get => string.Equals(_status, "Completed", StringComparison.OrdinalIgnoreCase) ? 100d : _progressPercent;
             set
             {
+                if (string.Equals(_status, "Completed", StringComparison.OrdinalIgnoreCase) && value < 100d)
+                {
+                    value = 100d;
+                }
                 if (Math.Abs(_progressPercent - value) >= 1.0 || value == 0 || value == 100 || (value < _progressPercent))
                 {
                     _progressPercent = value;
@@ -965,9 +977,13 @@ namespace get_link_manga
 
         public double DownloadProgressPercent
         {
-            get => _downloadProgressPercent;
+            get => string.Equals(_status, "Completed", StringComparison.OrdinalIgnoreCase) ? 100d : _downloadProgressPercent;
             set
             {
+                if (string.Equals(_status, "Completed", StringComparison.OrdinalIgnoreCase) && value < 100d)
+                {
+                    value = 100d;
+                }
                 if (Math.Abs(_downloadProgressPercent - value) >= 1.0 || value == 0 || value == 100 || (value < _downloadProgressPercent))
                 {
                     _downloadProgressPercent = value;

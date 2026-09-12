@@ -2709,6 +2709,11 @@ namespace get_link_manga
                             item.Status = hasErrors ? "Error" : "Completed";
                             item.CurrentProcess = GetDoneProcessText(item, hasErrors);
                             item.IsChecked = hasErrors ? item.IsChecked : false;
+                            if (!hasErrors)
+                            {
+                                item.DownloadProgressPercent = 100d;
+                                item.ProgressPercent = 100d;
+                            }
                         });
                         QueueParallelSplitCollapseIfReady(item);
                         
