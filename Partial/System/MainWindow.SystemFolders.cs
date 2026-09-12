@@ -434,6 +434,87 @@ namespace get_link_manga
             }
         }
 
+        internal void BtnBrowseAlphabetSplitRoot_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new VistaFolderBrowser
+            {
+                Title = _isVietnameseUi ? "Chọn folder gốc cần chia theo chữ cái" : "Select folder to split by alphabet",
+                SelectedPath = GetAlphabetSplitRootPath()
+            };
+
+            if (!dialog.ShowDialog(new System.Windows.Interop.WindowInteropHelper(this).Handle))
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(dialog.SelectedPath) || !Directory.Exists(dialog.SelectedPath))
+            {
+                MessageBox.Show("Thư mục đã chọn không hợp lệ.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (txtAlphabetSplitRoot != null)
+            {
+                txtAlphabetSplitRoot.Text = dialog.SelectedPath;
+            }
+        }
+
+        internal async void BtnSplitFoldersByAlphabet_Click(object sender, RoutedEventArgs e)
+        {
+            string targetFolder = GetAlphabetSplitRootPath();
+            if (string.IsNullOrWhiteSpace(targetFolder))
+            {
+                MessageBox.Show("Vui lòng chọn folder cần chia trước (Please select target folder first).", "Information", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!Directory.Exists(targetFolder))
+            {
+                MessageBox.Show("Thư mục đã chọn không tồn tại (Folder does not exist).", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            List<string> rawRanges = singleComicFolderToolsView?.GetAlphabetRanges() ?? new List<string>();
+            if (rawRanges.Count == 0)
+            {
+                MessageBox.Show("Vui lòng thiết lập ít nhất một khoảng chữ cái (Please add at least one alphabet range, e.g. A-G).", "Information", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            bool ignoreLeadingTags = chkAlphabetIgnoreLeadingTags?.IsChecked == true;
+
+            Log($"[Split Alphabet] Bắt đầu chia thư mục theo chữ cái tại: {targetFolder} | Ranges={string.Join(", ", rawRanges)}");
+            lblStatus.Text = _isVietnameseUi ? "Đang chia thư mục theo chữ cái..." : "Splitting folders by alphabet...";
+
+            try
+            {
+                int splitCount = await SplitFoldersByAlphabetInTargetFolderAsync(targetFolder, rawRanges, ignoreLeadingTags, CancellationToken.None);
+
+                Log("[Split Alphabet] Đang tạm ngừng 3 giây để hệ thống ổn định và nhận biết thư mục...");
+                await Task.Delay(3000);
+
+                if (splitCount == 0)
+                {
+                    Log("[Split Alphabet] Không tìm thấy thư mục con hợp lệ để chia.");
+                    lblStatus.Text = _isVietnameseUi ? "Không tìm thấy thư mục hợp lệ để chia." : "No valid folders found to split.";
+                    MessageBox.Show("Không tìm thấy thư mục hợp lệ để chia.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                Log($"[Split Alphabet] Hoàn tất chia {splitCount} thư mục.");
+                lblStatus.Text = _isVietnameseUi
+                    ? $"Đã chia thành công {splitCount} thư mục theo chữ cái."
+                    : $"Split completed. Split {splitCount} folders by alphabet.";
+                MessageBox.Show($"Đã chia thành công {splitCount} thư mục theo chữ cái!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                Log($"[Split Alphabet Error] Lỗi nghiêm trọng khi chia thư mục theo chữ cái: {ex.Message}");
+                lblStatus.Text = _isVietnameseUi ? "Chia thư mục thất bại." : "Split by alphabet failed.";
+                MessageBox.Show($"Lỗi khi chia thư mục: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void StartArchiveProgress(string statusText, bool showPauseButton)
         {
             Dispatcher.Invoke(() =>
@@ -987,6 +1068,17 @@ namespace get_link_manga
             return txtDownloadPath?.Text?.Trim();
         }
 
+        private string GetAlphabetSplitRootPath()
+        {
+            string path = txtAlphabetSplitRoot?.Text?.Trim();
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                return path;
+            }
+
+            return txtDownloadPath?.Text?.Trim();
+        }
+
         private async Task<int> SplitSingleComicFoldersInTargetFolderAsync(string targetFolder, int groupSize, CancellationToken token)
         {
             if (string.IsNullOrWhiteSpace(targetFolder) || !Directory.Exists(targetFolder) || groupSize <= 0)
@@ -1473,6 +1565,290 @@ namespace get_link_manga
         {
             // Legacy placeholder only. Explorer flow moved to MainWindow.SystemExplorer.cs.
             return downloadRoot;
+        }
+
+        private sealed class AlphabetRangeItem
+        {
+            public string DisplayName { get; set; }
+            public char StartLetter { get; set; }
+            public char EndLetter { get; set; }
+
+            public static bool TryParse(string input, out AlphabetRangeItem item)
+            {
+                item = null;
+                if (string.IsNullOrWhiteSpace(input)) return false;
+
+                string clean = input.Trim().ToUpperInvariant();
+                var parts = clean.Split(new[] { '-', '–', '—' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length == 2)
+                {
+                    string p1 = parts[0].Trim();
+                    string p2 = parts[1].Trim();
+                    if (p1.Length > 0 && p2.Length > 0)
+                    {
+                        char c1 = p1[0];
+                        char c2 = p2[0];
+                        if (c1 >= 'A' && c1 <= 'Z' && c2 >= 'A' && c2 <= 'Z')
+                        {
+                            char start = c1 <= c2 ? c1 : c2;
+                            char end = c1 <= c2 ? c2 : c1;
+                            item = new AlphabetRangeItem
+                            {
+                                DisplayName = $"{start}-{end}",
+                                StartLetter = start,
+                                EndLetter = end
+                            };
+                            return true;
+                        }
+                    }
+                }
+                else if (parts.Length == 1)
+                {
+                    string p = parts[0].Trim();
+                    if (p.Length > 0 && p[0] >= 'A' && p[0] <= 'Z')
+                    {
+                        item = new AlphabetRangeItem
+                        {
+                            DisplayName = p[0].ToString(),
+                            StartLetter = p[0],
+                            EndLetter = p[0]
+                        };
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        private async Task<int> SplitFoldersByAlphabetInTargetFolderAsync(string targetFolder, List<string> rawRanges, bool ignoreLeadingTags, CancellationToken token)
+        {
+            if (string.IsNullOrWhiteSpace(targetFolder) || !Directory.Exists(targetFolder) || rawRanges == null || rawRanges.Count == 0)
+            {
+                return 0;
+            }
+
+            await _folderStructureSemaphore.WaitAsync(token);
+            try
+            {
+                var parsedRanges = new List<AlphabetRangeItem>();
+                foreach (string raw in rawRanges)
+                {
+                    if (AlphabetRangeItem.TryParse(raw, out AlphabetRangeItem item))
+                    {
+                        parsedRanges.Add(item);
+                    }
+                }
+
+                if (parsedRanges.Count == 0)
+                {
+                    return 0;
+                }
+
+                var dirInfo = new DirectoryInfo(targetFolder);
+                var subDirs = dirInfo.GetDirectories();
+
+                var excludedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "[Number]",
+                    "Number",
+                    "[Numbers]",
+                    "Numbers",
+                    "other language",
+                    "Other Language",
+                    "other languages",
+                    "Other Languages"
+                };
+
+                foreach (var r in parsedRanges)
+                {
+                    excludedNames.Add(r.DisplayName);
+                }
+
+                int splitCount = 0;
+
+                foreach (var subDir in subDirs)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    if (subDir.Attributes.HasFlag(FileAttributes.Hidden) ||
+                        subDir.Attributes.HasFlag(FileAttributes.System) ||
+                        subDir.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase) ||
+                        subDir.Name.EndsWith("-tmp", StringComparison.OrdinalIgnoreCase) ||
+                        excludedNames.Contains(subDir.Name))
+                    {
+                        continue;
+                    }
+
+                    string categoryName = DetermineAlphabetCategory(subDir.Name, parsedRanges, ignoreLeadingTags);
+                    if (string.IsNullOrWhiteSpace(categoryName))
+                    {
+                        categoryName = "other language";
+                    }
+
+                    string destParentDir = Path.Combine(targetFolder, categoryName);
+                    string destPath = Path.Combine(destParentDir, subDir.Name);
+
+                    try
+                    {
+                        if (string.Equals(subDir.FullName, destPath, StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
+                        Directory.CreateDirectory(destParentDir);
+                        if (!Directory.Exists(destPath))
+                        {
+                            Directory.Move(subDir.FullName, destPath);
+                        }
+                        else
+                        {
+                            MergeDirectoryContents(subDir.FullName, destPath);
+                        }
+
+                        splitCount++;
+                        Log($"[Split Alphabet] Đã chia '{subDir.Name}' -> '{categoryName}\\{subDir.Name}'");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"[Split Alphabet Error] Không thể di chuyển '{subDir.FullName}': {ex.Message}");
+                    }
+                }
+
+                DeleteEmptyDirectoriesBottomUp(targetFolder);
+                return splitCount;
+            }
+            finally
+            {
+                _folderStructureSemaphore.Release();
+            }
+        }
+
+        private string DetermineAlphabetCategory(string folderName, List<AlphabetRangeItem> ranges, bool ignoreLeadingTags)
+        {
+            if (string.IsNullOrWhiteSpace(folderName))
+            {
+                return "other language";
+            }
+
+            string cleanName = folderName.Trim();
+            if (ignoreLeadingTags)
+            {
+                cleanName = StripLeadingTagsForAlphabet(cleanName);
+            }
+
+            char firstChar = '\0';
+            foreach (char c in cleanName)
+            {
+                if (char.IsWhiteSpace(c) || c == '_' || c == '-' || c == '.' || c == '~')
+                {
+                    continue;
+                }
+                firstChar = c;
+                break;
+            }
+
+            if (firstChar == '\0')
+            {
+                return "other language";
+            }
+
+            // 1. Nếu ký tự đầu là chữ số 0-9
+            if (char.IsDigit(firstChar))
+            {
+                return "[Number]";
+            }
+
+            // 2. Nếu là chữ cái Latin (hỗ trợ cả tiếng Việt và ký tự Latin mở rộng)
+            char latinLetter = ToNormalizedLatinLetter(firstChar);
+            if (latinLetter >= 'A' && latinLetter <= 'Z')
+            {
+                foreach (var r in ranges)
+                {
+                    if (latinLetter >= r.StartLetter && latinLetter <= r.EndLetter)
+                    {
+                        return r.DisplayName;
+                    }
+                }
+
+                return $"{latinLetter}";
+            }
+
+            // 3. Nếu là ngôn ngữ khác Latin (Nhật, Hàn, Trung, Cyrillic, Ả Rập...)
+            return "other language";
+        }
+
+        private string StripLeadingTagsForAlphabet(string name)
+        {
+            string current = name.Trim();
+            bool stripped;
+            do
+            {
+                stripped = false;
+                current = current.Trim();
+
+                if (current.StartsWith("[") && current.Contains("]"))
+                {
+                    int closeIdx = current.IndexOf(']');
+                    string remainder = current.Substring(closeIdx + 1).Trim();
+                    if (!string.IsNullOrEmpty(remainder))
+                    {
+                        current = remainder;
+                        stripped = true;
+                        continue;
+                    }
+                }
+
+                if (current.StartsWith("(") && current.Contains(")"))
+                {
+                    int closeIdx = current.IndexOf(')');
+                    string remainder = current.Substring(closeIdx + 1).Trim();
+                    if (!string.IsNullOrEmpty(remainder))
+                    {
+                        current = remainder;
+                        stripped = true;
+                        continue;
+                    }
+                }
+
+                if (current.StartsWith("【") && current.Contains("】"))
+                {
+                    int closeIdx = current.IndexOf('】');
+                    string remainder = current.Substring(closeIdx + 1).Trim();
+                    if (!string.IsNullOrEmpty(remainder))
+                    {
+                        current = remainder;
+                        stripped = true;
+                        continue;
+                    }
+                }
+            } while (stripped && current.Length > 0);
+
+            return string.IsNullOrWhiteSpace(current) ? name : current;
+        }
+
+        private char ToNormalizedLatinLetter(char c)
+        {
+            if (c == 'Đ' || c == 'đ')
+            {
+                return 'D';
+            }
+
+            string normalized = c.ToString().Normalize(NormalizationForm.FormD);
+            if (normalized.Length > 0)
+            {
+                char baseChar = char.ToUpperInvariant(normalized[0]);
+                if (baseChar >= 'A' && baseChar <= 'Z')
+                {
+                    return baseChar;
+                }
+            }
+
+            return '\0';
         }
     }
 }

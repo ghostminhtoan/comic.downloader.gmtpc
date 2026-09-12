@@ -71,6 +71,8 @@ namespace get_link_manga
         private ComboBox cmbSplitSingleComicFolderType => singleComicFolderToolsView?.SplitSingleComicFolderTypeComboBox;
         private CheckBox chkMergeRemainderFolder => singleComicFolderToolsView?.MergeRemainderFolderCheckBox;
         private TextBox txtMergeSingleComicRoot => singleComicFolderToolsView?.MergeSingleComicRootTextBox;
+        private TextBox txtAlphabetSplitRoot => singleComicFolderToolsView?.AlphabetSplitRootTextBox;
+        private CheckBox chkAlphabetIgnoreLeadingTags => singleComicFolderToolsView?.AlphabetIgnoreLeadingTagsCheckBox;
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
