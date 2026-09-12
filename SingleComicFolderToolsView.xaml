@@ -13,68 +13,76 @@
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
         <StackPanel Margin="0,10,0,10">
-            <!-- Card 1: SPLIT SINGLE COMIC FOLDERS -->
+            <!-- PANEL 1: TÁCH / GỘP THƯ MỤC THEO SỐ CHƯƠNG -->
             <Border Style="{StaticResource CyberpunkCard}" Padding="16" Margin="0,0,0,12">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="12"/>
+                        <RowDefinition Height="8"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="14"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="12"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="SPLIT SINGLE COMIC FOLDERS" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold"/>
-                    <TextBlock Grid.Row="2"
-                               Text="Chia book\chapter thành folder con theo khoảng chap tròn. Chap thập phân vẫn tính theo nhóm chap nguyên."
+                    <TextBlock x:Name="txtPanel1Header" Grid.Row="0" Text="SPLIT / MERGE FOLDERS BY CHAPTER COUNT" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold"/>
+                    <TextBlock x:Name="txtPanel1Desc" Grid.Row="2"
+                               Text="Chia book\chapter thành folder con theo khoảng chap tròn, hoặc gộp chapter trong các subfolder về folder đã chọn."
                                Foreground="{StaticResource CyberpunkMutedTextBrush}"
                                FontSize="11"
                                TextWrapping="Wrap"/>
 
+                    <!-- Hàng 1: Chọn thư mục gốc -->
                     <Grid Grid.Row="4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="CHAP GROUP" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="lblPanel1Root" Grid.Column="0" Text="ROOT FOLDER" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center"/>
 
-                        <Grid Grid.Column="2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="8"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                        <TextBox x:Name="txtSplitSingleComicRoot"
+                                 Grid.Column="2"
+                                 Style="{StaticResource SurfaceTextBox}"
+                                 Height="26"
+                                 VerticalContentAlignment="Center"/>
 
-                            <TextBox x:Name="txtSplitSingleComicRoot"
-                                     Grid.Column="0"
-                                     Style="{StaticResource SurfaceTextBox}"
-                                     Height="26"
-                                     VerticalContentAlignment="Center"/>
+                        <Button x:Name="btnBrowseSplitSingleComicRoot"
+                                Grid.Column="4"
+                                Content="BROWSE"
+                                Click="BtnBrowseSplitSingleComicRoot_Click"
+                                Style="{StaticResource CompactCyanButton}"
+                                Width="72"
+                                Margin="0"/>
+                    </Grid>
 
-                            <Button x:Name="btnBrowseSplitSingleComicRoot"
-                                    Grid.Column="2"
-                                    Content="BROWSE"
-                                    Click="BtnBrowseSplitSingleComicRoot_Click"
-                                    Style="{StaticResource CompactCyanButton}"
-                                    Width="72"
-                                    Margin="0"/>
-                        </Grid>
+                    <!-- Hàng 2: Nhóm chap + Kiểu folder + Nút Tách + Nút Gộp -->
+                    <Grid Grid.Row="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock x:Name="lblPanel1Group" Grid.Column="0" Text="CHAP GROUP" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center"/>
 
                         <ComboBox x:Name="cmbSplitChapterGroupSize"
-                                  Grid.Column="4"
+                                  Grid.Column="2"
                                   Style="{StaticResource CyberpunkComboBox}"
                                   Height="26"
-                                  Width="120"
+                                  Width="110"
                                   VerticalContentAlignment="Center"
                                   HorizontalContentAlignment="Center"
                                   SelectedIndex="1">
@@ -95,10 +103,10 @@
                         </ComboBox>
 
                         <ComboBox x:Name="cmbSplitSingleComicFolderType"
-                                  Grid.Column="6"
+                                  Grid.Column="4"
                                   Style="{StaticResource CyberpunkComboBox}"
                                   Height="26"
-                                  Width="150"
+                                  Width="130"
                                   VerticalContentAlignment="Center"
                                   HorizontalContentAlignment="Center"
                                   SelectedIndex="0">
@@ -115,15 +123,26 @@
                         </ComboBox>
 
                         <Button x:Name="btnSplitSingleComicFolders"
-                                Grid.Column="8"
-                                Content="SPLIT FOLDER"
+                                Grid.Column="6"
+                                Content="SPLIT BY CHAPTERS"
                                 Click="BtnSplitSingleComicFolders_Click"
                                 Style="{StaticResource CompactCyanButton}"
-                                Width="124"
+                                Height="26"
+                                Width="140"
+                                Margin="0"/>
+
+                        <Button x:Name="btnMergeSingleComicFolders"
+                                Grid.Column="8"
+                                Content="MERGE CHAPTERS"
+                                Click="BtnMergeSingleComicFolders_Click"
+                                Style="{StaticResource CompactPinkButton}"
+                                Height="26"
+                                Width="140"
                                 Margin="0"/>
                     </Grid>
 
-                    <StackPanel Grid.Row="6" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,2,0,0">
+                    <!-- Hàng 3: Tùy chọn gộp chap dư -->
+                    <StackPanel Grid.Row="8" Orientation="Horizontal" VerticalAlignment="Center">
                         <CheckBox x:Name="chkMergeRemainderFolder"
                                   Content="Gộp folder thừa vào folder trước đó (Merge remainder into previous folder)"
                                   IsChecked="True"
@@ -136,132 +155,56 @@
                 </Grid>
             </Border>
 
-            <!-- Card 2: MERGE SINGLE COMIC FOLDERS -->
-            <Border Style="{StaticResource CyberpunkCard}" Padding="16" Margin="0,0,0,12">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="12"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="14"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="0" Text="MERGE SINGLE COMIC FOLDERS" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold"/>
-                    <TextBlock Grid.Row="2"
-                               Text="Gộp chapter trong các subfolder về folder đã chọn. Chỉ xóa subfolder rỗng."
-                               Foreground="{StaticResource CyberpunkMutedTextBrush}"
-                               FontSize="11"
-                               TextWrapping="Wrap"/>
-
-                    <Grid Grid.Row="4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="8"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Column="0" Text="MERGE ROOT" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center"/>
-
-                        <Grid Grid.Column="2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="8"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBox x:Name="txtMergeSingleComicRoot"
-                                     Grid.Column="0"
-                                     Style="{StaticResource SurfaceTextBox}"
-                                     Height="26"
-                                     VerticalContentAlignment="Center"/>
-
-                            <Button x:Name="btnBrowseMergeSingleComicRoot"
-                                    Grid.Column="2"
-                                    Content="BROWSE"
-                                    Click="BtnBrowseMergeSingleComicRoot_Click"
-                                    Style="{StaticResource CompactCyanButton}"
-                                    Width="72"
-                                    Margin="0"/>
-                        </Grid>
-
-                        <Button x:Name="btnMergeSingleComicFolders"
-                                Grid.Column="4"
-                                Content="MERGE FOLDER"
-                                Click="BtnMergeSingleComicFolders_Click"
-                                Style="{StaticResource CompactPinkButton}"
-                                Width="128"
-                                Margin="0"/>
-                    </Grid>
-                </Grid>
-            </Border>
-
-            <!-- Card 3: SPLIT FOLDERS BY ALPHABET -->
+            <!-- PANEL 2: TÁCH / GỘP THƯ MỤC THEO ALPHABET -->
             <Border Style="{StaticResource CyberpunkCard}" Padding="16">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="8"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="14"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="12"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="14"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="14"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="12"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="SPLIT FOLDERS BY ALPHABET" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold"/>
-                    <TextBlock Grid.Row="2"
-                               Text="Chia các thư mục trong folder đã chọn vào các thư mục con theo chữ cái đầu (A-G, H-P, Q-Z...). Bắt đầu bằng số -> [Number], ngôn ngữ khác Latin -> other language."
+                    <TextBlock x:Name="txtPanel2Header" Grid.Row="0" Text="SPLIT / MERGE FOLDERS BY ALPHABET" Foreground="{StaticResource CyberpunkCyanBrush}" FontSize="15" FontWeight="Bold"/>
+                    <TextBlock x:Name="txtPanel2Desc" Grid.Row="2"
+                               Text="Chia các thư mục trong folder đã chọn vào các thư mục con theo chữ cái đầu (A-G, H-P, Q-Z...). Bắt đầu bằng số -> [Number], ngôn ngữ khác Latin -> other language; hoặc gộp tất cả truyện về lại thư mục gốc."
                                Foreground="{StaticResource CyberpunkMutedTextBrush}"
                                FontSize="11"
                                TextWrapping="Wrap"/>
 
+                    <!-- Hàng 1: Chọn thư mục gốc -->
                     <Grid Grid.Row="4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="SPLIT ROOT" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="lblPanel2Root" Grid.Column="0" Text="ROOT FOLDER" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center"/>
 
-                        <Grid Grid.Column="2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="8"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                        <TextBox x:Name="txtAlphabetSplitRoot"
+                                 Grid.Column="2"
+                                 Style="{StaticResource SurfaceTextBox}"
+                                 Height="26"
+                                 VerticalContentAlignment="Center"/>
 
-                            <TextBox x:Name="txtAlphabetSplitRoot"
-                                     Grid.Column="0"
-                                     Style="{StaticResource SurfaceTextBox}"
-                                     Height="26"
-                                     VerticalContentAlignment="Center"/>
-
-                            <Button x:Name="btnBrowseAlphabetSplitRoot"
-                                    Grid.Column="2"
-                                    Content="BROWSE"
-                                    Click="BtnBrowseAlphabetSplitRoot_Click"
-                                    Style="{StaticResource CompactCyanButton}"
-                                    Width="72"
-                                    Margin="0"/>
-                        </Grid>
-
-                        <Button x:Name="btnSplitFoldersByAlphabet"
+                        <Button x:Name="btnBrowseAlphabetSplitRoot"
                                 Grid.Column="4"
-                                Content="SPLIT BY ALPHABET"
-                                Click="BtnSplitFoldersByAlphabet_Click"
+                                Content="BROWSE"
+                                Click="BtnBrowseAlphabetSplitRoot_Click"
                                 Style="{StaticResource CompactCyanButton}"
-                                Width="160"
+                                Width="72"
                                 Margin="0"/>
                     </Grid>
 
+                    <!-- Hàng 2: Cấu hình Alphabet Ranges -->
                     <Grid Grid.Row="6">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -273,7 +216,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="RANGES" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="lblPanel2Ranges" Grid.Column="0" Text="RANGES" Style="{StaticResource InputLabelStyle}" VerticalAlignment="Center"/>
 
                         <WrapPanel x:Name="pnlAlphabetRanges" Grid.Column="2" VerticalAlignment="Center"/>
 
@@ -298,16 +241,44 @@
                                 ToolTip="Khôi phục mặc định: A-G, H-P, Q-Z (Reset default ranges)"/>
                     </Grid>
 
-                    <StackPanel Grid.Row="8" Orientation="Horizontal" VerticalAlignment="Center">
-                        <CheckBox x:Name="chkAlphabetIgnoreLeadingTags"
-                                  Content="Bỏ qua tag tiền tố [..] hoặc (..) khi lấy chữ cái đầu (Ignore leading bracket tags like [Artist] Title)"
-                                  IsChecked="True"
-                                  Foreground="{StaticResource CyberpunkTextBrush}"
-                                  FontSize="11"
-                                  FontWeight="SemiBold"
-                                  VerticalAlignment="Center"
-                                  ToolTip="Nếu thư mục có dạng '[Nhóm] Tên' hoặc '(C100) Tên', sẽ lấy chữ cái đầu của Tên thay vì lấy từ trong ngoặc."/>
-                    </StackPanel>
+                    <!-- Hàng 3: Checkbox bỏ qua tag + Nút Tách + Nút Gộp -->
+                    <Grid Grid.Row="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <CheckBox x:Name="chkAlphabetIgnoreLeadingTags"
+                                      Content="Bỏ qua tag tiền tố [..] hoặc (..) khi lấy chữ cái đầu (Ignore leading bracket tags like [Artist] Title)"
+                                      IsChecked="True"
+                                      Foreground="{StaticResource CyberpunkTextBrush}"
+                                      FontSize="11"
+                                      FontWeight="SemiBold"
+                                      VerticalAlignment="Center"
+                                      ToolTip="Nếu thư mục có dạng '[Nhóm] Tên' hoặc '(C100) Tên', sẽ lấy chữ cái đầu của Tên thay vì lấy từ trong ngoặc."/>
+                        </StackPanel>
+
+                        <Button x:Name="btnSplitFoldersByAlphabet"
+                                Grid.Column="1"
+                                Content="SPLIT BY ALPHABET"
+                                Click="BtnSplitFoldersByAlphabet_Click"
+                                Style="{StaticResource CompactCyanButton}"
+                                Height="26"
+                                Width="150"
+                                Margin="0"/>
+
+                        <Button x:Name="btnMergeFoldersByAlphabet"
+                                Grid.Column="3"
+                                Content="MERGE BY ALPHABET"
+                                Click="BtnMergeFoldersByAlphabet_Click"
+                                Style="{StaticResource CompactPinkButton}"
+                                Height="26"
+                                Width="150"
+                                Margin="0"/>
+                    </Grid>
                 </Grid>
             </Border>
         </StackPanel>

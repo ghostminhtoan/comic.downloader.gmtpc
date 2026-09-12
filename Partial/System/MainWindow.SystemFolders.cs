@@ -515,6 +515,63 @@ namespace get_link_manga
             }
         }
 
+        internal async void BtnMergeFoldersByAlphabet_Click(object sender, RoutedEventArgs e)
+        {
+            string targetFolder = GetAlphabetSplitRootPath();
+            if (string.IsNullOrWhiteSpace(targetFolder))
+            {
+                MessageBox.Show(
+                    _isVietnameseUi ? "Vui lòng chọn folder cần gộp trước (Please select target folder first)." : "Please select target folder first.",
+                    "Information", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!Directory.Exists(targetFolder))
+            {
+                MessageBox.Show(
+                    _isVietnameseUi ? "Thư mục đã chọn không tồn tại (Folder does not exist)." : "Folder does not exist.",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            List<string> rawRanges = singleComicFolderToolsView?.GetAlphabetRanges() ?? new List<string>();
+
+            Log($"[Merge Alphabet] Bắt đầu gộp thư mục theo chữ cái tại: {targetFolder}");
+            lblStatus.Text = _isVietnameseUi ? "Đang gộp thư mục theo chữ cái..." : "Merging folders by alphabet...";
+
+            try
+            {
+                int mergedCount = await MergeFoldersByAlphabetInTargetFolderAsync(targetFolder, rawRanges, CancellationToken.None);
+
+                Log("[Merge Alphabet] Đang tạm ngừng 3 giây để hệ thống ổn định và nhận biết thư mục...");
+                await Task.Delay(3000);
+
+                if (mergedCount == 0)
+                {
+                    Log("[Merge Alphabet] Không tìm thấy thư mục alphabet hợp lệ để gộp.");
+                    lblStatus.Text = _isVietnameseUi ? "Không tìm thấy thư mục phân loại alphabet hợp lệ để gộp." : "No valid alphabet categorized folders found to merge.";
+                    MessageBox.Show(
+                        _isVietnameseUi ? "Không tìm thấy thư mục phân loại alphabet hợp lệ để gộp." : "No valid alphabet categorized folders found to merge.",
+                        "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                Log($"[Merge Alphabet] Hoàn tất gộp {mergedCount} thư mục về thư mục gốc.");
+                lblStatus.Text = _isVietnameseUi
+                    ? $"Đã gộp thành công {mergedCount} thư mục về thư mục gốc."
+                    : $"Merge completed. Merged {mergedCount} folders back to root.";
+                MessageBox.Show(
+                    _isVietnameseUi ? $"Đã gộp thành công {mergedCount} thư mục về thư mục gốc!" : $"Successfully merged {mergedCount} folders back to root folder!",
+                    "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                Log($"[Merge Alphabet Error] Lỗi nghiêm trọng khi gộp thư mục theo chữ cái: {ex.Message}");
+                lblStatus.Text = _isVietnameseUi ? "Gộp thư mục thất bại." : "Merge by alphabet failed.";
+                MessageBox.Show($"Lỗi khi gộp thư mục: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void StartArchiveProgress(string statusText, bool showPauseButton)
         {
             Dispatcher.Invoke(() =>
@@ -1849,6 +1906,142 @@ namespace get_link_manga
             }
 
             return '\0';
+        }
+
+        private async Task<int> MergeFoldersByAlphabetInTargetFolderAsync(string targetFolder, List<string> rawRanges, CancellationToken token)
+        {
+            if (string.IsNullOrWhiteSpace(targetFolder) || !Directory.Exists(targetFolder))
+            {
+                return 0;
+            }
+
+            await _folderStructureSemaphore.WaitAsync(token);
+            try
+            {
+                var categoryNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "[Number]",
+                    "Number",
+                    "[Numbers]",
+                    "Numbers",
+                    "other language",
+                    "Other Language",
+                    "other languages",
+                    "Other Languages",
+                    "[Other Latin]"
+                };
+
+                if (rawRanges != null)
+                {
+                    foreach (var raw in rawRanges)
+                    {
+                        if (AlphabetRangeItem.TryParse(raw, out AlphabetRangeItem item))
+                        {
+                            categoryNames.Add(item.DisplayName);
+                        }
+                        else if (!string.IsNullOrWhiteSpace(raw))
+                        {
+                            categoryNames.Add(raw.Trim());
+                        }
+                    }
+                }
+
+                var rootDirInfo = new DirectoryInfo(targetFolder);
+                var subDirs = rootDirInfo.GetDirectories();
+
+                int mergedCount = 0;
+                var foldersToDeleteIfEmpty = new List<DirectoryInfo>();
+
+                foreach (var categoryDir in subDirs)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    if (categoryDir.Attributes.HasFlag(FileAttributes.Hidden) ||
+                        categoryDir.Attributes.HasFlag(FileAttributes.System) ||
+                        categoryDir.Name.StartsWith(".", StringComparison.OrdinalIgnoreCase) ||
+                        categoryDir.Name.EndsWith("-tmp", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    bool isAlphabetCategory = categoryNames.Contains(categoryDir.Name);
+                    if (!isAlphabetCategory)
+                    {
+                        string nameUpper = categoryDir.Name.Trim().ToUpperInvariant();
+                        if (AlphabetRangeItem.TryParse(nameUpper, out _))
+                        {
+                            isAlphabetCategory = true;
+                        }
+                    }
+
+                    if (!isAlphabetCategory)
+                    {
+                        continue;
+                    }
+
+                    var comicDirs = categoryDir.GetDirectories();
+                    foreach (var comicDir in comicDirs)
+                    {
+                        if (token.IsCancellationRequested)
+                        {
+                            break;
+                        }
+
+                        string destPath = Path.Combine(targetFolder, comicDir.Name);
+                        try
+                        {
+                            if (string.Equals(comicDir.FullName, destPath, StringComparison.OrdinalIgnoreCase))
+                            {
+                                continue;
+                            }
+
+                            if (!Directory.Exists(destPath))
+                            {
+                                Directory.Move(comicDir.FullName, destPath);
+                            }
+                            else
+                            {
+                                MergeDirectoryContents(comicDir.FullName, destPath);
+                            }
+
+                            mergedCount++;
+                            Log($"[Merge Alphabet] Đã gộp '{categoryDir.Name}\\{comicDir.Name}' -> '{comicDir.Name}'");
+                        }
+                        catch (Exception ex)
+                        {
+                            Log($"[Merge Alphabet Error] Không thể gộp '{comicDir.FullName}': {ex.Message}");
+                        }
+                    }
+
+                    foldersToDeleteIfEmpty.Add(categoryDir);
+                }
+
+                foreach (var catDir in foldersToDeleteIfEmpty)
+                {
+                    try
+                    {
+                        if (Directory.Exists(catDir.FullName) && !Directory.EnumerateFileSystemEntries(catDir.FullName).Any())
+                        {
+                            Directory.Delete(catDir.FullName, false);
+                            Log($"[Merge Alphabet] Đã dọn dẹp thư mục rỗng: '{catDir.Name}'");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"[Merge Alphabet Warning] Không thể xóa thư mục rỗng '{catDir.FullName}': {ex.Message}");
+                    }
+                }
+
+                DeleteEmptyDirectoriesBottomUp(targetFolder);
+                return mergedCount;
+            }
+            finally
+            {
+                _folderStructureSemaphore.Release();
+            }
         }
     }
 }

@@ -1837,7 +1837,7 @@ namespace get_link_manga
                         }
                         else if (tabItem.Content is SingleComicFolderToolsView)
                         {
-                            tabItem.Header = "split / merge folder";
+                            tabItem.Header = _isVietnameseUi ? "Tách / Gộp thư mục" : "Split / Merge folder";
                         }
                         else if (tabItem.Content is AutoSplitLongImagesView)
                         {

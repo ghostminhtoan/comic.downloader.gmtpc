@@ -989,6 +989,7 @@ namespace get_link_manga
             if (txtWebviewCpuPriorityLabel != null) txtWebviewCpuPriorityLabel.Text = "WEBVIEW CPU PRIORITY";
 
             UpdateLatestChapterButtonLabel();
+            singleComicFolderToolsView?.ApplyLanguage(false);
         }
 
         internal MessageBoxResult ShowLocalizedMessageBox(

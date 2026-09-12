@@ -82,6 +82,7 @@ namespace get_link_manga
             if (txtWebviewCpuPriorityLabel != null) txtWebviewCpuPriorityLabel.Text = "ĐỘ ƯU TIÊN WEBVIEW CPU";
 
             UpdateLatestChapterButtonLabel();
+            singleComicFolderToolsView?.ApplyLanguage(true);
         }
     }
 }

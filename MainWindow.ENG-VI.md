@@ -50,8 +50,13 @@ Mục tiêu: tìm chuỗi UI còn lệch giữa ENG và VI trong `MainWindow.*`.
 | `Contains` | `Chứa từ` | `MainWindow.xaml` / `MainWindow.UIEnglish.cs` | OK |
 | `Exact Word` | `Từ chính xác` | `MainWindow.xaml` / `MainWindow.UIEnglish.cs` | OK |
 | `AUTO SCROLL TO DOWNLOADING` | `TỰ CUỘN ĐẾN TRUYỆN ĐANG TẢI` | `MainWindow.xaml` / `MainWindow.UIEnglish.cs` / `MainWindow.UIVietnamese.cs` | OK |
-| `SPLIT FOLDERS BY ALPHABET` | `TÁCH FOLDER THEO CHỮ CÁI` | `SingleComicFolderToolsView.xaml` | OK |
+| `SPLIT / MERGE FOLDERS BY CHAPTER COUNT` | `TÁCH / GỘP THƯ MỤC THEO SỐ CHƯƠNG` | `SingleComicFolderToolsView.xaml` | OK |
+| `SPLIT / MERGE FOLDERS BY ALPHABET` | `TÁCH / GỘP THƯ MỤC THEO ALPHABET` | `SingleComicFolderToolsView.xaml` | OK |
+| `SPLIT BY CHAPTERS` | `TÁCH THEO CHAP` | `SingleComicFolderToolsView.xaml` | OK |
+| `MERGE CHAPTERS` | `GỘP CHAPTER` | `SingleComicFolderToolsView.xaml` | OK |
 | `SPLIT BY ALPHABET` | `TÁCH THEO CHỮ CÁI` | `SingleComicFolderToolsView.xaml` | OK |
+| `MERGE BY ALPHABET` | `GỘP THEO CHỮ CÁI` | `SingleComicFolderToolsView.xaml` | OK |
+| `Split / Merge folder` | `Tách / Gộp thư mục` | `MainWindow.WorkspaceLayout.cs` | OK |
 
 Ghi chú:
 - Bảng này chỉ trace chỗ đang lộ trên UI.
